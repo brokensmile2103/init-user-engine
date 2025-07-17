@@ -1,0 +1,271 @@
+.iue-inbox-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.iue-inbox-item {
+	position: relative;
+	padding: 16px 18px;
+	border-radius: 12px;
+	background: #f9f9f9;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	transition: background 0.3s ease;
+}
+
+.iue-inbox-item.iue-unread::before {
+	content: '';
+	position: absolute;
+	top: 24px;
+	left: 12px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--iue-theme-color);
+}
+
+.iue-inbox-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-weight: 600;
+	font-size: 16px;
+	margin-bottom: 8px;
+	color: #111;
+	padding-left: 12px;
+}
+
+.iue-inbox-item.iue-unread .iue-inbox-header strong {
+	font-weight: 700;
+	color: #000;
+}
+
+.iue-inbox-header small {
+	font-size: 13px;
+	color: #888;
+	white-space: nowrap;
+}
+
+.iue-inbox-content-wrap {
+	display: block;
+}
+
+.iue-inbox-content {
+	font-size: 14px;
+	color: #444;
+	line-height: 1.5;
+	padding-left: 12px;
+}
+
+.iue-inbox-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 12px;
+	position: relative;
+	justify-content: flex-end;
+}
+
+.iue-inbox-actions button {
+	padding: 6px 14px;
+	font-size: 13px;
+	border: none;
+	border-radius: 999px;
+	background: #e8e8e8;
+	color: #333;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.iue-inbox-actions button:hover {
+	background: #d6d6d6;
+}
+
+.iue-inbox-actions button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.iue-inbox-controls {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-bottom: 18px;
+}
+
+.iue-inbox-controls button {
+	padding: 8px 16px;
+	font-size: 14px;
+	border: none;
+	border-radius: 999px;
+	background: var(--iue-theme-color);
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.iue-inbox-controls button:hover {
+	background: var(--iue-theme-active-color);
+}
+
+.iue-empty {
+	text-align: center;
+	color: #aaa;
+	font-size: 16px;
+	font-style: italic;
+}
+
+.iue-inbox-more {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 6px;
+	border-radius: 6px;
+	transition: background 0.2s ease;
+}
+
+.iue-inbox-more:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+.iue-inbox-more .iue-icon {
+	margin-right: 0;
+}
+
+.iue-inbox-menu {
+	position: absolute;
+	top: 36px;
+	right: 12px;
+	background: #fff;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	z-index: 10;
+	min-width: 160px;
+	padding: 6px 0;
+}
+
+.iue-inbox-menu button {
+	all: unset;
+	font-size: 14px;
+	padding: 10px 16px;
+	cursor: pointer;
+	color: #333;
+	transition: background 0.2s;
+}
+
+.iue-inbox-menu button:hover {
+	background: #f0f0f0;
+}
+
+.iue-inbox-menu button:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.iue-inbox-menu[hidden] {
+	display: none;
+}
+
+#iue-modal.dark .iue-inbox-menu {
+	background: #333;
+	box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+#iue-modal.dark .iue-inbox-menu button {
+	color: #eee;
+}
+
+#iue-modal.dark .iue-inbox-menu button:hover {
+	background: #444;
+}
+
+.iue-inbox-item.iue-high-priority {
+	border-left: 4px solid #dc2626;
+	background: #fff8f8;
+}
+
+#iue-modal.dark .iue-inbox-item.iue-high-priority {
+	background: #3a2c2c;
+	border-left-color: #f87171;
+}
+
+.iue-inbox-item.iue-pinned::after {
+	content: '📌';
+	position: absolute;
+	top: 12px;
+	right: 16px;
+	font-size: 14px;
+}
+
+#iue-modal.dark .iue-inbox-item {
+	background: #262626;
+	box-shadow: none;
+}
+
+#iue-modal.dark .iue-inbox-item.iue-unread::before {
+	background: var(--iue-theme-color);
+}
+
+#iue-modal.dark .iue-inbox-header {
+	color: #eee;
+}
+
+#iue-modal.dark .iue-inbox-header strong {
+	color: #fff;
+}
+
+#iue-modal.dark .iue-inbox-header small {
+	color: #888;
+}
+
+#iue-modal.dark .iue-inbox-content {
+	color: #ccc;
+}
+
+#iue-modal.dark .iue-inbox-actions button {
+	background: #3a3a3a;
+	color: #eee;
+}
+
+#iue-modal.dark .iue-inbox-actions button:hover {
+	background: #4a4a4a;
+}
+
+#iue-modal.dark .iue-inbox-controls button {
+	background: var(--iue-theme-color);
+	color: #fff;
+}
+
+#iue-modal.dark .iue-inbox-controls button:hover {
+	background: var(--iue-theme-active-color);
+}
+
+#iue-modal .iue-modal-body::-webkit-scrollbar {
+	width: 6px;
+}
+
+#iue-modal .iue-modal-body::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 3px;
+}
+
+#iue-modal.dark .iue-modal-body::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.iue-confirming {
+	background-color: #dc2626 !important;
+	color: white !important;
+	border-color: #dc2626 !important;
+}
+
+.iue-inbox-link {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.iue-inbox-link:hover {
+	text-decoration: none;
+}

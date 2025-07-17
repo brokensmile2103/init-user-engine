@@ -1,0 +1,307 @@
+/* ==== Avatar ==== */
+.iue-avatar-wrapper {
+	position: relative;
+	display: inline-block;
+}
+.iue-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #f2f2f2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+/* ==== Modal Root ==== */
+#init-user-engine-login-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: none;
+	font-family: system-ui, sans-serif;
+	color: var(--iue-color, #111);
+}
+#init-user-engine-login-modal.open {
+	display: block;
+}
+.iue-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(6px);
+	animation: fadeIn 0.3s ease-out;
+}
+.iue-content {
+	position: absolute;
+	top: 10%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 95%;
+	max-width: 420px;
+	background: var(--iue-bg, #fff);
+	color: var(--iue-color, #111);
+	border-radius: 12px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+	overflow: hidden;
+	animation: slideDown 0.3s ease-out;
+}
+
+/* ==== Modal Header ==== */
+.iue-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 24px;
+	background: #f9f9f9;
+	border-bottom: 1px solid #eee;
+}
+.iue-header h3 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.25px;
+	color: #222;
+}
+.iue-close {
+	background: none;
+	border: none;
+	color: #666;
+	font-size: 22px;
+	cursor: pointer;
+	transition: color 0.2s;
+}
+.iue-close:hover {
+	color: #000;
+}
+
+/* ==== Modal Body ==== */
+.iue-body {
+	padding: 24px;
+	font-size: 16px;
+}
+
+/* ==== Form Fields (Login + Register) ==== */
+.iue-login-form input[type="text"],
+.iue-login-form input[type="password"],
+.iue-register-form input[type="text"],
+.iue-register-form input[type="email"],
+.iue-register-form input[type="password"] {
+	display: block;
+	width: 100%;
+	padding: 14px 0;
+	margin-bottom: 20px;
+	font-size: 15px;
+	border: none;
+	border-bottom: 1px solid #ccc;
+	background: transparent;
+	transition: border-color 0.2s, background 0.2s;
+}
+.iue-login-form input[type="text"]:focus,
+.iue-login-form input[type="password"]:focus,
+.iue-register-form input[type="text"]:focus,
+.iue-register-form input[type="email"]:focus,
+.iue-register-form input[type="password"]:focus {
+	border-color: var(--iue-theme-color);
+	outline: none;
+}
+
+/* ==== Remember Me ==== */
+.iue-login-form .login-remember {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 24px;
+	font-size: 16px;
+	color: #444;
+	cursor: pointer;
+	user-select: none;
+}
+.iue-login-form input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	accent-color: var(--iue-theme-color);
+	cursor: pointer;
+	vertical-align: middle;
+}
+
+/* ==== Submit Button (Login + Register) ==== */
+.iue-login-form input[type="submit"],
+.iue-login-form .login-submit input[type="submit"],
+.iue-register-form button.iue-submit {
+	display: inline-block;
+	width: 100%;
+	padding: 14px 0;
+	font-size: 15px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border: none;
+	border-radius: 9999px;
+	background: linear-gradient(135deg, var(--iue-theme-color), var(--iue-theme-active-color));
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.1s ease;
+}
+.iue-login-form input[type="submit"]:hover,
+.iue-register-form button.iue-submit:hover {
+	background: linear-gradient(135deg, var(--iue-theme-active-color), var(--iue-theme-color));
+	transform: translateY(-1px);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.iue-login-form input[type="submit"]:active,
+.iue-register-form button.iue-submit:active {
+	transform: scale(0.98);
+}
+
+/* ==== Forgot / Register Link ==== */
+.iue-reset-link,
+.iue-register-link {
+	text-align: center;
+	font-size: 14px;
+	margin-top: 12px;
+}
+.iue-register-link { margin-top: 24px; }
+
+.iue-reset-link a {
+	color: #666;
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+.iue-reset-link a:hover {
+	color: #000;
+	text-decoration: underline;
+}
+.iue-register-link a {
+	color: var(--iue-theme-color);
+	font-weight: 500;
+	text-decoration: none;
+	transition: color 0.2s;
+}
+.iue-register-link a:hover {
+	color: var(--iue-theme-active-color);
+	text-decoration: underline;
+}
+
+/* ==== Animations ==== */
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+@keyframes slideDown {
+	from { transform: translate(-50%, -25%); opacity: 0; }
+	to { transform: translate(-50%, 0); opacity: 1; }
+}
+@keyframes slideIn {
+	from { opacity: 0; transform: translateX(30px); }
+	to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ==== Slide transition ==== */
+#iue-form-login,
+#iue-form-register {
+	position: relative;
+	opacity: 1;
+	transform: translateX(0);
+	transition: none;
+	z-index: 1;
+}
+.iue-hidden {
+	display: none !important;
+}
+.iue-animating {
+	display: block !important;
+	animation: slideIn 0.35s ease-out forwards;
+}
+
+/* ==== Register Messages ==== */
+.iue-register-message {
+	margin-bottom: 16px;
+	padding: 10px 14px;
+	border-radius: 6px;
+	font-size: 14px;
+}
+.iue-register-message.loading { background: #f0f0f0; color: #333; }
+.iue-register-message.success { background: #e0f7ea; color: #007e5a; }
+.iue-register-message.error   { background: #ffe0e0; color: #b30000; }
+
+/* ==== Password Toggle ==== */
+.iue-password-wrapper {
+	position: relative;
+}
+.iue-password-toggle {
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--iue-theme-color, #666);
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ==== Dark Mode ==== */
+#init-user-engine-login-modal.dark {
+	--iue-bg: #1e1e1e;
+	--iue-color: #eee;
+}
+#init-user-engine-login-modal.dark .iue-content {
+	background: var(--iue-bg);
+	color: var(--iue-color);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+#init-user-engine-login-modal.dark .iue-header {
+	background: #2a2a2a;
+	border-bottom: 1px solid #444;
+}
+#init-user-engine-login-modal.dark .iue-header h3,
+#init-user-engine-login-modal.dark .iue-close {
+	color: #aaa;
+}
+#init-user-engine-login-modal.dark .iue-close:hover {
+	color: #fff;
+}
+#init-user-engine-login-modal.dark .iue-login-form input[type="text"],
+#init-user-engine-login-modal.dark .iue-login-form input[type="password"],
+#init-user-engine-login-modal.dark .iue-register-form input[type="text"],
+#init-user-engine-login-modal.dark .iue-register-form input[type="email"],
+#init-user-engine-login-modal.dark .iue-register-form input[type="password"] {
+	border-bottom-color: #444;
+	color: #eee;
+	background: transparent;
+}
+#init-user-engine-login-modal.dark .iue-login-form input[type="text"]:focus,
+#init-user-engine-login-modal.dark .iue-login-form input[type="password"]:focus,
+#init-user-engine-login-modal.dark .iue-register-form input:focus {
+	border-bottom-color: var(--iue-theme-color);
+}
+#init-user-engine-login-modal.dark .iue-login-form input[type="submit"],
+#init-user-engine-login-modal.dark .iue-register-form button.iue-submit {
+	background: linear-gradient(135deg, var(--iue-theme-color), var(--iue-theme-active-color));
+	color: #fff;
+}
+#init-user-engine-login-modal.dark .iue-login-form input[type="submit"]:hover,
+#init-user-engine-login-modal.dark .iue-register-form button.iue-submit:hover {
+	background: linear-gradient(135deg, var(--iue-theme-active-color), #004f7a);
+}
+#init-user-engine-login-modal.dark .iue-login-form .login-remember,
+#init-user-engine-login-modal.dark .iue-reset-link a {
+	color: #666;
+}
+#init-user-engine-login-modal.dark .iue-reset-link a:hover {
+	color: #999;
+}
+#init-user-engine-login-modal.dark .iue-register-link a {
+	color: var(--iue-theme-color);
+}
+#init-user-engine-login-modal.dark .iue-register-link a:hover {
+	color: var(--iue-theme-active-color);
+}

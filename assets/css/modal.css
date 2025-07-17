@@ -1,0 +1,178 @@
+/* ==== Universal Modal ==== */
+#iue-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: block;
+	font-family: system-ui, sans-serif;
+	color: var(--iue-color, #111);
+}
+
+#iue-modal .iue-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(6px);
+	animation: fadeIn 0.3s ease-out;
+}
+
+#iue-modal .iue-modal-content {
+	position: absolute;
+	top: 10%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 95%;
+	max-width: 520px;
+	background: var(--iue-bg, #fff);
+	color: var(--iue-color, #111);
+	border-radius: 12px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+	overflow: hidden;
+	animation: slideDown 0.3s ease-out;
+}
+
+#iue-modal .iue-modal-content.iue-modal-medium {
+	max-width: 520px;
+}
+
+#iue-modal .iue-modal-content.iue-modal-large {
+	max-width: 720px;
+}
+
+#iue-modal .iue-modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 24px;
+	background: #f9f9f9;
+	border-bottom: 1px solid #eee;
+}
+
+#iue-modal .iue-modal-header h3 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.25px;
+	color: #222;
+}
+
+#iue-modal .iue-modal-close {
+	background: none;
+	border: none;
+	color: #666;
+	font-size: 20px;
+	cursor: pointer;
+	transition: color 0.2s;
+	line-height: 1;
+}
+
+#iue-modal .iue-modal-close:hover {
+	color: #000;
+}
+
+#iue-modal .iue-modal-body {
+	padding: 24px;
+	font-size: 15px;
+	line-height: 1.6;
+	max-height: 70vh;
+	overflow-y: auto;
+}
+
+#iue-modal .iue-loading {
+	text-align: center;
+	color: #666;
+}
+
+#iue-modal .iue-loading svg {
+	animation: iue-spin 0.7s linear infinite;
+}
+
+@keyframes iue-spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+.iue-error {
+	color: red;
+	text-align: center;
+	padding: 30px 0;
+}
+
+#iue-modal.dark {
+	--iue-bg: #1e1e1e;
+	--iue-color: #eee;
+}
+
+#iue-modal.dark .iue-modal-content {
+	background: var(--iue-bg);
+	color: var(--iue-color);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+#iue-modal.dark .iue-modal-header {
+	background: #2a2a2a;
+	border-bottom: 1px solid #444;
+}
+
+#iue-modal.dark .iue-modal-header h3,
+#iue-modal.dark .iue-modal-close {
+	color: #aaa;
+}
+
+#iue-modal.dark .iue-modal-close:hover {
+	color: #fff;
+}
+
+#iue-modal .iue-pagination {
+	margin-top: 20px;
+	text-align: center;
+}
+
+#iue-modal .iue-page-btn {
+	display: inline-block;
+	margin: 0 3px;
+	padding: 6px 12px;
+	border: none;
+	border-radius: 6px;
+	background: #f0f0f0;
+	cursor: pointer;
+	font-size: 14px;
+	transition: background 0.2s;
+}
+
+#iue-modal .iue-page-btn:hover {
+	background: #e0e0e0;
+}
+
+#iue-modal .iue-page-btn.active {
+	background: var(--iue-theme-color);
+	color: white;
+	font-weight: bold;
+}
+
+#iue-modal .iue-pagination-dots {
+	display: inline-block;
+	margin: 0 4px;
+	color: #999;
+	font-size: 14px;
+}
+
+.iue-exp-progress {
+	margin-bottom: 1em;
+}
+.iue-exp-info {
+	font-weight: bold;
+	margin-bottom: 0.3em;
+}
+.iue-exp-bar {
+	background: #eee;
+	border-radius: 999px;
+	height: 10px;
+	overflow: hidden;
+}
+.iue-exp-bar-fill {
+	background: var(--iue-theme-exp-color, #4caf50);
+	height: 100%;
+	width: 0;
+	transition: width 0.3s ease-in-out;
+}

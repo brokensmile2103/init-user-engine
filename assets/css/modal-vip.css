@@ -1,0 +1,139 @@
+.iue-vip-container {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.iue-vip-current {
+	font-size: 15px;
+	padding: 12px 16px;
+	background: #f1f5f9;
+	border-radius: 8px;
+	color: #111;
+}
+
+#iue-modal.dark .iue-vip-current {
+	background: #2d2d2d;
+	color: #eee;
+}
+
+.iue-vip-status {
+	color: #10b981;
+	font-weight: bold;
+	margin-left: 8px;
+}
+
+.iue-vip-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 16px;
+}
+
+.iue-vip-card {
+	background: #f9f9f9;
+	border-radius: 10px;
+	padding: 16px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	text-align: center;
+	transition: transform 0.2s;
+}
+
+.iue-vip-card:hover {
+	transform: translateY(-3px);
+}
+
+.iue-vip-title {
+	font-weight: 600;
+	font-size: 16px;
+	margin-bottom: 8px;
+}
+
+.iue-vip-price {
+	font-size: 15px;
+	color: #333;
+	margin-bottom: 12px;
+}
+
+.iue-vip-price span {
+	font-size: 13px;
+	color: #777;
+}
+
+.iue-vip-buy-btn {
+	background: var(--iue-theme-color, #0073aa);
+	color: white;
+	border: none;
+	border-radius: 999px;
+	padding: 8px 16px;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.iue-vip-buy-btn:hover {
+	background: var(--iue-theme-active-color, #005f8a);
+}
+
+.iue-vip-note {
+	font-size: 14px;
+	color: #555;
+	line-height: 1.6;
+	padding: 0 4px;
+}
+
+#iue-modal.dark .iue-vip-card {
+	background: #262626;
+	color: #eee;
+}
+
+#iue-modal.dark .iue-vip-price,
+#iue-modal.dark .iue-vip-note {
+	color: #aaa;
+}
+
+.iue-vip-card--disabled {
+	opacity: 0.6;
+	pointer-events: none;
+	position: relative;
+}
+
+.iue-vip-card--disabled::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: repeating-linear-gradient(
+		45deg,
+		rgba(255, 255, 255, 0.1),
+		rgba(255, 255, 255, 0.1) 10px,
+		rgba(255, 255, 255, 0.2) 10px,
+		rgba(255, 255, 255, 0.2) 20px
+	);
+	border-radius: 10px;
+	pointer-events: none;
+}
+
+.iue-vip-card--disabled .iue-vip-buy-btn {
+	cursor: not-allowed;
+	opacity: 0.5;
+}
+
+.iue-vip-price .iue-vip-disabled-text {
+	display: inline-block;
+	color: #999;
+}
+
+#iue-modal.dark .iue-vip-price .iue-vip-disabled-text {
+	color: #777;
+}
+
+.iue-vip-buy-btn.disabled {
+	opacity: 0.5;
+	pointer-events: none;
+	cursor: default;
+	background-color: #ccc;
+}
+
+#iue-modal.dark .iue-vip-buy-btn.disabled {
+	background-color: #444;
+	color: #999;
+}

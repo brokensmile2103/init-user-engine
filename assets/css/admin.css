@@ -1,0 +1,52 @@
+/* admin.css */
+
+.iue-user-results {
+	position: absolute;
+	z-index: 999;
+	width: 100%;
+	max-width: 300px;
+	border: 1px solid #ccd0d4;
+	background: #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	display: none;
+}
+
+.iue-user-results .iue-user-item {
+	padding: 6px 10px;
+	cursor: pointer;
+}
+
+.iue-user-results .iue-user-item:hover {
+	background-color: #72aee6;
+	color: #fff;
+}
+
+.iue-user-selected {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin-top: 10px;
+}
+
+.iue-user-tag {
+	background: #0073aa;
+	color: #fff;
+	padding: 4px 8px;
+	border-radius: 3px;
+	font-size: 13px;
+	display: inline-flex;
+	align-items: center;
+}
+
+.iue-user-remove {
+	margin-left: 6px;
+	cursor: pointer;
+	font-weight: bold;
+	color: #fff;
+}
+
+.iue-user-item:hover,
+.iue-user-item.iue-active {
+	background: #72aee6;
+	color: #fff;
+}

@@ -1,0 +1,381 @@
+/* ==== Avatar Wrapper (Đã đăng nhập) ==== */
+.init-user-engine-avatar-wrapper.logged-in {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+/* ==== Avatar (Đã đăng nhập) ==== */
+.init-user-engine-avatar.is-logged-in img {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: block;
+	object-fit: cover;
+	transition: transform 0.2s ease;
+}
+
+.init-user-engine-avatar.is-logged-in:hover img {
+	transform: scale(1.05);
+}
+
+.iue-user-avatar {
+	position: relative;
+}
+.iue-unread-dot {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 10px;
+	height: 10px;
+	background: var(--iue-theme-color);
+	border-radius: 50%;
+	box-shadow: 0 0 0 2px #fff;
+}
+.iue-badge {
+	display: inline-block;
+	background: var(--iue-theme-color);
+	color: #fff;
+	border-radius: 10px;
+	font-size: 10px;
+	padding: 2px 6px;
+	margin-left: 6px;
+	vertical-align: middle;
+}
+
+/* ==== Dashboard Wrapper ==== */
+.iue-dashboard {
+	text-align: left;
+	visibility: hidden;
+	opacity: 0;
+	transform: translateY(-8px);
+	pointer-events: none;
+	position: absolute;
+	top: calc(100% + 15px);
+	right: 0;
+	width: 300px;
+	background: var(--iue-bg, #fff);
+	color: var(--iue-text, #111);
+	border-radius: 12px;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+	padding: 16px;
+	font-family: system-ui, sans-serif;
+	font-size: 14px;
+	z-index: 1000;
+	transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+.iue-dashboard.open {
+	visibility: visible;
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+	cursor: auto;
+}
+
+
+/* ==== Dark mode support ==== */
+.iue-dashboard.dark {
+	--iue-bg: #1e1e1e;
+	--iue-text: #f1f1f1;
+	--iue-subtext: #aaa;
+	--iue-border: #333;
+}
+
+.iue-dashboard:not(.dark) {
+	--iue-subtext: #666;
+	--iue-border: #eee;
+}
+
+/* ==== User Info ==== */
+.iue-user-info {
+	display: flex;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.iue-user-avatar {
+	width: 50px;
+	height: 50px;
+	margin-right: 12px;
+	flex-shrink: 0;
+}
+
+.iue-user-avatar img.avatar {
+	border-radius: 50%;
+}
+
+.iue-user-avatar .iue-avatar-wrapper .iue-vip-badge {
+	bottom: -2px;
+	right: -2px;
+}
+
+.iue-user-meta {
+	flex-grow: 1;
+}
+
+.iue-username {
+	font-weight: 600;
+	font-size: 15px;
+}
+
+.iue-user-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	font-size: 14px;
+	color: var(--iue-subtext);
+}
+
+.iue-user-stats li {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* ==== Menu ==== */
+.iue-dashboard-menu {
+	list-style: none;
+	padding: 0;
+	margin: 8px 0 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.iue-dashboard-menu li a {
+	display: block;
+	padding: 10px 12px;
+	border-radius: 8px;
+	text-decoration: none;
+	color: inherit;
+	background: transparent;
+	transition: background 0.2s, color 0.2s;
+}
+
+.iue-dashboard-menu li a:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+.iue-dashboard.dark .iue-dashboard-menu li a:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.iue-dashboard-menu .iue-separator {
+	height: 1px;
+	margin: 6px 0;
+	background: var(--iue-border);
+}
+
+/* ==== Animation ==== */
+@keyframes slideFadeIn {
+	from {
+		transform: translateY(-8px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.iue-icon {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	margin-right: 5px;
+	vertical-align: middle;
+	line-height: 0;
+	color: currentColor;
+}
+
+.iue-red-fire {
+	color: #f0506e;
+}
+
+/* ==== Checkin Box ==== */
+.iue-checkin-box {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 14px;
+	background: rgba(0, 0, 0, 0.03);
+	border-radius: 10px;
+	margin: 12px 0;
+	font-size: 14px;
+	color: var(--iue-text, #111);
+	transition: background 0.2s ease;
+}
+
+.iue-dashboard.dark .iue-checkin-box {
+	background: rgba(255, 255, 255, 0.05);
+	color: var(--iue-text, #f1f1f1);
+}
+
+.iue-checkin-left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+	color: var(--iue-subtext, #666);
+}
+
+.iue-checkin-left svg {
+	color: currentColor;
+}
+
+.iue-checkin-streak strong {
+	margin: 0 4px;
+	color: inherit;
+	font-weight: 600;
+}
+
+.iue-checkin-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.iue-checkin-button {
+	padding: 6px 12px;
+	border: none;
+	border-radius: 9999px;
+	background: var(--iue-theme-color);
+	color: #fff;
+	cursor: pointer;
+	font-size: 13px;
+	transition: background 0.2s ease;
+}
+
+.iue-checkin-button:hover {
+	background: var(--iue-theme-active-color);
+}
+
+.iue-checkin-timer {
+	font-size: 14px;
+	color: var(--iue-subtext, #666);
+}
+
+.iue-dashboard.dark .iue-checkin-timer {
+	color: var(--iue-subtext, #aaa);
+}
+
+.iue-timer-countdown {
+	margin-left: 0;
+}
+
+.iue-hidden {
+    display: none;
+}
+
+/* Init User Engine - Badge Styles */
+
+.iue-badge-level {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 6px;
+	border-radius: 999px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1;
+	background: #f4f4f4;
+	color: #333;
+	transition: background 0.3s;
+}
+
+.iue-level-badge-link {
+	vertical-align: middle;
+}
+
+.iue-badge-level .iue-badge-icon {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	transition: transform 0.3s;
+}
+
+.iue-badge-level:hover .iue-badge-icon {
+	transform: rotate(8deg) scale(1.1);
+}
+
+/* Rank-based colors */
+.iue-rank-default {
+	background: #fff8dc;
+	color: #a67c00;
+}
+
+.iue-rank-bronze {
+	background: #f5ebe0;
+	color: #cd7f32;
+}
+
+.iue-rank-silver {
+	background: #f0f0f0;
+	color: #a0a0a0;
+}
+
+.iue-rank-platinum {
+	background: #e0f7fa;
+	color: #007d8f;
+}
+
+.iue-rank-diamond {
+	background: #e0fcff;
+	color: #00bcd4;
+	box-shadow: 0 0 4px rgba(0, 188, 212, 0.6);
+}
+
+/* Optional text number */
+.iue-badge-number {
+	display: inline;
+	font-family: inherit;
+}
+
+.iue-avatar-wrapper {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.iue-avatar-overlay {
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+	max-height: 50px;
+	background: rgba(0, 0, 0, 0.3);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.iue-avatar-wrapper .iue-avatar-overlay .iue-icon {
+	margin-right: 0;
+	color: #fff;
+}
+
+.iue-avatar-wrapper:hover .iue-avatar-overlay {
+	opacity: 1;
+}
+
+.iue-vip-badge {
+	position: absolute;
+	bottom: -5px;
+	right: -5px;
+	background: var(--iue-theme-color, #f39c12);
+	color: #fff;
+	font-size: 11px;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 5px;
+	border-radius: 999px; /* pill shape */
+	white-space: nowrap;
+	z-index: 2;
+	line-height: 16px;
+}

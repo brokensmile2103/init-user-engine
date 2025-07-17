@@ -1,0 +1,652 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Init User Engine 1.0.0\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS."
+msgstr "Hệ thống người dùng nhẹ, sinh động với EXP, ví xu, điểm danh, VIP, hộp thư và giới thiệu – vận hành bằng REST API và JavaScript thuần."
+
+msgid "Settings"
+msgstr "Cài đặt"
+
+msgid "Login"
+msgstr "Đăng nhập"
+
+msgid "Checked in"
+msgstr "Đã điểm danh"
+
+msgid "Checked in successfully!"
+msgstr "Điểm danh thành công!"
+
+msgid "You received your reward!"
+msgstr "Bạn đã nhận phần thưởng!"
+
+msgid "Still too early to claim!"
+msgstr "Chưa đến lúc nhận thưởng!"
+
+msgid "Checking in..."
+msgstr "Đang điểm danh..."
+
+msgid "All messages marked as read."
+msgstr "Đã đánh dấu tất cả là đã đọc."
+
+msgid "All messages deleted."
+msgstr "Đã xoá tất cả tin nhắn."
+
+msgid "Error!"
+msgstr "Lỗi!"
+
+msgid "Transaction History"
+msgstr "Lịch sử giao dịch"
+
+msgid "Inbox"
+msgstr "Hộp thư"
+
+msgid "No messages in your inbox."
+msgstr "Không có tin nhắn nào trong hộp thư của bạn."
+
+msgid "Mark All as Read"
+msgstr "Đánh dấu tất cả đã đọc"
+
+msgid "Delete All"
+msgstr "Xoá tất cả"
+
+msgid "Mark as Read"
+msgstr "Đánh dấu đã đọc"
+
+msgid "Delete"
+msgstr "Xoá"
+
+msgid "No title"
+msgstr "Không có tiêu đề"
+
+msgid "Failed to load inbox."
+msgstr "Không thể tải hộp thư."
+
+msgid "Click again to confirm"
+msgstr "Nhấn lần nữa để xác nhận"
+
+msgid "VIP Membership"
+msgstr "Thành viên VIP"
+
+msgid "Current status:"
+msgstr "Trạng thái hiện tại:"
+
+msgid "VIP until"
+msgstr "VIP đến"
+
+msgid "Not a VIP"
+msgstr "Chưa là VIP"
+
+msgid "VIP 7 days"
+msgstr "VIP 7 ngày"
+
+msgid "VIP 30 days"
+msgstr "VIP 30 ngày"
+
+msgid "VIP 90 days"
+msgstr "VIP 90 ngày"
+
+msgid "VIP 180 days"
+msgstr "VIP 180 ngày"
+
+msgid "VIP 360 days"
+msgstr "VIP 360 ngày"
+
+msgid "VIP Lifetime"
+msgstr "VIP trọn đời"
+
+msgid "Note:"
+msgstr "Lưu ý:"
+
+msgid "VIP will be extended if purchased again before expiration."
+msgstr "VIP sẽ được gia hạn nếu mua thêm trước khi hết hạn."
+
+msgid "Buy Now"
+msgstr "Mua ngay"
+
+msgid "VIP purchased successfully!"
+msgstr "Đã mua VIP thành công!"
+
+msgid "Could not purchase VIP package."
+msgstr "Không thể mua gói VIP."
+
+msgid "An error occurred during VIP purchase."
+msgstr "Đã xảy ra lỗi khi mua VIP."
+
+msgid "Unavailable"
+msgstr "Không khả dụng"
+
+msgid "Invite Friends"
+msgstr "Mời bạn bè"
+
+msgid "Invite your friends and earn rewards"
+msgstr "Mời bạn bè và nhận phần thưởng"
+
+msgid "Your Referral Code"
+msgstr "Mã mời của bạn"
+
+msgid "Copy Link"
+msgstr "Sao chép liên kết"
+
+msgid "Copied!"
+msgstr "Đã sao chép!"
+
+msgid "Share via"
+msgstr "Chia sẻ qua"
+
+msgid "You and your friend will receive bonus when they register."
+msgstr "Bạn và bạn của bạn sẽ nhận thưởng khi họ đăng ký."
+
+msgid "Referral Benefits"
+msgstr "Quyền lợi khi mời bạn"
+
+msgid "You get:"
+msgstr "Bạn nhận được:"
+
+msgid "Your friend gets:"
+msgstr "Bạn của bạn nhận được:"
+
+msgid "Your Referral History"
+msgstr "Lịch sử mời bạn của bạn"
+
+msgid "No referral data yet."
+msgstr "Chưa có dữ liệu mời bạn."
+
+msgid "Could not load referral history."
+msgstr "Không thể tải lịch sử mời bạn."
+
+msgid "Check In"
+msgstr "Điểm danh"
+
+msgid "Referral"
+msgstr "Mời bạn bè"
+
+msgid "Logout"
+msgstr "Đăng xuất"
+
+msgid "Forgot password?"
+msgstr "Quên mật khẩu?"
+
+msgid "Create a new account"
+msgstr "Tạo tài khoản mới"
+
+msgid "Congratulations! You reached level %d and received %d coins as a bonus."
+msgstr "Chúc mừng! Bạn đã lên cấp %d và nhận được %d xu thưởng."
+
+msgid "Level Up!"
+msgstr "Lên cấp!"
+
+msgid "Daily login bonus"
+msgstr "Thưởng đăng nhập hằng ngày"
+
+msgid "Welcome bonus for registration"
+msgstr "Thưởng chào mừng khi đăng ký"
+
+msgid "Profile updated"
+msgstr "Đã cập nhật hồ sơ"
+
+msgid "Level up to %d"
+msgstr "Lên cấp %d"
+
+msgid "Check-in streak reached %d days"
+msgstr "Chuỗi điểm danh đạt %d ngày"
+
+msgid "Daily check-in reward"
+msgstr "Thưởng điểm danh hằng ngày"
+
+msgid "Bonus reward after being online"
+msgstr "Thưởng thêm khi online đủ lâu"
+
+msgid "Referral reward for inviting a friend"
+msgstr "Thưởng khi mời bạn bè"
+
+msgid "Welcome reward for signing up via referral"
+msgstr "Thưởng chào mừng khi đăng ký qua giới thiệu"
+
+msgid "EXP gained for inviting a friend"
+msgstr "EXP nhận được khi mời bạn bè"
+
+msgid "EXP gained from referral signup"
+msgstr "EXP nhận khi đăng ký qua giới thiệu"
+
+msgid "EXP from daily login"
+msgstr "EXP từ đăng nhập hằng ngày"
+
+msgid "Welcome EXP for registration"
+msgstr "EXP chào mừng khi đăng ký"
+
+msgid "EXP for profile update"
+msgstr "EXP khi cập nhật hồ sơ"
+
+msgid "EXP reset after level %d up"
+msgstr "EXP được thiết lập lại sau khi lên cấp %d"
+
+msgid "EXP for %d-day streak milestone"
+msgstr "EXP cho mốc chuỗi điểm danh %d ngày"
+
+msgid "EXP reward after staying online"
+msgstr "EXP thưởng sau khi online"
+
+msgid "Your friend %s has joined using your referral link."
+msgstr "Bạn của bạn %s đã tham gia qua liên kết giới thiệu."
+
+msgid "New Referral Signup"
+msgstr "Có người tham gia từ liên kết mời"
+
+msgid "Unauthorized"
+msgstr "Chưa xác thực"
+
+msgid "Init User Engine Settings"
+msgstr "Cài đặt Init User Engine"
+
+msgid "Init User Engine"
+msgstr "Init User Engine"
+
+msgid "Theme Color"
+msgstr "Màu giao diện"
+
+msgid "Used as the main highlight color in user modals."
+msgstr "Dùng làm màu nổi bật trong giao diện người dùng."
+
+msgid "Coin Label"
+msgstr "Tên gọi đồng xu"
+
+msgid "Singular label used to represent the virtual currency (e.g., Xu, Coin)."
+msgstr "Tên đơn dùng để đại diện cho tiền ảo (ví dụ: Xu, Coin)."
+
+msgid "Cash Label"
+msgstr "Tên gọi tiền mặt"
+
+msgid "Label for premium currency or real-money equivalent (e.g., Cash, Kim cương)."
+msgstr "Tên gọi cho tiền cao cấp hoặc tương đương tiền thật (ví dụ: Cash, Kim cương)."
+
+msgid "Custom Links"
+msgstr "Liên kết tuỳ chỉnh"
+
+msgid "Custom Register URL"
+msgstr "Link đăng ký tuỳ chỉnh"
+
+msgid "Redirect here when user clicks \"Register\". Leave blank to use default wp-login.php?action=register."
+msgstr "Chuyển hướng đến link này khi người dùng nhấn Đăng ký. Để trống để dùng mặc định wp-login.php?action=register."
+
+msgid "Custom Lost Password URL"
+msgstr "Link quên mật khẩu tuỳ chỉnh"
+
+msgid "Redirect here when user clicks \"Lost password\". Leave blank to use default wp-login.php?action=lostpassword."
+msgstr "Chuyển hướng đến link này khi người dùng nhấn Quên mật khẩu. Để trống để dùng mặc định wp-login.php?action=lostpassword."
+
+msgid "Check-in Reward"
+msgstr "Thưởng điểm danh"
+
+msgid "Coin Reward"
+msgstr "Thưởng xu"
+
+msgid "Coin awarded each time the user checks in daily."
+msgstr "Tặng xu mỗi lần người dùng điểm danh hằng ngày."
+
+msgid "EXP Reward"
+msgstr "Thưởng EXP"
+
+msgid "EXP gained from daily check-in."
+msgstr "EXP nhận được từ điểm danh hằng ngày."
+
+msgid "Cash Reward"
+msgstr "Thưởng tiền mặt"
+
+msgid "Cash rewarded upon check-in (rarely used, mostly 0)."
+msgstr "Tặng tiền mặt khi điểm danh (hiếm dùng, thường để 0)."
+
+msgid "Online Reward"
+msgstr "Thưởng online"
+
+msgid "Minutes Required"
+msgstr "Số phút yêu cầu"
+
+msgid "Minimum minutes user must stay online to receive reward."
+msgstr "Số phút người dùng cần online để nhận thưởng."
+
+msgid "Coin rewarded when online duration is met."
+msgstr "Tặng xu khi online đủ thời gian."
+
+msgid "EXP rewarded after being online for required time."
+msgstr "Tặng EXP sau khi online đủ thời gian."
+
+msgid "Cash rewarded for being active online."
+msgstr "Tặng tiền mặt khi hoạt động online."
+
+msgid "VIP Pricing (by Coin)"
+msgstr "Giá VIP (tính bằng xu)"
+
+msgid "Set to 0 to disable this VIP package."
+msgstr "Đặt bằng 0 để tắt gói VIP này."
+
+msgid "VIP Bonus"
+msgstr "Thưởng VIP"
+
+msgid "Bonus Coin (%)"
+msgstr "Tăng xu (%)"
+
+msgid "Extra Coin gained when VIP, in percent."
+msgstr "Tăng xu khi là VIP (tính theo %)."
+
+msgid "Bonus EXP (%)"
+msgstr "Tăng EXP (%)"
+
+msgid "Extra EXP gained when VIP, in percent."
+msgstr "Tăng EXP khi là VIP (tính theo %)."
+
+msgid "Referral Reward"
+msgstr "Thưởng giới thiệu"
+
+msgid "Coin for Referrer"
+msgstr "Xu cho người mời"
+
+msgid "Coin reward given to the person who shared their referral link."
+msgstr "Xu thưởng cho người đã chia sẻ liên kết giới thiệu."
+
+msgid "EXP for Referrer"
+msgstr "EXP cho người mời"
+
+msgid "EXP granted to referrer when someone registers through their link."
+msgstr "EXP tặng người mời khi có người đăng ký qua liên kết."
+
+msgid "Cash for Referrer"
+msgstr "Tiền mặt cho người mời"
+
+msgid "Cash awarded to the referrer."
+msgstr "Tiền mặt tặng cho người mời."
+
+msgid "Coin for New User"
+msgstr "Xu cho người mới"
+
+msgid "Coin bonus for new user who signs up via referral."
+msgstr "Xu tặng cho người mới khi đăng ký qua giới thiệu."
+
+msgid "EXP for New User"
+msgstr "EXP cho người mới"
+
+msgid "EXP bonus for the new referred user."
+msgstr "EXP tặng cho người mới được mời."
+
+msgid "Cash for New User"
+msgstr "Tiền mặt cho người mới"
+
+msgid "Cash given to new user (rarely used)."
+msgstr "Tiền mặt tặng cho người mới (hiếm dùng)."
+
+msgid "Username or Email Address"
+msgstr "Tên đăng nhập hoặc địa chỉ email"
+
+msgid "Password"
+msgstr "Mật khẩu"
+
+msgid "Invalid VIP package."
+msgstr "Gói VIP không hợp lệ."
+
+msgid "This VIP package is disabled."
+msgstr "Gói VIP này đã bị tắt."
+
+msgid "Not enough Coin."
+msgstr "Không đủ xu."
+
+msgid "You have successfully purchased VIP for %s days. Enjoy your exclusive benefits!"
+msgstr "Bạn đã mua VIP thành công trong %s ngày. Hãy tận hưởng các đặc quyền!"
+
+msgid "lifetime"
+msgstr "trọn đời"
+
+msgid "VIP Purchase Successful"
+msgstr "Mua VIP thành công"
+
+msgid "You must be logged in to purchase VIP."
+msgstr "Bạn cần đăng nhập để mua VIP."
+
+msgid "Invalid VIP package selected."
+msgstr "Bạn đã chọn gói VIP không hợp lệ."
+
+msgid "No EXP activity yet."
+msgstr "Chưa có hoạt động EXP nào."
+
+msgid "Experience Log"
+msgstr "Lịch sử EXP"
+
+msgid "Failed to load experience log."
+msgstr "Tải lịch sử EXP thất bại."
+
+msgid "EXP"
+msgstr "EXP"
+
+msgid "Unknown"
+msgstr "Không rõ"
+
+msgid "Upload Avatar"
+msgstr "Tải lên ảnh đại diện"
+
+msgid "Drop image here or click to upload"
+msgstr "Kéo ảnh vào đây hoặc nhấn để tải lên"
+
+msgid "Save Avatar"
+msgstr "Lưu ảnh đại diện"
+
+msgid "Uploading..."
+msgstr "Đang tải lên..."
+
+msgid "Please select a valid image."
+msgstr "Vui lòng chọn một hình ảnh hợp lệ."
+
+msgid "Image too large (max 10MB)"
+msgstr "Ảnh quá lớn (tối đa 10MB)"
+
+msgid "Upload failed. Please try again."
+msgstr "Tải lên thất bại. Vui lòng thử lại."
+
+msgid "Remove Avatar"
+msgstr "Xoá ảnh đại diện"
+
+msgid "Are you sure you want to remove your avatar?"
+msgstr "Bạn có chắc chắn muốn xoá ảnh đại diện không?"
+
+msgid "Removing..."
+msgstr "Đang xoá..."
+
+msgid "Failed to remove avatar. Please try again."
+msgstr "Xoá ảnh thất bại. Vui lòng thử lại."
+
+msgid "You have a new reply to your comment"
+msgstr "Bạn có một phản hồi mới cho bình luận của mình"
+
+msgid "<strong>%s</strong> replied to your comment: <em>%s</em>"
+msgstr "<strong>%s</strong> đã phản hồi bình luận của bạn: <em>%s</em>"
+
+msgid "Welcome to the community!"
+msgstr "Chào mừng bạn đến với cộng đồng!"
+
+msgid "You received +%1$d EXP and +%2$d coins for signing up. Let the journey begin!"
+msgstr "Bạn nhận được +%1$d EXP và +%2$d xu khi đăng ký tài khoản. Cùng khám phá ngay nhé!"
+
+msgid "just now"
+msgstr "vừa xong"
+
+msgid "%d minute"
+msgstr "%d phút"
+
+msgid "%d minutes"
+msgstr "%d phút"
+
+msgid "%d hour"
+msgstr "%d giờ"
+
+msgid "%d hours"
+msgstr "%d giờ"
+
+msgid "%d day"
+msgstr "%d ngày"
+
+msgid "%d days"
+msgstr "%d ngày"
+
+msgid "%d week"
+msgstr "%d tuần"
+
+msgid "%d weeks"
+msgstr "%d tuần"
+
+msgid "%d month"
+msgstr "%d tháng"
+
+msgid "%d months"
+msgstr "%d tháng"
+
+msgid "%d year"
+msgstr "%d năm"
+
+msgid "%d years"
+msgstr "%d năm"
+
+msgid "You do not have permission to access this page."
+msgstr "Bạn không có quyền truy cập trang này."
+
+msgid "Please fill in all required fields."
+msgstr "Vui lòng điền đầy đủ các trường bắt buộc."
+
+msgid "Send Notification"
+msgstr "Gửi thông báo"
+
+msgid "Notification sent successfully."
+msgstr "Thông báo đã được gửi thành công."
+
+msgid "Title"
+msgstr "Tiêu đề"
+
+msgid "Enter notification title..."
+msgstr "Nhập tiêu đề thông báo..."
+
+msgid "Content"
+msgstr "Nội dung"
+
+msgid "Write your message content here..."
+msgstr "Nhập nội dung thông báo tại đây..."
+
+msgid "Select Users"
+msgstr "Chọn người dùng"
+
+msgid "Search by username or display name..."
+msgstr "Tìm theo tên đăng nhập hoặc tên hiển thị..."
+
+msgid "Selected user IDs will appear here."
+msgstr "ID người dùng đã chọn sẽ hiển thị tại đây."
+
+msgid "Send to all members"
+msgstr "Gửi đến toàn bộ thành viên"
+
+msgid "This will override the user ID field and send to all registered users."
+msgstr "Tùy chọn này sẽ bỏ qua danh sách người dùng bên trên và gửi cho toàn bộ thành viên."
+
+msgid "Type"
+msgstr "Loại"
+
+msgid "Priority"
+msgstr "Độ ưu tiên"
+
+msgid "Optional Link"
+msgstr "Liên kết (tùy chọn)"
+
+msgid "https://example.com/optional-link"
+msgstr "https://example.com/duong-dan-tuy-chon"
+
+msgid "Pin this message"
+msgstr "Ghim thông báo này"
+
+msgid "Expire At (optional)"
+msgstr "Hết hạn (tuỳ chọn)"
+
+msgid "Optional expiration time"
+msgstr "Thời gian hết hạn (nếu có)"
+
+msgid "Edit Profile"
+msgstr "Chỉnh sửa hồ sơ"
+
+msgid "Hide Admin Bar (Subscriber)"
+msgstr "Ẩn thanh quản trị (Subscriber)"
+
+msgid "Hide admin bar on frontend for users with Subscriber role."
+msgstr "Ẩn thanh quản trị ở giao diện ngoài với người dùng có vai trò Subscriber."
+
+msgid "Reward from WooCommerce order"
+msgstr "Phần thưởng từ đơn hàng WooCommerce"
+
+msgid "EXP from WooCommerce order"
+msgstr "EXP từ đơn hàng WooCommerce"
+
+msgid "Thanks for your purchase!"
+msgstr "Cảm ơn bạn đã mua hàng!"
+
+msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
+msgstr "Bạn nhận được +%1$d EXP và +%2$d xu từ đơn hàng. Tiếp tục phát triển nhé!"
+
+msgid "Comment posted"
+msgstr "Bình luận thành công"
+
+msgid "First time post published"
+msgstr "Xuất bản bài viết đầu tiên"
+
+msgid "EXP from posting a comment"
+msgstr "Nhận EXP khi bình luận"
+
+msgid "EXP from publishing a post"
+msgstr "Nhận EXP khi đăng bài viết"
+
+msgid "Back to login"
+msgstr "Quay lại đăng nhập"
+
+msgid "Create a new account"
+msgstr "Tạo tài khoản mới"
+
+msgid "Registering..."
+msgstr "Đang đăng ký..."
+
+msgid "Welcome! You can now log in."
+msgstr "Chào mừng! Bạn có thể đăng nhập ngay."
+
+msgid "Username must be at least 3 characters."
+msgstr "Tên người dùng phải có ít nhất 3 ký tự."
+
+msgid "Username can only contain letters, numbers and underscores."
+msgstr "Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới."
+
+msgid "Please enter a valid email address."
+msgstr "Vui lòng nhập địa chỉ email hợp lệ."
+
+msgid "Password must be at least 6 characters."
+msgstr "Mật khẩu phải có ít nhất 6 ký tự."
+
+msgid "Username"
+msgstr "Tên người dùng"
+
+msgid "Pick a cool username"
+msgstr "Chọn một tên thật ngầu"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "We’ll never spam you"
+msgstr "Chúng tôi sẽ không gửi thư rác"
+
+msgid "Make it strong"
+msgstr "Đặt mật khẩu thật mạnh"
+
+msgid "Register"
+msgstr "Đăng ký"
+
+msgid "Disable Gravatar Completely"
+msgstr "Tắt hoàn toàn Gravatar"
+
+msgid "Disable all Gravatar calls and use a local default SVG instead."
+msgstr "Vô hiệu hóa mọi kết nối tới Gravatar và dùng ảnh mặc định nội bộ (SVG)."
+
+msgid "Improves performance by preventing external requests to gravatar.com."
+msgstr "Tăng tốc website bằng cách chặn các yêu cầu tới gravatar.com."

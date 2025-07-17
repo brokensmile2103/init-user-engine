@@ -1,0 +1,227 @@
+/* modal-referral.css */
+.iue-referral-container {
+    padding: 24px;
+    max-width: 520px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.iue-referral-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.iue-referral-box {
+    display: inline-block;
+    background: var(--iue-theme-color, #0073aa);
+    color: #fff;
+    border-radius: 14px;
+    padding: 16px 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    margin-bottom: 16px;
+    transition: all 0.2s;
+}
+
+.iue-referral-code {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.iue-referral-code-label {
+    font-size: 0.75rem;
+    margin-top: 4px;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.iue-referral-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px auto 28px;
+    max-width: 100%;
+}
+
+#iue-referral-link {
+    flex-grow: 1;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.4;
+}
+
+.iue-referral-copy-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--iue-theme-color, #0073aa);
+    transition: transform 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iue-referral-copy-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    pointer-events: none;
+}
+
+.iue-referral-copy-btn:hover {
+    transform: scale(1.1);
+    color: var(--iue-theme-active-color, #005f8b);
+}
+
+.iue-referral-share {
+    margin-bottom: 20px;
+}
+
+.iue-referral-share p {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+.iue-referral-socials {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.iue-referral-socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--iue-theme-color, #0073aa);
+    color: #fff;
+    font-size: 16px;
+    transition: background 0.2s ease;
+    text-decoration: none;
+}
+
+.iue-referral-socials a:hover {
+    background: var(--iue-theme-active-color, #005f8b);
+}
+
+/* ==== DARK MODE SUPPORT ==== */
+#iue-modal.dark .iue-referral-container {
+    background-color: #1e1e1e;
+    color: #eee;
+}
+
+#iue-modal.dark .iue-referral-heading {
+    color: #fff;
+}
+
+#iue-modal.dark #iue-referral-link {
+    background: #2a2a2a;
+    color: #eee;
+    border-color: #444;
+}
+
+#iue-modal.dark .iue-referral-copy-btn {
+    color: var(--iue-theme-color, #4fa3d1);
+}
+
+#iue-modal.dark .iue-referral-copy-btn:hover {
+    color: var(--iue-theme-active-color, #6fc3f7);
+}
+
+#iue-modal.dark .iue-referral-share p {
+    color: #ccc;
+}
+
+#iue-modal.dark .iue-referral-socials a {
+    background: var(--iue-theme-color, #4fa3d1);
+    color: #fff;
+}
+
+#iue-modal.dark .iue-referral-socials a:hover {
+    background: var(--iue-theme-active-color, #6fc3f7);
+}
+
+.iue-referral-benefits {
+    background: #f8f9fa;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.iue-referral-benefits h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.iue-referral-benefit-row {
+    margin: 6px 0;
+}
+
+.iue-referral-history {
+    margin-top: 32px;
+    text-align: left;
+}
+
+.iue-referral-history h4 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.iue-referral-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.iue-referral-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.92rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.iue-referral-date {
+    font-size: 0.8rem;
+    color: #777;
+}
+
+#iue-modal.dark .iue-referral-benefits {
+    background-color: #2a2a2a;
+    color: #ddd;
+}
+
+#iue-modal.dark .iue-referral-benefits h4,
+#iue-modal.dark .iue-referral-benefit-row strong {
+    color: #fff;
+}
+
+#iue-modal.dark .iue-referral-history h4 {
+    color: #fff;
+}
+
+#iue-modal.dark .iue-referral-date {
+    color: #aaa;
+}
+
+#iue-modal.dark .iue-referral-list li {
+    border-color: #444;
+    color: #ddd;
+}

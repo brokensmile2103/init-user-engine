@@ -1,0 +1,652 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Init User Engine 1.0.0\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS."
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Checked in"
+msgstr ""
+
+msgid "Checked in successfully!"
+msgstr ""
+
+msgid "You received your reward!"
+msgstr ""
+
+msgid "Still too early to claim!"
+msgstr ""
+
+msgid "Checking in..."
+msgstr ""
+
+msgid "All messages marked as read."
+msgstr ""
+
+msgid "All messages deleted."
+msgstr ""
+
+msgid "Error!"
+msgstr ""
+
+msgid "Transaction History"
+msgstr ""
+
+msgid "Inbox"
+msgstr ""
+
+msgid "No messages in your inbox."
+msgstr ""
+
+msgid "Mark All as Read"
+msgstr ""
+
+msgid "Delete All"
+msgstr ""
+
+msgid "Mark as Read"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "No title"
+msgstr ""
+
+msgid "Failed to load inbox."
+msgstr ""
+
+msgid "Click again to confirm"
+msgstr ""
+
+msgid "VIP Membership"
+msgstr ""
+
+msgid "Current status:"
+msgstr ""
+
+msgid "VIP until"
+msgstr ""
+
+msgid "Not a VIP"
+msgstr ""
+
+msgid "VIP 7 days"
+msgstr ""
+
+msgid "VIP 30 days"
+msgstr ""
+
+msgid "VIP 90 days"
+msgstr ""
+
+msgid "VIP 180 days"
+msgstr ""
+
+msgid "VIP 360 days"
+msgstr ""
+
+msgid "VIP Lifetime"
+msgstr ""
+
+msgid "Note:"
+msgstr ""
+
+msgid "VIP will be extended if purchased again before expiration."
+msgstr ""
+
+msgid "Buy Now"
+msgstr ""
+
+msgid "VIP purchased successfully!"
+msgstr ""
+
+msgid "Could not purchase VIP package."
+msgstr ""
+
+msgid "An error occurred during VIP purchase."
+msgstr ""
+
+msgid "Unavailable"
+msgstr ""
+
+msgid "Invite Friends"
+msgstr ""
+
+msgid "Invite your friends and earn rewards"
+msgstr ""
+
+msgid "Your Referral Code"
+msgstr ""
+
+msgid "Copy Link"
+msgstr ""
+
+msgid "Copied!"
+msgstr ""
+
+msgid "Share via"
+msgstr ""
+
+msgid "You and your friend will receive bonus when they register."
+msgstr ""
+
+msgid "Referral Benefits"
+msgstr ""
+
+msgid "You get:"
+msgstr ""
+
+msgid "Your friend gets:"
+msgstr ""
+
+msgid "Your Referral History"
+msgstr ""
+
+msgid "No referral data yet."
+msgstr ""
+
+msgid "Could not load referral history."
+msgstr ""
+
+msgid "Check In"
+msgstr ""
+
+msgid "Referral"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Forgot password?"
+msgstr ""
+
+msgid "Create a new account"
+msgstr ""
+
+msgid "Congratulations! You reached level %d and received %d coins as a bonus."
+msgstr ""
+
+msgid "Level Up!"
+msgstr ""
+
+msgid "Daily login bonus"
+msgstr ""
+
+msgid "Welcome bonus for registration"
+msgstr ""
+
+msgid "Profile updated"
+msgstr ""
+
+msgid "Level up to %d"
+msgstr ""
+
+msgid "Check-in streak reached %d days"
+msgstr ""
+
+msgid "Daily check-in reward"
+msgstr ""
+
+msgid "Bonus reward after being online"
+msgstr ""
+
+msgid "Referral reward for inviting a friend"
+msgstr ""
+
+msgid "Welcome reward for signing up via referral"
+msgstr ""
+
+msgid "EXP gained for inviting a friend"
+msgstr ""
+
+msgid "EXP gained from referral signup"
+msgstr ""
+
+msgid "EXP from daily login"
+msgstr ""
+
+msgid "Welcome EXP for registration"
+msgstr ""
+
+msgid "EXP for profile update"
+msgstr ""
+
+msgid "EXP reset after level %d up"
+msgstr ""
+
+msgid "EXP for %d-day streak milestone"
+msgstr ""
+
+msgid "EXP reward after staying online"
+msgstr ""
+
+msgid "Your friend %s has joined using your referral link."
+msgstr ""
+
+msgid "New Referral Signup"
+msgstr ""
+
+msgid "Unauthorized"
+msgstr ""
+
+msgid "Init User Engine Settings"
+msgstr ""
+
+msgid "Init User Engine"
+msgstr ""
+
+msgid "Theme Color"
+msgstr ""
+
+msgid "Used as the main highlight color in user modals."
+msgstr ""
+
+msgid "Coin Label"
+msgstr ""
+
+msgid "Singular label used to represent the virtual currency (e.g., Xu, Coin)."
+msgstr ""
+
+msgid "Cash Label"
+msgstr ""
+
+msgid "Label for premium currency or real-money equivalent (e.g., Cash, Kim cương)."
+msgstr ""
+
+msgid "Custom Links"
+msgstr ""
+
+msgid "Custom Register URL"
+msgstr ""
+
+msgid "Redirect here when user clicks \"Register\". Leave blank to use default wp-login.php?action=register."
+msgstr ""
+
+msgid "Custom Lost Password URL"
+msgstr ""
+
+msgid "Redirect here when user clicks \"Lost password\". Leave blank to use default wp-login.php?action=lostpassword."
+msgstr ""
+
+msgid "Check-in Reward"
+msgstr ""
+
+msgid "Coin Reward"
+msgstr ""
+
+msgid "Coin awarded each time the user checks in daily."
+msgstr ""
+
+msgid "EXP Reward"
+msgstr ""
+
+msgid "EXP gained from daily check-in."
+msgstr ""
+
+msgid "Cash Reward"
+msgstr ""
+
+msgid "Cash rewarded upon check-in (rarely used, mostly 0)."
+msgstr ""
+
+msgid "Online Reward"
+msgstr ""
+
+msgid "Minutes Required"
+msgstr ""
+
+msgid "Minimum minutes user must stay online to receive reward."
+msgstr ""
+
+msgid "Coin rewarded when online duration is met."
+msgstr ""
+
+msgid "EXP rewarded after being online for required time."
+msgstr ""
+
+msgid "Cash rewarded for being active online."
+msgstr ""
+
+msgid "VIP Pricing (by Coin)"
+msgstr ""
+
+msgid "Set to 0 to disable this VIP package."
+msgstr ""
+
+msgid "VIP Bonus"
+msgstr ""
+
+msgid "Bonus Coin (%)"
+msgstr ""
+
+msgid "Extra Coin gained when VIP, in percent."
+msgstr ""
+
+msgid "Bonus EXP (%)"
+msgstr ""
+
+msgid "Extra EXP gained when VIP, in percent."
+msgstr ""
+
+msgid "Referral Reward"
+msgstr ""
+
+msgid "Coin for Referrer"
+msgstr ""
+
+msgid "Coin reward given to the person who shared their referral link."
+msgstr ""
+
+msgid "EXP for Referrer"
+msgstr ""
+
+msgid "EXP granted to referrer when someone registers through their link."
+msgstr ""
+
+msgid "Cash for Referrer"
+msgstr ""
+
+msgid "Cash awarded to the referrer."
+msgstr ""
+
+msgid "Coin for New User"
+msgstr ""
+
+msgid "Coin bonus for new user who signs up via referral."
+msgstr ""
+
+msgid "EXP for New User"
+msgstr ""
+
+msgid "EXP bonus for the new referred user."
+msgstr ""
+
+msgid "Cash for New User"
+msgstr ""
+
+msgid "Cash given to new user (rarely used)."
+msgstr ""
+
+msgid "Username or Email Address"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Invalid VIP package."
+msgstr ""
+
+msgid "This VIP package is disabled."
+msgstr ""
+
+msgid "Not enough Coin."
+msgstr ""
+
+msgid "You have successfully purchased VIP for %s days. Enjoy your exclusive benefits!"
+msgstr ""
+
+msgid "lifetime"
+msgstr ""
+
+msgid "VIP Purchase Successful"
+msgstr ""
+
+msgid "You must be logged in to purchase VIP."
+msgstr ""
+
+msgid "Invalid VIP package selected."
+msgstr ""
+
+msgid "No EXP activity yet."
+msgstr ""
+
+msgid "Experience Log"
+msgstr ""
+
+msgid "Failed to load experience log."
+msgstr ""
+
+msgid "EXP"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Upload Avatar"
+msgstr ""
+
+msgid "Drop image here or click to upload"
+msgstr ""
+
+msgid "Save Avatar"
+msgstr ""
+
+msgid "Uploading..."
+msgstr ""
+
+msgid "Please select a valid image."
+msgstr ""
+
+msgid "Image too large (max 10MB)"
+msgstr ""
+
+msgid "Upload failed. Please try again."
+msgstr ""
+
+msgid "Remove Avatar"
+msgstr ""
+
+msgid "Are you sure you want to remove your avatar?"
+msgstr ""
+
+msgid "Removing..."
+msgstr ""
+
+msgid "Failed to remove avatar. Please try again."
+msgstr ""
+
+msgid "You have a new reply to your comment"
+msgstr ""
+
+msgid "<strong>%s</strong> replied to your comment: <em>%s</em>"
+msgstr ""
+
+msgid "Welcome to the community!"
+msgstr ""
+
+msgid "You received +%1$d EXP and +%2$d coins for signing up. Let the journey begin!"
+msgstr ""
+
+msgid "just now"
+msgstr ""
+
+msgid "%d minute"
+msgstr ""
+
+msgid "%d minutes"
+msgstr ""
+
+msgid "%d hour"
+msgstr ""
+
+msgid "%d hours"
+msgstr ""
+
+msgid "%d day"
+msgstr ""
+
+msgid "%d days"
+msgstr ""
+
+msgid "%d week"
+msgstr ""
+
+msgid "%d weeks"
+msgstr ""
+
+msgid "%d month"
+msgstr ""
+
+msgid "%d months"
+msgstr ""
+
+msgid "%d year"
+msgstr ""
+
+msgid "%d years"
+msgstr ""
+
+msgid "You do not have permission to access this page."
+msgstr ""
+
+msgid "Please fill in all required fields."
+msgstr ""
+
+msgid "Send Notification"
+msgstr ""
+
+msgid "Notification sent successfully."
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Enter notification title..."
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Write your message content here..."
+msgstr ""
+
+msgid "Select Users"
+msgstr ""
+
+msgid "Search by username or display name..."
+msgstr ""
+
+msgid "Selected user IDs will appear here."
+msgstr ""
+
+msgid "Send to all members"
+msgstr ""
+
+msgid "This will override the user ID field and send to all registered users."
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Optional Link"
+msgstr ""
+
+msgid "https://example.com/optional-link"
+msgstr ""
+
+msgid "Pin this message"
+msgstr ""
+
+msgid "Expire At (optional)"
+msgstr ""
+
+msgid "Optional expiration time"
+msgstr ""
+
+msgid "Edit Profile"
+msgstr ""
+
+msgid "Hide Admin Bar (Subscriber)"
+msgstr ""
+
+msgid "Hide admin bar on frontend for users with Subscriber role."
+msgstr ""
+
+msgid "Reward from WooCommerce order"
+msgstr ""
+
+msgid "EXP from WooCommerce order"
+msgstr ""
+
+msgid "Thanks for your purchase!"
+msgstr ""
+
+msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
+msgstr ""
+
+msgid "Comment posted"
+msgstr ""
+
+msgid "First time post published"
+msgstr ""
+
+msgid "EXP from posting a comment"
+msgstr ""
+
+msgid "EXP from publishing a post"
+msgstr ""
+
+msgid "Back to login"
+msgstr ""
+
+msgid "Create a new account"
+msgstr ""
+
+msgid "Registering..."
+msgstr ""
+
+msgid "Welcome! You can now log in."
+msgstr ""
+
+msgid "Username must be at least 3 characters."
+msgstr ""
+
+msgid "Username can only contain letters, numbers and underscores."
+msgstr ""
+
+msgid "Please enter a valid email address."
+msgstr ""
+
+msgid "Password must be at least 6 characters."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Pick a cool username"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "We’ll never spam you"
+msgstr ""
+
+msgid "Make it strong"
+msgstr ""
+
+msgid "Register"
+msgstr ""
+
+msgid "Disable Gravatar Completely"
+msgstr ""
+
+msgid "Disable all Gravatar calls and use a local default SVG instead."
+msgstr ""
+
+msgid "Improves performance by preventing external requests to gravatar.com."
+msgstr ""

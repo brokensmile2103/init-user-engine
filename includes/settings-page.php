@@ -32,6 +32,18 @@ add_action( 'admin_menu', function () {
 	);
 
 	require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'tools/send-notification.php';
+
+	add_submenu_page(
+		INIT_PLUGIN_SUITE_IUE_SLUG,
+		__( 'Top-up Coin/Cash', 'init-user-engine' ),
+		__( 'Top-up Coin/Cash', 'init-user-engine' ),
+		'manage_options',
+		'init-user-engine-topup',
+		'init_plugin_suite_user_engine_render_topup_page'
+	);
+
+	require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'tools/topup.php';
+
 } );
 
 // Register settings

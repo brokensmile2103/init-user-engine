@@ -14,6 +14,13 @@ function init_plugin_suite_user_engine_register_rest_routes() {
         'permission_callback' => '__return_true',
     ]);
 
+    // GET /captcha – Tạo captcha đơn giản
+    register_rest_route( $namespace, '/captcha', [
+        'methods'  => 'GET',
+        'callback' => 'init_plugin_suite_user_engine_api_get_captcha',
+        'permission_callback' => '__return_true',
+    ]);
+
     // POST /checkin – Điểm danh hằng ngày
     register_rest_route( $namespace, '/checkin', [
         'methods'             => 'POST',
@@ -108,6 +115,24 @@ function init_plugin_suite_user_engine_register_rest_routes() {
             return is_user_logged_in();
         },
     ]);
+
+    // POST /profile/update – Cập nhật thông tin hồ sơ người dùng
+    register_rest_route( $namespace, '/profile/update', [
+        'methods'             => 'POST',
+        'callback'            => 'init_plugin_suite_user_engine_api_update_profile',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
+    ]);
+
+    // GET /profile/me – Lấy thông tin hồ sơ người dùng hiện tại
+    register_rest_route( $namespace, '/profile/me', [
+        'methods'             => 'GET',
+        'callback'            => 'init_plugin_suite_user_engine_api_get_profile',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
+    ]);
 }
 
 // Handle register
@@ -116,6 +141,17 @@ function init_plugin_suite_user_engine_api_register_user( WP_REST_Request $reque
     $username = sanitize_user( $data['username'] ?? '' );
     $email    = sanitize_email( $data['email'] ?? '' );
     $password = $data['password'] ?? '';
+
+    $captcha_token  = sanitize_text_field( $data['captcha_token'] ?? '' );
+    $captcha_answer = intval( $data['captcha_answer'] ?? 0 );
+    $captcha_key    = 'iue_captcha_' . md5($_SERVER['REMOTE_ADDR'] . $captcha_token);
+    $expected       = get_transient($captcha_key);
+
+    if ( false === $expected || intval($expected) !== $captcha_answer ) {
+        return new WP_Error( 'captcha_failed', __( 'Captcha validation failed.', 'init-user-engine' ), [ 'status' => 400 ] );
+    }
+
+    delete_transient($captcha_key);
 
     // Validate dữ liệu
     if ( strlen( $username ) < 3 ) {
@@ -170,6 +206,56 @@ function init_plugin_suite_user_engine_api_register_user( WP_REST_Request $reque
         'status'  => 'registered',
         'message' => __( 'Registration successful. You can now log in.', 'init-user-engine' ),
     ], 200 );
+}
+
+// Captcha
+function init_plugin_suite_user_engine_api_get_captcha() {
+    $mode = rand(0, 1); // 0: toán học ký hiệu, 1: ngôn ngữ tự nhiên
+
+    if ( $mode === 0 ) {
+        $ops = ['+', '-', '×'];
+        $op = $ops[ array_rand($ops) ];
+        $a = rand(2, 9);
+        $b = rand(2, 9);
+        if ( $op === '-' && $b > $a ) [$a, $b] = [$b, $a];
+
+        $answer = match($op) {
+            '+' => $a + $b,
+            '-' => $a - $b,
+            '×' => $a * $b,
+        };
+
+        $question = sprintf( __( '%d %s %d = ?', 'init-user-engine' ), $a, $op, $b );
+
+    } else {
+        $ops = ['plus', 'minus', 'times'];
+        $op = $ops[ array_rand($ops) ];
+        $a = rand(2, 9);
+        $b = rand(2, 9);
+        if ( $op === 'minus' && $b > $a ) [$a, $b] = [$b, $a];
+
+        $answer = match($op) {
+            'plus'  => $a + $b,
+            'minus' => $a - $b,
+            'times' => $a * $b,
+        };
+
+        $question = match($op) {
+            'plus'  => sprintf( __( 'What is %d plus %d?', 'init-user-engine' ), $a, $b ),
+            'minus' => sprintf( __( 'What is %d minus %d?', 'init-user-engine' ), $a, $b ),
+            'times' => sprintf( __( 'What is %d times %d?', 'init-user-engine' ), $a, $b ),
+        };
+    }
+
+    $token = wp_generate_password(12, false, false);
+    $ip    = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+    $key   = 'iue_captcha_' . md5($ip . $token);
+    set_transient($key, $answer, 10 * MINUTE_IN_SECONDS);
+
+    return [
+        'question' => $question,
+        'token'    => $token,
+    ];
 }
 
 // Handle daily check-in, reward EXP/coin, update streak and milestones
@@ -493,5 +579,81 @@ function init_plugin_suite_user_engine_api_remove_avatar( WP_REST_Request $reque
     return rest_ensure_response([
         'success' => true,
         'url'     => esc_url( $default_avatar_url ),
+    ]);
+}
+
+// Lấy dữ liệu người dùng
+function init_plugin_suite_user_engine_api_get_profile( WP_REST_Request $request ) {
+    $user_id = get_current_user_id();
+    if ( ! $user_id ) {
+        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
+    }
+
+    $user = get_userdata( $user_id );
+
+    $profile = [
+        'display_name' => $user->display_name,
+        'bio'          => get_user_meta( $user_id, 'description', true ),
+        'facebook'     => get_user_meta( $user_id, 'iue_facebook', true ),
+        'twitter'      => get_user_meta( $user_id, 'iue_twitter', true ),
+        'discord'      => get_user_meta( $user_id, 'iue_discord', true ),
+        'website'      => get_user_meta( $user_id, 'iue_website', true ),
+        'gender'       => get_user_meta( $user_id, 'iue_gender', true ),
+    ];
+
+    return rest_ensure_response( $profile );
+}
+
+// Cập nhật thông tin
+function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $request ) {
+    $user_id = get_current_user_id();
+    if ( ! $user_id ) {
+        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
+    }
+
+    $data = $request->get_json_params();
+
+    $honeypot = sanitize_text_field( $data['iue_hp'] ?? '' );
+    if ( ! empty($honeypot) ) {
+        return new WP_Error( 'spam_detected', __( 'Spam detected.', 'init-user-engine' ), [ 'status' => 400 ] );
+    }
+
+    $display_name = sanitize_text_field( $data['display_name'] ?? '' );
+    $bio          = sanitize_textarea_field( $data['bio'] ?? '' );
+    $password     = $data['new_password'] ?? '';
+
+    $facebook = esc_url_raw( $data['facebook'] ?? '' );
+    $twitter  = esc_url_raw( $data['twitter'] ?? '' );
+    $discord  = sanitize_text_field( $data['discord'] ?? '' );
+    $website  = esc_url_raw( $data['website'] ?? '' );
+    $gender   = sanitize_key( $data['gender'] ?? '' );
+
+    // Cập nhật user core
+    wp_update_user( [
+        'ID'           => $user_id,
+        'display_name' => $display_name,
+    ] );
+
+    // Cập nhật mật khẩu nếu có
+    if ( ! empty( $password ) ) {
+        wp_set_password( $password, $user_id );
+    }
+
+    // Cập nhật các meta
+    update_user_meta( $user_id, 'description', $bio );
+    update_user_meta( $user_id, 'iue_facebook', $facebook );
+    update_user_meta( $user_id, 'iue_twitter', $twitter );
+    update_user_meta( $user_id, 'iue_discord', $discord );
+    update_user_meta( $user_id, 'iue_website', $website );
+    update_user_meta( $user_id, 'iue_gender', $gender );
+
+    do_action( 'init_plugin_suite_user_engine_after_update_profile', $user_id, $data );
+
+    return rest_ensure_response([
+        'success' => true,
+        'data'    => [
+            'display_name' => $display_name,
+            'bio'          => $bio,
+        ]
     ]);
 }

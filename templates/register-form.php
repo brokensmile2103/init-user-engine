@@ -19,6 +19,17 @@
 			placeholder="<?php esc_attr_e( 'Make it strong', 'init-user-engine' ); ?>" required>
 	</p>
 
+	<p class="iue-form-group iue-hidden">
+		<label for="iue_hp">Leave this field empty</label>
+		<input type="text" name="iue_hp" id="iue_hp" autocomplete="off" tabindex="-1">
+	</p>
+
+	<p class="iue-form-group iue-register-captcha">
+		<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
+		<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>
+		<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input" required>
+	</p>
+
 	<p class="iue-form-group iue-register-submit">
 		<button type="submit" class="iue-submit">
 			<?php esc_html_e( 'Register', 'init-user-engine' ); ?>

@@ -588,6 +588,9 @@ msgstr "Cảm ơn bạn đã mua hàng!"
 msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
 msgstr "Bạn nhận được +%1$d EXP và +%2$d xu từ đơn hàng. Tiếp tục phát triển nhé!"
 
+msgid "You earned +%1$d EXP and +%2$d coins for submitting a review. Keep it up!"
+msgstr "Bạn nhận được +%1$d EXP và +%2$d xu khi đánh giá. Tiếp tục phát huy nhé!"
+
 msgid "Comment posted"
 msgstr "Bình luận thành công"
 
@@ -650,3 +653,135 @@ msgstr "Vô hiệu hóa mọi kết nối tới Gravatar và dùng ảnh mặc �
 
 msgid "Improves performance by preventing external requests to gravatar.com."
 msgstr "Tăng tốc website bằng cách chặn các yêu cầu tới gravatar.com."
+
+msgid "Edit Profile"
+msgstr "Chỉnh sửa hồ sơ"
+
+msgid "Display Name"
+msgstr "Tên hiển thị"
+
+msgid "Your public display name"
+msgstr "Tên công khai hiển thị cho mọi người"
+
+msgid "Bio"
+msgstr "Giới thiệu"
+
+msgid "Short self introduction"
+msgstr "Giới thiệu ngắn về bản thân"
+
+msgid "New Password"
+msgstr "Mật khẩu mới"
+
+msgid "Leave blank to keep current password"
+msgstr "Để trống nếu không muốn đổi mật khẩu"
+
+msgid "https://facebook.com/yourprofile"
+msgstr "https://facebook.com/trangcuaban"
+
+msgid "https://twitter.com/yourhandle"
+msgstr "https://twitter.com/tencuaban"
+
+msgid "Your Discord username or invite"
+msgstr "Tên người dùng hoặc link Discord của bạn"
+
+msgid "https://yourwebsite.com"
+msgstr "https://trangwebcuaban.com"
+
+msgid "Gender"
+msgstr "Giới tính"
+
+msgid "Prefer not to say"
+msgstr "Không muốn tiết lộ"
+
+msgid "Male"
+msgstr "Nam"
+
+msgid "Female"
+msgstr "Nữ"
+
+msgid "Other"
+msgstr "Khác"
+
+msgid "Save"
+msgstr "Lưu thay đổi"
+
+msgid "Profile updated successfully!"
+msgstr "Cập nhật hồ sơ thành công!"
+
+msgid "Could not update profile."
+msgstr "Không thể cập nhật hồ sơ."
+
+msgid "Could not load profile data."
+msgstr "Không thể tải dữ liệu hồ sơ."
+
+msgid "An error occurred while updating."
+msgstr "Có lỗi xảy ra khi cập nhật."
+
+msgid "Top-up Coin/Cash"
+msgstr "Nạp Coin/Cash"
+
+msgid "Top-up Coin / Cash"
+msgstr "Nạp Coin / Cash"
+
+msgid "Top-up successful."
+msgstr "Nạp tiền thành công."
+
+msgid "Please fill in all required fields correctly."
+msgstr "Vui lòng điền đầy đủ và chính xác các trường bắt buộc."
+
+msgid "Amount"
+msgstr "Số tiền"
+
+msgid "Top-up Type"
+msgstr "Loại nạp"
+
+msgid "Apply to all members"
+msgstr "Áp dụng cho toàn bộ thành viên"
+
+msgid "This will override the user ID field and top-up to all users."
+msgstr "Tùy chọn này sẽ bỏ qua danh sách ID và nạp tiền cho toàn bộ người dùng."
+
+msgid "Top-up Now"
+msgstr "Thực hiện Nạp"
+
+msgid "Admin Top-up Coin"
+msgstr "Admin nạp Coin"
+
+msgid "You have received %d Coins from the admin."
+msgstr "Bạn vừa nhận được %d Coin từ admin."
+
+msgid "Admin Top-up Cash"
+msgstr "Admin nạp Cash"
+
+msgid "You have received %d Cash from the admin."
+msgstr "Bạn vừa nhận được %d Cash từ admin."
+
+msgid "Username already exists."
+msgstr "Tên người dùng đã tồn tại."
+
+msgid "Email already registered."
+msgstr "Email này đã được đăng ký."
+
+msgid "Not logged in."
+msgstr "Bạn chưa đăng nhập."
+
+msgid "No file uploaded."
+msgstr "Chưa có tệp nào được tải lên."
+
+msgid "You reached a %d-day check-in streak!"
+msgstr "Chuỗi điểm danh của bạn đã đạt %d ngày!"
+
+msgid "Your consistency is impressive! We just sent you a bonus reward."
+msgstr "Sự kiên trì của bạn thật ấn tượng! Chúng tôi vừa gửi phần thưởng thêm cho bạn."
+
+msgid "What is %d plus %d?"
+msgstr "Tổng của %d và %d là gì?"
+
+msgid "What is %d minus %d?"
+msgstr "%d trừ %d bằng bao nhiêu?"
+
+msgid "What is %d times %d?"
+msgstr "%d nhân %d bằng bao nhiêu?"
+
+msgid "Loading..."
+msgstr "Đang tải..."

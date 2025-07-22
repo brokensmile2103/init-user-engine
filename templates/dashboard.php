@@ -30,7 +30,7 @@ $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $use
 		</div>
 		<div class="iue-user-meta">
 			<div class="iue-username">
-				<?php echo esc_html( $user->display_name ); ?>
+				<span id="iue-dashboard-display-name"><?php echo esc_html( $user->display_name ); ?></span>
 				<a href="#"
 					role="button"
 					class="iue-level-badge-link"
@@ -102,7 +102,7 @@ $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $use
 			</a>
 		</li>
 		<li>
-			<a href="<?php echo esc_url( admin_url( 'profile.php' ) ); ?>" target="_blank">
+			<a href="#" role="button" class="iue-menu-link" data-action="edit-profile">
 				<span class="iue-icon" data-iue-icon="user"></span>
 				<span><?php esc_html_e( 'Edit Profile', 'init-user-engine' ); ?></span>
 			</a>

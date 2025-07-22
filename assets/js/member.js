@@ -82,6 +82,11 @@ function initMenuClick() {
             loadExpLog();
             return;
         }
+
+        if (action === 'edit-profile') {
+            loadEditProfileModal();
+            return;
+        }
     });
 }
 

@@ -85,23 +85,23 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 				    </td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="iue_type"><?php esc_html_e( 'Type', 'init-user-engine' ); ?></label></th>
+					<th scope="row"><?php esc_html_e( 'Type', 'init-user-engine' ); ?></th>
 					<td>
-						<select name="iue_type" id="iue_type">
-							<option value="system">system</option>
-							<option value="gift">gift</option>
-							<option value="event">event</option>
-							<option value="warning">warning</option>
-						</select>
+						<fieldset>
+							<label><input type="radio" name="iue_type" value="system" checked> <?php esc_html_e( 'system', 'init-user-engine' ); ?></label><br>
+							<label><input type="radio" name="iue_type" value="gift"> <?php esc_html_e( 'gift', 'init-user-engine' ); ?></label><br>
+							<label><input type="radio" name="iue_type" value="event"> <?php esc_html_e( 'event', 'init-user-engine' ); ?></label><br>
+							<label><input type="radio" name="iue_type" value="warning"> <?php esc_html_e( 'warning', 'init-user-engine' ); ?></label>
+						</fieldset>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="iue_priority"><?php esc_html_e( 'Priority', 'init-user-engine' ); ?></label></th>
+					<th scope="row"><?php esc_html_e( 'Priority', 'init-user-engine' ); ?></th>
 					<td>
-						<select name="iue_priority" id="iue_priority">
-							<option value="normal">normal</option>
-							<option value="high">high</option>
-						</select>
+						<fieldset>
+							<label><input type="radio" name="iue_priority" value="normal" checked> <?php esc_html_e( 'normal', 'init-user-engine' ); ?></label><br>
+							<label><input type="radio" name="iue_priority" value="high"> <?php esc_html_e( 'high', 'init-user-engine' ); ?></label>
+						</fieldset>
 					</td>
 				</tr>
 				<tr>

@@ -588,6 +588,9 @@ msgstr ""
 msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
 msgstr ""
 
+msgid "You earned +%1$d EXP and +%2$d coins for submitting a review. Keep it up!"
+msgstr ""
+
 msgid "Comment posted"
 msgstr ""
 
@@ -649,4 +652,133 @@ msgid "Disable all Gravatar calls and use a local default SVG instead."
 msgstr ""
 
 msgid "Improves performance by preventing external requests to gravatar.com."
+msgstr ""
+
+msgid "Edit Profile"
+msgstr ""
+
+msgid "Display Name"
+msgstr ""
+
+msgid "Your public display name"
+msgstr ""
+
+msgid "Bio"
+msgstr ""
+
+msgid "Short self introduction"
+msgstr ""
+
+msgid "New Password"
+msgstr ""
+
+msgid "Leave blank to keep current password"
+msgstr ""
+
+msgid "https://facebook.com/yourprofile"
+msgstr ""
+
+msgid "https://twitter.com/yourhandle"
+msgstr ""
+
+msgid "Your Discord username or invite"
+msgstr ""
+
+msgid "https://yourwebsite.com"
+msgstr ""
+
+msgid "Gender"
+msgstr ""
+
+msgid "Prefer not to say"
+msgstr ""
+
+msgid "Male"
+msgstr ""
+
+msgid "Female"
+msgstr ""
+
+msgid "Other"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Profile updated successfully!"
+msgstr ""
+
+msgid "Could not update profile."
+msgstr ""
+
+msgid "Could not load profile data."
+msgstr ""
+
+msgid "An error occurred while updating."
+msgstr ""
+
+msgid "Top-up Coin / Cash"
+msgstr ""
+
+msgid "Top-up successful."
+msgstr ""
+
+msgid "Please fill in all required fields correctly."
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "Top-up Type"
+msgstr ""
+
+msgid "Apply to all members"
+msgstr ""
+
+msgid "This will override the user ID field and top-up to all users."
+msgstr ""
+
+msgid "Top-up Now"
+msgstr ""
+
+msgid "Admin Top-up Coin"
+msgstr ""
+
+msgid "You have received %d Coins from the admin."
+msgstr ""
+
+msgid "Admin Top-up Cash"
+msgstr ""
+
+msgid "You have received %d Cash from the admin."
+msgstr ""
+
+msgid "Username already exists."
+msgstr ""
+
+msgid "Email already registered."
+msgstr ""
+
+msgid "Not logged in."
+msgstr ""
+
+msgid "No file uploaded."
+msgstr ""
+
+msgid "You reached a %d-day check-in streak!"
+msgstr ""
+
+msgid "Your consistency is impressive! We just sent you a bonus reward."
+msgstr ""
+
+msgid "What is %d plus %d?"
+msgstr ""
+
+msgid "What is %d minus %d?"
+msgstr ""
+
+msgid "What is %d times %d?"
+msgstr ""
+
+msgid "Loading..."
 msgstr ""

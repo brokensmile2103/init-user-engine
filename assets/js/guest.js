@@ -142,6 +142,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		const form = document.getElementById('iue-register-form');
 		if (!form) return;
 
+		let currentCaptcha = null;
+
+		async function loadCaptcha() {
+			const res = await fetch('/wp-json/inituser/v1/captcha');
+			currentCaptcha = await res.json();
+			const box = document.getElementById('iue-captcha-question');
+			if (box) box.textContent = currentCaptcha.question;
+		}
+
+		loadCaptcha();
+
 		form.addEventListener('submit', async function (e) {
 			e.preventDefault();
 
@@ -149,22 +160,26 @@ document.addEventListener('DOMContentLoaded', function () {
 			const email = form.email.value.trim();
 			const password = form.password.value;
 
-			// === 1. Validate ===
 			const error = validateRegisterInput(username, email, password);
 			if (error) {
 				showRegisterMessage(error, 'error');
 				return;
 			}
 
-			// === 2. Show loading ===
 			showRegisterMessage(InitUserEngineData.i18n.registering || 'Registering...', 'loading');
 
 			try {
-				// === 3. Gửi request ===
 				const response = await fetch('/wp-json/inituser/v1/register', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ username, email, password })
+					body: JSON.stringify({
+						username,
+						email,
+						password,
+						iue_hp: '',
+						captcha_token: currentCaptcha?.token || '',
+						captcha_answer: parseInt(form.captcha_answer.value)
+					})
 				});
 
 				const result = await response.json();
@@ -173,16 +188,17 @@ document.addEventListener('DOMContentLoaded', function () {
 					throw new Error(result.message || 'Unknown error');
 				}
 
-				// === 4. Thành công ===
 				showRegisterMessage(InitUserEngineData.i18n.register_success || 'Welcome! You can now log in.', 'success');
 
-				// Option: tự động chuyển về form login
 				setTimeout(() => {
 					document.getElementById('iue-register-link')?.click();
 				}, 1500);
 
 			} catch (err) {
 				showRegisterMessage(err.message, 'error');
+
+			} finally {
+				await loadCaptcha();
 			}
 		});
 

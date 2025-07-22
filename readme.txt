@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,7 +108,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 
 **Base:** `/wp-json/inituser/v1/`
 
-- `POST /register` – Create a new user account
+- `POST /register` – Create a new user account  
 - `POST /checkin` – Daily check-in  
 - `POST /claim-reward` – Claim reward after online duration  
 - `GET  /transactions` – Get coin/cash transaction log  
@@ -121,7 +121,9 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `POST /vip/purchase` – Purchase VIP package  
 - `GET  /referral-log` – Get referral history  
 - `POST /avatar` – Upload new avatar  
-- `POST /avatar/remove` – Remove custom avatar and revert to default   
+- `POST /avatar/remove` – Remove custom avatar and revert to default  
+- `GET  /profile/me` – Get current user profile  
+- `POST /profile/update` – Update profile information
 
 == Frequently Asked Questions ==
 
@@ -144,6 +146,21 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.0.3 – July 22, 2025 =
+- Secured the `/register` endpoint against spam and abuse
+- Added custom CAPTCHA system with randomized math questions (e.g. "6 + 3", "What is 5 times 2?")
+- Implemented honeypot hidden field to block bot-based submissions
+- Stored CAPTCHA answer via transient using IP + token with 10-minute expiration
+- All CAPTCHA questions are fully translatable using standard i18n functions
+- Minor code cleanup and improved form reliability
+
+= 1.0.2 – July 21, 2025 =
+- Added Edit Profile modal with support for display name, bio, password, social links, website, and gender
+- Built REST API endpoints for fetching and updating user profile
+- Created Admin Top-up tool for Coins and Cash
+- Supports selecting specific users or sending to all members
+- Logs transaction and sends inbox notification upon top-up
 
 = 1.0.1 – July 8, 2025 =
 - Added full registration module for guest users

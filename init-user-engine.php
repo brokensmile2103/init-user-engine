@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.0.1
+ * Version: 1.0.3
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // =======================
 // Constant Definitions
 // =======================
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.1' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.3' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -35,6 +35,7 @@ define( 'INIT_PLUGIN_SUITE_IUE_REF_SALT',       987586218 );
 // =======================
 // Load Core Functions
 // =======================
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'init.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'core.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'exp.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'coin.php';
@@ -206,6 +207,13 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         INIT_PLUGIN_SUITE_IUE_VERSION
     );
 
+    wp_enqueue_style(
+        'init-user-engine-modal-profile',
+        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-profile.css',
+        [],
+        INIT_PLUGIN_SUITE_IUE_VERSION
+    );
+
     wp_enqueue_script(
         'init-user-engine-icon',
         INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/icon.js',
@@ -293,6 +301,14 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         INIT_PLUGIN_SUITE_IUE_VERSION,
         true
     );
+
+    wp_enqueue_script(
+        'init-user-engine-profile',
+        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/profile.js',
+        [],
+        INIT_PLUGIN_SUITE_IUE_VERSION,
+        true
+    );
     
     wp_enqueue_script(
         'init-user-engine-user',
@@ -348,79 +364,104 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         ] ),
 
         'i18n' => [
-            'already_checked_in'    => __( 'Checked in', 'init-user-engine' ),
-            'checkin_success'       => __( 'Checked in successfully!', 'init-user-engine' ),
-            'reward_claimed'        => __( 'You received your reward!', 'init-user-engine' ),
-            'reward_too_early'      => __( 'Still too early to claim!', 'init-user-engine' ),
-            'checking_in'           => __( 'Checking in...', 'init-user-engine' ),
-            'mark_all_read_success' => __( 'All messages marked as read.', 'init-user-engine' ),
-            'delete_all_success'    => __( 'All messages deleted.', 'init-user-engine' ),
-            'error'                 => __( 'Error!', 'init-user-engine' ),
-            'transaction_title'     => __( 'Transaction History', 'init-user-engine' ),
-            'inbox_title'           => __( 'Inbox', 'init-user-engine' ),
-            'no_messages'           => __( 'No messages in your inbox.', 'init-user-engine' ),
-            'mark_all_read'         => __( 'Mark All as Read', 'init-user-engine' ),
-            'delete_all'            => __( 'Delete All', 'init-user-engine' ),
-            'mark_as_read'          => __( 'Mark as Read', 'init-user-engine' ),
-            'delete'                => __( 'Delete', 'init-user-engine' ),
-            'no_title'              => __( 'No title', 'init-user-engine' ),
-            'load_inbox_error'      => __( 'Failed to load inbox.', 'init-user-engine' ),
-            'mark_all_read_success' => __( 'All messages marked as read.', 'init-user-engine' ),
-            'delete_all_success'    => __( 'All messages deleted.', 'init-user-engine' ),
-            'confirm_action'        => __( 'Click again to confirm', 'init-user-engine' ),
+            'already_checked_in'       => __( 'Checked in', 'init-user-engine' ),
+            'checkin_success'          => __( 'Checked in successfully!', 'init-user-engine' ),
+            'reward_claimed'           => __( 'You received your reward!', 'init-user-engine' ),
+            'reward_too_early'         => __( 'Still too early to claim!', 'init-user-engine' ),
+            'checking_in'              => __( 'Checking in...', 'init-user-engine' ),
+            'mark_all_read_success'    => __( 'All messages marked as read.', 'init-user-engine' ),
+            'delete_all_success'       => __( 'All messages deleted.', 'init-user-engine' ),
+            'error'                    => __( 'Error!', 'init-user-engine' ),
+            'transaction_title'        => __( 'Transaction History', 'init-user-engine' ),
+            'inbox_title'              => __( 'Inbox', 'init-user-engine' ),
+            'no_messages'              => __( 'No messages in your inbox.', 'init-user-engine' ),
+            'mark_all_read'            => __( 'Mark All as Read', 'init-user-engine' ),
+            'delete_all'               => __( 'Delete All', 'init-user-engine' ),
+            'mark_as_read'             => __( 'Mark as Read', 'init-user-engine' ),
+            'delete'                   => __( 'Delete', 'init-user-engine' ),
+            'no_title'                 => __( 'No title', 'init-user-engine' ),
+            'load_inbox_error'         => __( 'Failed to load inbox.', 'init-user-engine' ),
+            'mark_all_read_success'    => __( 'All messages marked as read.', 'init-user-engine' ),
+            'delete_all_success'       => __( 'All messages deleted.', 'init-user-engine' ),
+            'confirm_action'           => __( 'Click again to confirm', 'init-user-engine' ),
 
-            'vip_title'             => __( 'VIP Membership', 'init-user-engine' ),
-            'vip_status_prefix'     => __( 'Current status:', 'init-user-engine' ),
-            'vip_until'             => __( 'VIP until', 'init-user-engine' ),
-            'vip_not'               => __( 'Not a VIP', 'init-user-engine' ),
+            'vip_title'                => __( 'VIP Membership', 'init-user-engine' ),
+            'vip_status_prefix'        => __( 'Current status:', 'init-user-engine' ),
+            'vip_until'                => __( 'VIP until', 'init-user-engine' ),
+            'vip_not'                  => __( 'Not a VIP', 'init-user-engine' ),
 
-            'vip_7d'                => __( 'VIP 7 days', 'init-user-engine' ),
-            'vip_30d'               => __( 'VIP 30 days', 'init-user-engine' ),
-            'vip_90d'               => __( 'VIP 90 days', 'init-user-engine' ),
-            'vip_180d'              => __( 'VIP 180 days', 'init-user-engine' ),
-            'vip_360d'              => __( 'VIP 360 days', 'init-user-engine' ),
-            'vip_lifetime'          => __( 'VIP Lifetime', 'init-user-engine' ),
+            'vip_7d'                   => __( 'VIP 7 days', 'init-user-engine' ),
+            'vip_30d'                  => __( 'VIP 30 days', 'init-user-engine' ),
+            'vip_90d'                  => __( 'VIP 90 days', 'init-user-engine' ),
+            'vip_180d'                 => __( 'VIP 180 days', 'init-user-engine' ),
+            'vip_360d'                 => __( 'VIP 360 days', 'init-user-engine' ),
+            'vip_lifetime'             => __( 'VIP Lifetime', 'init-user-engine' ),
 
-            'vip_note_title'        => __( 'Note:', 'init-user-engine' ),
-            'vip_note_extend'       => __( 'VIP will be extended if purchased again before expiration.', 'init-user-engine' ),
+            'vip_note_title'           => __( 'Note:', 'init-user-engine' ),
+            'vip_note_extend'          => __( 'VIP will be extended if purchased again before expiration.', 'init-user-engine' ),
 
-            'vip_buy_btn'           => __( 'Buy Now', 'init-user-engine' ),
-            'vip_purchase_success'  => __( 'VIP purchased successfully!', 'init-user-engine' ),
-            'vip_purchase_fail'     => __( 'Could not purchase VIP package.', 'init-user-engine' ),
-            'vip_error_generic'     => __( 'An error occurred during VIP purchase.', 'init-user-engine' ),
-            'vip_unavailable'       => __( 'Unavailable', 'init-user-engine' ),
+            'vip_buy_btn'              => __( 'Buy Now', 'init-user-engine' ),
+            'vip_purchase_success'     => __( 'VIP purchased successfully!', 'init-user-engine' ),
+            'vip_purchase_fail'        => __( 'Could not purchase VIP package.', 'init-user-engine' ),
+            'vip_error_generic'        => __( 'An error occurred during VIP purchase.', 'init-user-engine' ),
+            'vip_unavailable'          => __( 'Unavailable', 'init-user-engine' ),
 
-            'referral_title'        => __( 'Invite Friends', 'init-user-engine' ),
-            'referral_heading'      => __( 'Invite your friends and earn rewards', 'init-user-engine' ),
-            'referral_code_label'   => __( 'Your Referral Code', 'init-user-engine' ),
-            'referral_copy'         => __( 'Copy Link', 'init-user-engine' ),
-            'referral_copied'       => __( 'Copied!', 'init-user-engine' ),
-            'referral_share'        => __( 'Share via', 'init-user-engine' ),
-            'referral_bonus_note'   => __( 'You and your friend will receive bonus when they register.', 'init-user-engine' ),
-            'referral_benefits'     => __( 'Referral Benefits', 'init-user-engine' ),
-            'you_get'               => __( 'You get:', 'init-user-engine' ),
-            'friend_get'            => __( 'Your friend gets:', 'init-user-engine' ),
-            'referral_history'      => __( 'Your Referral History', 'init-user-engine' ),
-            'no_referrals'          => __( 'No referral data yet.', 'init-user-engine' ),
-            'load_fail'             => __( 'Could not load referral history.', 'init-user-engine' ),
+            'referral_title'           => __( 'Invite Friends', 'init-user-engine' ),
+            'referral_heading'         => __( 'Invite your friends and earn rewards', 'init-user-engine' ),
+            'referral_code_label'      => __( 'Your Referral Code', 'init-user-engine' ),
+            'referral_copy'            => __( 'Copy Link', 'init-user-engine' ),
+            'referral_copied'          => __( 'Copied!', 'init-user-engine' ),
+            'referral_share'           => __( 'Share via', 'init-user-engine' ),
+            'referral_bonus_note'      => __( 'You and your friend will receive bonus when they register.', 'init-user-engine' ),
+            'referral_benefits'        => __( 'Referral Benefits', 'init-user-engine' ),
+            'you_get'                  => __( 'You get:', 'init-user-engine' ),
+            'friend_get'               => __( 'Your friend gets:', 'init-user-engine' ),
+            'referral_history'         => __( 'Your Referral History', 'init-user-engine' ),
+            'no_referrals'             => __( 'No referral data yet.', 'init-user-engine' ),
+            'load_fail'                => __( 'Could not load referral history.', 'init-user-engine' ),
 
-            'no_exp_log'            => __( 'No EXP activity yet.', 'init-user-engine' ),
-            'exp_log_title'         => __( 'Experience Log', 'init-user-engine' ),
-            'exp_log_load_fail'     => __( 'Failed to load experience log.', 'init-user-engine' ),
-            'exp_log_exp'           => __( 'EXP', 'init-user-engine' ),
-            'exp_log_unknown'       => __( 'Unknown', 'init-user-engine' ),
+            'no_exp_log'               => __( 'No EXP activity yet.', 'init-user-engine' ),
+            'exp_log_title'            => __( 'Experience Log', 'init-user-engine' ),
+            'exp_log_load_fail'        => __( 'Failed to load experience log.', 'init-user-engine' ),
+            'exp_log_exp'              => __( 'EXP', 'init-user-engine' ),
+            'exp_log_unknown'          => __( 'Unknown', 'init-user-engine' ),
 
-            'upload_avatar'         => __( 'Upload Avatar', 'init-user-engine' ),
-            'avatar_drop_text'      => __( 'Drop image here or click to upload', 'init-user-engine' ),
-            'avatar_save'           => __( 'Save Avatar', 'init-user-engine' ),
-            'avatar_uploading'      => __( 'Uploading...', 'init-user-engine' ),
-            'avatar_invalid'        => __( 'Please select a valid image.', 'init-user-engine' ),
-            'avatar_too_large'      => __( 'Image too large (max 10MB)', 'init-user-engine' ),
-            'avatar_upload_fail'    => __( 'Upload failed. Please try again.', 'init-user-engine' ),
-            'avatar_remove'         => __( 'Remove Avatar', 'init-user-engine' ),
-            'avatar_remove_confirm' => __( 'Are you sure you want to remove your avatar?', 'init-user-engine' ),
-            'avatar_removing'       => __( 'Removing...', 'init-user-engine' ),
-            'avatar_remove_fail'    => __( 'Failed to remove avatar. Please try again.', 'init-user-engine' ),
+            'upload_avatar'            => __( 'Upload Avatar', 'init-user-engine' ),
+            'avatar_drop_text'         => __( 'Drop image here or click to upload', 'init-user-engine' ),
+            'avatar_save'              => __( 'Save Avatar', 'init-user-engine' ),
+            'avatar_uploading'         => __( 'Uploading...', 'init-user-engine' ),
+            'avatar_invalid'           => __( 'Please select a valid image.', 'init-user-engine' ),
+            'avatar_too_large'         => __( 'Image too large (max 10MB)', 'init-user-engine' ),
+            'avatar_upload_fail'       => __( 'Upload failed. Please try again.', 'init-user-engine' ),
+            'avatar_remove'            => __( 'Remove Avatar', 'init-user-engine' ),
+            'avatar_remove_confirm'    => __( 'Are you sure you want to remove your avatar?', 'init-user-engine' ),
+            'avatar_removing'          => __( 'Removing...', 'init-user-engine' ),
+            'avatar_remove_fail'       => __( 'Failed to remove avatar. Please try again.', 'init-user-engine' ),
+
+            'edit_profile_title'       => __( 'Edit Profile', 'init-user-engine' ),
+            'display_name'             => __( 'Display Name', 'init-user-engine' ),
+            'display_name_placeholder' => __( 'Your public display name', 'init-user-engine' ),
+            'bio'                      => __( 'Bio', 'init-user-engine' ),
+            'bio_placeholder'          => __( 'Short self introduction', 'init-user-engine' ),
+            'new_password'             => __( 'New Password', 'init-user-engine' ),
+            'leave_blank_to_keep'      => __( 'Leave blank to keep current password', 'init-user-engine' ),
+
+            'facebook_placeholder'     => __( 'https://facebook.com/yourprofile', 'init-user-engine' ),
+            'twitter_placeholder'      => __( 'https://twitter.com/yourhandle', 'init-user-engine' ),
+            'discord_placeholder'      => __( 'Your Discord username or invite', 'init-user-engine' ),
+            'website_placeholder'      => __( 'https://yourwebsite.com', 'init-user-engine' ),
+
+            'gender'                   => __( 'Gender', 'init-user-engine' ),
+            'gender_unspecified'       => __( 'Prefer not to say', 'init-user-engine' ),
+            'gender_male'              => __( 'Male', 'init-user-engine' ),
+            'gender_female'            => __( 'Female', 'init-user-engine' ),
+            'gender_other'             => __( 'Other', 'init-user-engine' ),
+
+            'save'                     => __( 'Save', 'init-user-engine' ),
+            'update_success'           => __( 'Profile updated successfully!', 'init-user-engine' ),
+            'update_failed'            => __( 'Could not update profile.', 'init-user-engine' ),
+            'fetch_profile_failed'     => __( 'Could not load profile data.', 'init-user-engine' ),
+            'error_generic'            => __( 'An error occurred while updating.', 'init-user-engine' ),
         ],
     ];
 
@@ -437,69 +478,4 @@ function init_plugin_suite_user_engine_add_settings_link($links) {
     $settings_link = '<a href="' . admin_url('admin.php?page=' . INIT_PLUGIN_SUITE_IUE_SLUG) . '">' . __('Settings', 'init-user-engine') . '</a>';
     array_unshift($links, $settings_link);
     return $links;
-}
-
-// ==========================
-// Create Database
-// ==========================
-register_activation_hook( __FILE__, 'init_plugin_suite_user_engine_on_activation' );
-add_action( 'wpmu_new_blog', 'init_plugin_suite_user_engine_on_new_blog', 10, 6 );
-
-/**
- * Xử lý khi plugin được activate (site đơn hoặc toàn mạng)
- */
-function init_plugin_suite_user_engine_on_activation() {
-    if ( is_multisite() ) {
-        $sites = get_sites( [ 'number' => 0 ] ); // lấy tất cả site
-        foreach ( $sites as $site ) {
-            switch_to_blog( $site->blog_id );
-            init_plugin_suite_user_engine_create_inbox_table();
-            restore_current_blog();
-        }
-    } else {
-        init_plugin_suite_user_engine_create_inbox_table();
-    }
-}
-
-/**
- * Xử lý khi tạo site mới trong multisite
- */
-function init_plugin_suite_user_engine_on_new_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
-    switch_to_blog( $blog_id );
-    init_plugin_suite_user_engine_create_inbox_table();
-    restore_current_blog();
-}
-
-/**
- * Hàm tạo bảng inbox
- */
-function init_plugin_suite_user_engine_create_inbox_table() {
-    global $wpdb;
-
-    $table_name = $wpdb->prefix . 'init_user_engine_inbox';
-    $charset_collate = $wpdb->get_charset_collate();
-
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-    $sql = "CREATE TABLE $table_name (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        user_id BIGINT UNSIGNED NOT NULL,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        type VARCHAR(50) NOT NULL DEFAULT 'system',
-        status VARCHAR(20) NOT NULL DEFAULT 'unread',
-        priority VARCHAR(10) NOT NULL DEFAULT 'normal',
-        pinned TINYINT(1) NOT NULL DEFAULT 0,
-        link TEXT DEFAULT NULL,
-        metadata LONGTEXT DEFAULT NULL,
-        expire_at BIGINT UNSIGNED DEFAULT NULL,
-        created_at BIGINT UNSIGNED NOT NULL,
-        PRIMARY KEY (id),
-        KEY user_id (user_id),
-        KEY status (status),
-        KEY priority (priority),
-        KEY pinned (pinned)
-    ) $charset_collate;";
-
-    dbDelta( $sql );
 }

@@ -87,6 +87,7 @@
 .iue-login-form input[type="text"],
 .iue-login-form input[type="password"],
 .iue-register-form input[type="text"],
+.iue-register-form input[type="number"],
 .iue-register-form input[type="email"],
 .iue-register-form input[type="password"] {
 	display: block;
@@ -102,6 +103,7 @@
 .iue-login-form input[type="text"]:focus,
 .iue-login-form input[type="password"]:focus,
 .iue-register-form input[type="text"]:focus,
+.iue-register-form input[type="number"]:focus,
 .iue-register-form input[type="email"]:focus,
 .iue-register-form input[type="password"]:focus {
 	border-color: var(--iue-theme-color);

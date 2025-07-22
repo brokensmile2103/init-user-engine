@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.0.1-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.0.3-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -50,7 +50,9 @@ Base: `/wp-json/inituser/v1/`
 - `POST /vip/purchase` – Buy VIP membership  
 - `GET  /referral-log` – Get referral history  
 - `POST /avatar` – Upload avatar  
-- `POST /avatar/remove` – Revert to default avatar  
+- `POST /avatar/remove` – Revert to default avatar
+- `GET  /profile/me` – Get current user profile  
+- `POST /profile/update` – Update profile information
 
 ## Developer Hooks
 

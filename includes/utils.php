@@ -202,3 +202,39 @@ function init_plugin_suite_user_engine_time_ago( $timestamp ) {
 add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	wp_enqueue_style( 'iue-admin-icon', INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/menu-icon.css', [], INIT_PLUGIN_SUITE_IUE_VERSION );
 } );
+
+// Enhanced IP detection
+function init_plugin_suite_user_engine_get_real_ip() {
+    $ip_keys = [
+        'HTTP_CF_CONNECTING_IP',     // Cloudflare
+        'HTTP_X_FORWARDED_FOR',      // Load balancer/proxy
+        'HTTP_X_FORWARDED',          // Proxy
+        'HTTP_X_CLUSTER_CLIENT_IP',  // Cluster
+        'HTTP_CLIENT_IP',            // Proxy
+        'HTTP_X_REAL_IP',           // Nginx proxy
+        'REMOTE_ADDR'               // Standard
+    ];
+
+    foreach ($ip_keys as $key) {
+        if (array_key_exists($key, $_SERVER)) {
+            $ip = $_SERVER[$key];
+            
+            // Handle comma-separated IPs (X-Forwarded-For có thể có nhiều IP)
+            if (strpos($ip, ',') !== false) {
+                $ip = trim(explode(',', $ip)[0]);
+            }
+            
+            // Validate IP
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return $ip;
+            }
+            
+            // Fallback: accept private IPs too (for local dev)
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                return $ip;
+            }
+        }
+    }
+    
+    return '127.0.0.1'; // Ultimate fallback
+}

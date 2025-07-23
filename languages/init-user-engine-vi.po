@@ -259,7 +259,7 @@ msgid "Singular label used to represent the virtual currency (e.g., Xu, Coin)."
 msgstr "Tên đơn dùng để đại diện cho tiền ảo (ví dụ: Xu, Coin)."
 
 msgid "Cash Label"
-msgstr "Tên gọi tiền mặt"
+msgstr "Tên gọi Cash"
 
 msgid "Label for premium currency or real-money equivalent (e.g., Cash, Kim cương)."
 msgstr "Tên gọi cho tiền cao cấp hoặc tương đương tiền thật (ví dụ: Cash, Kim cương)."
@@ -295,10 +295,10 @@ msgid "EXP gained from daily check-in."
 msgstr "EXP nhận được từ điểm danh hằng ngày."
 
 msgid "Cash Reward"
-msgstr "Thưởng tiền mặt"
+msgstr "Thưởng Cash"
 
 msgid "Cash rewarded upon check-in (rarely used, mostly 0)."
-msgstr "Tặng tiền mặt khi điểm danh (hiếm dùng, thường để 0)."
+msgstr "Tặng Cash khi điểm danh (hiếm dùng, thường để 0)."
 
 msgid "Online Reward"
 msgstr "Thưởng online"
@@ -316,7 +316,7 @@ msgid "EXP rewarded after being online for required time."
 msgstr "Tặng EXP sau khi online đủ thời gian."
 
 msgid "Cash rewarded for being active online."
-msgstr "Tặng tiền mặt khi hoạt động online."
+msgstr "Tặng Cash khi hoạt động online."
 
 msgid "VIP Pricing (by Coin)"
 msgstr "Giá VIP (tính bằng xu)"
@@ -355,10 +355,10 @@ msgid "EXP granted to referrer when someone registers through their link."
 msgstr "EXP tặng người mời khi có người đăng ký qua liên kết."
 
 msgid "Cash for Referrer"
-msgstr "Tiền mặt cho người mời"
+msgstr "Cash cho người mời"
 
 msgid "Cash awarded to the referrer."
-msgstr "Tiền mặt tặng cho người mời."
+msgstr "Cash tặng cho người mời."
 
 msgid "Coin for New User"
 msgstr "Xu cho người mới"
@@ -373,10 +373,10 @@ msgid "EXP bonus for the new referred user."
 msgstr "EXP tặng cho người mới được mời."
 
 msgid "Cash for New User"
-msgstr "Tiền mặt cho người mới"
+msgstr "Cash cho người mới"
 
 msgid "Cash given to new user (rarely used)."
-msgstr "Tiền mặt tặng cho người mới (hiếm dùng)."
+msgstr "Cash tặng cho người mới (hiếm dùng)."
 
 msgid "Username or Email Address"
 msgstr "Tên đăng nhập hoặc địa chỉ email"
@@ -785,3 +785,54 @@ msgstr "%d nhân %d bằng bao nhiêu?"
 
 msgid "Loading..."
 msgstr "Đang tải..."
+
+msgid "Type your answer here"
+msgstr "Nhập câu trả lời của bạn"
+
+msgid "%d %s %d = ?"
+msgstr "%d %s %d = ?"
+
+msgid "How many days in a week?"
+msgstr "Một tuần có bao nhiêu ngày?"
+
+msgid "How many hours in a day?"
+msgstr "Một ngày có bao nhiêu giờ?"
+
+msgid "How many minutes in an hour?"
+msgstr "Một giờ có bao nhiêu phút?"
+
+msgid "How many months in a year?"
+msgstr "Một năm có bao nhiêu tháng?"
+
+msgid "What is 10 divided by 2?"
+msgstr "10 chia cho 2 bằng bao nhiêu?"
+
+msgid "What is 3 squared?"
+msgstr "3 bình phương bằng bao nhiêu?"
+
+msgid "Too many registration attempts. Please try again later."
+msgstr "Bạn đã thử đăng ký quá nhiều lần. Vui lòng thử lại sau."
+
+msgid "Password must contain both letters and numbers."
+msgstr "Mật khẩu phải chứa cả chữ cái và số."
+
+msgid "Registration successful. You can now log in."
+msgstr "Đăng ký thành công. Bạn có thể đăng nhập ngay bây giờ."
+
+msgid "Please complete the captcha."
+msgstr "Vui lòng hoàn thành captcha."
+
+msgid "Invalid captcha token."
+msgstr "Mã captcha không hợp lệ."
+
+msgid "Captcha has expired. Please try again."
+msgstr "Captcha đã hết hạn. Vui lòng thử lại."
+
+msgid "Too many captcha attempts. Please get a new one."
+msgstr "Bạn đã thử captcha quá nhiều lần. Vui lòng lấy captcha mới."
+
+msgid "Incorrect captcha answer. Please try again."
+msgstr "Câu trả lời captcha không đúng. Vui lòng thử lại."
+
+msgid "Captcha validation failed. Please try again."
+msgstr "Xác thực captcha thất bại. Vui lòng thử lại."

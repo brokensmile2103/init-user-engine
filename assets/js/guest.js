@@ -139,118 +139,226 @@ document.addEventListener('DOMContentLoaded', function () {
 	})();
 
 	(function handleRegisterForm() {
-		const form = document.getElementById('iue-register-form');
-		if (!form) return;
+	    const form = document.getElementById('iue-register-form');
+	    if (!form) return;
 
-		let currentCaptcha = null;
+	    let currentCaptcha = null;
+	    let captchaAttempts = 0;
+	    const maxAttempts = 3;
 
-		async function loadCaptcha() {
-			const res = await fetch('/wp-json/inituser/v1/captcha');
-			currentCaptcha = await res.json();
-			const box = document.getElementById('iue-captcha-question');
-			if (box) box.textContent = currentCaptcha.question;
-		}
+	    async function loadCaptcha(force = false) {
+	        try {
+	            // Add cache buster để tránh cached response
+	            const timestamp = Date.now();
+	            const res = await fetch(`/wp-json/inituser/v1/captcha?_=${timestamp}`, {
+	                headers: {
+	                    'Cache-Control': 'no-cache',
+	                    'Pragma': 'no-cache'
+	                }
+	            });
+	            
+	            if (!res.ok) {
+	                throw new Error('Failed to load captcha');
+	            }
+	            
+	            currentCaptcha = await res.json();
+	            const box = document.getElementById('iue-captcha-question');
+	            const answerInput = document.getElementById('iue_register_captcha_answer');
+	            
+	            if (box) {
+	                box.textContent = currentCaptcha.question;
+	                box.className = 'iue-captcha-question'; // Reset any error styling
+	            }
+	            
+	            if (answerInput) {
+	                answerInput.value = '';
+	            }
+	            
+	            // Reset attempts counter on new captcha
+	            if (force) {
+	                captchaAttempts = 0;
+	                updateCaptchaUI();
+	            }
+	            
+	        } catch (error) {
+	            console.error('Captcha load error:', error);
+	            const box = document.getElementById('iue-captcha-question');
+	            if (box) {
+	                box.textContent = 'Failed to load captcha. Please refresh the page.';
+	                box.className = 'iue-captcha-question error';
+	            }
+	        }
+	    }
 
-		loadCaptcha();
+	    function updateCaptchaUI() {
+	        const box = document.getElementById('iue-captcha-question');
+	        const answerInput = document.getElementById('iue_register_captcha_answer');
+	        
+	        if (captchaAttempts >= maxAttempts) {
+	            if (box) box.className = 'iue-captcha-question error';
+	            if (answerInput) answerInput.disabled = true;
+	            showRegisterMessage('Too many captcha attempts. Getting a new one...', 'error');
+	            setTimeout(() => loadCaptcha(true), 2000);
+	        } else {
+	            if (box) box.className = 'iue-captcha-question';
+	            if (answerInput) answerInput.disabled = false;
+	        }
+	    }
 
-		form.addEventListener('submit', async function (e) {
-			e.preventDefault();
+	    // Initial captcha load
+	    loadCaptcha();
 
-			const username = form.username.value.trim();
-			const email = form.email.value.trim();
-			const password = form.password.value;
+	    form.addEventListener('submit', async function (e) {
+	        e.preventDefault();
 
-			const error = validateRegisterInput(username, email, password);
-			if (error) {
-				showRegisterMessage(error, 'error');
-				return;
-			}
+	        const username = form.username.value.trim();
+	        const email = form.email.value.trim();
+	        const password = form.password.value;
+	        const captchaAnswer = form.captcha_answer.value.trim();
 
-			showRegisterMessage(InitUserEngineData.i18n.registering || 'Registering...', 'loading');
+	        // Enhanced validation
+	        const error = validateRegisterInput(username, email, password, captchaAnswer);
+	        if (error) {
+	            showRegisterMessage(error, 'error');
+	            return;
+	        }
 
-			try {
-				const response = await fetch('/wp-json/inituser/v1/register', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						username,
-						email,
-						password,
-						iue_hp: '',
-						captcha_token: currentCaptcha?.token || '',
-						captcha_answer: parseInt(form.captcha_answer.value)
-					})
-				});
+	        // Check if captcha is loaded
+	        if (!currentCaptcha || !currentCaptcha.token) {
+	            showRegisterMessage('Captcha not loaded. Please wait...', 'error');
+	            await loadCaptcha();
+	            return;
+	        }
 
-				const result = await response.json();
+	        // Check captcha expiration
+	        if (currentCaptcha.expires && Date.now() > currentCaptcha.expires * 1000) {
+	            showRegisterMessage('Captcha expired. Loading new one...', 'error');
+	            await loadCaptcha(true);
+	            return;
+	        }
 
-				if (!response.ok) {
-					throw new Error(result.message || 'Unknown error');
-				}
+	        showRegisterMessage(InitUserEngineData.i18n.registering || 'Registering...', 'loading');
 
-				showRegisterMessage(InitUserEngineData.i18n.register_success || 'Welcome! You can now log in.', 'success');
+	        try {
+	            const response = await fetch('/wp-json/inituser/v1/register', {
+	                method: 'POST',
+	                headers: { 
+	                    'Content-Type': 'application/json',
+	                    'X-Requested-With': 'XMLHttpRequest'
+	                },
+	                body: JSON.stringify({
+	                    username,
+	                    email,
+	                    password,
+	                    iue_hp: '', // Honeypot
+	                    captcha_token: currentCaptcha.token,
+	                    captcha_answer: parseInt(captchaAnswer)
+	                })
+	            });
 
-				setTimeout(() => {
-					document.getElementById('iue-register-link')?.click();
-				}, 1500);
+	            const result = await response.json();
 
-			} catch (err) {
-				showRegisterMessage(err.message, 'error');
+	            if (!response.ok) {
+	                // Handle specific captcha errors
+	                if (result.code === 'captcha_wrong' || result.code === 'captcha_attempts') {
+	                    captchaAttempts++;
+	                    updateCaptchaUI();
+	                } else if (result.code === 'captcha_expired' || result.code === 'captcha_invalid') {
+	                    await loadCaptcha(true);
+	                } else if (result.code === 'rate_limit') {
+	                    showRegisterMessage('Too many attempts. Please wait before trying again.', 'error');
+	                    setTimeout(() => window.location.reload(), 5000);
+	                    return;
+	                }
+	                
+	                throw new Error(result.message || 'Registration failed');
+	            }
 
-			} finally {
-				await loadCaptcha();
-			}
-		});
+	            showRegisterMessage(InitUserEngineData.i18n.register_success || 'Welcome! You can now log in.', 'success');
 
-		(function enablePasswordToggleSVG() {
-			document.querySelectorAll('input[type="password"]').forEach(input => {
-				if (input.dataset.hasToggle === '1') return;
+	            // Reset form
+	            form.reset();
+	            captchaAttempts = 0;
+	            await loadCaptcha(true);
 
-				const wrapper = document.createElement('div');
-				wrapper.className = 'iue-password-wrapper';
-				input.parentNode.insertBefore(wrapper, input);
-				wrapper.appendChild(input);
+	            // Switch to login form after success
+	            setTimeout(() => {
+	                const registerLink = document.getElementById('iue-register-link');
+	                if (registerLink) registerLink.click();
+	            }, 2000);
 
-				const toggle = document.createElement('button');
-				toggle.type = 'button';
-				toggle.className = 'iue-password-toggle';
-				toggle.innerHTML = svgEye;
-				wrapper.appendChild(toggle);
+	        } catch (err) {
+	            showRegisterMessage(err.message, 'error');
+	            
+	            // Always reload captcha after failed attempt (security measure)
+	            setTimeout(async () => {
+	                if (!err.message.includes('captcha')) {
+	                    await loadCaptcha(true);
+	                }
+	            }, 1000);
+	        }
+	    });
 
-				toggle.addEventListener('click', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
+	    function validateRegisterInput(username, email, password, captchaAnswer) {
+	        const i18n = InitUserEngineData?.i18n || {};
+	        
+	        if (!captchaAnswer) {
+	            return i18n.captcha_required || 'Please complete the captcha.';
+	        }
+	        
+	        if (username.length < 3) {
+	            return i18n.username_too_short || 'Username must be at least 3 characters.';
+	        }
+	        
+	        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+	            return i18n.username_invalid || 'Username can only contain letters, numbers and underscores.';
+	        }
+	        
+	        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+	            return i18n.email_invalid || 'Please enter a valid email address.';
+	        }
+	        
+	        if (password.length < 6) {
+	            return i18n.password_too_short || 'Password must be at least 6 characters.';
+	        }
+	        
+	        // Enhanced password validation
+	        if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+	            return i18n.password_weak || 'Password must contain both letters and numbers.';
+	        }
+	        
+	        return null;
+	    }
 
-					const isShown = input.type === 'text';
-					input.type = isShown ? 'password' : 'text';
-					toggle.innerHTML = isShown ? svgEye : svgEyeOff;
-				});
+	    function showRegisterMessage(message, type = 'info') {
+	        let box = document.getElementById('iue-register-message');
+	        if (!box) {
+	            box = document.createElement('div');
+	            box.id = 'iue-register-message';
+	            box.className = 'iue-register-message';
+	            form.prepend(box);
+	        }
 
-				input.dataset.hasToggle = '1';
-			});
-		})();
+	        box.textContent = message;
+	        box.className = `iue-register-message ${type}`;
+	        
+	        // Auto-hide success messages
+	        if (type === 'success') {
+	            setTimeout(() => {
+	                box.style.opacity = '0.7';
+	            }, 3000);
+	        }
+	    }
 
-		function validateRegisterInput(username, email, password) {
-			const i18n = InitUserEngineData?.i18n || {};
-			if (username.length < 3) return i18n.username_too_short || 'Username must be at least 3 characters.';
-			if (!/^[a-zA-Z0-9_]+$/.test(username)) return i18n.username_invalid || 'Username can only contain letters, numbers and underscores.';
-			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return i18n.email_invalid || 'Please enter a valid email address.';
-			if (password.length < 6) return i18n.password_too_short || 'Password must be at least 6 characters.';
-			return null;
-		}
-
-		function showRegisterMessage(message, type = 'info') {
-			let box = document.getElementById('iue-register-message');
-			if (!box) {
-				box = document.createElement('div');
-				box.id = 'iue-register-message';
-				box.className = 'iue-register-message';
-				form.prepend(box);
-			}
-
-			box.textContent = message;
-			box.className = `iue-register-message ${type}`;
-		}
+	    // Auto-refresh captcha every 10 minutes for active users
+	    setInterval(async () => {
+	        if (document.visibilityState === 'visible' && currentCaptcha) {
+	            const age = Date.now() - (currentCaptcha.expires - 15 * 60 * 1000);
+	            if (age > 10 * 60 * 1000) { // 10 minutes old
+	                await loadCaptcha(true);
+	            }
+	        }
+	    }, 60 * 1000); // Check every minute
 	})();
 
 	(function applyLoginModalTheme() {

@@ -274,6 +274,7 @@
 #init-user-engine-login-modal.dark .iue-login-form input[type="text"],
 #init-user-engine-login-modal.dark .iue-login-form input[type="password"],
 #init-user-engine-login-modal.dark .iue-register-form input[type="text"],
+#init-user-engine-login-modal.dark .iue-register-form input[type="number"],
 #init-user-engine-login-modal.dark .iue-register-form input[type="email"],
 #init-user-engine-login-modal.dark .iue-register-form input[type="password"] {
 	border-bottom-color: #444;
@@ -281,6 +282,7 @@
 	background: transparent;
 }
 #init-user-engine-login-modal.dark .iue-login-form input[type="text"]:focus,
+#init-user-engine-login-modal.dark .iue-login-form input[type="number"]:focus,
 #init-user-engine-login-modal.dark .iue-login-form input[type="password"]:focus,
 #init-user-engine-login-modal.dark .iue-register-form input:focus {
 	border-bottom-color: var(--iue-theme-color);

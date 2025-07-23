@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // =======================
 // Constant Definitions
 // =======================
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.3' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.4' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -105,6 +105,12 @@ function init_plugin_suite_user_engine_enqueue_guest_assets() {
             'username_invalid'     => __( 'Username can only contain letters, numbers and underscores.', 'init-user-engine' ),
             'email_invalid'        => __( 'Please enter a valid email address.', 'init-user-engine' ),
             'password_too_short'   => __( 'Password must be at least 6 characters.', 'init-user-engine' ),
+            'password_weak'        => __( 'Password must contain both letters and numbers.', 'init-user-engine' ),
+            'captcha_required'     => __( 'Please complete the captcha.', 'init-user-engine' ),
+            'captcha_not_loaded'   => __( 'Captcha not loaded. Please wait...', 'init-user-engine' ),
+            'captcha_expired'      => __( 'Captcha expired. Loading new one...', 'init-user-engine' ),
+            'too_many_attempts'    => __( 'Too many attempts. Please wait before trying again.', 'init-user-engine' ),
+            'registration_failed'  => __( 'Registration failed', 'init-user-engine' ),
             'placeholder_username' => __( 'Username or Email Address', 'init-user-engine' ),
             'placeholder_password' => __( 'Password', 'init-user-engine' ),
         ]

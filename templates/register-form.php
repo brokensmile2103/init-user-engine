@@ -27,7 +27,8 @@
 	<p class="iue-form-group iue-register-captcha">
 		<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
 		<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>
-		<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input" required>
+		<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input"
+			placeholder="<?php esc_attr_e( 'Type your answer here', 'init-user-engine' ); ?>" required>
 	</p>
 
 	<p class="iue-form-group iue-register-submit">

@@ -782,3 +782,54 @@ msgstr ""
 
 msgid "Loading..."
 msgstr ""
+
+msgid "Type your answer here"
+msgstr ""
+
+msgid "%d %s %d = ?"
+msgstr ""
+
+msgid "How many days in a week?"
+msgstr ""
+
+msgid "How many hours in a day?"
+msgstr ""
+
+msgid "How many minutes in an hour?"
+msgstr ""
+
+msgid "How many months in a year?"
+msgstr ""
+
+msgid "What is 10 divided by 2?"
+msgstr ""
+
+msgid "What is 3 squared?"
+msgstr ""
+
+msgid "Too many registration attempts. Please try again later."
+msgstr ""
+
+msgid "Password must contain both letters and numbers."
+msgstr ""
+
+msgid "Registration successful. You can now log in."
+msgstr ""
+
+msgid "Please complete the captcha."
+msgstr ""
+
+msgid "Invalid captcha token."
+msgstr ""
+
+msgid "Captcha has expired. Please try again."
+msgstr ""
+
+msgid "Too many captcha attempts. Please get a new one."
+msgstr ""
+
+msgid "Incorrect captcha answer. Please try again."
+msgstr ""
+
+msgid "Captcha validation failed. Please try again."
+msgstr ""

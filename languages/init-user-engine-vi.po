@@ -174,8 +174,8 @@ msgstr "Quên mật khẩu?"
 msgid "Create a new account"
 msgstr "Tạo tài khoản mới"
 
-msgid "Congratulations! You reached level %d and received %d coins as a bonus."
-msgstr "Chúc mừng! Bạn đã lên cấp %d và nhận được %d xu thưởng."
+msgid "Congratulations! You reached level %1$d and received %2$d coins as a bonus."
+msgstr "Chúc mừng! Bạn đã lên cấp %1$d và nhận được %2$d xu thưởng."
 
 msgid "Level Up!"
 msgstr "Lên cấp!"
@@ -459,8 +459,8 @@ msgstr "Xoá ảnh thất bại. Vui lòng thử lại."
 msgid "You have a new reply to your comment"
 msgstr "Bạn có một phản hồi mới cho bình luận của mình"
 
-msgid "<strong>%s</strong> replied to your comment: <em>%s</em>"
-msgstr "<strong>%s</strong> đã phản hồi bình luận của bạn: <em>%s</em>"
+msgid "<strong>%1$s</strong> replied to your comment: <em>%2$s</em>"
+msgstr "<strong>%1$s</strong> đã phản hồi bình luận của bạn: <em>%2$s</em>"
 
 msgid "Welcome to the community!"
 msgstr "Chào mừng bạn đến với cộng đồng!"
@@ -774,14 +774,14 @@ msgstr "Chuỗi điểm danh của bạn đã đạt %d ngày!"
 msgid "Your consistency is impressive! We just sent you a bonus reward."
 msgstr "Sự kiên trì của bạn thật ấn tượng! Chúng tôi vừa gửi phần thưởng thêm cho bạn."
 
-msgid "What is %d plus %d?"
-msgstr "Tổng của %d và %d là gì?"
+msgid "What is %1$d plus %2$d?"
+msgstr "Tổng của %1$d và %2$d là gì?"
 
-msgid "What is %d minus %d?"
-msgstr "%d trừ %d bằng bao nhiêu?"
+msgid "What is %1$d minus %2$d?"
+msgstr "%1$d trừ %2$d bằng bao nhiêu?"
 
-msgid "What is %d times %d?"
-msgstr "%d nhân %d bằng bao nhiêu?"
+msgid "What is %1$d times %2$d?"
+msgstr "%1$d nhân %2$d bằng bao nhiêu?"
 
 msgid "Loading..."
 msgstr "Đang tải..."
@@ -789,8 +789,8 @@ msgstr "Đang tải..."
 msgid "Type your answer here"
 msgstr "Nhập câu trả lời của bạn"
 
-msgid "%d %s %d = ?"
-msgstr "%d %s %d = ?"
+msgid "%1$d %2$s %3$d = ?"
+msgstr "%1$d %2$s %3$d = ?"
 
 msgid "How many days in a week?"
 msgstr "Một tuần có bao nhiêu ngày?"

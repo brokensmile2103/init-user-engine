@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -146,6 +146,10 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.0.5 – July 23, 2025 =
+- Emergency fix for PHP 7.4 compatibility (replaced match expressions and array unpacking)
+- Standardized all translation strings for full i18n compliance
 
 = 1.0.4 – July 23, 2025 =
 - Upgraded CAPTCHA system with better validation and answer protection

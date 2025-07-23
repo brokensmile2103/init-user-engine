@@ -13,7 +13,7 @@ function init_plugin_suite_user_engine_render_topup_page() {
 		isset( $_POST['iue_topup_nonce'] )
 		&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['iue_topup_nonce'] ) ), 'iue_topup' )
 	) {
-		$amount    = (int) ($_POST['iue_amount'] ?? 0);
+		$amount    = absint( wp_unslash( $_POST['iue_amount'] ?? 0 ) );
 		$type      = sanitize_key( $_POST['iue_topup_type'] ?? 'coin' );
 		$send_all  = ! empty( $_POST['iue_send_all'] );
 		$user_ids  = [];
@@ -34,13 +34,15 @@ function init_plugin_suite_user_engine_render_topup_page() {
 					init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $amount, 'topup_admin', 'add' );
 
 					$title   = __( 'Admin Top-up Coin', 'init-user-engine' );
-					$content = sprintf( __( 'You have received %d Coins from the admin.', 'init-user-engine' ), $amount );
+					// translators: %d is the amount of Coins the user received from admin
+					$content = sprintf( __( 'You have received %1$d Coins from the admin.', 'init-user-engine' ), $amount );
 				} else {
 					$new_cash = init_plugin_suite_user_engine_add_cash( $user_id, $amount );
 					init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $amount, 'topup_admin', 'add' );
 
 					$title   = __( 'Admin Top-up Cash', 'init-user-engine' );
-					$content = sprintf( __( 'You have received %d Cash from the admin.', 'init-user-engine' ), $amount );
+					// translators: %d is the amount of Cash the user received from admin
+					$content = sprintf( __( 'You have received %1$d Cash from the admin.', 'init-user-engine' ), $amount );
 				}
 
 				init_plugin_suite_user_engine_send_inbox(

@@ -217,7 +217,7 @@ function init_plugin_suite_user_engine_get_real_ip() {
 
     foreach ($ip_keys as $key) {
         if (array_key_exists($key, $_SERVER)) {
-            $ip = $_SERVER[$key];
+            $ip = sanitize_text_field( wp_unslash( $_SERVER[$key] ) );
             
             // Handle comma-separated IPs (X-Forwarded-For có thể có nhiều IP)
             if (strpos($ip, ',') !== false) {

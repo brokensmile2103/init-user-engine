@@ -137,47 +137,57 @@ function init_plugin_suite_user_engine_register_rest_routes() {
 
 // Enhanced Captcha với better validation
 function init_plugin_suite_user_engine_api_get_captcha() {
-    // Tạo session ID unique cho mỗi request
     $session_id = wp_generate_password(16, false, false);
     $timestamp = time();
-    
-    $mode = rand(0, 2); // 0: math symbols, 1: natural language, 2: mixed
+
+    $mode = wp_rand(0, 2); // 0: symbols, 1: text, 2: mixed
 
     if ($mode === 0) {
         $ops = ['+', '-', '×'];
         $op = $ops[array_rand($ops)];
-        $a = rand(1, 12);
-        $b = rand(1, 9);
-        if ($op === '-' && $b > $a) [$a, $b] = [$b, $a];
+        $a = wp_rand(1, 12);
+        $b = wp_rand(1, 9);
 
-        $answer = match($op) {
-            '+' => $a + $b,
-            '-' => $a - $b,
-            '×' => $a * $b,
-        };
+        if ($op === '-' && $b > $a) {
+            $temp = $a;
+            $a = $b;
+            $b = $temp;
+        }
 
-        $question = sprintf(__('%d %s %d = ?', 'init-user-engine'), $a, $op, $b);
+        if ($op === '+') {
+            $answer = $a + $b;
+        } elseif ($op === '-') {
+            $answer = $a - $b;
+        } else {
+            $answer = $a * $b;
+        }
+
+        $question = sprintf(__('%1$d %2$s %3$d = ?', 'init-user-engine'), $a, $op, $b);
 
     } elseif ($mode === 1) {
         $ops = ['plus', 'minus', 'times'];
         $op = $ops[array_rand($ops)];
-        $a = rand(1, 12);
-        $b = rand(1, 9);
-        if ($op === 'minus' && $b > $a) [$a, $b] = [$b, $a];
+        $a = wp_rand(1, 12);
+        $b = wp_rand(1, 9);
 
-        $answer = match($op) {
-            'plus'  => $a + $b,
-            'minus' => $a - $b,
-            'times' => $a * $b,
-        };
+        if ($op === 'minus' && $b > $a) {
+            $temp = $a;
+            $a = $b;
+            $b = $temp;
+        }
 
-        $question = match($op) {
-            'plus'  => sprintf(__('What is %d plus %d?', 'init-user-engine'), $a, $b),
-            'minus' => sprintf(__('What is %d minus %d?', 'init-user-engine'), $a, $b),
-            'times' => sprintf(__('What is %d times %d?', 'init-user-engine'), $a, $b),
-        };
+        if ($op === 'plus') {
+            $answer = $a + $b;
+            $question = sprintf(__('What is %1$d plus %2$d?', 'init-user-engine'), $a, $b);
+        } elseif ($op === 'minus') {
+            $answer = $a - $b;
+            $question = sprintf(__('What is %1$d minus %2$d?', 'init-user-engine'), $a, $b);
+        } else {
+            $answer = $a * $b;
+            $question = sprintf(__('What is %1$d times %2$d?', 'init-user-engine'), $a, $b);
+        }
+
     } else {
-        // Mixed mode - text questions
         $questions = [
             ['question' => __('How many days in a week?', 'init-user-engine'), 'answer' => 7],
             ['question' => __('How many hours in a day?', 'init-user-engine'), 'answer' => 24],
@@ -186,34 +196,31 @@ function init_plugin_suite_user_engine_api_get_captcha() {
             ['question' => __('What is 10 divided by 2?', 'init-user-engine'), 'answer' => 5],
             ['question' => __('What is 3 squared?', 'init-user-engine'), 'answer' => 9],
         ];
-        
+
         $selected = $questions[array_rand($questions)];
         $question = $selected['question'];
         $answer = $selected['answer'];
     }
 
-    // Enhanced key generation với multiple factors
-    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
     $ip = init_plugin_suite_user_engine_get_real_ip();
     $key_data = $session_id . '|' . $timestamp . '|' . substr(md5($user_agent . $ip), 0, 8);
     $captcha_key = 'iue_captcha_' . hash('sha256', $key_data);
-    
-    // Store với metadata
+
     $captcha_data = [
-        'answer' => $answer,
-        'session' => $session_id,
-        'timestamp' => $timestamp,
-        'ip' => $ip,
+        'answer'   => $answer,
+        'session'  => $session_id,
+        'timestamp'=> $timestamp,
+        'ip'       => $ip,
         'attempts' => 0
     ];
-    
-    // Lưu 15 phút thay vì 10
+
     set_transient($captcha_key, $captcha_data, 15 * MINUTE_IN_SECONDS);
 
     return [
         'question' => $question,
-        'token' => base64_encode($key_data), // encode để hide internal structure
-        'expires' => $timestamp + (15 * MINUTE_IN_SECONDS)
+        'token'    => base64_encode($key_data),
+        'expires'  => $timestamp + (15 * MINUTE_IN_SECONDS)
     ];
 }
 

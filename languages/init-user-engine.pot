@@ -174,7 +174,7 @@ msgstr ""
 msgid "Create a new account"
 msgstr ""
 
-msgid "Congratulations! You reached level %d and received %d coins as a bonus."
+msgid "Congratulations! You reached level %1$d and received %2$d coins as a bonus."
 msgstr ""
 
 msgid "Level Up!"
@@ -717,6 +717,9 @@ msgstr ""
 msgid "An error occurred while updating."
 msgstr ""
 
+msgid "Top-up Coin/Cash"
+msgstr ""
+
 msgid "Top-up Coin / Cash"
 msgstr ""
 
@@ -771,13 +774,13 @@ msgstr ""
 msgid "Your consistency is impressive! We just sent you a bonus reward."
 msgstr ""
 
-msgid "What is %d plus %d?"
+msgid "What is %1$d plus %2$d?"
 msgstr ""
 
-msgid "What is %d minus %d?"
+msgid "What is %1$d minus %2$d?"
 msgstr ""
 
-msgid "What is %d times %d?"
+msgid "What is %1$d times %2$d?"
 msgstr ""
 
 msgid "Loading..."
@@ -786,7 +789,7 @@ msgstr ""
 msgid "Type your answer here"
 msgstr ""
 
-msgid "%d %s %d = ?"
+msgid "%1$d %2$s %3$d = ?"
 msgstr ""
 
 msgid "How many days in a week?"

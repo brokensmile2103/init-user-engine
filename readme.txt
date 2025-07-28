@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_inbox_insert_data` – Modify inbox data before inserting into database  
 - `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
 - `init_plugin_suite_user_engine_after_register` – Hook after successful user registration (pass user ID and submitted data)
+- `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
 
 === Actions ===
 
@@ -124,6 +125,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `POST /avatar/remove` – Remove custom avatar and revert to default  
 - `GET  /profile/me` – Get current user profile  
 - `POST /profile/update` – Update profile information
+- `GET  /daily-tasks` – Get list of completed daily tasks and rewards
 
 == Frequently Asked Questions ==
 
@@ -146,6 +148,15 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.0.6 – July 28, 2025 =
+- Added Daily Task modal with REST API support
+- Built daily tasks for check-in, online activity, and other actions based on real user logs
+- Rewards now dynamically reflect actual amount and type (coin/cash) from transaction data
+- Tasks only appear if completed, ensuring a clean and relevant UI
+- Supported extensible task system via `init_plugin_suite_user_engine_daily_tasks` filter
+- Added `translators:` comments for all `sprintf()` translation strings in CAPTCHA module
+- Minor refinements to i18n strings for better clarity and consistency
 
 = 1.0.5 – July 23, 2025 =
 - Emergency fix for PHP 7.4 compatibility (replaced match expressions and array unpacking)

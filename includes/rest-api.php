@@ -42,6 +42,13 @@ function init_plugin_suite_user_engine_register_rest_routes() {
         'permission_callback' => '__return_true',
     ]);
 
+    // GET /daily-tasks – Lấy nhiệm vụ hàng ngày
+    register_rest_route( $namespace, '/daily-tasks', [
+        'methods'             => 'GET',
+        'callback'            => 'init_plugin_suite_user_engine_api_get_daily_tasks',
+        'permission_callback' => '__return_true',
+    ]);
+
     // GET /exp-log – Lấy log EXP riêng
     register_rest_route( $namespace, '/exp-log', [
         'methods'             => 'GET',
@@ -162,6 +169,7 @@ function init_plugin_suite_user_engine_api_get_captcha() {
             $answer = $a * $b;
         }
 
+        // translators: %1$d and %3$d are numbers, %2$s is the operator (+, −, ×)
         $question = sprintf(__('%1$d %2$s %3$d = ?', 'init-user-engine'), $a, $op, $b);
 
     } elseif ($mode === 1) {
@@ -178,12 +186,15 @@ function init_plugin_suite_user_engine_api_get_captcha() {
 
         if ($op === 'plus') {
             $answer = $a + $b;
+            // translators: %1$d and %2$d are numbers
             $question = sprintf(__('What is %1$d plus %2$d?', 'init-user-engine'), $a, $b);
         } elseif ($op === 'minus') {
             $answer = $a - $b;
+            // translators: %1$d and %2$d are numbers
             $question = sprintf(__('What is %1$d minus %2$d?', 'init-user-engine'), $a, $b);
         } else {
             $answer = $a * $b;
+            // translators: %1$d and %2$d are numbers
             $question = sprintf(__('What is %1$d times %2$d?', 'init-user-engine'), $a, $b);
         }
 
@@ -230,6 +241,11 @@ function init_plugin_suite_user_engine_api_register_user(WP_REST_Request $reques
     $username = sanitize_user($data['username'] ?? '');
     $email = sanitize_email($data['email'] ?? '');
     $password = $data['password'] ?? '';
+
+    $honeypot = sanitize_text_field($data['iue_hp'] ?? '');
+    if (!empty($honeypot)) {
+        return new WP_Error('bot_detected', __('Bot submission detected.', 'init-user-engine'), ['status' => 403]);
+    }
 
     $captcha_token = sanitize_text_field($data['captcha_token'] ?? '');
     $captcha_answer = intval($data['captcha_answer'] ?? 0);

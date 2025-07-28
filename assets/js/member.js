@@ -63,6 +63,11 @@ function initMenuClick() {
             return;
         }
 
+        if (action === 'daily-task') {
+            loadDailyTasks();
+            return;
+        }
+
         if (action === 'history') {
             loadTransactionHistory();
             return;
@@ -114,6 +119,42 @@ document.addEventListener('keydown', function (e) {
     if (key === 'e') {
         e.preventDefault();
         loadExpLog();
+        return;
+    }
+
+    if (key === 'v') {
+        e.preventDefault();
+        loadVipModal();
+        return;
+    }
+
+    if (key === 'd') {
+        e.preventDefault();
+        loadDailyTasks();
+        return;
+    }
+
+    if (key === 'h') {
+        e.preventDefault();
+        loadTransactionHistory();
+        return;
+    }
+
+    if (key === 'i') {
+        e.preventDefault();
+        loadInbox();
+        return;
+    }
+
+    if (key === 'r') {
+        e.preventDefault();
+        loadReferral();
+        return;
+    }
+
+    if (key === 'p') {
+        e.preventDefault();
+        loadEditProfileModal();
         return;
     }
 

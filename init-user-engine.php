@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // =======================
 // Constant Definitions
 // =======================
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.5' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.6' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -301,6 +301,14 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
     );
 
     wp_enqueue_script(
+        'init-user-engine-daily-task',
+        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/daily-task.js',
+        [],
+        INIT_PLUGIN_SUITE_IUE_VERSION,
+        true
+    );
+
+    wp_enqueue_script(
         'init-user-engine-avatar',
         INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/avatar.js',
         [],
@@ -379,6 +387,9 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'delete_all_success'       => __( 'All messages deleted.', 'init-user-engine' ),
             'error'                    => __( 'Error!', 'init-user-engine' ),
             'transaction_title'        => __( 'Transaction History', 'init-user-engine' ),
+            'daily_task_title'         => __( 'Daily Tasks', 'init-user-engine' ),
+            'daily_task_empty'         => __( 'No daily tasks found.', 'init-user-engine' ),
+            'daily_task_load_error'    => __( 'Failed to load daily tasks.', 'init-user-engine' ),
             'inbox_title'              => __( 'Inbox', 'init-user-engine' ),
             'no_messages'              => __( 'No messages in your inbox.', 'init-user-engine' ),
             'mark_all_read'            => __( 'Mark All as Read', 'init-user-engine' ),

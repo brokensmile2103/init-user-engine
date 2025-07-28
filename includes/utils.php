@@ -175,22 +175,22 @@ function init_plugin_suite_user_engine_time_ago( $timestamp ) {
 			switch ( $unit ) {
 				case 'year':
 					// translators: %d = number of years
-					return sprintf( _n( '%d year ago', '%d years ago', $val, 'init-user-engine' ), $val );
+					return sprintf( _n( '%d year', '%d years', $val, 'init-user-engine' ), $val );
 				case 'month':
 					// translators: %d = number of months
-					return sprintf( _n( '%d month ago', '%d months ago', $val, 'init-user-engine' ), $val );
+					return sprintf( _n( '%d month', '%d months', $val, 'init-user-engine' ), $val );
 				case 'week':
 					// translators: %d = number of weeks
-					return sprintf( _n( '%d week ago', '%d weeks ago', $val, 'init-user-engine' ), $val );
+					return sprintf( _n( '%d week', '%d weeks', $val, 'init-user-engine' ), $val );
 				case 'day':
 					// translators: %d = number of days
-					return sprintf( _n( '%d day ago', '%d days ago', $val, 'init-user-engine' ), $val );
+					return sprintf( _n( '%d day', '%d days', $val, 'init-user-engine' ), $val );
 				case 'hour':
 					// translators: %d = number of hours
-					return sprintf( _n( '%d hour ago', '%d hours ago', $val, 'init-user-engine' ), $val );
+					return sprintf( _n( '%d hour', '%d hours', $val, 'init-user-engine' ), $val );
 				case 'minute':
 					// translators: %d = number of minutes
-					return sprintf( _n( '%d minute ago', '%d minutes ago', $val, 'init-user-engine' ), $val );
+					return sprintf( _n( '%d minute', '%d minutes', $val, 'init-user-engine' ), $val );
 			}
 		}
 	}

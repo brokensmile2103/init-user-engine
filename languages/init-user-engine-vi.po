@@ -836,3 +836,30 @@ msgstr "Câu trả lời captcha không đúng. Vui lòng thử lại."
 
 msgid "Captcha validation failed. Please try again."
 msgstr "Xác thực captcha thất bại. Vui lòng thử lại."
+
+msgid "Daily Tasks"
+msgstr "Nhiệm vụ hàng ngày"
+
+msgid "No daily tasks found."
+msgstr "Không có nhiệm vụ nào."
+
+msgid "Failed to load daily tasks."
+msgstr "Tải nhiệm vụ thất bại."
+
+msgid "Check in today"
+msgstr "Điểm danh hôm nay"
+
+msgid "Stay active today"
+msgstr "Hoạt động đủ thời gian trong ngày"
+
+msgid "Update your profile today"
+msgstr "Cập nhật hồ sơ hôm nay"
+
+msgid "Post a comment today"
+msgstr "Gửi bình luận hôm nay"
+
+msgid "Invite a friend"
+msgstr "Mời bạn bè"
+
+msgid "Publish your first post"
+msgstr "Đăng bài đầu tiên"

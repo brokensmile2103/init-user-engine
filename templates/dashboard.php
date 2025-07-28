@@ -90,6 +90,12 @@ $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $use
 			</a>
 		</li>
 		<li>
+			<a href="#" role="button" class="iue-menu-link" data-action="daily-task">
+				<span class="iue-icon" data-iue-icon="task"></span>
+				<span><?php esc_html_e( 'Daily Tasks', 'init-user-engine' ); ?></span>
+			</a>
+		</li>
+		<li>
 			<a href="#" role="button" class="iue-menu-link" data-action="history">
 				<span class="iue-icon" data-iue-icon="history"></span>
 				<span><?php esc_html_e( 'Transaction History', 'init-user-engine' ); ?></span>

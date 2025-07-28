@@ -836,3 +836,30 @@ msgstr ""
 
 msgid "Captcha validation failed. Please try again."
 msgstr ""
+
+msgid "Daily Tasks"
+msgstr ""
+
+msgid "No daily tasks found."
+msgstr ""
+
+msgid "Failed to load daily tasks."
+msgstr ""
+
+msgid "Check in today"
+msgstr ""
+
+msgid "Stay active today"
+msgstr ""
+
+msgid "Update your profile today"
+msgstr ""
+
+msgid "Post a comment today"
+msgstr ""
+
+msgid "Invite a friend"
+msgstr ""
+
+msgid "Publish your first post"
+msgstr ""

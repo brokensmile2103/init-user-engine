@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // =======================
 // Constant Definitions
 // =======================
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.6' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.7' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );

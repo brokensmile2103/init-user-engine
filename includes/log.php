@@ -272,10 +272,7 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 		foreach ( $log as $e ) {
 			if ( $e['source'] !== $source ) continue;
 			if ( $e['change'] !== 'add' ) continue;
-
-			if ( in_array( $source, [ 'update_profile', 'comment_post' ] ) ) {
-				if ( substr( $e['time'], 0, 10 ) !== $today ) continue;
-			}
+			if ( substr( $e['time'], 0, 10 ) !== $today ) continue;
 
 			$total_amount += absint( $e['amount'] ?? 0 );
 			$type = $e['type'] ?? $type;

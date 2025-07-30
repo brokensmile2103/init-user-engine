@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -148,6 +148,20 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.0.7 – July 31, 2025 =
+- Fixed critical bugs in daily check-in system while preserving original functionality
+- Enhanced null-safe DOM element checking to prevent JavaScript errors
+- Fixed button state management to prevent double-clicks during check-in process
+- Improved error handling for check-in and reward claim API calls with proper fallbacks
+- Added automatic button text reset after errors with 3-second timeout
+- Enhanced localStorage data validation with proper string conversion
+- Fixed reward claiming logic with better status validation and DOM updates
+- Added automatic DOM ready detection for reliable script initialization
+- Preserved original countdown behavior: pauses when tab is hidden, resumes on return
+- Maintained localStorage-based timing system for consistent user experience
+- Added safety checks for configuration data and optional function calls
+- Improved event dispatching system for check-in success and level-up notifications
 
 = 1.0.6 – July 28, 2025 =
 - Added Daily Task modal with REST API support

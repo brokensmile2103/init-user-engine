@@ -257,7 +257,6 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 		],
 	];
 
-	// Gộp reward theo từng source (tổng cộng 1 task duy nhất)
 	$task_log_sources = [
 		'update_profile' => __( 'Update your profile today', 'init-user-engine' ),
 		'comment_post'   => __( 'Post a comment today', 'init-user-engine' ),
@@ -270,11 +269,13 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 		$type         = null;
 
 		foreach ( $log as $e ) {
+			if ( ! is_array( $e ) ) continue;
+			if ( ! isset( $e['source'], $e['change'], $e['time'], $e['amount'] ) ) continue;
 			if ( $e['source'] !== $source ) continue;
 			if ( $e['change'] !== 'add' ) continue;
 			if ( substr( $e['time'], 0, 10 ) !== $today ) continue;
 
-			$total_amount += absint( $e['amount'] ?? 0 );
+			$total_amount += absint( $e['amount'] );
 			$type = $e['type'] ?? $type;
 		}
 
@@ -286,7 +287,7 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 					'type'   => $type,
 					'amount' => $total_amount,
 				],
-				'check' => fn() => true,
+				'check' => '__return_true', // dùng hàm thay vì closure
 			];
 		}
 	}
@@ -296,12 +297,25 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 	$output = [];
 
 	foreach ( $tasks as $task ) {
-		$completed = is_callable( $task['check'] ) ? call_user_func( $task['check'], $user_id ) : false;
+		$completed = false;
+
+		if ( is_callable( $task['check'] ) ) {
+			try {
+				$ref = new ReflectionFunction( $task['check'] );
+				$arg_count = $ref->getNumberOfParameters();
+
+				$completed = $arg_count > 0
+					? call_user_func( $task['check'], $user_id )
+					: call_user_func( $task['check'] );
+			} catch ( Throwable $e ) {
+				error_log( '[IUE] Failed to execute task check callback: ' . $e->getMessage() );
+			}
+		}
 
 		$output[] = [
-			'title'     => $task['title'],
+			'title'     => $task['title'] ?? 'Untitled task',
 			'completed' => (bool) $completed,
-			'reward'    => $task['reward'],
+			'reward'    => $task['reward'] ?? [ 'type' => 'coin', 'amount' => 0 ],
 		];
 	}
 

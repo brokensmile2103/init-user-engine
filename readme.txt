@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,19 +149,30 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.0.8 – July 31, 2025 =
+- Completely rewrote check-in countdown logic to only count when tab is active
+- Changed from timestamp-based calculation to real-time remaining seconds storage
+- Fixed critical bug where countdown continued running in background when tab was hidden
+- Added proper tab visibility detection to pause/resume countdown accurately
+- Implemented daily reset mechanism that clears old countdown data on new day
+- Fixed auto-reward claiming issue that occurred after long periods of inactivity
+- Added proper state persistence when switching tabs or closing browser
+- Countdown now properly resumes from exact remaining time when returning to tab
+- Improved localStorage management with separate keys for remaining time and date tracking
+- Enhanced countdown reliability by saving state on every second tick
+- Fixed memory leaks by properly clearing intervals and event listeners
+
 = 1.0.7 – July 31, 2025 =
-- Fixed critical bugs in daily check-in system while preserving original functionality
-- Enhanced null-safe DOM element checking to prevent JavaScript errors
-- Fixed button state management to prevent double-clicks during check-in process
-- Improved error handling for check-in and reward claim API calls with proper fallbacks
-- Added automatic button text reset after errors with 3-second timeout
-- Enhanced localStorage data validation with proper string conversion
-- Fixed reward claiming logic with better status validation and DOM updates
-- Added automatic DOM ready detection for reliable script initialization
-- Preserved original countdown behavior: pauses when tab is hidden, resumes on return
-- Maintained localStorage-based timing system for consistent user experience
-- Added safety checks for configuration data and optional function calls
-- Improved event dispatching system for check-in success and level-up notifications
+- Refactored daily check-in JavaScript: clearer logic, safer countdown handling, and accurate reward claiming
+- Removed redundant `localStorage` key (`REMAINING_KEY`), simplified timing logic using only `startTime`
+- Fixed countdown bug when tab visibility changes by pausing updates and preventing memory leaks
+- Handled auto-claim reward when returning after countdown has finished
+- Prevented duplicate intervals by clearing previous `setInterval` before starting new one
+- Fixed bug where disabled check-in button never re-enabled on error
+- Rewrote `/daily-tasks` REST API to prevent fatal errors caused by invalid log entries
+- Replaced unsafe closures in task check callbacks with static callbacks (`__return_true`)
+- Added fallback and error logging in `call_user_func` for task completion checks
+- Filtered and validated log entries before accessing offsets to avoid runtime crashes
 
 = 1.0.6 – July 28, 2025 =
 - Added Daily Task modal with REST API support

@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.0.7-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.0.9-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -68,6 +68,7 @@ Base: `/wp-json/inituser/v1/`
 - `init_plugin_suite_user_engine_render_level_badge` – Custom level badge HTML  
 - `init_plugin_suite_user_engine_validate_register_fields` – Extend registration logic
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
+- `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
 
 ### Actions
 

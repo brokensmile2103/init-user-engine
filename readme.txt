@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
 - `init_plugin_suite_user_engine_after_register` – Hook after successful user registration (pass user ID and submitted data)
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
+- `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
 
 === Actions ===
 
@@ -148,6 +149,12 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.0.9 – August 3, 2025 =
+- Added extensible filter system to `init_plugin_suite_user_engine_format_log_message()` function
+- Introduced `init_user_engine_format_log_message` filter hook for customizing transaction log messages
+- Enhanced log message formatting with access to full entry data, source, type, and amount parameters
+- Improved code maintainability by allowing themes and plugins to extend log message display
 
 = 1.0.8 – July 31, 2025 =
 - Completely rewrote check-in countdown logic to only count when tab is active

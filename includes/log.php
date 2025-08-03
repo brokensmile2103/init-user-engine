@@ -41,45 +41,74 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		return is_array( $log ) ? $log : [];
 	}
 
-	// Format a log entry into readable message
-	function init_plugin_suite_user_engine_format_log_message( $entry ) {
-		$source = $entry['source'] ?? 'unknown';
-		$type   = $entry['type'] ?? '';
-		$amount = absint( $entry['amount'] ?? 0 );
-
-		switch ( $source ) {
-			case 'daily_login':
-				return __( 'Daily login bonus', 'init-user-engine' );
-			case 'user_register':
-				return __( 'Welcome bonus for registration', 'init-user-engine' );
-			case 'update_profile':
-				return __( 'Profile updated', 'init-user-engine' );
-			case ( preg_match( '/^level_up_(\d+)$/', $source, $m ) ? true : false ):
-				// translators: %d is the new level number
-				return sprintf( __( 'Level up to %d', 'init-user-engine' ), $m[1] );
-			case ( preg_match( '/^milestone_(\d+)$/', $source, $m ) ? true : false ):
-				// translators: %d is the number of days in the check-in streak
-				return sprintf( __( 'Check-in streak reached %d days', 'init-user-engine' ), $m[1] );
-			case 'checkin':
-				return __( 'Daily check-in reward', 'init-user-engine' );
-			case 'reward':
-				return __( 'Bonus reward after being online', 'init-user-engine' );
-			case 'referral':
-				return __( 'Referral reward for inviting a friend', 'init-user-engine' );
-			case 'referral_new':
-				return __( 'Welcome reward for signing up via referral', 'init-user-engine' );
-			case 'woo_order':
-				return __( 'Reward from WooCommerce order', 'init-user-engine' );
-			case 'comment_post':
-				return __( 'Comment posted', 'init-user-engine' );
-			case 'publish_post':
-				return __( 'First time post published', 'init-user-engine' );
-			case 'unlock_reward':
-				return __( 'Chapter unlock reward', 'init-user-engine' );
-			default:
-				return ucfirst( str_replace( '_', ' ', $source ) );
-		}
+// Format a log entry into readable message
+function init_plugin_suite_user_engine_format_log_message( $entry ) {
+	$source = $entry['source'] ?? 'unknown';
+	$type   = $entry['type'] ?? '';
+	$amount = absint( $entry['amount'] ?? 0 );
+	
+	$message = '';
+	
+	switch ( $source ) {
+		case 'daily_login':
+			$message = __( 'Daily login bonus', 'init-user-engine' );
+			break;
+		case 'user_register':
+			$message = __( 'Welcome bonus for registration', 'init-user-engine' );
+			break;
+		case 'update_profile':
+			$message = __( 'Profile updated', 'init-user-engine' );
+			break;
+		case ( preg_match( '/^level_up_(\d+)$/', $source, $m ) ? true : false ):
+			// translators: %d is the new level number
+			$message = sprintf( __( 'Level up to %d', 'init-user-engine' ), $m[1] );
+			break;
+		case ( preg_match( '/^milestone_(\d+)$/', $source, $m ) ? true : false ):
+			// translators: %d is the number of days in the check-in streak
+			$message = sprintf( __( 'Check-in streak reached %d days', 'init-user-engine' ), $m[1] );
+			break;
+		case 'checkin':
+			$message = __( 'Daily check-in reward', 'init-user-engine' );
+			break;
+		case 'reward':
+			$message = __( 'Bonus reward after being online', 'init-user-engine' );
+			break;
+		case 'referral':
+			$message = __( 'Referral reward for inviting a friend', 'init-user-engine' );
+			break;
+		case 'referral_new':
+			$message = __( 'Welcome reward for signing up via referral', 'init-user-engine' );
+			break;
+		case 'woo_order':
+			$message = __( 'Reward from WooCommerce order', 'init-user-engine' );
+			break;
+		case 'comment_post':
+			$message = __( 'Comment posted', 'init-user-engine' );
+			break;
+		case 'publish_post':
+			$message = __( 'First time post published', 'init-user-engine' );
+			break;
+		case 'unlock_reward':
+			$message = __( 'Chapter unlock reward', 'init-user-engine' );
+			break;
+		default:
+			$message = ucfirst( str_replace( '_', ' ', $source ) );
+			break;
 	}
+	
+	/**
+	 * Filter to customize log message format
+	 * 
+	 * @param string $message The formatted message
+	 * @param array  $entry   The original log entry data
+	 * @param string $source  The source of the log entry
+	 * @param string $type    The type of the log entry
+	 * @param int    $amount  The amount value
+	 * 
+	 * @since 1.0.0
+	 */
+	return apply_filters( 'init_user_engine_format_log_message', $message, $entry, $source, $type, $amount );
+}
 
 // Log EXP separately
 function init_plugin_suite_user_engine_log_exp( $user_id, $amount, $source = '', $change = 'add' ) {
@@ -308,7 +337,9 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 					? call_user_func( $task['check'], $user_id )
 					: call_user_func( $task['check'] );
 			} catch ( Throwable $e ) {
-				error_log( '[IUE] Failed to execute task check callback: ' . $e->getMessage() );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( '[IUE] Failed to execute task check callback: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				}
 			}
 		}
 

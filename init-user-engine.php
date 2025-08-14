@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.0.9
+ * Version: 1.1.0
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,8 @@ defined('ABSPATH') || exit;
 // =======================
 // Constant Definitions
 // =======================
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.0.9' );
+
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.1.0' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -35,6 +36,7 @@ define( 'INIT_PLUGIN_SUITE_IUE_REF_SALT',       987586218 );
 // =======================
 // Load Core Functions
 // =======================
+
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'init.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'core.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'exp.php';
@@ -163,166 +165,6 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
     }";
 
     wp_add_inline_style( 'init-user-engine-user', $custom_css );
-
-    wp_enqueue_style(
-        'init-user-engine-toast',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/toast.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal-transaction',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-transaction.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal-inbox',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-inbox.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal-vip',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-vip.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal-referral',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-referral.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal-avatar',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-avatar.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_style(
-        'init-user-engine-modal-profile',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/modal-profile.css',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-icon',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/icon.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-toast',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/toast.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-utils',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/utils.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-checkin',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/checkin.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-modal',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/modal.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-level',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/level.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-inbox',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/inbox.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-vip',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/vip.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-referral',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/referral.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-transaction',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/transaction.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-daily-task',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/daily-task.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-avatar',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/avatar.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
-
-    wp_enqueue_script(
-        'init-user-engine-profile',
-        INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/profile.js',
-        [],
-        INIT_PLUGIN_SUITE_IUE_VERSION,
-        true
-    );
     
     wp_enqueue_script(
         'init-user-engine-user',
@@ -489,6 +331,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
 // ==========================
 // Settings link
 // ==========================
+
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'init_plugin_suite_user_engine_add_settings_link');
 // Add a "Settings" link to the plugin row in the Plugins admin screen
 function init_plugin_suite_user_engine_add_settings_link($links) {

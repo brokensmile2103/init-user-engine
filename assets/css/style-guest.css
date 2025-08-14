@@ -309,3 +309,19 @@
 #init-user-engine-login-modal.dark .iue-register-link a:hover {
 	color: var(--iue-theme-active-color);
 }
+
+.iue-vip-badge {
+	position: absolute;
+	bottom: -5px;
+	right: -5px;
+	background: var(--iue-theme-color, #f39c12);
+	color: #fff;
+	font-size: 11px;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 5px;
+	border-radius: 999px; /* pill shape */
+	white-space: nowrap;
+	z-index: 2;
+	line-height: 16px;
+}

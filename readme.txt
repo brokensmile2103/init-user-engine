@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.9
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,14 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.0 – August 14, 2025 =
+- Reorganized and consolidated all CSS files into a single minified stylesheet for improved performance
+- Combined all JavaScript files into one unified script file to reduce HTTP requests
+- Optimized asset loading by eliminating multiple file dependencies
+- Improved page load times through streamlined resource management
+- Enhanced maintainability with centralized CSS and JS architecture
+- Reduced bandwidth usage and improved caching efficiency for better user experience
 
 = 1.0.9 – August 3, 2025 =
 - Added extensible filter system to `init_plugin_suite_user_engine_format_log_message()` function

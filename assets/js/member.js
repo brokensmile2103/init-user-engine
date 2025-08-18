@@ -1210,57 +1210,49 @@ function loadEditProfileModal() {
 
 function renderEditProfileModal(user, t) {
     showUserEngineModal(t.edit_profile_title || 'Edit Profile', `
-        <div class="iue-edit-profile-container">
-            <div class="iue-form-group">
-                <label>${t.display_name || 'Display Name'}</label>
-                <input type="text" id="iue-display-name" value="${user.display_name || ''}" placeholder="${t.display_name_placeholder || 'Your public display name'}" />
-            </div>
-
-            <div class="iue-form-group">
-                <label>${t.bio || 'Bio'}</label>
-                <textarea id="iue-bio" rows="3" placeholder="${t.bio_placeholder || 'Short self introduction'}">${user.bio || ''}</textarea>
-            </div>
-
-            <div class="iue-form-group">
-                <label>${t.new_password || 'New Password'}</label>
-                <input type="password" id="iue-new-password" placeholder="${t.leave_blank_to_keep || 'Leave blank to keep current password'}" />
-            </div>
-
-            <div class="iue-form-group">
-                <label>Facebook</label>
-                <input type="url" id="iue-facebook" value="${user.facebook || ''}" placeholder="${t.facebook_placeholder || 'https://facebook.com/yourprofile'}" />
-            </div>
-
-            <div class="iue-form-group">
-                <label>Twitter</label>
-                <input type="url" id="iue-twitter" value="${user.twitter || ''}" placeholder="${t.twitter_placeholder || 'https://twitter.com/yourhandle'}" />
-            </div>
-
-            <div class="iue-form-group">
-                <label>Discord</label>
-                <input type="text" id="iue-discord" value="${user.discord || ''}" placeholder="${t.discord_placeholder || 'Your Discord username or invite'}" />
-            </div>
-
-            <div class="iue-form-group">
-                <label>Website</label>
-                <input type="url" id="iue-website" value="${user.website || ''}" placeholder="${t.website_placeholder || 'https://yourwebsite.com'}" />
-            </div>
-
-            <div class="iue-form-group">
-                <label>${t.gender || 'Gender'}</label>
-                <select id="iue-gender">
-                    <option value="">${t.gender_unspecified || 'Prefer not to say'}</option>
-                    <option value="male" ${user.gender === 'male' ? 'selected' : ''}>${t.gender_male || 'Male'}</option>
-                    <option value="female" ${user.gender === 'female' ? 'selected' : ''}>${t.gender_female || 'Female'}</option>
-                    <option value="other" ${user.gender === 'other' ? 'selected' : ''}>${t.gender_other || 'Other'}</option>
-                </select>
-            </div>
-
-            <div class="iue-form-actions">
-                <button id="iue-save-profile" class="iue-btn">${t.save || 'Save'}</button>
-            </div>
-        </div>
-    `);
+       <div class="iue-edit-profile-container">
+           <div class="iue-form-group">
+               <label for="iue-display-name">${t.display_name || 'Display Name'}</label>
+               <input type="text" id="iue-display-name" value="${user.display_name || ''}" placeholder="${t.display_name_placeholder || 'Your public display name'}" />
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-bio">${t.bio || 'Bio'}</label>
+               <textarea id="iue-bio" rows="3" placeholder="${t.bio_placeholder || 'Short self introduction'}">${user.bio || ''}</textarea>
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-new-password">${t.new_password || 'New Password'}</label>
+               <input type="password" id="iue-new-password" placeholder="${t.leave_blank_to_keep || 'Leave blank to keep current password'}" />
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-facebook">Facebook</label>
+               <input type="url" id="iue-facebook" value="${user.facebook || ''}" placeholder="${t.facebook_placeholder || 'https://facebook.com/yourprofile'}" />
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-twitter">Twitter</label>
+               <input type="url" id="iue-twitter" value="${user.twitter || ''}" placeholder="${t.twitter_placeholder || 'https://twitter.com/yourhandle'}" />
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-discord">Discord</label>
+               <input type="text" id="iue-discord" value="${user.discord || ''}" placeholder="${t.discord_placeholder || 'Your Discord username or invite'}" />
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-website">Website</label>
+               <input type="url" id="iue-website" value="${user.website || ''}" placeholder="${t.website_placeholder || 'https://yourwebsite.com'}" />
+           </div>
+           <div class="iue-form-group">
+               <label for="iue-gender">${t.gender || 'Gender'}</label>
+               <select id="iue-gender">
+                   <option value="">${t.gender_unspecified || 'Prefer not to say'}</option>
+                   <option value="male" ${user.gender === 'male' ? 'selected' : ''}>${t.gender_male || 'Male'}</option>
+                   <option value="female" ${user.gender === 'female' ? 'selected' : ''}>${t.gender_female || 'Female'}</option>
+                   <option value="other" ${user.gender === 'other' ? 'selected' : ''}>${t.gender_other || 'Other'}</option>
+               </select>
+           </div>
+           <div class="iue-form-actions">
+               <button id="iue-save-profile" class="iue-btn">${t.save || 'Save'}</button>
+           </div>
+       </div>
+   `);
 
     const saveBtn = document.querySelector('#iue-save-profile');
     if (!saveBtn) return;

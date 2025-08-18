@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,15 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.1 – August 18, 2025 =
+- Added full Inbox Statistics admin page with detailed analytics and charts
+- Implemented date range filter (7d, 30d, 90d, all-time) for customizable reporting
+- Built overview grid showing total, unread, daily, and recipient counts
+- Introduced advanced breakdowns: message types, priority levels, and engagement analytics
+- Added daily activity chart, top recipients leaderboard, and recent activity summary
+- Implemented refresh button with last updated timestamp for real-time insights
+- Added simplified dashboard widget showing key inbox metrics with quick action links
 
 = 1.1.0 – August 14, 2025 =
 - Reorganized and consolidated all CSS files into a single minified stylesheet for improved performance

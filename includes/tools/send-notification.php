@@ -129,11 +129,3 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 	</div>
 	<?php
 }
-
-add_action( 'admin_enqueue_scripts', function ( $hook ) {
-	if ( strpos( $hook, 'init-user-engine' ) !== false ) {
-		wp_enqueue_style( 'iue-send-notice-style', INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/admin.css', [], INIT_PLUGIN_SUITE_IUE_VERSION );
-		wp_enqueue_script( 'iue-send-notice', INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/admin.js', [ 'jquery' ], INIT_PLUGIN_SUITE_IUE_VERSION, true );
-		wp_localize_script( 'iue-send-notice', 'InitPluginSuiteUserEngineAdminNoticeData', [ 'nonce' => wp_create_nonce( 'iue_send_notice' ) ] );
-	}
-} );

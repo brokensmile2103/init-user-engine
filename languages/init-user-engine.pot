@@ -863,3 +863,135 @@ msgstr ""
 
 msgid "Publish your first post"
 msgstr ""
+
+msgid "Inbox Statistics"
+msgstr ""
+
+msgid "Inbox table not found. Please ensure the User Engine plugin is properly installed."
+msgstr ""
+
+msgid "Date Range:"
+msgstr ""
+
+msgid "Last 7 Days"
+msgstr ""
+
+msgid "Last 30 Days"
+msgstr ""
+
+msgid "Last 90 Days"
+msgstr ""
+
+msgid "All Time"
+msgstr ""
+
+msgid "Total Messages"
+msgstr ""
+
+msgid "Unread Messages"
+msgstr ""
+
+msgid "Sent Today"
+msgstr ""
+
+msgid "Total Recipients"
+msgstr ""
+
+msgid "📊 Message Types Distribution"
+msgstr ""
+
+msgid "No message type data available."
+msgstr ""
+
+msgid "🚨 Priority Levels"
+msgstr ""
+
+msgid "No priority data available."
+msgstr ""
+
+msgid "📈 Engagement Analytics"
+msgstr ""
+
+msgid "Overall Read Rate"
+msgstr ""
+
+msgid "Avg Messages per User"
+msgstr ""
+
+msgid "Pinned Messages"
+msgstr ""
+
+msgid "Active Recipients (30d)"
+msgstr ""
+
+msgid "📊 Daily Activity"
+msgstr ""
+
+msgid "No activity data for selected period."
+msgstr ""
+
+msgid "🏆 Top Recipients"
+msgstr ""
+
+msgid "total"
+msgstr ""
+
+msgid "unread"
+msgstr ""
+
+msgid "No recipient data available."
+msgstr ""
+
+msgid "📝 Recent Activity Summary"
+msgstr ""
+
+msgid "This Week:"
+msgstr ""
+
+msgid "This Month:"
+msgstr ""
+
+msgid "Peak Day:"
+msgstr ""
+
+msgid "N/A"
+msgstr ""
+
+msgid "Avg Daily:"
+msgstr ""
+
+msgid "Refresh Data"
+msgstr ""
+
+msgid "Last updated: %s"
+msgstr ""
+
+msgid "Unknown User"
+msgstr ""
+
+msgid "Inbox Overview"
+msgstr ""
+
+msgid "📭 Inbox Table Not Found"
+msgstr ""
+
+msgid "Please check your plugin installation."
+msgstr ""
+
+msgid "Unread"
+msgstr ""
+
+msgid "Today"
+msgstr ""
+
+msgid "Recipients"
+msgstr ""
+
+msgid "Read Rate:"
+msgstr ""
+
+msgid "Avg per User:"
+msgstr ""
+
+msgid "View Full Statistics"
+msgstr ""

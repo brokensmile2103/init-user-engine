@@ -863,3 +863,135 @@ msgstr "Mời bạn bè"
 
 msgid "Publish your first post"
 msgstr "Đăng bài đầu tiên"
+
+msgid "Inbox Statistics"
+msgstr "Thống kê hộp thư"
+
+msgid "Inbox table not found. Please ensure the User Engine plugin is properly installed."
+msgstr "Không tìm thấy bảng hộp thư. Vui lòng đảm bảo plugin User Engine đã được cài đặt đúng."
+
+msgid "Date Range:"
+msgstr "Khoảng thời gian:"
+
+msgid "Last 7 Days"
+msgstr "7 ngày qua"
+
+msgid "Last 30 Days"
+msgstr "30 ngày qua"
+
+msgid "Last 90 Days"
+msgstr "90 ngày qua"
+
+msgid "All Time"
+msgstr "Toàn bộ thời gian"
+
+msgid "Total Messages"
+msgstr "Tổng số tin nhắn"
+
+msgid "Unread Messages"
+msgstr "Tin nhắn chưa đọc"
+
+msgid "Sent Today"
+msgstr "Gửi hôm nay"
+
+msgid "Total Recipients"
+msgstr "Tổng số người nhận"
+
+msgid "📊 Message Types Distribution"
+msgstr "📊 Phân bổ loại tin nhắn"
+
+msgid "No message type data available."
+msgstr "Không có dữ liệu loại tin nhắn."
+
+msgid "🚨 Priority Levels"
+msgstr "🚨 Mức độ ưu tiên"
+
+msgid "No priority data available."
+msgstr "Không có dữ liệu ưu tiên."
+
+msgid "📈 Engagement Analytics"
+msgstr "📈 Phân tích tương tác"
+
+msgid "Overall Read Rate"
+msgstr "Tỷ lệ đọc tổng thể"
+
+msgid "Avg Messages per User"
+msgstr "Số tin nhắn trung bình mỗi người dùng"
+
+msgid "Pinned Messages"
+msgstr "Tin nhắn được ghim"
+
+msgid "Active Recipients (30d)"
+msgstr "Người nhận hoạt động (30 ngày)"
+
+msgid "📊 Daily Activity"
+msgstr "📊 Hoạt động hàng ngày"
+
+msgid "No activity data for selected period."
+msgstr "Không có dữ liệu hoạt động cho khoảng thời gian đã chọn."
+
+msgid "🏆 Top Recipients"
+msgstr "🏆 Người nhận hàng đầu"
+
+msgid "total"
+msgstr "tổng"
+
+msgid "unread"
+msgstr "chưa đọc"
+
+msgid "No recipient data available."
+msgstr "Không có dữ liệu người nhận."
+
+msgid "📝 Recent Activity Summary"
+msgstr "📝 Tóm tắt hoạt động gần đây"
+
+msgid "This Week:"
+msgstr "Tuần này:"
+
+msgid "This Month:"
+msgstr "Tháng này:"
+
+msgid "Peak Day:"
+msgstr "Ngày cao điểm:"
+
+msgid "N/A"
+msgstr "Không có"
+
+msgid "Avg Daily:"
+msgstr "Trung bình hàng ngày:"
+
+msgid "Refresh Data"
+msgstr "Làm mới dữ liệu"
+
+msgid "Last updated: %s"
+msgstr "Cập nhật lần cuối: %s"
+
+msgid "Unknown User"
+msgstr "Người dùng không xác định"
+
+msgid "Inbox Overview"
+msgstr "Tổng quan Hộp thư"
+
+msgid "📭 Inbox Table Not Found"
+msgstr "📭 Không tìm thấy bảng hộp thư"
+
+msgid "Please check your plugin installation."
+msgstr "Vui lòng kiểm tra cài đặt plugin của bạn."
+
+msgid "Unread"
+msgstr "Chưa đọc"
+
+msgid "Today"
+msgstr "Hôm nay"
+
+msgid "Recipients"
+msgstr "Người nhận"
+
+msgid "Read Rate:"
+msgstr "Tỷ lệ đọc:"
+
+msgid "Avg per User:"
+msgstr "Trung bình mỗi người dùng:"
+
+msgid "View Full Statistics"
+msgstr "Xem toàn bộ thống kê"

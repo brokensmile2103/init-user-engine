@@ -286,3 +286,30 @@ function init_plugin_suite_user_engine_format_inbox( $item ) {
 
 	return apply_filters( 'init_plugin_suite_user_engine_format_inbox', $formatted, $item );
 }
+
+// Đăng ký cron job weekly để dọn dẹp inbox mồ côi
+function init_plugin_suite_user_engine_schedule_cleanup() {
+    if (!wp_next_scheduled('init_plugin_suite_user_engine_cleanup_orphaned_inbox')) {
+        wp_schedule_event(time(), 'weekly', 'init_plugin_suite_user_engine_cleanup_orphaned_inbox');
+    }
+}
+add_action('wp', 'init_plugin_suite_user_engine_schedule_cleanup');
+
+// Hook để thực hiện cleanup khi cron chạy
+add_action('init_plugin_suite_user_engine_cleanup_orphaned_inbox', 'init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler');
+
+/**
+ * Hàm xử lý dọn dẹp inbox mồ côi
+ * Xóa các inbox thuộc về user_id không tồn tại nữa
+ */
+function init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler() {
+    global $wpdb;
+    
+    $inbox_table = $wpdb->prefix . 'init_user_engine_inbox';
+    $users_table = $wpdb->prefix . 'users';
+    
+    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+    $wpdb->query("DELETE i FROM {$inbox_table} i LEFT JOIN {$users_table} u ON i.user_id = u.ID WHERE u.ID IS NULL");
+    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+}

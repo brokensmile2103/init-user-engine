@@ -325,3 +325,61 @@
 	z-index: 2;
 	line-height: 16px;
 }
+
+/* Init User Engine - Badge Styles */
+
+.iue-badge-level {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 6px;
+	border-radius: 999px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1;
+	background: #f4f4f4;
+	color: #333;
+	transition: background 0.3s;
+}
+
+.iue-level-badge-link {
+	vertical-align: middle;
+}
+
+.iue-badge-level .iue-badge-icon {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	transition: transform 0.3s;
+}
+
+.iue-badge-level:hover .iue-badge-icon {
+	transform: rotate(8deg) scale(1.1);
+}
+
+/* Rank-based colors */
+.iue-rank-default {
+	background: #fff8dc;
+	color: #a67c00;
+}
+
+.iue-rank-bronze {
+	background: #f5ebe0;
+	color: #cd7f32;
+}
+
+.iue-rank-silver {
+	background: #f0f0f0;
+	color: #a0a0a0;
+}
+
+.iue-rank-platinum {
+	background: #e0f7fa;
+	color: #007d8f;
+}
+
+.iue-rank-diamond {
+	background: #e0fcff;
+	color: #00bcd4;
+}

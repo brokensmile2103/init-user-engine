@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,12 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.2 – August 19, 2025 =
+- Added automated weekly cleanup system for orphaned inbox messages
+- Implemented silent background maintenance to remove inbox entries from deleted user accounts
+- Enhanced database integrity by automatically clearing orphaned data without logging or notifications
+- Improved system performance through regular cleanup of stale inbox records
 
 = 1.1.1 – August 18, 2025 =
 - Added full Inbox Statistics admin page with detailed analytics and charts

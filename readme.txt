@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,30 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.5 – August 22, 2025 =
+- Fixed timezone consistency issues in transient cleanup cron scheduler
+- Corrected inbox statistics queries to properly handle WordPress timezone settings
+- Enhanced date range filtering accuracy for inbox analytics and daily activity charts
+- Improved scheduled cleanup reliability by using WordPress timezone-aware functions
+- Fixed statistical calculations that were affected by UTC vs local time discrepancies
+- Updated cron frequency from hourly to twice-daily for optimal performance balance
+
+= 1.1.4 – August 22, 2025 =
+- Optimized captcha loading system with lazy initialization to reduce unnecessary API calls
+- Implemented smart captcha management that only loads when users access the registration form
+- Fixed memory leaks in JavaScript interval handlers with proper cleanup on modal close
+- Enhanced registration flow by preserving captcha on successful submissions instead of unnecessary reloads
+- Improved performance by eliminating background captcha generation for inactive registration forms
+- Reduced server load and database transient accumulation through intelligent captcha lifecycle management
+
+= 1.1.3 – August 22, 2025 =
+- Added automated hourly cleanup system for expired transient data
+- Implemented scheduled cron job to remove outdated captcha and rate limiting transients
+- Enhanced database performance by preventing transient accumulation and orphaned records
+- Improved system stability through regular cleanup of temporary data without manual intervention
+- Added proper cleanup on plugin deactivation to maintain database integrity
+- Optimized memory usage by eliminating stale transient entries that could impact site performance
 
 = 1.1.2 – August 19, 2025 =
 - Added automated weekly cleanup system for orphaned inbox messages

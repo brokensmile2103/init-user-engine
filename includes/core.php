@@ -33,3 +33,50 @@ function init_plugin_suite_user_engine_has_checked_in_today( $user_id ) {
 
 	return ( $last_checkin === $today );
 }
+
+// Đăng ký cron job
+add_action( 'init', 'init_plugin_suite_user_engine_schedule_cleanup_transients' );
+add_action( 'init_plugin_suite_user_engine_cleanup_transients', 'init_plugin_suite_user_engine_do_cleanup' );
+
+function init_plugin_suite_user_engine_schedule_cleanup_transients() {
+    if ( ! wp_next_scheduled( 'init_plugin_suite_user_engine_cleanup_transients' ) ) {
+        wp_schedule_event( time(), 'twicedaily', 'init_plugin_suite_user_engine_cleanup_transients' );
+    }
+}
+
+function init_plugin_suite_user_engine_do_cleanup() {
+    global $wpdb;
+    
+    $current_time = current_time( 'timestamp' );
+    
+    // Dọn captcha transients hết hạn
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query( $wpdb->prepare(
+        "DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b 
+         WHERE a.option_name LIKE %s 
+         AND a.option_name = CONCAT('_transient_timeout_', SUBSTRING(b.option_name, 12))
+         AND b.option_name LIKE %s 
+         AND a.option_value < %d",
+        '_transient_timeout_iue_captcha_%',
+        '_transient_iue_captcha_%',
+        $current_time
+    ));
+    
+    // Dọn rate limit transients hết hạn  
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $wpdb->query( $wpdb->prepare(
+        "DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b 
+         WHERE a.option_name LIKE %s 
+         AND a.option_name = CONCAT('_transient_timeout_', SUBSTRING(b.option_name, 12))
+         AND b.option_name LIKE %s 
+         AND a.option_value < %d",
+        '_transient_timeout_iue_register_rate_%',
+        '_transient_iue_register_rate_%',
+        $current_time
+    ));
+}
+
+// Cleanup khi deactivate
+register_deactivation_hook( __FILE__, function() {
+    wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_cleanup_transients' );
+});

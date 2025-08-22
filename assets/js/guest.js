@@ -112,6 +112,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				loginForm.classList.add('iue-hidden');
 				registerForm.classList.remove('iue-hidden');
 				registerForm.classList.add('iue-animating');
+				
+				// LAZY LOAD CAPTCHA CHỈ KHI CHUYỂN QUA TAB ĐĂNG KÝ
+				initRegisterFormIfNeeded();
 			} else {
 				registerForm.classList.add('iue-hidden');
 				loginForm.classList.remove('iue-hidden');
@@ -138,7 +141,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
-	(function handleRegisterForm() {
+	// LAZY REGISTER FORM HANDLER
+	let registerFormInitialized = false;
+	
+	function initRegisterFormIfNeeded() {
+		if (registerFormInitialized) return;
+		registerFormInitialized = true;
+		
+		handleRegisterForm();
+	}
+
+	function handleRegisterForm() {
 	    const form = document.getElementById('iue-register-form');
 	    if (!form) return;
 
@@ -205,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	        }
 	    }
 
-	    // Initial captcha load
+	    // LOAD CAPTCHA NGAY KHI INIT REGISTER FORM
 	    loadCaptcha();
 
 	    form.addEventListener('submit', async function (e) {
@@ -279,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	            // Reset form
 	            form.reset();
 	            captchaAttempts = 0;
-	            await loadCaptcha(true);
+	            // KHÔNG RELOAD CAPTCHA KHI ĐĂNG KÝ THÀNH CÔNG
 
 	            // Switch to login form after success
 	            setTimeout(() => {
@@ -350,16 +363,52 @@ document.addEventListener('DOMContentLoaded', function () {
 	        }
 	    }
 
-	    // Auto-refresh captcha every 10 minutes for active users
-	    setInterval(async () => {
-	        if (document.visibilityState === 'visible' && currentCaptcha) {
-	            const age = Date.now() - (currentCaptcha.expires - 15 * 60 * 1000);
-	            if (age > 10 * 60 * 1000) { // 10 minutes old
-	                await loadCaptcha(true);
+	    // CHỈ REFRESH CAPTCHA KHI REGISTER FORM ĐÃ ĐƯỢC INIT
+	    let refreshInterval;
+	    
+	    function startCaptchaRefresh() {
+	        refreshInterval = setInterval(async () => {
+	            const registerForm = document.getElementById('iue-form-register');
+	            if (document.visibilityState === 'visible' && 
+	                currentCaptcha && 
+	                registerForm && 
+	                !registerForm.classList.contains('iue-hidden')) {
+	                
+	                const age = Date.now() - (currentCaptcha.expires - 15 * 60 * 1000);
+	                if (age > 10 * 60 * 1000) { // 10 minutes old
+	                    await loadCaptcha(true);
+	                }
 	            }
+	        }, 60 * 1000); // Check every minute
+	    }
+	    
+	    function stopCaptchaRefresh() {
+	        if (refreshInterval) {
+	            clearInterval(refreshInterval);
+	            refreshInterval = null;
 	        }
-	    }, 60 * 1000); // Check every minute
-	})();
+	    }
+	    
+	    // Start refresh when form is initialized
+	    startCaptchaRefresh();
+	    
+	    // Cleanup interval khi modal đóng
+	    const closeBtn = document.getElementById('init-user-engine-modal-close');
+	    if (closeBtn) {
+	        closeBtn.addEventListener('click', stopCaptchaRefresh);
+	    }
+	    
+	    // Cleanup khi chuyển về login form
+	    const registerLink = document.getElementById('iue-register-link');
+	    if (registerLink) {
+	        registerLink.addEventListener('click', function() {
+	            const registerForm = document.getElementById('iue-form-register');
+	            if (registerForm && registerForm.classList.contains('iue-hidden')) {
+	                stopCaptchaRefresh();
+	            }
+	        });
+	    }
+	}
 
 	(function applyLoginModalTheme() {
 		const config = window.InitPluginSuiteUserEngineConfig || {};

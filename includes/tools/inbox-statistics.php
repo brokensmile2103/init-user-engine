@@ -276,11 +276,11 @@ function init_plugin_suite_user_engine_get_comprehensive_inbox_stats() {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     $stats['unread_messages'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'unread'");
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    $stats['today_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('today')));
+    $stats['today_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('today', current_time('timestamp'))));
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    $stats['week_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('monday this week')));
+    $stats['week_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('monday this week', current_time('timestamp'))));
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    $stats['month_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('first day of this month')));
+    $stats['month_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('first day of this month', current_time('timestamp'))));
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     $stats['total_recipients'] = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table}");
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -366,7 +366,7 @@ function init_plugin_suite_user_engine_get_filtered_inbox_stats($range = '7days'
     if ($days) {
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = wp_date('Y-m-d', strtotime("-{$i} days"));
-            $day_start = strtotime($date);
+            $day_start = strtotime($date, current_time('timestamp'));
             $day_end = $day_start + DAY_IN_SECONDS - 1;
             
             // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -382,7 +382,7 @@ function init_plugin_suite_user_engine_get_filtered_inbox_stats($range = '7days'
         // For "all time", get last 30 days
         for ($i = 29; $i >= 0; $i--) {
             $date = wp_date('Y-m-d', strtotime("-{$i} days"));
-            $day_start = strtotime($date);
+            $day_start = strtotime($date, current_time('timestamp'));
             $day_end = $day_start + DAY_IN_SECONDS - 1;
             
             // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -410,7 +410,7 @@ function init_plugin_suite_user_engine_get_advanced_inbox_analytics() {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     $analytics['active_recipients'] = (int) $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(DISTINCT user_id) FROM {$table} WHERE created_at >= %d",
-        strtotime('-30 days')
+        current_time('timestamp') - (30 * DAY_IN_SECONDS)
     ));
     // phpcs:enable
     
@@ -425,7 +425,7 @@ function init_plugin_suite_user_engine_get_advanced_inbox_analytics() {
         GROUP BY DATE(FROM_UNIXTIME(created_at))
         ORDER BY count DESC
         LIMIT 1
-    ", strtotime('-90 days')), ARRAY_A);
+    ", current_time('timestamp') - (90 * DAY_IN_SECONDS)), ARRAY_A);
     // phpcs:enable
     
     if ($peak_day_data) {
@@ -443,7 +443,7 @@ function init_plugin_suite_user_engine_get_advanced_inbox_analytics() {
             WHERE created_at >= %d
             GROUP BY DATE(FROM_UNIXTIME(created_at))
         ) daily_stats
-    ", strtotime('-30 days')));
+    ", current_time('timestamp') - (30 * DAY_IN_SECONDS)));
     // phpcs:enable
     
     $analytics['avg_daily'] = $avg_daily ? round($avg_daily, 1) : 0;

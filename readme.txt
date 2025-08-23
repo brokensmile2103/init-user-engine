@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,14 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.6 – August 23, 2025 =
+- Enhanced database initialization system with admin_init hook for improved reliability
+- Added administrator privilege verification to ensure secure table creation and maintenance
+- Implemented comprehensive table existence checking to prevent database inconsistencies
+- Improved multisite compatibility with automatic table creation for new blog instances
+- Added PHPCS compliance annotations to suppress unnecessary warnings for database operations
+- Strengthened plugin activation process with fail-safe table creation mechanisms
 
 = 1.1.5 – August 22, 2025 =
 - Fixed timezone consistency issues in transient cleanup cron scheduler

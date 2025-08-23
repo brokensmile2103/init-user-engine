@@ -4,16 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 // ==========================
 // Create Database
 // ==========================
-
 register_activation_hook( __FILE__, 'init_plugin_suite_user_engine_on_activation' );
 add_action( 'wpmu_new_blog', 'init_plugin_suite_user_engine_on_new_blog', 10, 6 );
+add_action( 'admin_init', 'init_plugin_suite_user_engine_check_table' );
 
 /**
  * Xử lý khi plugin được activate (site đơn hoặc toàn mạng)
  */
 function init_plugin_suite_user_engine_on_activation() {
     if ( is_multisite() ) {
-        $sites = get_sites( [ 'number' => 0 ] ); // lấy tất cả site
+        $sites = get_sites( [ 'number' => 0 ] );
         foreach ( $sites as $site ) {
             switch_to_blog( $site->blog_id );
             init_plugin_suite_user_engine_create_inbox_table();
@@ -34,16 +34,32 @@ function init_plugin_suite_user_engine_on_new_blog( $blog_id, $user_id, $domain,
 }
 
 /**
+ * Kiểm tra và tạo bảng nếu cần thiết (admin_init hook)
+ */
+function init_plugin_suite_user_engine_check_table() {
+    if ( ! current_user_can( 'administrator' ) ) {
+        return;
+    }
+    
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'init_user_engine_inbox';
+    
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) !== $table_name ) {
+        init_plugin_suite_user_engine_create_inbox_table();
+    }
+}
+
+/**
  * Hàm tạo bảng inbox
  */
 function init_plugin_suite_user_engine_create_inbox_table() {
     global $wpdb;
-
     $table_name = $wpdb->prefix . 'init_user_engine_inbox';
     $charset_collate = $wpdb->get_charset_collate();
-
+    
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
+    
     $sql = "CREATE TABLE $table_name (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id BIGINT UNSIGNED NOT NULL,
@@ -63,6 +79,6 @@ function init_plugin_suite_user_engine_create_inbox_table() {
         KEY priority (priority),
         KEY pinned (pinned)
     ) $charset_collate;";
-
+    
     dbDelta( $sql );
 }

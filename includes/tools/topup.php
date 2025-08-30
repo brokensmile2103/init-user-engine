@@ -6,59 +6,117 @@ function init_plugin_suite_user_engine_render_topup_page() {
 		wp_die( esc_html__( 'You do not have permission to access this page.', 'init-user-engine' ) );
 	}
 
+	// Load currency labels directly from options (no helper here)
+	$opts       = (array) get_option( constant( 'INIT_PLUGIN_SUITE_IUE_OPTION' ), [] );
+	$coin_label = isset( $opts['label_coin'] ) ? trim( wp_strip_all_tags( (string) $opts['label_coin'] ) ) : '';
+	$cash_label = isset( $opts['label_cash'] ) ? trim( wp_strip_all_tags( (string) $opts['label_cash'] ) ) : '';
+	$coin_label = $coin_label !== '' ? $coin_label : 'Coin';
+	$cash_label = $cash_label !== '' ? $cash_label : 'Cash';
+
 	$success = false;
-	$error = '';
+	$error   = '';
 
 	if (
 		isset( $_POST['iue_topup_nonce'] )
 		&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['iue_topup_nonce'] ) ), 'iue_topup' )
 	) {
-		$amount    = absint( wp_unslash( $_POST['iue_amount'] ?? 0 ) );
-		$type      = sanitize_key( $_POST['iue_topup_type'] ?? 'coin' );
-		$send_all  = ! empty( $_POST['iue_send_all'] );
-		$user_ids  = [];
+		// Cho phép số âm (delta). RAW ADJUST: bỏ qua mọi bonus/VIP.
+		$amount   = intval( wp_unslash( $_POST['iue_amount'] ?? 0 ) );
+		$type     = sanitize_key( $_POST['iue_topup_type'] ?? 'coin' );
+		$send_all = ! empty( $_POST['iue_send_all'] );
+		$user_ids = [];
 
 		if ( $send_all ) {
 			$user_ids = get_users( [ 'fields' => 'ID' ] );
 		} else {
-			$raw = sanitize_text_field( wp_unslash( $_POST['iue_user_ids'] ?? '' ) );
+			$raw      = sanitize_text_field( wp_unslash( $_POST['iue_user_ids'] ?? '' ) );
 			$user_ids = array_filter( array_map( 'absint', explode( ',', $raw ) ) );
 		}
 
-		if ( $amount <= 0 || empty( $user_ids ) || ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
+		// amount = 0 thì không làm gì; type sai; không có user => lỗi
+		if ( 0 === $amount || empty( $user_ids ) || ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
 			$error = __( 'Please fill in all required fields correctly.', 'init-user-engine' );
 		} else {
 			foreach ( $user_ids as $user_id ) {
-				if ( $type === 'coin' ) {
-					$new_coin = init_plugin_suite_user_engine_add_coin( $user_id, $amount );
-					init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $amount, 'topup_admin', 'add' );
+				if ( 'coin' === $type ) {
+					// RAW adjust coin (no bonus/VIP)
+					$before = (int) init_plugin_suite_user_engine_get_coin( $user_id );
+					$target = max( 0, $before + (int) $amount );
+					init_plugin_suite_user_engine_set_coin( $user_id, $target );
 
-					$title   = __( 'Admin Top-up Coin', 'init-user-engine' );
-					// translators: %d is the amount of Coins the user received from admin
-					$content = sprintf( __( 'You have received %1$d Coins from the admin.', 'init-user-engine' ), $amount );
+					$delta   = $target - $before; // có thể âm/dương/0
+					if ( 0 !== $delta ) {
+						$applied = abs( $delta );
+						$change  = ( $delta < 0 ) ? 'deduct' : 'add';
+
+						init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $applied, 'topup_admin', $change );
+
+						if ( 'deduct' === $change ) {
+							// translators: %s = currency label (e.g., Coin or Cash)
+							$title   = sprintf( __( 'Admin Adjustment %s', 'init-user-engine' ), $coin_label );
+							// translators: 1: amount, 2: currency label
+							$content = sprintf( __( '%1$d %2$s has been deducted by admin.', 'init-user-engine' ), $applied, $coin_label );
+							$icon    = 'warning';
+						} else {
+							// translators: %s = currency label (e.g., Coin or Cash)
+							$title   = sprintf( __( 'Admin Top-up %s', 'init-user-engine' ), $coin_label );
+							// translators: 1: amount, 2: currency label
+							$content = sprintf( __( 'You have received %1$d %2$s from the admin.', 'init-user-engine' ), $applied, $coin_label );
+							$icon    = 'gift';
+						}
+
+						init_plugin_suite_user_engine_send_inbox(
+							$user_id,
+							$title,
+							$content,
+							$icon,
+							[ 'topup_by_admin' => 1 ],
+							null,
+							'normal'
+						);
+					}
 				} else {
-					$new_cash = init_plugin_suite_user_engine_add_cash( $user_id, $amount );
-					init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $amount, 'topup_admin', 'add' );
+					// RAW adjust cash (no bonus/VIP)
+					$before = (int) init_plugin_suite_user_engine_get_cash( $user_id );
+					$target = max( 0, $before + (int) $amount );
+					init_plugin_suite_user_engine_set_cash( $user_id, $target );
 
-					$title   = __( 'Admin Top-up Cash', 'init-user-engine' );
-					// translators: %d is the amount of Cash the user received from admin
-					$content = sprintf( __( 'You have received %1$d Cash from the admin.', 'init-user-engine' ), $amount );
+					$delta   = $target - $before;
+					if ( 0 !== $delta ) {
+						$applied = abs( $delta );
+						$change  = ( $delta < 0 ) ? 'deduct' : 'add';
+
+						init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $applied, 'topup_admin', $change );
+
+						if ( 'deduct' === $change ) {
+							// translators: %s = currency label (e.g., Coin or Cash)
+							$title   = sprintf( __( 'Admin Adjustment %s', 'init-user-engine' ), $cash_label );
+							// translators: 1: amount, 2: currency label
+							$content = sprintf( __( '%1$d %2$s has been deducted by admin.', 'init-user-engine' ), $applied, $cash_label );
+							$icon    = 'warning';
+						} else {
+							// translators: %s = currency label (e.g., Coin or Cash)
+							$title   = sprintf( __( 'Admin Top-up %s', 'init-user-engine' ), $cash_label );
+							// translators: 1: amount, 2: currency label
+							$content = sprintf( __( 'You have received %1$d %2$s from the admin.', 'init-user-engine' ), $applied, $cash_label );
+							$icon    = 'gift';
+						}
+
+						init_plugin_suite_user_engine_send_inbox(
+							$user_id,
+							$title,
+							$content,
+							$icon,
+							[ 'topup_by_admin' => 1 ],
+							null,
+							'normal'
+						);
+					}
 				}
-
-				init_plugin_suite_user_engine_send_inbox(
-					$user_id,
-					$title,
-					$content,
-					'gift',
-					[ 'topup_by_admin' => 1 ],
-					null,
-					'normal'
-				);
 			}
 			$success = true;
 		}
 	}
-
 	?>
 	<div class="wrap iue-topup-wrapper">
 		<h1><?php esc_html_e( 'Top-up Coin / Cash', 'init-user-engine' ); ?></h1>
@@ -76,7 +134,8 @@ function init_plugin_suite_user_engine_render_topup_page() {
 				<tr>
 					<th scope="row"><label for="iue_amount"><?php esc_html_e( 'Amount', 'init-user-engine' ); ?></label></th>
 					<td>
-						<input type="number" name="iue_amount" id="iue_amount" min="1" required class="regular-text" placeholder="1000">
+						<input type="number" name="iue_amount" id="iue_amount" step="1" required class="regular-text" placeholder="1000 / -1000">
+						<p class="description"><?php esc_html_e( 'Positive to add, negative to deduct. Deduction will not go below 0.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 				<tr>

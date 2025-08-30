@@ -744,17 +744,11 @@ msgstr "Tùy chọn này sẽ bỏ qua danh sách ID và nạp tiền cho toàn 
 msgid "Top-up Now"
 msgstr "Thực hiện Nạp"
 
-msgid "Admin Top-up Coin"
-msgstr "Admin nạp Coin"
+msgid "Admin Top-up %s"
+msgstr "Nạp %s từ Quản trị viên"
 
-msgid "You have received %d Coins from the admin."
-msgstr "Bạn vừa nhận được %d Coin từ admin."
-
-msgid "Admin Top-up Cash"
-msgstr "Admin nạp Cash"
-
-msgid "You have received %d Cash from the admin."
-msgstr "Bạn vừa nhận được %d Cash từ admin."
+msgid "You have received %1$d %2$s from the admin."
+msgstr "Bạn đã nhận được %1$d %2$s từ Quản trị viên."
 
 msgid "Username already exists."
 msgstr "Tên người dùng đã tồn tại."
@@ -995,3 +989,12 @@ msgstr "Trung bình mỗi người dùng:"
 
 msgid "View Full Statistics"
 msgstr "Xem toàn bộ thống kê"
+
+msgid "Positive to add, negative to deduct. Deduction will not go below 0."
+msgstr "Số dương để cộng, số âm để trừ. Khi trừ sẽ không giảm xuống dưới 0."
+
+msgid "Admin Adjustment %s"
+msgstr "Điều chỉnh %s bởi Quản trị viên"
+
+msgid "%1$d %2$s has been deducted by admin."
+msgstr "Bạn đã bị trừ %1$d %2$s bởi Quản trị viên."

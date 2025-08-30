@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,15 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.7 – August 30, 2025 =
+- Refactored Admin Top-up tool to support both addition (positive) and deduction (negative) amounts
+- Bypassed VIP/bonus multipliers during manual top-ups to ensure exact applied value
+- Implemented raw balance adjustments with automatic clamping to prevent negative wallet values
+- Updated inbox notifications to reflect both top-up and deduction actions consistently
+- Enhanced transaction logging with accurate applied amounts and proper change type (add/deduct)
+- Added `translators:` comments for all `sprintf()` translation strings in Top-up tool to meet WPCS i18n standards
+- Improved admin UI with description note: positive values add funds, negative values deduct funds
 
 = 1.1.6 – August 23, 2025 =
 - Enhanced database initialization system with admin_init hook for improved reliability

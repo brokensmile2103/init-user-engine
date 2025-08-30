@@ -744,16 +744,10 @@ msgstr ""
 msgid "Top-up Now"
 msgstr ""
 
-msgid "Admin Top-up Coin"
+msgid "Admin Top-up %s"
 msgstr ""
 
-msgid "You have received %d Coins from the admin."
-msgstr ""
-
-msgid "Admin Top-up Cash"
-msgstr ""
-
-msgid "You have received %d Cash from the admin."
+msgid "You have received %1$d %2$s from the admin."
 msgstr ""
 
 msgid "Username already exists."
@@ -994,4 +988,13 @@ msgid "Avg per User:"
 msgstr ""
 
 msgid "View Full Statistics"
+msgstr ""
+
+msgid "Positive to add, negative to deduct. Deduction will not go below 0."
+msgstr ""
+
+msgid "Admin Adjustment %s"
+msgstr ""
+
+msgid "%1$d %2$s has been deducted by admin."
 msgstr ""

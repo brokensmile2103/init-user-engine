@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,16 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.8 – September 17, 2025 =
+- Added admin user metabox on profile/edit screens showing wallet, EXP, VIP, and inbox statistics
+- Displayed Coin, Cash, Level, and EXP progress with dynamic progress bar
+- Integrated VIP information including total purchases, expiry date, lifetime detection, and coin spent
+- Implemented inbox quick stats with total, unread, last 7 days, and last message timestamp
+- Linked inbox statistics directly to full analytics page for quick navigation
+- Included helper functions with safe fallbacks for coin, cash, VIP, and inbox stats to ensure robustness
+- Fixed missing version parameter in `wp_register_style()` to comply with WordPress coding standards
+- Enhanced inline admin CSS with proper versioning using `INIT_PLUGIN_SUITE_IUE_VERSION`
 
 = 1.1.7 – August 30, 2025 =
 - Refactored Admin Top-up tool to support both addition (positive) and deduction (negative) amounts

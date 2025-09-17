@@ -998,3 +998,66 @@ msgstr "Điều chỉnh %s bởi Quản trị viên"
 
 msgid "%1$d %2$s has been deducted by admin."
 msgstr "Bạn đã bị trừ %1$d %2$s bởi Quản trị viên."
+
+msgid "User Overview"
+msgstr "Tổng quan người dùng"
+
+msgid "Snapshot"
+msgstr "Tổng quan nhanh"
+
+msgid "Level"
+msgstr "Cấp"
+
+msgid "VIP Purchases"
+msgstr "Lượt mua VIP"
+
+msgid "VIP Status"
+msgstr "Trạng thái VIP"
+
+msgid "Level Progress"
+msgstr "Tiến độ lên cấp"
+
+msgid "VIP Details"
+msgstr "Chi tiết VIP"
+
+msgid "Current state:"
+msgstr "Trạng thái hiện tại:"
+
+msgid "Expiry:"
+msgstr "Hết hạn:"
+
+msgid "Never expires"
+msgstr "Không hết hạn"
+
+msgid "Total VIP days purchased (all time):"
+msgstr "Tổng số ngày VIP đã mua (toàn thời gian):"
+
+msgid "Total Coin spent for VIP:"
+msgstr "Tổng Coin đã dùng cho VIP:"
+
+msgid "Inbox (User)"
+msgstr "Hộp thư (Người dùng)"
+
+msgid "Last message:"
+msgstr "Tin gần nhất:"
+
+msgid "Open Inbox Statistics"
+msgstr "Mở thống kê Hộp thư"
+
+msgid "Not VIP"
+msgstr "Chưa là VIP"
+
+msgid "VIP: Lifetime"
+msgstr "VIP: Trọn đời"
+
+msgid "VIP: %s left"
+msgstr "VIP: còn %s"
+
+msgid "VIP expired"
+msgstr "VIP đã hết hạn"
+
+msgid "Active"
+msgstr "Đang hoạt động"
+
+msgid "Inactive"
+msgstr "Không hoạt động"

@@ -998,3 +998,66 @@ msgstr ""
 
 msgid "%1$d %2$s has been deducted by admin."
 msgstr ""
+
+msgid "User Overview"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
+msgid "Level"
+msgstr ""
+
+msgid "VIP Purchases"
+msgstr ""
+
+msgid "VIP Status"
+msgstr ""
+
+msgid "Level Progress"
+msgstr ""
+
+msgid "VIP Details"
+msgstr ""
+
+msgid "Current state:"
+msgstr ""
+
+msgid "Expiry:"
+msgstr ""
+
+msgid "Never expires"
+msgstr ""
+
+msgid "Total VIP days purchased (all time):"
+msgstr ""
+
+msgid "Total Coin spent for VIP:"
+msgstr ""
+
+msgid "Inbox (User)"
+msgstr ""
+
+msgid "Last message:"
+msgstr ""
+
+msgid "Open Inbox Statistics"
+msgstr ""
+
+msgid "Not VIP"
+msgstr ""
+
+msgid "VIP: Lifetime"
+msgstr ""
+
+msgid "VIP: %s left"
+msgstr ""
+
+msgid "VIP expired"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""

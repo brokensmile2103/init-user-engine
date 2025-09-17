@@ -55,7 +55,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
             <div class="iue-stats-card iue-stats-total">
                 <div class="iue-stats-icon">📧</div>
                 <div class="iue-stats-content">
-                    <h3><?php echo esc_html(number_format($stats['total_messages'])); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n($stats['total_messages'])); ?></h3>
                     <p><?php esc_html_e('Total Messages', 'init-user-engine'); ?></p>
                 </div>
             </div>
@@ -63,7 +63,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
             <div class="iue-stats-card iue-stats-unread">
                 <div class="iue-stats-icon">🔔</div>
                 <div class="iue-stats-content">
-                    <h3><?php echo esc_html(number_format($stats['unread_messages'])); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n($stats['unread_messages'])); ?></h3>
                     <p><?php esc_html_e('Unread Messages', 'init-user-engine'); ?></p>
                     <small><?php echo esc_html($stats['unread_percentage']); ?>% of total</small>
                 </div>
@@ -72,7 +72,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
             <div class="iue-stats-card iue-stats-today">
                 <div class="iue-stats-icon">📅</div>
                 <div class="iue-stats-content">
-                    <h3><?php echo esc_html(number_format($stats['today_messages'])); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n($stats['today_messages'])); ?></h3>
                     <p><?php esc_html_e('Sent Today', 'init-user-engine'); ?></p>
                 </div>
             </div>
@@ -80,7 +80,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
             <div class="iue-stats-card iue-stats-recipients">
                 <div class="iue-stats-icon">👥</div>
                 <div class="iue-stats-content">
-                    <h3><?php echo esc_html(number_format($stats['total_recipients'])); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n($stats['total_recipients'])); ?></h3>
                     <p><?php esc_html_e('Total Recipients', 'init-user-engine'); ?></p>
                 </div>
             </div>
@@ -99,7 +99,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                                 <div class="iue-type-item">
                                     <div class="iue-type-header">
                                         <span class="iue-type-name"><?php echo esc_html(ucfirst($type)); ?></span>
-                                        <span class="iue-type-count"><?php echo esc_html(number_format($count)); ?></span>
+                                        <span class="iue-type-count"><?php echo esc_html(number_format_i18n($count)); ?></span>
                                     </div>
                                     <div class="iue-type-bar">
                                         <div class="iue-type-fill" style="width: <?php echo esc_attr($stats['total_messages'] > 0 ? round(($count / $stats['total_messages']) * 100, 1) : 0); ?>%;"></div>
@@ -120,7 +120,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                         <?php if (!empty($stats['priority_levels'])): ?>
                             <?php foreach ($stats['priority_levels'] as $priority => $count): ?>
                                 <div class="iue-priority-card iue-priority-<?php echo esc_attr($priority); ?>">
-                                    <div class="iue-priority-count"><?php echo esc_html(number_format($count)); ?></div>
+                                    <div class="iue-priority-count"><?php echo esc_html(number_format_i18n($count)); ?></div>
                                     <div class="iue-priority-label"><?php echo esc_html(ucfirst($priority)); ?></div>
                                     <div class="iue-priority-percent"><?php echo esc_html($stats['total_messages'] > 0 ? round(($count / $stats['total_messages']) * 100, 1) : 0); ?>%</div>
                                 </div>
@@ -150,12 +150,12 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                         
                         <div class="iue-engagement-item">
                             <h4><?php esc_html_e('Pinned Messages', 'init-user-engine'); ?></h4>
-                            <div class="iue-engagement-value"><?php echo esc_html(number_format($stats['pinned_messages'])); ?></div>
+                            <div class="iue-engagement-value"><?php echo esc_html(number_format_i18n($stats['pinned_messages'])); ?></div>
                         </div>
                         
                         <div class="iue-engagement-item">
                             <h4><?php esc_html_e('Active Recipients (30d)', 'init-user-engine'); ?></h4>
-                            <div class="iue-engagement-value"><?php echo esc_html(number_format($advanced_stats['active_recipients'] ?? 0)); ?></div>
+                            <div class="iue-engagement-value"><?php echo esc_html(number_format_i18n($advanced_stats['active_recipients'] ?? 0)); ?></div>
                         </div>
                     </div>
                 </div>
@@ -204,7 +204,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                                     <div class="iue-recipient-info">
                                         <div class="iue-recipient-name"><?php echo esc_html($recipient['display_name']); ?></div>
                                         <div class="iue-recipient-details">
-                                            <span class="iue-total-messages"><?php echo esc_html(number_format($recipient['total_messages'])); ?> <?php esc_html_e('total', 'init-user-engine'); ?></span>
+                                            <span class="iue-total-messages"><?php echo esc_html(number_format_i18n($recipient['total_messages'])); ?> <?php esc_html_e('total', 'init-user-engine'); ?></span>
                                             <?php if ($recipient['unread_count'] > 0): ?>
                                                 <span class="iue-unread-count"><?php echo esc_html($recipient['unread_count']); ?> <?php esc_html_e('unread', 'init-user-engine'); ?></span>
                                             <?php endif; ?>
@@ -224,11 +224,11 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                     <div class="iue-recent-summary">
                         <div class="iue-summary-item">
                             <span class="iue-summary-label"><?php esc_html_e('This Week:', 'init-user-engine'); ?></span>
-                            <span class="iue-summary-value"><?php echo esc_html(number_format($stats['week_messages'])); ?></span>
+                            <span class="iue-summary-value"><?php echo esc_html(number_format_i18n($stats['week_messages'])); ?></span>
                         </div>
                         <div class="iue-summary-item">
                             <span class="iue-summary-label"><?php esc_html_e('This Month:', 'init-user-engine'); ?></span>
-                            <span class="iue-summary-value"><?php echo esc_html(number_format($stats['month_messages'])); ?></span>
+                            <span class="iue-summary-value"><?php echo esc_html(number_format_i18n($stats['month_messages'])); ?></span>
                         </div>
                         <div class="iue-summary-item">
                             <span class="iue-summary-label"><?php esc_html_e('Peak Day:', 'init-user-engine'); ?></span>
@@ -236,7 +236,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                         </div>
                         <div class="iue-summary-item">
                             <span class="iue-summary-label"><?php esc_html_e('Avg Daily:', 'init-user-engine'); ?></span>
-                            <span class="iue-summary-value"><?php echo esc_html(number_format($advanced_stats['avg_daily'] ?? 0, 1)); ?></span>
+                            <span class="iue-summary-value"><?php echo esc_html(number_format_i18n($advanced_stats['avg_daily'] ?? 0, 1)); ?></span>
                         </div>
                     </div>
                 </div>
@@ -523,19 +523,19 @@ function init_plugin_suite_user_engine_render_inbox_dashboard_widget() {
     <div class="iue-dashboard-widget">
         <div class="iue-widget-stats">
             <div class="iue-widget-stat">
-                <span class="iue-stat-number"><?php echo esc_html(number_format($total_messages)); ?></span>
+                <span class="iue-stat-number"><?php echo esc_html(number_format_i18n($total_messages)); ?></span>
                 <span class="iue-stat-label"><?php esc_html_e('Total Messages', 'init-user-engine'); ?></span>
             </div>
             <div class="iue-widget-stat">
-                <span class="iue-stat-number iue-unread"><?php echo esc_html(number_format($unread_messages)); ?></span>
+                <span class="iue-stat-number iue-unread"><?php echo esc_html(number_format_i18n($unread_messages)); ?></span>
                 <span class="iue-stat-label"><?php esc_html_e('Unread', 'init-user-engine'); ?></span>
             </div>
             <div class="iue-widget-stat">
-                <span class="iue-stat-number iue-today"><?php echo esc_html(number_format($today_messages)); ?></span>
+                <span class="iue-stat-number iue-today"><?php echo esc_html(number_format_i18n($today_messages)); ?></span>
                 <span class="iue-stat-label"><?php esc_html_e('Today', 'init-user-engine'); ?></span>
             </div>
             <div class="iue-widget-stat">
-                <span class="iue-stat-number iue-recipients"><?php echo esc_html(number_format($total_recipients)); ?></span>
+                <span class="iue-stat-number iue-recipients"><?php echo esc_html(number_format_i18n($total_recipients)); ?></span>
                 <span class="iue-stat-label"><?php esc_html_e('Recipients', 'init-user-engine'); ?></span>
             </div>
         </div>

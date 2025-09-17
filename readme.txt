@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,11 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.1.9 – September 17, 2025 =
+- Added extensible filter to inject custom KPIs after Cash in the Admin User metabox
+- Introduced helper function to normalize extra KPI items and ensure safe output
+- Provided theme example to display "Power Stone" metric with i18n and WPCS compliance
 
 = 1.1.8 – September 17, 2025 =
 - Added admin user metabox on profile/edit screens showing wallet, EXP, VIP, and inbox statistics

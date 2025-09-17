@@ -126,6 +126,18 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 						<div class="iue-meta"><?php esc_html_e( 'Cash', 'init-user-engine' ); ?></div>
 						<b><?php echo esc_html( number_format_i18n( $cash ) ); ?></b>
 					</div>
+					<?php
+					// Extra KPIs injected via filter
+					$__iue_extra_kpis = init_plugin_suite_user_engine_get_admin_user_extra_stats( $user_id );
+					if ( ! empty( $__iue_extra_kpis ) ) :
+						foreach ( $__iue_extra_kpis as $__iue_item ) : ?>
+							<div class="iue-kpi">
+								<div class="iue-meta"><?php echo esc_html( $__iue_item['label'] ); ?></div>
+								<b><?php echo wp_kses_post( $__iue_item['value'] ); ?></b>
+							</div>
+						<?php endforeach;
+					endif;
+					?>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Level', 'init-user-engine' ); ?></div>
 						<b><?php echo esc_html( $level ); ?></b>
@@ -337,4 +349,36 @@ function init_plugin_suite_user_engine_get_inbox_quick_stats( $user_id ) {
 	}
 
 	return $stats;
+}
+
+/**
+ * Return extra KPI rows for the Admin User metabox (after Cash).
+ *
+ * Structure each item as:
+ * [
+ *   'label' => (string) KPI label (plain text, will be esc_html),
+ *   'value' => (string) KPI value (HTML allowed, will be wp_kses_post),
+ * ]
+ *
+ * @param int $user_id
+ * @return array<int, array{label:string,value:string}>
+ */
+function init_plugin_suite_user_engine_get_admin_user_extra_stats( $user_id ) {
+	$items = apply_filters( 'init_plugin_suite_user_engine_admin_user_extra_stats', [], $user_id );
+
+	// Normalize to safe array
+	$normalized = [];
+	if ( is_array( $items ) ) {
+		foreach ( $items as $row ) {
+			if ( ! is_array( $row ) ) continue;
+			$label = isset( $row['label'] ) ? (string) $row['label'] : '';
+			$value = isset( $row['value'] ) ? (string) $row['value'] : '';
+			if ( $label === '' ) continue;
+			$normalized[] = [
+				'label' => $label,
+				'value' => $value,
+			];
+		}
+	}
+	return $normalized;
 }

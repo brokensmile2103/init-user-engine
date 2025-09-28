@@ -24,12 +24,19 @@
 		<input type="text" name="iue_hp" id="iue_hp" autocomplete="off" tabindex="-1">
 	</p>
 
-	<p class="iue-form-group iue-register-captcha">
-		<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
-		<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>
-		<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input"
-			placeholder="<?php esc_attr_e( 'Type your answer here', 'init-user-engine' ); ?>" required>
-	</p>
+	<?php
+	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
+	$disable_captcha = ! empty( $options['disable_captcha'] );
+	?>
+
+	<?php if ( ! $disable_captcha ) : ?>
+		<p class="iue-form-group iue-register-captcha">
+			<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
+			<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>
+			<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input"
+				placeholder="<?php esc_attr_e( 'Type your answer here', 'init-user-engine' ); ?>" required>
+		</p>
+	<?php endif; ?>
 
 	<p class="iue-form-group iue-register-submit">
 		<button type="submit" class="iue-submit">

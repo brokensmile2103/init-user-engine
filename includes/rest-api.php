@@ -206,6 +206,16 @@ function init_plugin_suite_user_engine_api_get_captcha() {
             ['question' => __('How many months in a year?', 'init-user-engine'), 'answer' => 12],
             ['question' => __('What is 10 divided by 2?', 'init-user-engine'), 'answer' => 5],
             ['question' => __('What is 3 squared?', 'init-user-engine'), 'answer' => 9],
+            ['question' => __('How many sides does a square have?', 'init-user-engine'), 'answer' => 4],
+            ['question' => __('How many legs does a spider have?', 'init-user-engine'), 'answer' => 8],
+            ['question' => __('How many letters are in the English alphabet?', 'init-user-engine'), 'answer' => 26],
+            ['question' => __('What is 100 divided by 25?', 'init-user-engine'), 'answer' => 4],
+            ['question' => __('What is 2 cubed?', 'init-user-engine'), 'answer' => 8],
+            ['question' => __('How many days in February (non-leap year)?', 'init-user-engine'), 'answer' => 28],
+            ['question' => __('How many fingers do humans normally have in total?', 'init-user-engine'), 'answer' => 10],
+            ['question' => __('What is 5 times 6?', 'init-user-engine'), 'answer' => 30],
+            ['question' => __('What is 9 minus 4?', 'init-user-engine'), 'answer' => 5],
+            ['question' => __('What is 7 plus 8?', 'init-user-engine'), 'answer' => 15],
         ];
 
         $selected = $questions[array_rand($questions)];
@@ -237,9 +247,9 @@ function init_plugin_suite_user_engine_api_get_captcha() {
 
 // Enhanced register function
 function init_plugin_suite_user_engine_api_register_user(WP_REST_Request $request) {
-    $data = $request->get_json_params();
+    $data     = $request->get_json_params();
     $username = sanitize_user($data['username'] ?? '');
-    $email = sanitize_email($data['email'] ?? '');
+    $email    = sanitize_email($data['email'] ?? '');
     $password = $data['password'] ?? '';
 
     $honeypot = sanitize_text_field($data['iue_hp'] ?? '');
@@ -247,26 +257,30 @@ function init_plugin_suite_user_engine_api_register_user(WP_REST_Request $reques
         return new WP_Error('bot_detected', __('Bot submission detected.', 'init-user-engine'), ['status' => 403]);
     }
 
-    $captcha_token = sanitize_text_field($data['captcha_token'] ?? '');
-    $captcha_answer = intval($data['captcha_answer'] ?? 0);
+    // Check setting disable_captcha
+    $settings         = get_option(INIT_PLUGIN_SUITE_IUE_OPTION, []);
+    $disable_captcha  = ! empty($settings['disable_captcha']);
 
-    // Enhanced captcha validation
-    $captcha_result = init_plugin_suite_user_engine_validate_captcha($captcha_token, $captcha_answer);
-    
-    if (is_wp_error($captcha_result)) {
-        return $captcha_result;
+    if (! $disable_captcha) {
+        $captcha_token  = sanitize_text_field($data['captcha_token'] ?? '');
+        $captcha_answer = intval($data['captcha_answer'] ?? 0);
+
+        $captcha_result = init_plugin_suite_user_engine_validate_captcha($captcha_token, $captcha_answer);
+        if (is_wp_error($captcha_result)) {
+            return $captcha_result;
+        }
     }
 
     // Rate limiting per IP
-    $ip = init_plugin_suite_user_engine_get_real_ip();
+    $ip       = init_plugin_suite_user_engine_get_real_ip();
     $rate_key = 'iue_register_rate_' . hash('sha256', $ip);
     $attempts = get_transient($rate_key) ?: 0;
-    
-    if ($attempts >= 5) { // Max 5 attempts per hour
+
+    if ($attempts >= 5) {
         return new WP_Error('rate_limit', __('Too many registration attempts. Please try again later.', 'init-user-engine'), ['status' => 429]);
     }
 
-    // Validate dữ liệu
+    // Validate dữ liệu...
     if (strlen($username) < 3) {
         return new WP_Error('invalid_username', __('Username must be at least 3 characters.', 'init-user-engine'), ['status' => 400]);
     }
@@ -291,18 +305,15 @@ function init_plugin_suite_user_engine_api_register_user(WP_REST_Request $reques
         return new WP_Error('weak_password', __('Password must be at least 6 characters.', 'init-user-engine'), ['status' => 400]);
     }
 
-    // Enhanced password strength check
     if (!preg_match('/^(?=.*[a-zA-Z])(?=.*\d)/', $password)) {
         return new WP_Error('weak_password', __('Password must contain both letters and numbers.', 'init-user-engine'), ['status' => 400]);
     }
 
-    // Filter mở rộng để validate tùy biến
     $errors = apply_filters('init_plugin_suite_user_engine_validate_register_fields', [], [
         'username' => $username,
-        'email' => $email,
+        'email'    => $email,
         'password' => $password,
     ]);
-
     if (!empty($errors) && is_array($errors)) {
         return new WP_REST_Response([
             'status' => 'validation_failed',
@@ -310,24 +321,20 @@ function init_plugin_suite_user_engine_api_register_user(WP_REST_Request $reques
         ], 400);
     }
 
-    // Increment rate limit counter
     set_transient($rate_key, $attempts + 1, HOUR_IN_SECONDS);
 
-    // Tạo tài khoản
     $user_id = wp_create_user($username, $password, $email);
 
     if (is_wp_error($user_id)) {
         return new WP_Error('registration_failed', $user_id->get_error_message(), ['status' => 500]);
     }
 
-    // Clear rate limit on successful registration
     delete_transient($rate_key);
 
-    // Gắn metadata mặc định (nếu cần)
     do_action('init_plugin_suite_user_engine_after_register', $user_id);
 
     return new WP_REST_Response([
-        'status' => 'registered',
+        'status'  => 'registered',
         'message' => __('Registration successful. You can now log in.', 'init-user-engine'),
     ], 200);
 }

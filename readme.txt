@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.9
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,18 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.0 – September 28, 2025 =
+- Added ability to revoke VIP membership directly from the Admin User Metabox
+- Implemented automatic inbox notification to inform users when their VIP status is removed
+- Ensured safe validation to guarantee VIP is removed from the correct user only
+- Added new option in plugin settings to completely disable CAPTCHA on registration
+- Updated registration form JS to auto-detect and skip CAPTCHA field when disabled
+- Enhanced REST API `/register` to conditionally bypass CAPTCHA validation based on settings
+- Expanded CAPTCHA trivia pool with fresh, unambiguous fact-based questions (e.g., sides of a square, letters in the English alphabet, spider legs, etc.)
+- Fully localized all new CAPTCHA questions with ready-made msgid/msgstr entries
+- Improved validation and UI consistency by showing clearer error messages and reset flow
+- Ensured no debatable or ambiguous questions remain in the trivia pool for maximum reliability
 
 = 1.1.9 – September 17, 2025 =
 - Added extensible filter to inject custom KPIs after Cash in the Admin User metabox

@@ -120,11 +120,11 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				<div class="iue-kpis">
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Coin', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $coin ) ); ?></b>
+						<strong><?php echo esc_html( number_format_i18n( $coin ) ); ?></strong>
 					</div>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Cash', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $cash ) ); ?></b>
+						<strong><?php echo esc_html( number_format_i18n( $cash ) ); ?></strong>
 					</div>
 					<?php
 					// Extra KPIs injected via filter
@@ -133,30 +133,30 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 						foreach ( $__iue_extra_kpis as $__iue_item ) : ?>
 							<div class="iue-kpi">
 								<div class="iue-meta"><?php echo esc_html( $__iue_item['label'] ); ?></div>
-								<b><?php echo wp_kses_post( $__iue_item['value'] ); ?></b>
+								<strong><?php echo wp_kses_post( $__iue_item['value'] ); ?></strong>
 							</div>
 						<?php endforeach;
 					endif;
 					?>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Level', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( $level ); ?></b>
+						<strong><?php echo esc_html( $level ); ?></strong>
 					</div>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'EXP', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $exp_now ) ); ?>
+						<strong><?php echo esc_html( number_format_i18n( $exp_now ) ); ?>
 							<?php if ( $exp_required > 0 ) : ?>
 								<span class="iue-meta">/ <?php echo esc_html( number_format_i18n( $exp_required ) ); ?></span>
 							<?php endif; ?>
-						</b>
+						</strong>
 					</div>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'VIP Purchases', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $vip_purchases ) ); ?></b>
+						<strong><?php echo esc_html( number_format_i18n( $vip_purchases ) ); ?></strong>
 					</div>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'VIP Status', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( $vip_label ); ?></b>
+						<strong><?php echo esc_html( $vip_label ); ?></strong>
 					</div>
 				</div>
 
@@ -210,6 +210,23 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 						<strong><?php echo esc_html( number_format_i18n( $tot_coin ) ); ?></strong>
 					</li>
 				</ul>
+
+				<?php
+				// Generate secure admin-post URL for removing VIP
+				$__iue_remove_vip_url = wp_nonce_url(
+					admin_url( 'admin-post.php?action=iue_remove_vip&user_id=' . $user_id ),
+					'iue_remove_vip_' . $user_id
+				);
+
+				// Show button only if currently VIP, lifetime, or has an expiry set
+				if ( $is_lifetime || $is_vip || (int) $vip_expiry > 0 ) : ?>
+					<p class="iue-meta" style="margin-top:10px;">
+						<a class="button button-secondary" href="<?php echo esc_url( $__iue_remove_vip_url ); ?>"
+						   onclick="return confirm('<?php echo esc_attr__( 'Are you sure you want to remove this user’s VIP status?', 'init-user-engine' ); ?>');">
+							<?php esc_html_e( 'Remove VIP', 'init-user-engine' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
 			</div>
 
 			<div class="iue-card">
@@ -217,15 +234,15 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				<div class="iue-kpis" style="margin-top:6px;">
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Total Messages', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $inbox['total'] ) ); ?></b>
+						<strong><?php echo esc_html( number_format_i18n( $inbox['total'] ) ); ?></strong>
 					</div>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Unread', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $inbox['unread'] ) ); ?></b>
+						<strong><?php echo esc_html( number_format_i18n( $inbox['unread'] ) ); ?></strong>
 					</div>
 					<div class="iue-kpi">
 						<div class="iue-meta"><?php esc_html_e( 'Last 7 Days', 'init-user-engine' ); ?></div>
-						<b><?php echo esc_html( number_format_i18n( $inbox['last7'] ) ); ?></b>
+						<strong><?php echo esc_html( number_format_i18n( $inbox['last7'] ) ); ?></strong>
 					</div>
 				</div>
 				<p class="iue-meta" style="margin-top:10px;">
@@ -382,3 +399,98 @@ function init_plugin_suite_user_engine_get_admin_user_extra_stats( $user_id ) {
 	}
 	return $normalized;
 }
+
+/**
+ * Handle admin-post to remove VIP from a user.
+ * URL pattern: admin-post.php?action=iue_remove_vip&user_id=###&_wpnonce=...
+ */
+add_action( 'admin_post_iue_remove_vip', function () {
+	if ( ! is_admin() ) wp_die();
+
+	$user_id = isset( $_GET['user_id'] ) ? absint( $_GET['user_id'] ) : 0;
+	if ( ! $user_id ) {
+		wp_safe_redirect( add_query_arg( 'iue_vip_removed', '0', admin_url() ) );
+		exit;
+	}
+
+	// Nonce + capability checks
+	if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'iue_remove_vip_' . $user_id ) ) {
+		wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
+	}
+	if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		wp_die( esc_html__( 'You do not have permission to edit this user.', 'init-user-engine' ) );
+	}
+
+	$now = current_time( 'timestamp' );
+
+	// Fetch current log & expiry using available helpers or meta
+	$vip_expiry = function_exists( 'init_plugin_suite_user_engine_get_vip_expiry' )
+		? (int) init_plugin_suite_user_engine_get_vip_expiry( $user_id )
+		: (int) get_user_meta( $user_id, 'iue_vip_expire', true );
+
+	$vip_log = function_exists( 'init_plugin_suite_user_engine_get_vip_log' )
+		? (array) init_plugin_suite_user_engine_get_vip_log( $user_id )
+		: (array) get_user_meta( $user_id, 'iue_vip_log', true );
+
+	if ( ! is_array( $vip_log ) ) $vip_log = [];
+
+	// SOFT-CANCEL STRATEGY:
+	// - Set expiry to 0 (inactive)
+	// - Add a log entry {action: cancel}
+	// - If any "lifetime" entries exist (days >= 9999), neutralize them by converting to 0 days but keep note
+	$had_lifetime = false;
+	foreach ( $vip_log as &$__row ) {
+		$days_val = isset( $__row['days'] ) ? (int) $__row['days'] : 0;
+		if ( $days_val >= 9999 ) {
+			$had_lifetime = true;
+			$__row['note'] = ( isset( $__row['note'] ) ? (string) $__row['note'] . '; ' : '' ) . 'lifetime_cancelled';
+			$__row['days'] = 0; // neutralize lifetime flag for UI checker
+		}
+	}
+	unset( $__row );
+
+	$vip_log[] = [
+		'action'      => 'cancel',
+		'by'          => get_current_user_id(),
+		'time'        => $now,
+		'prev_expiry' => (int) $vip_expiry,
+		'note'        => $had_lifetime ? 'admin_cancel_vip (lifetime neutralized)' : 'admin_cancel_vip',
+	];
+
+	// Persist changes
+	update_user_meta( $user_id, 'iue_vip_expire', 0 );
+	update_user_meta( $user_id, 'iue_vip_log', $vip_log );
+
+	/**
+	 * Hook for external integrations/auditing
+	 *
+	 * @param int   $user_id
+	 * @param int   $prev_expiry
+	 * @param array $vip_log_after
+	 */
+	do_action( 'init_plugin_suite_user_engine_vip_removed', $user_id, (int) $vip_expiry, $vip_log );
+
+	// Redirect back (profile or user-edit) with notice
+	$back = wp_get_referer();
+	if ( ! $back ) $back = get_edit_user_link( $user_id );
+	wp_safe_redirect( add_query_arg( 'iue_vip_removed', '1', $back ) );
+	exit;
+} );
+
+// Show an admin notice after VIP removal
+add_action( 'admin_notices', function () {
+	if ( ! isset( $_GET['iue_vip_removed'] ) ) return;
+
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( $screen && ! in_array( $screen->id, [ 'profile', 'user-edit' ], true ) ) {
+		// Only show on user profile screens
+		return;
+	}
+
+	$ok = ( $_GET['iue_vip_removed'] === '1' );
+	$class = $ok ? 'updated' : 'error';
+	$msg   = $ok
+		? esc_html__( 'VIP status has been removed for this user.', 'init-user-engine' )
+		: esc_html__( 'Failed to remove VIP status.', 'init-user-engine' );
+	echo '<div class="' . esc_attr( $class ) . ' notice is-dismissible"><p>' . $msg . '</p></div>';
+} );

@@ -1061,3 +1061,51 @@ msgstr ""
 
 msgid "Inactive"
 msgstr ""
+
+msgid "Your VIP status has been removed"
+msgstr ""
+
+msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
+msgstr ""
+
+msgid "Remove VIP"
+msgstr ""
+
+msgid "Disable Captcha"
+msgstr ""
+
+msgid "Turn off captcha validation during registration."
+msgstr ""
+
+msgid "Use only if you trust your traffic or rely on external protection (e.g., Cloudflare)."
+msgstr ""
+
+msgid "How many sides does a square have?"
+msgstr ""
+
+msgid "How many legs does a spider have?"
+msgstr ""
+
+msgid "How many letters are in the English alphabet?"
+msgstr ""
+
+msgid "What is 100 divided by 25?"
+msgstr ""
+
+msgid "What is 2 cubed?"
+msgstr ""
+
+msgid "How many days in February (non-leap year)?"
+msgstr ""
+
+msgid "How many fingers do humans normally have in total?"
+msgstr ""
+
+msgid "What is 5 times 6?"
+msgstr ""
+
+msgid "What is 9 minus 4?"
+msgstr ""
+
+msgid "What is 7 plus 8?"
+msgstr ""

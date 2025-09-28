@@ -210,3 +210,23 @@ add_action( 'init_plugin_suite_review_system_after_criteria_review', function ( 
 		get_permalink( $post_id )
 	);
 }, 10, 5 );
+
+// Hook vào action khi VIP bị gỡ
+add_action( 'init_plugin_suite_user_engine_vip_removed', function( $user_id, $prev_expiry, $vip_log_after ) {
+	// Tiêu đề và nội dung inbox message
+	$title   = __( 'Your VIP status has been removed', 'init-user-engine' );
+	$content = __( 'An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support.', 'init-user-engine' );
+
+	// Gửi tin nhắn hệ thống đến user
+	if ( function_exists( 'init_plugin_suite_user_engine_send_inbox' ) ) {
+		init_plugin_suite_user_engine_send_inbox(
+			$user_id,
+			$title,
+			$content,
+			'system',
+			[ 'action' => 'vip_removed', 'prev_expiry' => $prev_expiry ],
+			null,
+			'high'
+		);
+	}
+}, 10, 3 );

@@ -1061,3 +1061,51 @@ msgstr "Đang hoạt động"
 
 msgid "Inactive"
 msgstr "Không hoạt động"
+
+msgid "Your VIP status has been removed"
+msgstr "Trạng thái VIP của bạn đã bị gỡ bỏ"
+
+msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
+msgstr "Quản trị viên đã hủy tư cách thành viên VIP của bạn. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ."
+
+msgid "Remove VIP"
+msgstr "Gỡ bỏ VIP"
+
+msgid "Disable Captcha"
+msgstr "Tắt Captcha"
+
+msgid "Turn off captcha validation during registration."
+msgstr "Tắt xác thực Captcha trong quá trình đăng ký."
+
+msgid "Use only if you trust your traffic or rely on external protection (e.g., Cloudflare)."
+msgstr "Chỉ sử dụng nếu bạn tin tưởng nguồn truy cập hoặc dựa vào lớp bảo vệ bên ngoài (ví dụ: Cloudflare)."
+
+msgid "How many sides does a square have?"
+msgstr "Một hình vuông có bao nhiêu cạnh?"
+
+msgid "How many legs does a spider have?"
+msgstr "Một con nhện có bao nhiêu chân?"
+
+msgid "How many letters are in the English alphabet?"
+msgstr "Bảng chữ cái tiếng Anh có bao nhiêu chữ cái?"
+
+msgid "What is 100 divided by 25?"
+msgstr "100 chia cho 25 bằng bao nhiêu?"
+
+msgid "What is 2 cubed?"
+msgstr "2 mũ 3 bằng bao nhiêu?"
+
+msgid "How many days in February (non-leap year)?"
+msgstr "Tháng Hai có bao nhiêu ngày (năm không nhuận)?"
+
+msgid "How many fingers do humans normally have in total?"
+msgstr "Người bình thường có tổng cộng bao nhiêu ngón tay?"
+
+msgid "What is 5 times 6?"
+msgstr "5 nhân 6 bằng bao nhiêu?"
+
+msgid "What is 9 minus 4?"
+msgstr "9 trừ 4 bằng bao nhiêu?"
+
+msgid "What is 7 plus 8?"
+msgstr "7 cộng 8 bằng bao nhiêu?"

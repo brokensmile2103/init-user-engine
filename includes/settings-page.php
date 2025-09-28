@@ -77,6 +77,7 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 
 	$output['hide_admin_bar_subscriber'] = ! empty( $input['hide_admin_bar_subscriber'] ) ? 1 : 0;
 	$output['disable_gravatar'] 		 = ! empty( $input['disable_gravatar'] ) ? 1 : 0;
+	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
 
 	$output['checkin_coin']         	 = absint( $input['checkin_coin'] ?? 10 );
 	$output['checkin_exp']          	 = absint( $input['checkin_exp'] ?? 50 );
@@ -180,6 +181,21 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							<?php esc_html_e( 'Disable all Gravatar calls and use a local default SVG instead.', 'init-user-engine' ); ?>
 						</label>
 						<p class="description"><?php esc_html_e( 'Improves performance by preventing external requests to gravatar.com.', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Disable Captcha', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[disable_captcha]"
+								value="1"
+								<?php checked( $options['disable_captcha'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Turn off captcha validation during registration.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description"><?php esc_html_e( 'Use only if you trust your traffic or rely on external protection (e.g., Cloudflare).', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 

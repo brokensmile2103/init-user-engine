@@ -261,14 +261,19 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 		return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
 	}
 
-	$today = init_plugin_suite_user_engine_today();
-	$log   = init_plugin_suite_user_engine_get_transaction_log( $user_id );
+	$today    = init_plugin_suite_user_engine_today();
+	$log      = init_plugin_suite_user_engine_get_transaction_log( $user_id );
+	$settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+
+	// Lấy amount từ cài đặt, có fallback mặc định
+	$checkin_coin = isset( $settings['checkin_coin'] ) ? absint( $settings['checkin_coin'] ) : 10;
+	$online_coin  = isset( $settings['online_coin'] )  ? absint( $settings['online_coin'] )  : 100;
 
 	$tasks = [
 		[
 			'key'     => 'checkin',
 			'title'   => __( 'Check in today', 'init-user-engine' ),
-			'reward'  => [ 'type' => 'coin', 'amount' => 10 ],
+			'reward'  => [ 'type' => 'coin', 'amount' => $checkin_coin ],
 			'check'   => function( $user_id ) use ( $today ) {
 				$last = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_last', '' );
 				return $last === $today;
@@ -277,7 +282,7 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 		[
 			'key'     => 'online_reward',
 			'title'   => __( 'Stay active today', 'init-user-engine' ),
-			'reward'  => [ 'type' => 'coin', 'amount' => 100 ],
+			'reward'  => [ 'type' => 'coin', 'amount' => $online_coin ],
 			'check'   => function( $user_id ) use ( $today ) {
 				$last     = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_last', '' );
 				$rewarded = (bool) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_rewarded', false );

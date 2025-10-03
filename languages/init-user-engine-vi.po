@@ -585,6 +585,9 @@ msgstr "EXP từ đơn hàng WooCommerce"
 msgid "Thanks for your purchase!"
 msgstr "Cảm ơn bạn đã mua hàng!"
 
+msgid "Thanks for your review!"
+msgstr "Cảm ơn bạn đã đánh giá!"
+
 msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
 msgstr "Bạn nhận được +%1$d EXP và +%2$d xu từ đơn hàng. Tiếp tục phát triển nhé!"
 

@@ -61,95 +61,181 @@ add_action( 'wp_insert_comment', function ( $comment_id, $comment_object ) {
 add_action( 'transition_post_status', function ( $new_status, $old_status, $post ) {
 	if ( $new_status === 'publish' && $old_status !== 'publish' && $post->post_type === 'post' ) {
 		if ( $post->post_author ) {
-			do_action( 'init_plugin_suite_user_engine_add_exp',  $post->post_author, 20, 'publish_post' );
-			do_action( 'init_plugin_suite_user_engine_add_coin', $post->post_author, 5,  'publish_post' );
+			// Lấy exp và coin từ filter duy nhất
+			$rewards = apply_filters( 'init_plugin_suite_user_engine_publish_post_rewards', [
+				'exp'  => 20,
+				'coin' => 5,
+			], $post );
+
+			// Đảm bảo có dữ liệu hợp lệ
+			$exp  = isset( $rewards['exp'] )  ? (int) $rewards['exp']  : 0;
+			$coin = isset( $rewards['coin'] ) ? (int) $rewards['coin'] : 0;
+
+			if ( $exp > 0 ) {
+				do_action( 'init_plugin_suite_user_engine_add_exp',  $post->post_author, $exp, 'publish_post' );
+			}
+			if ( $coin > 0 ) {
+				do_action( 'init_plugin_suite_user_engine_add_coin', $post->post_author, $coin, 'publish_post' );
+			}
 		}
 	}
 }, 10, 3 );
 
 // Award EXP + coin on user registration
 add_action( 'user_register', function ( $user_id ) {
-	do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, 50, 'user_register' );
-	do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, 20, 'user_register' );
+	// Lấy exp và coin từ filter duy nhất
+	$rewards = apply_filters( 'init_plugin_suite_user_engine_user_register_rewards', [
+		'exp'  => 50,
+		'coin' => 20,
+	], $user_id );
 
-	$content = sprintf(
-		// translators: %1$d is EXP amount, %2$d is coin amount
-		__( 'You received +%1$d EXP and +%2$d coins for signing up. Let the journey begin!', 'init-user-engine' ),
-		50,
-		20
-	);
+	$exp  = isset( $rewards['exp'] )  ? (int) $rewards['exp']  : 0;
+	$coin = isset( $rewards['coin'] ) ? (int) $rewards['coin'] : 0;
 
-	init_plugin_suite_user_engine_insert_inbox(
-		$user_id,
-		__( 'Welcome to the community!', 'init-user-engine' ),
-		$content,
-		'welcome',
-		[],
-		null,
-		'high',
-		home_url()
-	);
+	if ( $exp > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, $exp, 'user_register' );
+	}
+	if ( $coin > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, $coin, 'user_register' );
+	}
+
+	// Gửi inbox thông báo cho user
+	if ( $exp > 0 || $coin > 0 ) {
+		$content = sprintf(
+			// translators: %1$d is EXP amount, %2$d is coin amount
+			__( 'You received +%1$d EXP and +%2$d coins for signing up. Let the journey begin!', 'init-user-engine' ),
+			$exp,
+			$coin
+		);
+
+		init_plugin_suite_user_engine_insert_inbox(
+			$user_id,
+			__( 'Welcome to the community!', 'init-user-engine' ),
+			$content,
+			'welcome',
+			[],
+			null,
+			'high',
+			home_url()
+		);
+	}
 });
 
 // Award EXP + coin when user updates profile (once only)
 add_action( 'profile_update', function ( $user_id, $old_user_data ) {
 	$already = get_user_meta( $user_id, 'iue_profile_bonus_given', true );
-	if ( $already === '1' ) return;
+	if ( $already === '1' ) {
+		return;
+	}
 
 	update_user_meta( $user_id, 'iue_profile_bonus_given', 1 );
-	do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, 30, 'update_profile' );
-	do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, 10, 'update_profile' );
+
+	// Lấy exp và coin từ filter duy nhất
+	$rewards = apply_filters( 'init_plugin_suite_user_engine_update_profile_rewards', [
+		'exp'  => 30,
+		'coin' => 10,
+	], $user_id, $old_user_data );
+
+	$exp  = isset( $rewards['exp'] )  ? (int) $rewards['exp']  : 0;
+	$coin = isset( $rewards['coin'] ) ? (int) $rewards['coin'] : 0;
+
+	if ( $exp > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, $exp, 'update_profile' );
+	}
+	if ( $coin > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, $coin, 'update_profile' );
+	}
 }, 10, 2 );
 
 // Award EXP + coin on first login of the day
 add_action( 'init', function () {
-	if ( ! is_user_logged_in() ) return;
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
 
 	$user_id = get_current_user_id();
 	$today   = init_plugin_suite_user_engine_today();
 	$last    = get_user_meta( $user_id, 'iue_last_login_bonus', true );
 
-	if ( $last === $today ) return;
+	if ( $last === $today ) {
+		return;
+	}
 
 	update_user_meta( $user_id, 'iue_last_login_bonus', $today );
-	do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, 10, 'daily_login' );
-	do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, 5,  'daily_login' );
+
+	// Lấy exp và coin từ filter duy nhất
+	$rewards = apply_filters( 'init_plugin_suite_user_engine_daily_login_rewards', [
+		'exp'  => 10,
+		'coin' => 5,
+	], $user_id, $today );
+
+	$exp  = isset( $rewards['exp'] )  ? (int) $rewards['exp']  : 0;
+	$coin = isset( $rewards['coin'] ) ? (int) $rewards['coin'] : 0;
+
+	if ( $exp > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, $exp, 'daily_login' );
+	}
+	if ( $coin > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, $coin, 'daily_login' );
+	}
 });
 
 // Award EXP + coin when user completes a WooCommerce order
 add_action( 'woocommerce_order_status_completed', function ( $order_id ) {
 	$order = wc_get_order( $order_id );
-	if ( ! $order || ! $order->get_user_id() ) return;
+	if ( ! $order || ! $order->get_user_id() ) {
+		return;
+	}
 
 	$user_id = $order->get_user_id();
 	$total   = (float) $order->get_total();
 
-	// Tính thưởng dựa trên tổng tiền đơn hàng
-	$coin = max( 1, floor( $total / 10000 ) ); // 10k = 1 coin
-	$exp  = max( 5, floor( $total / 5000 ) );  // 5k = 1 exp
+	// Default reward calculation
+	$default_rewards = [
+		'coin' => max( 1, floor( $total / 10000 ) ), // 10k = 1 coin
+		'exp'  => max( 5, floor( $total / 5000 ) ),  // 5k = 1 exp
+	];
 
-	do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, $exp,  'woo_order' );
-	do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, $coin, 'woo_order' );
+	// Cho phép custom reward qua filter
+	$rewards = apply_filters(
+		'init_plugin_suite_user_engine_woo_order_rewards',
+		$default_rewards,
+		$user_id,
+		$order,
+		$total
+	);
+
+	$exp  = isset( $rewards['exp'] )  ? (int) $rewards['exp']  : 0;
+	$coin = isset( $rewards['coin'] ) ? (int) $rewards['coin'] : 0;
+
+	if ( $exp > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, $exp, 'woo_order' );
+	}
+	if ( $coin > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, $coin, 'woo_order' );
+	}
 
 	// Gửi thông báo hộp thư đến
-	$title   = __( 'Thanks for your purchase!', 'init-user-engine' );
-	$content = sprintf(
-		// translators: %1$d = EXP, %2$d = coin
-		__( 'You received +%1$d EXP and +%2$d coins for your order. Keep growing!', 'init-user-engine' ),
-		$exp,
-		$coin
-	);
+	if ( $exp > 0 || $coin > 0 ) {
+		$title   = __( 'Thanks for your purchase!', 'init-user-engine' );
+		$content = sprintf(
+			// translators: %1$d = EXP, %2$d = coin
+			__( 'You received +%1$d EXP and +%2$d coins for your order. Keep growing!', 'init-user-engine' ),
+			$exp,
+			$coin
+		);
 
-	init_plugin_suite_user_engine_insert_inbox(
-		$user_id,
-		$title,
-		$content,
-		'woo_reward',
-		[ 'order_id' => $order_id ],
-		null,
-		'normal',
-		$order->get_view_order_url()
-	);
+		init_plugin_suite_user_engine_insert_inbox(
+			$user_id,
+			$title,
+			$content,
+			'woo_reward',
+			[ 'order_id' => $order_id ],
+			null,
+			'normal',
+			$order->get_view_order_url()
+		);
+	}
 }, 10 );
 
 // Someone replied to your comment

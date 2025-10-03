@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,24 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.3 – October 3, 2025 =
+- Refactored all EXP + Coin award logic to use unified, extensible filters:
+  - `init_plugin_suite_user_engine_publish_post_rewards`
+  - `init_plugin_suite_user_engine_user_register_rewards`
+  - `init_plugin_suite_user_engine_update_profile_rewards`
+  - `init_plugin_suite_user_engine_daily_login_rewards`
+  - `init_plugin_suite_user_engine_woo_order_rewards`
+- Each filter now returns both `exp` and `coin` values in a single array for easier customization
+- Preserved default reward amounts (e.g. 20 EXP + 5 Coin for publish, 50 EXP + 20 Coin for register, etc.)
+- Added support for WooCommerce dynamic rewards calculation based on order total, with filter override
+- Ensured backward compatibility with existing `init_plugin_suite_user_engine_add_exp` and `init_plugin_suite_user_engine_add_coin` actions
+- Updated inbox notification content strings to use filtered values dynamically
+- All new filters fully localized and translation-ready with proper `translators:` comments
+- Synced Daily Tasks REST API with plugin settings:
+  - `checkin_coin` setting now drives "Check in today" reward
+  - `online_coin` setting now drives "Stay active today" reward
+  - Prevented hardcoded reward mismatch between API output and actual check-in/claim logic
 
 = 1.2.2 – October 3, 2025 =
 - Added new Comment Reward options in plugin settings:

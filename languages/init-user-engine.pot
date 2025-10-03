@@ -585,6 +585,9 @@ msgstr ""
 msgid "Thanks for your purchase!"
 msgstr ""
 
+msgid "Thanks for your review!"
+msgstr ""
+
 msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
 msgstr ""
 

@@ -1,12 +1,60 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-// Award EXP + coin when user comments
+// Award EXP + Coin when user comments (daily cap anchored by daily check-in)
 add_action( 'wp_insert_comment', function ( $comment_id, $comment_object ) {
-	if ( $comment_object->user_id ) {
-		do_action( 'init_plugin_suite_user_engine_add_exp',  $comment_object->user_id, 10, 'comment_post' );
-		do_action( 'init_plugin_suite_user_engine_add_coin', $comment_object->user_id, 2,  'comment_post' );
+	$user_id = (int) ( $comment_object->user_id ?? 0 );
+	if ( $user_id <= 0 ) {
+		return; // chỉ user login mới được thưởng
 	}
+
+	// Chỉ bỏ qua pingback/trackback. Mọi comment thường (kể cả comment_type='comment') đều thưởng
+	$ctype = (string) ( $comment_object->comment_type ?? '' );
+	if ( in_array( $ctype, [ 'pingback', 'trackback' ], true ) ) {
+		return;
+	}
+
+	// Lấy config (fallback mặc định nếu chưa lưu UI)
+	$settings   = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	$exp_each   = isset( $settings['comment_exp'] )       ? absint( $settings['comment_exp'] )       : 10; // default
+	$coin_each  = isset( $settings['comment_coin'] )      ? absint( $settings['comment_coin'] )      : 2;  // default
+	$daily_cap  = isset( $settings['comment_daily_cap'] ) ? absint( $settings['comment_daily_cap'] ) : 0;  // 0 = unlimited
+
+	// Nếu cả 2 đều 0 thì thôi
+	if ( $exp_each <= 0 && $coin_each <= 0 ) {
+		return;
+	}
+
+	// Neo bằng ngày check-in cuối cùng
+	$checkin_last = (string) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_last', '' );
+
+	// Anchor + counter cho comment-reward
+	$anchor = (string) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_comment_anchor', '' );
+	$count  = (int)    init_plugin_suite_user_engine_get_meta( $user_id, 'iue_comment_awarded_count', 0 );
+
+	// Nếu khác mốc check-in -> reset counter và cập nhật anchor
+	if ( $anchor !== $checkin_last ) {
+		$anchor = $checkin_last;
+		$count  = 0;
+		init_plugin_suite_user_engine_update_meta( $user_id, 'iue_comment_anchor', $anchor );
+		init_plugin_suite_user_engine_update_meta( $user_id, 'iue_comment_awarded_count', $count );
+	}
+
+	// Nếu đã chạm cap (và cap > 0) thì dừng
+	if ( $daily_cap > 0 && $count >= $daily_cap ) {
+		return;
+	}
+
+	// Thưởng qua action sẵn có của hệ thống
+	if ( $exp_each > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_exp',  $user_id, $exp_each,  'comment_post' );
+	}
+	if ( $coin_each > 0 ) {
+		do_action( 'init_plugin_suite_user_engine_add_coin', $user_id, $coin_each, 'comment_post' );
+	}
+
+	// Tăng counter
+	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_comment_awarded_count', $count + 1 );
 }, 10, 2 );
 
 // Award EXP + coin on first-time post publish
@@ -133,40 +181,82 @@ add_action( 'wp_insert_comment', function( $comment_id, $comment ) {
 	);
 }, 20, 2 );
 
-// Dùng avatar của IUE
-add_filter( 'get_avatar_url', 'init_plugin_suite_user_engine_custom_avatar_url', 10, 3 );
-function init_plugin_suite_user_engine_custom_avatar_url( $url, $id_or_email, $args ) {
-	$user_id = 0;
+/**
+ * Force IUE avatar to take precedence over Nextend (and others)
+ * - Hook vào pre_get_avatar_data (ưu tiên rất cao)
+ * - Nếu user có meta 'iue_custom_avatar' thì dùng nó, set found_avatar=true
+ * - Giữ nguyên các args khác để tránh side effects
+ */
+add_filter( 'pre_get_avatar_data', function( $args, $id_or_email ) {
+    $user_id = 0;
 
-	if ( is_numeric( $id_or_email ) ) {
-		$user_id = (int) $id_or_email;
-	} elseif ( is_object( $id_or_email ) && isset( $id_or_email->user_id ) ) {
-		$user_id = (int) $id_or_email->user_id;
-	} elseif ( is_string( $id_or_email ) ) {
-		$user = get_user_by( 'email', $id_or_email );
-		$user_id = $user ? $user->ID : 0;
-	}
+    if ( is_numeric( $id_or_email ) ) {
+        $user_id = (int) $id_or_email;
+    } elseif ( is_object( $id_or_email ) ) {
+        // Comment object / WP_User / WP_Comment etc.
+        if ( isset( $id_or_email->user_id ) && $id_or_email->user_id ) {
+            $user_id = (int) $id_or_email->user_id;
+        } elseif ( $id_or_email instanceof WP_User ) {
+            $user_id = (int) $id_or_email->ID;
+        }
+    } elseif ( is_string( $id_or_email ) && is_email( $id_or_email ) ) {
+        $u = get_user_by( 'email', $id_or_email );
+        $user_id = $u ? (int) $u->ID : 0;
+    }
 
-	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
-	$disable_gravatar = ! empty( $options['disable_gravatar'] );
+    if ( ! $user_id ) {
+        return $args; // Không xác định user => để mặc định
+    }
 
-	if ( $user_id ) {
-		$custom_50 = get_user_meta( $user_id, 'iue_custom_avatar', true );
-		if ( $custom_50 && filter_var( $custom_50, FILTER_VALIDATE_URL ) ) {
-			if ( isset( $args['size'] ) && (int) $args['size'] >= 80 ) {
-				$custom_80 = str_replace( '-50.', '-80.', $custom_50 );
-				return esc_url( $custom_80 );
-			}
-			return esc_url( $custom_50 );
-		}
-	}
+    // Tùy chọn disable gravatar
+    $options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
+    $disable_gravatar = ! empty( $options['disable_gravatar'] );
 
-	if ( $disable_gravatar ) {
-		return INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'img/default-avatar.svg';
-	}
+    // Lấy avatar IUE
+    $custom_50 = get_user_meta( $user_id, 'iue_custom_avatar', true );
+    if ( $custom_50 && filter_var( $custom_50, FILTER_VALIDATE_URL ) ) {
+        $size = (int) ( $args['size'] ?? 50 );
 
-	return $url;
-}
+        // Map kích thước đơn giản 50/80
+        $use_url = $custom_50;
+        if ( $size >= 80 ) {
+            $use_url = str_replace( '-50.', '-80.', $custom_50 );
+        }
+
+        // Gán lại dữ liệu avatar
+        $args['url']          = esc_url( $use_url );
+        $args['found_avatar'] = true;         // báo với WP là đã tìm được
+        $args['height']       = $size;
+        $args['width']        = $size;
+
+        return $args; // QUAN TRỌNG: return sớm để override mọi thứ khác
+    }
+
+    // Không có avatar IUE:
+    if ( $disable_gravatar ) {
+        $args['url']          = trailingslashit( INIT_PLUGIN_SUITE_IUE_ASSETS_URL ) . 'img/default-avatar.svg';
+        $args['found_avatar'] = true;
+        $args['height']       = (int) ( $args['size'] ?? 50 );
+        $args['width']        = (int) ( $args['size'] ?? 50 );
+        return $args;
+    }
+
+    // Mặc định: để Nextend/WP xử lý
+    return $args;
+}, 9999, 2 );
+
+/**
+ * (Tùy chọn) Đồng bộ filter get_avatar_url để những nơi gọi trực tiếp URL vẫn được override
+ * Ưu tiên cao để chắc chắn thắng
+ */
+add_filter( 'get_avatar_url', function( $url, $id_or_email, $args ) {
+    $data = apply_filters( 'pre_get_avatar_data', array(
+        'size'  => $args['size'] ?? 50,
+        'url'   => $url,
+    ), $id_or_email );
+
+    return isset( $data['url'] ) ? $data['url'] : $url;
+}, 9999, 3 );
 
 // Ẩn admin-bar
 add_filter( 'show_admin_bar', function ( $show ) {

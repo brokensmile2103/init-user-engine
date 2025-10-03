@@ -405,16 +405,25 @@ function init_plugin_suite_user_engine_get_admin_user_extra_stats( $user_id ) {
  * URL pattern: admin-post.php?action=iue_remove_vip&user_id=###&_wpnonce=...
  */
 add_action( 'admin_post_iue_remove_vip', function () {
-	if ( ! is_admin() ) wp_die();
+	if ( ! is_admin() ) {
+		wp_die();
+	}
 
-	$user_id = isset( $_GET['user_id'] ) ? absint( $_GET['user_id'] ) : 0;
+	$user_id = isset( $_GET['user_id'] )
+		? absint( wp_unslash( $_GET['user_id'] ) )
+		: 0;
+
 	if ( ! $user_id ) {
 		wp_safe_redirect( add_query_arg( 'iue_vip_removed', '0', admin_url() ) );
 		exit;
 	}
 
-	// Nonce + capability checks
-	if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'iue_remove_vip_' . $user_id ) ) {
+	// Nonce + capability checks (UNSLASH + SANITIZE trước khi verify)
+	$nonce = isset( $_GET['_wpnonce'] )
+		? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) )
+		: '';
+
+	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'iue_remove_vip_' . $user_id ) ) {
 		wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
 	}
 	if ( ! current_user_can( 'edit_user', $user_id ) ) {
@@ -470,27 +479,56 @@ add_action( 'admin_post_iue_remove_vip', function () {
 	 */
 	do_action( 'init_plugin_suite_user_engine_vip_removed', $user_id, (int) $vip_expiry, $vip_log );
 
-	// Redirect back (profile or user-edit) with notice
+	// Redirect back (profile or user-edit) with notice + nonce
 	$back = wp_get_referer();
-	if ( ! $back ) $back = get_edit_user_link( $user_id );
-	wp_safe_redirect( add_query_arg( 'iue_vip_removed', '1', $back ) );
+	if ( ! $back ) {
+		$back = get_edit_user_link( $user_id );
+	}
+
+	$notice_nonce = wp_create_nonce( 'iue_notice_' . get_current_user_id() );
+
+	wp_safe_redirect( add_query_arg(
+		array(
+			'iue_vip_removed' => '1',
+			'_iue_notice'     => $notice_nonce,
+		),
+		$back
+	) );
 	exit;
 } );
 
 // Show an admin notice after VIP removal
 add_action( 'admin_notices', function () {
-	if ( ! isset( $_GET['iue_vip_removed'] ) ) return;
+	// Đọc GET an toàn (unslash + sanitize)
+	$flag = isset( $_GET['iue_vip_removed'] )
+		? sanitize_text_field( wp_unslash( $_GET['iue_vip_removed'] ) )
+		: '';
 
-	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-	if ( $screen && ! in_array( $screen->id, [ 'profile', 'user-edit' ], true ) ) {
-		// Only show on user profile screens
+	$notice_nonce = isset( $_GET['_iue_notice'] )
+		? sanitize_text_field( wp_unslash( $_GET['_iue_notice'] ) )
+		: '';
+
+	// Verify nonce cho notice để thỏa WordPress.Security.NonceVerification.Recommended
+	if ( empty( $flag ) || empty( $notice_nonce ) || ! wp_verify_nonce( $notice_nonce, 'iue_notice_' . get_current_user_id() ) ) {
 		return;
 	}
 
-	$ok = ( $_GET['iue_vip_removed'] === '1' );
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( $screen && ! in_array( $screen->id, array( 'profile', 'user-edit' ), true ) ) {
+		// Chỉ hiển thị ở trang hồ sơ user
+		return;
+	}
+
+	$ok   = ( '1' === $flag );
 	$class = $ok ? 'updated' : 'error';
 	$msg   = $ok
-		? esc_html__( 'VIP status has been removed for this user.', 'init-user-engine' )
-		: esc_html__( 'Failed to remove VIP status.', 'init-user-engine' );
-	echo '<div class="' . esc_attr( $class ) . ' notice is-dismissible"><p>' . $msg . '</p></div>';
+		? __( 'VIP status has been removed for this user.', 'init-user-engine' )
+		: __( 'Failed to remove VIP status.', 'init-user-engine' );
+
+	// ESCAPE tại điểm xuất: class -> esc_attr, nội dung -> esc_html
+	printf(
+		'<div class="%1$s notice is-dismissible"><p>%2$s</p></div>',
+		esc_attr( $class ),
+		esc_html( $msg )
+	);
 } );

@@ -1109,3 +1109,24 @@ msgstr ""
 
 msgid "What is 7 plus 8?"
 msgstr ""
+
+msgid "Comment Reward"
+msgstr ""
+
+msgid "EXP per Comment"
+msgstr ""
+
+msgid "EXP awarded for each valid comment."
+msgstr ""
+
+msgid "Coin per Comment"
+msgstr ""
+
+msgid "Coin awarded for each valid comment."
+msgstr ""
+
+msgid "Daily Comment Cap"
+msgstr ""
+
+msgid "Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor."
+msgstr ""

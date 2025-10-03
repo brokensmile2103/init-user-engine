@@ -294,7 +294,7 @@
 }
 #init-user-engine-login-modal.dark .iue-login-form input[type="submit"]:hover,
 #init-user-engine-login-modal.dark .iue-register-form button.iue-submit:hover {
-	background: linear-gradient(135deg, var(--iue-theme-active-color), #004f7a);
+	background: linear-gradient(135deg, var(--iue-theme-active-color), var(--iue-theme-color));
 }
 #init-user-engine-login-modal.dark .iue-login-form .login-remember,
 #init-user-engine-login-modal.dark .iue-reset-link a {

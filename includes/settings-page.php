@@ -83,6 +83,10 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['checkin_exp']          	 = absint( $input['checkin_exp'] ?? 50 );
 	$output['checkin_cash']         	 = absint( $input['checkin_cash'] ?? 0 );
 
+	$output['comment_exp']       		 = absint( $input['comment_exp'] ?? 10 );
+	$output['comment_coin']      		 = absint( $input['comment_coin'] ?? 2 );
+	$output['comment_daily_cap'] 		 = absint( $input['comment_daily_cap'] ?? 0 );
+
 	$output['online_minutes']       	 = absint( $input['online_minutes'] ?? 10 );
 	$output['online_coin']          	 = absint( $input['online_coin'] ?? 100 );
 	$output['online_exp']           	 = absint( $input['online_exp'] ?? 50 );
@@ -244,6 +248,37 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<input type="number" min="0" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[checkin_cash]"
 							value="<?php echo esc_attr( $options['checkin_cash'] ?? 0 ); ?>" />
 						<p class="description"><?php esc_html_e( 'Cash rewarded upon check-in (rarely used, mostly 0).', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'Comment Reward', 'init-user-engine' ); ?></h2></th>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'EXP per Comment', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[comment_exp]"
+							value="<?php echo esc_attr( $options['comment_exp'] ?? 10 ); ?>" />
+						<p class="description"><?php esc_html_e( 'EXP awarded for each valid comment.', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Coin per Comment', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[comment_coin]"
+							value="<?php echo esc_attr( $options['comment_coin'] ?? 2 ); ?>" />
+						<p class="description"><?php esc_html_e( 'Coin awarded for each valid comment.', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Daily Comment Cap', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[comment_daily_cap]"
+							value="<?php echo esc_attr( $options['comment_daily_cap'] ?? 0 ); ?>" />
+						<p class="description"><?php esc_html_e( 'Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 

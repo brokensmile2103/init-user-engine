@@ -1109,3 +1109,24 @@ msgstr "9 trừ 4 bằng bao nhiêu?"
 
 msgid "What is 7 plus 8?"
 msgstr "7 cộng 8 bằng bao nhiêu?"
+
+msgid "Comment Reward"
+msgstr "Thưởng Bình luận"
+
+msgid "EXP per Comment"
+msgstr "EXP mỗi Bình luận"
+
+msgid "EXP awarded for each valid comment."
+msgstr "EXP được thưởng cho mỗi bình luận hợp lệ."
+
+msgid "Coin per Comment"
+msgstr "Coin mỗi Bình luận"
+
+msgid "Coin awarded for each valid comment."
+msgstr "Coin được thưởng cho mỗi bình luận hợp lệ."
+
+msgid "Daily Comment Cap"
+msgstr "Giới hạn Bình luận mỗi ngày"
+
+msgid "Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor."
+msgstr "Số bình luận tối đa mỗi ngày được nhận thưởng. 0 = không giới hạn. Hệ thống sẽ dùng điểm danh hằng ngày để reset."

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,28 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.2 – October 3, 2025 =
+- Added new Comment Reward options in plugin settings:
+  - EXP per comment (default 10)
+  - Coin per comment (default 2)
+  - Daily comment cap (default 0 = unlimited, reset anchored to daily check-in)
+- Implemented counter reset tied to `iue_checkin_last` meta to ensure daily limits reset only after user check-in
+- Prevented reward farming by enforcing strict per-day cap logic
+- Localized all new strings with msgid/msgstr entries for full translation support
+- Preserved backward compatibility with existing EXP and Coin award actions
+
+= 1.2.1 – September 28, 2025 =
+- Refactored avatar override to hook into `pre_get_avatar_data` with very high priority, ensuring IUE avatar takes precedence over third-party filters such as Nextend Social Login  
+- Retained lightweight `get_avatar_url` shim for backward compatibility with direct URL calls  
+- Added safe fallbacks: defer to WordPress/Nextend when no IUE avatar is present; if Gravatar is disabled, serve bundled SVG as default  
+- Improved cache behavior so avatar changes propagate more consistently with CDN/page cache purges  
+- Fixed WPCS issues in `admin_post_iue_remove_vip`:  
+  - Properly unslashed and sanitized all `$_GET` inputs before verification  
+  - Strengthened nonce handling with a dedicated notice nonce for admin notices  
+  - Escaped all dynamic output at the point of rendering to resolve `OutputNotEscaped` errors  
+  - Sanitized query arguments on redirects; left targeted PHPCS ignores only for raw SQL queries with clear justification  
+- No breaking changes: all actions, filters, and helper functions remain unchanged for seamless drop-in update
 
 = 1.2.0 – September 28, 2025 =
 - Added ability to revoke VIP membership directly from the Admin User Metabox

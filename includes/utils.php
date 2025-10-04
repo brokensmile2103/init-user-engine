@@ -238,3 +238,60 @@ function init_plugin_suite_user_engine_get_real_ip() {
     
     return '127.0.0.1'; // Ultimate fallback
 }
+
+/**
+ * Verify Cloudflare Turnstile token.
+ *
+ * @param string $token
+ * @param string $remote_ip
+ * @return true|WP_Error
+ */
+function init_plugin_suite_user_engine_verify_turnstile( $token, $remote_ip = '' ) {
+	$settings    = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	$secret_key  = $settings['turnstile_secret_key'] ?? '';
+
+	if ( empty( $secret_key ) ) {
+		return new WP_Error( 'turnstile_not_configured', __( 'Turnstile is not properly configured.', 'init-user-engine' ), [ 'status' => 500 ] );
+	}
+
+	$token = trim( (string) $token );
+	if ( $token === '' ) {
+		return new WP_Error( 'turnstile_required', __( 'Captcha verification is required.', 'init-user-engine' ), [ 'status' => 400 ] );
+	}
+
+	$args = [
+		'timeout' => 8,
+		'body'    => [
+			'secret'   => $secret_key,
+			'response' => $token,
+			'remoteip' => $remote_ip,
+		],
+	];
+
+	$response = wp_remote_post( 'https://challenges.cloudflare.com/turnstile/v0/siteverify', $args );
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error( 'turnstile_http_error', __( 'Captcha verification failed due to a network error. Please try again.', 'init-user-engine' ), [ 'status' => 502 ] );
+	}
+
+	$code = wp_remote_retrieve_response_code( $response );
+	if ( $code < 200 || $code >= 300 ) {
+		return new WP_Error( 'turnstile_bad_response', __( 'Captcha verification service returned an unexpected response.', 'init-user-engine' ), [ 'status' => 502 ] );
+	}
+
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( ! is_array( $body ) ) {
+		return new WP_Error( 'turnstile_parse_error', __( 'Captcha verification response could not be parsed.', 'init-user-engine' ), [ 'status' => 502 ] );
+	}
+
+	if ( ! empty( $body['success'] ) ) {
+		return true;
+	}
+
+	// Map một số error code phổ biến (tham khảo Cloudflare docs)
+	$error_codes = $body['error-codes'] ?? [];
+	if ( is_array( $error_codes ) && in_array( 'timeout-or-duplicate', $error_codes, true ) ) {
+		return new WP_Error( 'turnstile_timeout', __( 'Captcha expired or already used. Please refresh and try again.', 'init-user-engine' ), [ 'status' => 400 ] );
+	}
+
+	return new WP_Error( 'turnstile_invalid', __( 'Captcha verification failed. Please try again.', 'init-user-engine' ), [ 'status' => 400 ] );
+}

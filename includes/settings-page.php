@@ -79,6 +79,12 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['disable_gravatar'] 		 = ! empty( $input['disable_gravatar'] ) ? 1 : 0;
 	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
 
+	$output['turnstile_site_key']   	 = sanitize_text_field( $input['turnstile_site_key'] ?? '' );
+	$output['turnstile_secret_key'] 	 = sanitize_text_field( $input['turnstile_secret_key'] ?? '' );
+
+	$turnstile_theme 					 = $input['turnstile_theme'] ?? 'auto';
+	$output['turnstile_theme'] 			 = in_array( $turnstile_theme, [ 'auto', 'light', 'dark' ], true ) ? $turnstile_theme : 'auto';
+
 	$output['checkin_coin']         	 = absint( $input['checkin_coin'] ?? 10 );
 	$output['checkin_exp']          	 = absint( $input['checkin_exp'] ?? 50 );
 	$output['checkin_cash']         	 = absint( $input['checkin_cash'] ?? 0 );
@@ -200,6 +206,61 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							<?php esc_html_e( 'Turn off captcha validation during registration.', 'init-user-engine' ); ?>
 						</label>
 						<p class="description"><?php esc_html_e( 'Use only if you trust your traffic or rely on external protection (e.g., Cloudflare).', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'Cloudflare Turnstile', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Site Key', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="text" class="regular-text"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_site_key]"
+							value="<?php echo esc_attr( $options['turnstile_site_key'] ?? '' ); ?>" />
+						<p class="description">
+							<?php esc_html_e( 'Public site key from your Cloudflare Turnstile dashboard. Required to render the widget on the frontend.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Secret Key', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="password" class="regular-text"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_secret_key]"
+							value="<?php echo esc_attr( $options['turnstile_secret_key'] ?? '' ); ?>" />
+						<p class="description">
+							<?php esc_html_e( 'Private secret key used for server-side verification of Turnstile responses.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Theme', 'init-user-engine' ); ?></th>
+					<td>
+						<select name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_theme]">
+							<?php
+							$current_theme = $options['turnstile_theme'] ?? 'auto';
+							$themes = [
+								'auto'  => __( 'Auto (match system/OS preference)', 'init-user-engine' ),
+								'light' => __( 'Light mode', 'init-user-engine' ),
+								'dark'  => __( 'Dark mode', 'init-user-engine' ),
+							];
+							foreach ( $themes as $val => $label ) {
+								printf(
+									'<option value="%1$s"%2$s>%3$s</option>',
+									esc_attr( $val ),
+									selected( $current_theme, $val, false ),
+									esc_html( $label )
+								);
+							}
+							?>
+						</select>
+						<p class="description">
+							<?php esc_html_e( 'Choose the visual style of the captcha widget (auto, light, or dark).', 'init-user-engine' ); ?>
+						</p>
 					</td>
 				</tr>
 

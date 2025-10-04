@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,27 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.4 – October 4, 2025 =
+- Added full integration with Cloudflare Turnstile for spam-proof registration:
+  - Admin settings now support entering Turnstile **Site Key** and **Secret Key**
+  - If both keys are set, registration form automatically shows Turnstile widget instead of legacy math captcha
+  - Fallback to legacy captcha only when Turnstile keys are missing
+  - If CAPTCHA is disabled entirely, registration form shows no challenge at all
+- Updated registration endpoint (`/register`) to:
+  - Verify Turnstile tokens server-side with Cloudflare API
+  - Gracefully fallback to math captcha validation if Turnstile is not configured
+  - Return structured WP_Error codes: `turnstile_required`, `turnstile_invalid`, `captcha_wrong`, etc.
+  - Retain honeypot detection and IP-based rate limiting (max 5 attempts/hour)
+- Enhanced `guest.js`:
+  - Unified client-side flow for both Turnstile and legacy captcha
+  - Implemented late initialization (Turnstile widget loads only when Register tab is shown) to reduce page weight
+  - Reset Turnstile widget after each failed or successful attempt to avoid stale tokens
+  - Clear, translated error messages for Turnstile failures (expired, timeout, missing token, etc.)
+- Security hardened:
+  - Prevented bypass when captcha/Turnstile token missing
+  - Verified tokens are one-time-use per attempt
+  - Ensured consistent block on invalid, expired, or reused tokens
 
 = 1.2.3 – October 3, 2025 =
 - Refactored all EXP + Coin award logic to use unified, extensible filters:

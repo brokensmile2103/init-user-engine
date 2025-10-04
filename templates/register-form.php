@@ -25,17 +25,30 @@
 	</p>
 
 	<?php
-	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
-	$disable_captcha = ! empty( $options['disable_captcha'] );
+	$options          = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
+	$disable_captcha  = ! empty( $options['disable_captcha'] );
+	$turnstile_key    = $options['turnstile_site_key'] ?? '';
+	$turnstile_theme  = $options['turnstile_theme'] ?? 'auto';
 	?>
 
 	<?php if ( ! $disable_captcha ) : ?>
-		<p class="iue-form-group iue-register-captcha">
-			<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
-			<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>
-			<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input"
-				placeholder="<?php esc_attr_e( 'Type your answer here', 'init-user-engine' ); ?>" required>
-		</p>
+		<?php if ( ! empty( $turnstile_key ) && ! empty( $options['turnstile_secret_key'] ) ) : ?>
+			<p class="iue-form-group iue-register-captcha">
+				<label><?php esc_html_e( 'Human Verification', 'init-user-engine' ); ?></label><br>
+				<div id="iue-turnstile"
+					data-sitekey="<?php echo esc_attr( $turnstile_key ); ?>"
+					data-theme="<?php echo esc_attr( in_array( $turnstile_theme, ['auto','light','dark'], true ) ? $turnstile_theme : 'auto' ); ?>">
+				</div>
+			</p>
+		<?php else : ?>
+			<!-- Fallback captcha cũ -->
+			<p class="iue-form-group iue-register-captcha">
+				<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
+				<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>
+				<input type="number" name="captcha_answer" id="iue_register_captcha_answer" class="iue-input"
+					placeholder="<?php esc_attr_e( 'Type your answer here', 'init-user-engine' ); ?>" required>
+			</p>
+		<?php endif; ?>
 	<?php endif; ?>
 
 	<p class="iue-form-group iue-register-submit">

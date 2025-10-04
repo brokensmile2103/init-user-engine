@@ -1133,3 +1133,66 @@ msgstr "Giới hạn Bình luận mỗi ngày"
 
 msgid "Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor."
 msgstr "Số bình luận tối đa mỗi ngày được nhận thưởng. 0 = không giới hạn. Hệ thống sẽ dùng điểm danh hằng ngày để reset."
+
+msgid "Cloudflare Turnstile"
+msgstr "Cloudflare Turnstile"
+
+msgid "Site Key"
+msgstr "Site Key"
+
+msgid "Public site key from your Cloudflare Turnstile dashboard. Required to render the widget on the frontend."
+msgstr "Site key công khai từ bảng điều khiển Cloudflare Turnstile. Bắt buộc để hiển thị widget ở frontend."
+
+msgid "Secret Key"
+msgstr "Secret Key"
+
+msgid "Private secret key used for server-side verification of Turnstile responses."
+msgstr "Secret key riêng tư dùng để xác minh phản hồi Turnstile ở phía máy chủ."
+
+msgid "Theme"
+msgstr "Giao diện"
+
+msgid "Auto (match system/OS preference)"
+msgstr "Tự động (theo giao diện hệ thống/OS)"
+
+msgid "Light mode"
+msgstr "Chế độ sáng"
+
+msgid "Dark mode"
+msgstr "Chế độ tối"
+
+msgid "Choose the visual style of the captcha widget (auto, light, or dark)."
+msgstr "Chọn kiểu hiển thị của widget captcha (tự động, sáng hoặc tối)."
+
+msgid "Human Verification"
+msgstr "Xác minh người dùng"
+
+msgid "Cloudflare Turnstile Site Key"
+msgstr "Mã Site Key của Cloudflare Turnstile"
+
+msgid "Cloudflare Turnstile Secret Key"
+msgstr "Mã Secret Key của Cloudflare Turnstile"
+
+msgid "Please complete the captcha."
+msgstr "Vui lòng hoàn tất captcha."
+
+msgid "Captcha verification is required."
+msgstr "Yêu cầu xác minh captcha."
+
+msgid "Captcha expired. Loading new one..."
+msgstr "Captcha đã hết hạn. Đang tải captcha mới..."
+
+msgid "Captcha not loaded. Please wait..."
+msgstr "Captcha chưa tải xong. Vui lòng chờ..."
+
+msgid "Captcha expired or invalid."
+msgstr "Captcha đã hết hạn hoặc không hợp lệ."
+
+msgid "Too many captcha attempts. Getting a new one..."
+msgstr "Bạn đã thử captcha quá nhiều lần. Đang tải captcha mới..."
+
+msgid "Too many attempts. Please wait before trying again."
+msgstr "Bạn đã thử quá nhiều lần. Vui lòng chờ trước khi thử lại."
+
+msgid "Registration failed"
+msgstr "Đăng ký thất bại"

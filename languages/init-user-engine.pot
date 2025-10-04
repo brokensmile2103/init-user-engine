@@ -1133,3 +1133,66 @@ msgstr ""
 
 msgid "Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor."
 msgstr ""
+
+msgid "Cloudflare Turnstile"
+msgstr ""
+
+msgid "Site Key"
+msgstr ""
+
+msgid "Public site key from your Cloudflare Turnstile dashboard. Required to render the widget on the frontend."
+msgstr ""
+
+msgid "Secret Key"
+msgstr ""
+
+msgid "Private secret key used for server-side verification of Turnstile responses."
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "Auto (match system/OS preference)"
+msgstr ""
+
+msgid "Light mode"
+msgstr ""
+
+msgid "Dark mode"
+msgstr ""
+
+msgid "Choose the visual style of the captcha widget (auto, light, or dark)."
+msgstr ""
+
+msgid "Human Verification"
+msgstr ""
+
+msgid "Cloudflare Turnstile Site Key"
+msgstr ""
+
+msgid "Cloudflare Turnstile Secret Key"
+msgstr ""
+
+msgid "Please complete the captcha."
+msgstr ""
+
+msgid "Captcha verification is required."
+msgstr ""
+
+msgid "Captcha expired. Loading new one..."
+msgstr ""
+
+msgid "Captcha not loaded. Please wait..."
+msgstr ""
+
+msgid "Captcha expired or invalid."
+msgstr ""
+
+msgid "Too many captcha attempts. Getting a new one..."
+msgstr ""
+
+msgid "Too many attempts. Please wait before trying again."
+msgstr ""
+
+msgid "Registration failed"
+msgstr ""

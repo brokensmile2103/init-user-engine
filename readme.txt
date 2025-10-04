@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,18 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.5 – October 4, 2025 =
+- Refined dashboard menu CSS for better scalability with multiple grouped items:
+  - Added `.multi-menu` style to support grouped links (e.g., Sticker Store, Frame Store, Effects)
+  - Adjusted padding, spacing, and hover states to keep grouped items compact but consistent with main menu
+  - Improved dark mode support for multi-menu background/hover states
+- Optimized avatar frame overlay CSS:
+  - Prevented hover scaling on frame elements while keeping core avatar hover intact
+  - Ensured frame overlay maintains alignment across various container contexts
+- Minor visual polish:
+  - Standardized border-radius and spacing for consistency across badges, dots, and menu links
+  - Unified hover background opacity values in both light and dark modes
 
 = 1.2.4 – October 4, 2025 =
 - Added full integration with Cloudflare Turnstile for spam-proof registration:

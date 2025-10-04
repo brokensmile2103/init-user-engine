@@ -15,8 +15,8 @@
 	transition: transform 0.2s ease;
 }
 
-.init-user-engine-avatar.is-logged-in:hover img {
-	transform: scale(1.05);
+.init-user-engine-avatar.is-logged-in:hover img:not(.iue-avatar-frame) {
+  transform: scale(1.05);
 }
 
 .iue-user-avatar {
@@ -138,36 +138,72 @@
 
 /* ==== Menu ==== */
 .iue-dashboard-menu {
-	list-style: none;
-	padding: 0;
-	margin: 8px 0 0 0;
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .iue-dashboard-menu li a {
-	display: block;
-	padding: 10px 12px;
-	border-radius: 8px;
-	text-decoration: none;
-	color: inherit;
-	background: transparent;
-	transition: background 0.2s, color 0.2s;
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
 }
 
 .iue-dashboard-menu li a:hover {
-	background: rgba(0, 0, 0, 0.05);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .iue-dashboard.dark .iue-dashboard-menu li a:hover {
-	background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .iue-dashboard-menu .iue-separator {
-	height: 1px;
-	margin: 6px 0;
-	background: var(--iue-border);
+    height: 1px;
+    margin: 6px 0;
+    background: var(--iue-border);
+}
+
+/* ==== Multi Menu ==== */
+.iue-dashboard-menu li.multi-menu .multi-wrap {
+    display: flex;
+    flex-wrap: wrap; /* tự xuống dòng khi nhiều link */
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+}
+
+.iue-dashboard-menu li.multi-menu a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;        /* nhỏ gọn hơn menu chính */
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.2;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(0,0,0,0.03);
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.iue-dashboard-menu li.multi-menu a:hover {
+    background: rgba(0,0,0,0.07);
+}
+
+.iue-dashboard.dark .iue-dashboard-menu li.multi-menu a {
+    background: rgba(255,255,255,0.04);
+}
+
+.iue-dashboard.dark .iue-dashboard-menu li.multi-menu a:hover {
+    background: rgba(255,255,255,0.08);
 }
 
 /* ==== Animation ==== */

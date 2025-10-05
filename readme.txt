@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,16 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.6 – October 5, 2025 =
+- Enhanced Admin User Metabox for better visibility of user activity and communication:
+  - Added Recent Transactions section under VIP Details showing up to 100 latest Coin/Cash logs with type, amount, source, and timestamp
+  - Added Recent Inbox section under Inbox (User) listing up to 100 latest messages with type, status, title, and time
+  - Both sections feature compact scrollable layouts with limited height for clean, admin-friendly viewing
+- Fully backward compatible:
+  - No database or meta structure changes
+  - Automatically uses existing transaction and inbox data
+  - Lightweight rendering ensures stable performance even with large user histories
 
 = 1.2.5 – October 4, 2025 =
 - Refined dashboard menu CSS for better scalability with multiple grouped items:

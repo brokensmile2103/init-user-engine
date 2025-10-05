@@ -32,6 +32,17 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 		.iue-flex { display:flex; gap:18px; align-items:center; }
 		.iue-flex .iue-badge { background:#e7f5ff; color:#0a66c2; border:1px solid #b5dcff; padding:2px 8px; border-radius:999px; font-weight:600; }
 		.iue-list { margin:8px 0 0; padding-left:18px; }
+
+		/* New: simple scroll boxes for logs/inbox */
+		.iue-scroll { max-height: 320px; overflow: auto; border:1px solid #eee; background:#fafafa; padding:10px; border-radius:6px; }
+		.iue-log, .iue-inbox { list-style: none; margin:0; padding:0; }
+		.iue-log-item, .iue-inbox-item { display:flex; gap:8px; align-items:flex-start; padding:6px 0; border-bottom:1px dashed #e3e3e3; }
+		.iue-log-item:last-child, .iue-inbox-item:last-child { border-bottom:none; }
+		.iue-badge { background:#e7f5ff; color:#0a66c2; border:1px solid #b5dcff; padding:1px 6px; border-radius:999px; font-weight:600; font-size:11px; line-height:18px; }
+		.iue-amount { min-width:90px; font-weight:700; }
+		.iue-right { margin-left:auto; color:#666; font-size:11px; white-space:nowrap; }
+		.iue-title { font-weight:600; }
+		.iue-dim { color:#666; font-size:12px; }
 	';
 	wp_register_style(
 	    'iue-admin-inline-style',
@@ -227,6 +238,43 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 						</a>
 					</p>
 				<?php endif; ?>
+
+				<?php
+				// ==================== NEW: Recent Transactions (up to 100) ====================
+				$__tx_log = [];
+				if ( function_exists( 'init_plugin_suite_user_engine_get_transaction_log' ) ) {
+					$__tx_all = (array) init_plugin_suite_user_engine_get_transaction_log( $user_id );
+					// latest first
+					$__tx_log = array_slice( array_reverse( array_values( $__tx_all ) ), 0, 100 );
+				}
+				?>
+				<h4 style="margin-top:20px;"><?php esc_html_e( 'Recent Transactions', 'init-user-engine' ); ?></h4>
+				<?php if ( ! empty( $__tx_log ) ) : ?>
+					<div class="iue-scroll" aria-label="<?php esc_attr_e( 'Transaction log', 'init-user-engine' ); ?>">
+						<ul class="iue-log">
+							<?php foreach ( $__tx_log as $__e ) :
+								if ( ! is_array( $__e ) ) { continue; }
+								$__type  = strtoupper( (string) ( $__e['type'] ?? '' ) );
+								$__sign  = ( ( $__e['change'] ?? 'add' ) === 'deduct' ) ? '-' : '+';
+								$__amt   = absint( $__e['amount'] ?? 0 );
+								$__msg   = function_exists( 'init_plugin_suite_user_engine_format_log_message' )
+									? init_plugin_suite_user_engine_format_log_message( $__e )
+									: ucfirst( str_replace( '_', ' ', (string) ( $__e['source'] ?? 'unknown' ) ) );
+								$__time  = (string) ( $__e['time'] ?? wp_date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) );
+								?>
+								<li class="iue-log-item">
+									<span class="iue-badge"><?php echo esc_html( $__type ); ?></span>
+									<span class="iue-amount"><?php echo esc_html( $__sign . number_format_i18n( $__amt ) ); ?></span>
+									<span class="iue-dim"><?php echo esc_html( $__msg ); ?></span>
+									<span class="iue-right"><?php echo esc_html( $__time ); ?></span>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php else : ?>
+					<p class="iue-meta"><?php esc_html_e( 'No transactions found.', 'init-user-engine' ); ?></p>
+				<?php endif; ?>
+				<!-- ==================== /NEW ==================== -->
 			</div>
 
 			<div class="iue-card">
@@ -258,6 +306,46 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 						<?php esc_html_e( 'Open Inbox Statistics', 'init-user-engine' ); ?>
 					</a>
 				</p>
+
+				<?php
+				// ==================== NEW: Recent Inbox (up to 100) ====================
+				$__inbox_rows = [];
+				if ( function_exists( 'init_plugin_suite_user_engine_get_inbox' ) && function_exists( 'init_plugin_suite_user_engine_get_inbox_table' ) ) {
+					// Lấy 100 item mới nhất (hàm đã ORDER BY created_at DESC)
+					$__inbox_rows = (array) init_plugin_suite_user_engine_get_inbox( $user_id, 1, 100 );
+				}
+				?>
+				<h4 style="margin-top:20px;"><?php esc_html_e( 'Recent Inbox', 'init-user-engine' ); ?></h4>
+				<?php if ( ! empty( $__inbox_rows ) ) : ?>
+					<div class="iue-scroll" aria-label="<?php esc_attr_e( 'Recent inbox messages', 'init-user-engine' ); ?>">
+						<ul class="iue-inbox">
+							<?php foreach ( $__inbox_rows as $__m ) :
+								if ( ! is_array( $__m ) ) { continue; }
+								$__status   = strtoupper( (string) ( $__m['status'] ?? 'unknown' ) );
+								$__type     = strtoupper( (string) ( $__m['type'] ?? 'system' ) );
+								$__title    = (string) ( $__m['title'] ?? '' );
+								$__content  = isset( $__m['content'] ) ? wp_strip_all_tags( (string) $__m['content'] ) : '';
+								$__content  = $__content !== '' ? wp_html_excerpt( $__content, 120, '…' ) : '';
+								$__created  = isset( $__m['created_at'] ) ? (int) $__m['created_at'] : current_time( 'timestamp' );
+								?>
+								<li class="iue-inbox-item">
+									<div style="flex:1;">
+										<div class="iue-title"><?php echo esc_html( $__title ); ?></div>
+										<?php if ( $__content ) : ?>
+											<div class="iue-dim"><?php echo esc_html( $__content ); ?></div>
+										<?php endif; ?>
+									</div>
+									<span class="iue-badge"><?php echo esc_html( $__type ); ?></span>
+									<span class="iue-badge" style="background:#f5f5f5;color:#444;border-color:#e1e1e1;"><?php echo esc_html( $__status ); ?></span>
+									<span class="iue-right"><?php echo esc_html( wp_date( 'M j, Y H:i', $__created ) ); ?></span>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php else : ?>
+					<p class="iue-meta"><?php esc_html_e( 'No inbox messages found.', 'init-user-engine' ); ?></p>
+				<?php endif; ?>
+				<!-- ==================== /NEW ==================== -->
 			</div>
 		</div>
 	</div>

@@ -1196,3 +1196,21 @@ msgstr ""
 
 msgid "Registration failed"
 msgstr ""
+
+msgid "Recent Transactions"
+msgstr ""
+
+msgid "No transactions found."
+msgstr ""
+
+msgid "Transaction log"
+msgstr ""
+
+msgid "Recent Inbox"
+msgstr ""
+
+msgid "Recent inbox messages"
+msgstr ""
+
+msgid "No inbox messages found."
+msgstr ""

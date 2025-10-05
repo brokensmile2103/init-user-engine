@@ -1196,3 +1196,21 @@ msgstr "Bạn đã thử quá nhiều lần. Vui lòng chờ trước khi thử 
 
 msgid "Registration failed"
 msgstr "Đăng ký thất bại"
+
+msgid "Recent Transactions"
+msgstr "Giao dịch gần đây"
+
+msgid "No transactions found."
+msgstr "Không có giao dịch nào."
+
+msgid "Transaction log"
+msgstr "Nhật ký giao dịch"
+
+msgid "Recent Inbox"
+msgstr "Hộp thư gần đây"
+
+msgid "Recent inbox messages"
+msgstr "Các tin nhắn hộp thư gần đây"
+
+msgid "No inbox messages found."
+msgstr "Không có tin nhắn nào trong hộp thư."

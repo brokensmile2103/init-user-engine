@@ -1214,3 +1214,27 @@ msgstr ""
 
 msgid "No inbox messages found."
 msgstr ""
+
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+msgid "Cleanup Inbox by Type"
+msgstr ""
+
+msgid "Are you sure you want to permanently delete all messages of this type? This action cannot be undone."
+msgstr ""
+
+msgid "Delete All of This Type"
+msgstr ""
+
+msgid "Use this tool to purge messages by type in case of spikes or malformed entries."
+msgstr ""
+
+msgid "No types available"
+msgstr ""
+
+msgid "Cleanup completed for type \"%1$s\". Deleted %2$d messages."
+msgstr ""
+
+msgid "Cleanup failed: invalid or missing type."
+msgstr ""

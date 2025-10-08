@@ -1214,3 +1214,27 @@ msgstr "Các tin nhắn hộp thư gần đây"
 
 msgid "No inbox messages found."
 msgstr "Không có tin nhắn nào trong hộp thư."
+
+msgid "You do not have permission to perform this action."
+msgstr "Bạn không có quyền thực hiện thao tác này."
+
+msgid "Cleanup Inbox by Type"
+msgstr "Dọn dẹp hộp thư theo loại"
+
+msgid "Are you sure you want to permanently delete all messages of this type? This action cannot be undone."
+msgstr "Bạn có chắc muốn xóa vĩnh viễn tất cả tin nhắn của loại này không? Hành động này không thể hoàn tác."
+
+msgid "Delete All of This Type"
+msgstr "Xóa toàn bộ loại này"
+
+msgid "Use this tool to purge messages by type in case of spikes or malformed entries."
+msgstr "Dùng công cụ này để quét sạch tin nhắn theo loại khi có đột biến hoặc dữ liệu lỗi."
+
+msgid "No types available"
+msgstr "Không có loại nào"
+
+msgid "Cleanup completed for type \"%1$s\". Deleted %2$d messages."
+msgstr "Đã dọn xong loại “%1$s”. Đã xóa %2$d tin nhắn."
+
+msgid "Cleanup failed: invalid or missing type."
+msgstr "Dọn dẹp thất bại: loại không hợp lệ hoặc thiếu."

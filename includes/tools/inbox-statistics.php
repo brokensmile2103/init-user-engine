@@ -24,6 +24,32 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
         return;
     }
 
+    // Admin notice sau khi cleanup
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    if ( isset( $_GET['iue_cleanup_done'] ) ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $status = isset( $_GET['iue_cleanup_status'] ) ? sanitize_text_field( wp_unslash( $_GET['iue_cleanup_status'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $type   = isset( $_GET['iue_cleanup_type'] ) ? sanitize_text_field( wp_unslash( $_GET['iue_cleanup_type'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $deleted = isset( $_GET['iue_deleted'] ) ? (int) $_GET['iue_deleted'] : 0;
+
+        if ( 'ok' === $status ) {
+            echo '<div class="notice notice-success is-dismissible"><p>' .
+                sprintf(
+                    /* translators: 1: message type, 2: deleted count */
+                    esc_html__( 'Cleanup completed for type "%1$s". Deleted %2$d messages.', 'init-user-engine' ),
+                    esc_html( $type ),
+                    (int) $deleted
+                ) .
+            '</p></div>';
+        } else {
+            echo '<div class="notice notice-error is-dismissible"><p>' .
+                esc_html__( 'Cleanup failed: invalid or missing type.', 'init-user-engine' ) .
+            '</p></div>';
+        }
+    }
+
     // Get comprehensive statistics
     $stats = init_plugin_suite_user_engine_get_comprehensive_inbox_stats();
     $advanced_stats = init_plugin_suite_user_engine_get_advanced_inbox_analytics();
@@ -257,6 +283,39 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                     echo esc_html(sprintf(__('Last updated: %s', 'init-user-engine'), wp_date('M j, Y H:i')));
                     ?>
                 </span>
+            </div>
+
+            <!-- CLEANUP INBOX THEO TYPE -->
+            <div class="iue-cleanup-by-type" style="margin-top:12px; padding-top:12px; border-top:1px solid #e2e8f0;">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_attr__( 'Are you sure you want to permanently delete all messages of this type? This action cannot be undone.', 'init-user-engine' ); ?>');">
+                    <?php wp_nonce_field( 'iue_cleanup_inbox_type' ); ?>
+                    <input type="hidden" name="action" value="iue_cleanup_inbox_type" />
+                    <label for="iue_cleanup_type" style="margin-right:6px; font-weight:600;">
+                        🧹 <?php esc_html_e('Cleanup Inbox by Type', 'init-user-engine'); ?>:
+                    </label>
+                    <select name="iue_cleanup_type" id="iue_cleanup_type" required>
+                        <?php
+                        $iue_types = init_plugin_suite_user_engine_get_inbox_types();
+                        if ( ! empty( $iue_types ) ) :
+                            foreach ( $iue_types as $t ) :
+                                ?>
+                                <option value="<?php echo esc_attr( $t ); ?>"><?php echo esc_html( ucfirst( $t ) ); ?></option>
+                                <?php
+                            endforeach;
+                        else :
+                            ?>
+                            <option value=""><?php esc_html_e( 'No types available', 'init-user-engine' ); ?></option>
+                            <?php
+                        endif;
+                        ?>
+                    </select>
+                    <button type="submit" class="button button-secondary" <?php echo empty( $iue_types ) ? 'disabled' : ''; ?>>
+                        <?php esc_html_e('Delete All of This Type', 'init-user-engine'); ?>
+                    </button>
+                    <p class="description" style="margin-top:6px;">
+                        <?php esc_html_e('Use this tool to purge messages by type in case of spikes or malformed entries.', 'init-user-engine'); ?>
+                    </p>
+                </form>
             </div>
         </div>
     </div>

@@ -313,3 +313,60 @@ function init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler() {
     $wpdb->query("DELETE i FROM {$inbox_table} i LEFT JOIN {$users_table} u ON i.user_id = u.ID WHERE u.ID IS NULL");
     // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
+
+// Lấy danh sách type hiện có trong inbox
+function init_plugin_suite_user_engine_get_inbox_types() {
+    global $wpdb;
+    $table = init_plugin_suite_user_engine_get_inbox_table();
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $rows = $wpdb->get_col( "SELECT DISTINCT type FROM {$table} WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC" );
+    if ( ! is_array( $rows ) ) {
+        $rows = array();
+    }
+    return array_map( 'sanitize_text_field', $rows );
+}
+
+// Handle cleanup inbox by type
+add_action( 'admin_post_iue_cleanup_inbox_type', 'init_plugin_suite_user_engine_handle_cleanup_inbox_type' );
+function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+    }
+
+    check_admin_referer( 'iue_cleanup_inbox_type' );
+
+    $type  = isset( $_POST['iue_cleanup_type'] ) ? sanitize_text_field( wp_unslash( $_POST['iue_cleanup_type'] ) ) : '';
+    $types = init_plugin_suite_user_engine_get_inbox_types();
+
+    if ( empty( $type ) || ! in_array( $type, $types, true ) ) {
+        wp_safe_redirect( add_query_arg(
+            array(
+                'page'               => 'init-user-engine-inbox-stats',
+                'iue_cleanup_done'   => 1,
+                'iue_cleanup_status' => 'invalid',
+            ),
+            admin_url( 'admin.php' )
+        ) );
+        exit;
+    }
+
+    global $wpdb;
+    $table = init_plugin_suite_user_engine_get_inbox_table();
+
+    // Xoá theo type (sử dụng prepare để an toàn)
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE type = %s", $type ) );
+
+    wp_safe_redirect( add_query_arg(
+        array(
+            'page'               => 'init-user-engine-inbox-stats',
+            'iue_cleanup_done'   => 1,
+            'iue_cleanup_status' => 'ok',
+            'iue_cleanup_type'   => rawurlencode( $type ),
+            'iue_deleted'        => (int) $deleted,
+        ),
+        admin_url( 'admin.php' )
+    ) );
+    exit;
+}

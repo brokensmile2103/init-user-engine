@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,22 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.7 – October 8, 2025 =
+- Added **Inbox Cleanup Tool** directly in the *Inbox Statistics* admin page:
+  - Introduced new “Cleanup Inbox by Type” block under the **Refresh Data** section.
+  - Allows administrators to permanently delete all inbox messages of a selected `type`.
+  - Automatically lists all existing message types for quick selection.
+  - Includes nonce verification, capability checks, and confirmation prompt for safety.
+  - Displays success or error notice with deleted message count after operation.
+- Enhanced date range filter security:
+  - Added nonce field and verification for the “Date Range” dropdown form.
+  - Removed WPCS `NonceVerification.Recommended` warnings on GET processing.
+- Improved overall PHPCS compliance for the statistics module:
+  - Explicitly documented safe cases for display-only notices.
+  - Limited PHPCS ignores to justified database queries only.
+- Fully backward compatible with existing inbox data and analytics logic.
+- No database schema changes or new dependencies introduced.
 
 = 1.2.6 – October 5, 2025 =
 - Enhanced Admin User Metabox for better visibility of user activity and communication:

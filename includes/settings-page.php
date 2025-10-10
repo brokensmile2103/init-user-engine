@@ -232,7 +232,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<input type="password" class="regular-text"
 							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_secret_key]"
 							value="<?php echo esc_attr( $options['turnstile_secret_key'] ?? '' ); ?>"
-							autocomplete="off" />
+							autocomplete="new-password" />
 						<p class="description">
 							<?php esc_html_e( 'Private secret key used for server-side verification of Turnstile responses.', 'init-user-engine' ); ?>
 						</p>

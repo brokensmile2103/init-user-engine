@@ -43,11 +43,47 @@ function init_plugin_suite_user_engine_send_inbox( $user_id, $title, $content, $
 	return init_plugin_suite_user_engine_insert_inbox( $user_id, $title, $content, $type, $meta, $expire, $priority, $link, $pinned );
 }
 
-// Gửi cho nhiều người
-function init_plugin_suite_user_engine_send_inbox_to_users( $user_ids, $title, $content, $type = 'system', $meta = [], $expire = null, $priority = 'normal', $link = '', $pinned = 0 ) {
-	foreach ( $user_ids as $user_id ) {
-		init_plugin_suite_user_engine_send_inbox( $user_id, $title, $content, $type, $meta, $expire, $priority, $link, $pinned );
-	}
+// Gửi cho nhiều người (nâng cấp: dùng bulk insert)
+function init_plugin_suite_user_engine_send_inbox_to_users(
+    $user_ids,
+    $title,
+    $content,
+    $type      = 'system',
+    $meta      = [],
+    $expire    = null,
+    $priority  = 'normal',
+    $link      = '',
+    $pinned    = 0
+) {
+    // Cho phép tuỳ chỉnh kích thước batch qua filter (mặc định 500)
+    $chunk_size = (int) apply_filters( 'init_user_engine_inbox_bulk_chunk_size', 500, $user_ids, $title, $type );
+
+    // Dùng hàm bulk mới cho hiệu năng
+    $inserted = init_plugin_suite_user_engine_send_inbox_to_users_bulk(
+        $user_ids,
+        $title,
+        $content,
+        $type,
+        $meta,
+        $expire,
+        $priority,
+        $link,
+        $pinned,
+        $chunk_size
+    );
+
+    // Fallback an toàn: nếu bulk thất bại vì lý do nào đó, quay về loop từng user (giữ tương thích)
+    if ( ! $inserted ) {
+        $inserted = 0;
+        foreach ( (array) $user_ids as $uid ) {
+            $id = init_plugin_suite_user_engine_send_inbox( $uid, $title, $content, $type, $meta, $expire, $priority, $link, $pinned );
+            if ( $id ) {
+                $inserted++;
+            }
+        }
+    }
+
+    return (int) $inserted;
 }
 
 // Get inbox messages (paginated)
@@ -369,4 +405,160 @@ function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
         admin_url( 'admin.php' )
     ) );
     exit;
+}
+
+/**
+ * Bulk-insert inbox messages cho nhiều user trong 1 hoặc vài query.
+ *
+ * @param int[]        $user_ids   Mảng user ID.
+ * @param string       $title
+ * @param string       $content
+ * @param string       $type
+ * @param array        $metadata
+ * @param int|string|null $expire_at  UNIX ts, string parse-able, hoặc null.
+ * @param string       $priority   normal|high|low...
+ * @param string       $link
+ * @param int|bool     $pinned
+ * @param int          $chunk_size Số bản ghi mỗi lô (500–1000 là ổn).
+ *
+ * @return int Tổng số rows được insert.
+ */
+function init_plugin_suite_user_engine_insert_inbox_bulk(
+    $user_ids,
+    $title,
+    $content,
+    $type      = 'system',
+    $metadata  = [],
+    $expire_at = null,
+    $priority  = 'normal',
+    $link      = '',
+    $pinned    = 0,
+    $chunk_size = 500
+) {
+    global $wpdb;
+
+    $table = init_plugin_suite_user_engine_get_inbox_table();
+
+    // Chuẩn hoá input
+    $user_ids = array_values( array_unique( array_map( 'intval', (array) $user_ids ) ) );
+    $user_ids = array_filter( $user_ids, static function( $v ) { return $v > 0; } );
+    if ( empty( $user_ids ) ) {
+        return 0;
+    }
+
+    $created_at = current_time( 'timestamp' );
+    $pinned     = $pinned ? 1 : 0;
+    $meta_str   = maybe_serialize( $metadata );
+    $link_str   = $link ?: ''; // để trống thay vì NULL cho đơn giản & ổn định.
+
+    // Chuẩn hoá expire
+    if ( $expire_at ) {
+        $expire_at = is_numeric( $expire_at ) ? (int) $expire_at : strtotime( $expire_at );
+        if ( $expire_at <= 0 ) {
+            $expire_at = null;
+        }
+    } else {
+        $expire_at = null;
+    }
+
+    $total_inserted = 0;
+
+    // Chia lô để tránh query quá dài
+    foreach ( array_chunk( $user_ids, max( 1, (int) $chunk_size ) ) as $batch ) {
+        $values_sql = [];
+        $params     = [];
+
+        foreach ( $batch as $uid ) {
+            // Cho phép tuỳ biến từng hàng trước khi build SQL
+            $row = apply_filters( 'init_plugin_suite_user_engine_inbox_bulk_row_data', [
+                'user_id'    => $uid,
+                'title'      => $title,
+                'content'    => $content,
+                'type'       => $type,
+                'status'     => 'unread',
+                'created_at' => $created_at,
+                'priority'   => $priority,
+                'pinned'     => $pinned,
+                'link'       => $link_str,
+                'metadata'   => $meta_str,
+                'expire_at'  => $expire_at,
+            ], $uid );
+
+            // Hàng với expire_at NULL thì chèn NULL trực tiếp để không đổi semantics
+            $placeholders =
+                "(%d,%s,%s,%s,'unread',%d,%s,%d,%s,%s," . ( is_null( $row['expire_at'] ) ? "NULL" : "%d" ) . ")";
+
+            $values_sql[] = $placeholders;
+
+            // Thứ tự tham số khớp với placeholders
+            $params[] = (int) $row['user_id'];  // %d
+            $params[] = (string) $row['title']; // %s
+            $params[] = (string) $row['content'];
+            $params[] = (string) $row['type'];
+            $params[] = (int)    $row['created_at'];
+            $params[] = (string) $row['priority'];
+            $params[] = (int)    $row['pinned'];
+            $params[] = (string) $row['link'];
+            $params[] = (string) $row['metadata'];
+
+            if ( ! is_null( $row['expire_at'] ) ) {
+                $params[] = (int) $row['expire_at'];
+            }
+        }
+
+        // Cột theo đúng thứ tự placeholders ở trên
+        $sql  = "INSERT INTO {$table} 
+                (user_id,title,content,type,status,created_at,priority,pinned,link,metadata,expire_at)
+                VALUES " . implode( ',', $values_sql );
+
+        // Transaction cho an toàn & tốc độ (InnoDB)
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->query( 'START TRANSACTION' );
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $result = $wpdb->query( $wpdb->prepare( $sql, $params ) );
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->query( 'COMMIT' );
+
+        $inserted = (int) $result;
+        $total_inserted += $inserted;
+
+        /**
+         * Action: đã insert xong một batch.
+         *
+         * @param int   $inserted   Số row chèn thành công trong batch.
+         * @param array $batch      Danh sách user_id của batch.
+         * @param array $context    Ngữ cảnh dùng để log/metrics.
+         */
+        do_action( 'init_plugin_suite_user_engine_inbox_bulk_inserted', $inserted, $batch, [
+            'title'      => $title,
+            'type'       => $type,
+            'priority'   => $priority,
+            'pinned'     => $pinned,
+            'has_expire' => ! is_null( $expire_at ),
+        ] );
+    }
+
+    return $total_inserted;
+}
+
+/**
+ * Helper: Gửi inbox cho nhiều user bằng bulk insert (thay cho loop).
+ */
+function init_plugin_suite_user_engine_send_inbox_to_users_bulk(
+    $user_ids,
+    $title,
+    $content,
+    $type      = 'system',
+    $meta      = [],
+    $expire    = null,
+    $priority  = 'normal',
+    $link      = '',
+    $pinned    = 0,
+    $chunk_size = 500
+) {
+    return init_plugin_suite_user_engine_insert_inbox_bulk(
+        $user_ids, $title, $content, $type, $meta, $expire, $priority, $link, $pinned, $chunk_size
+    );
 }

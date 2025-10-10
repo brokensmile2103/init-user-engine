@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.8
+Stable tag: 1.2.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,17 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.9 – October 10, 2025 =
+- Upgraded multi-user inbox sender to use **bulk insert** for massive scalability.  
+  - Converts thousands of single inserts into optimized batched queries.  
+  - Handles large user arrays efficiently with automatic chunking for stability.  
+- Simplified inbox table creation for new installations (no index changes applied).  
+- Significantly improved performance when sending inbox messages to large user bases (e.g., 10,000+ users).  
+- Refactored **Admin Tools**:
+  - **Notification Tool** now uses the new bulk inbox sender for instant multi-user delivery.
+  - **Top-up Tool** updated to integrate with the new inbox system while keeping balance and log logic fully intact.
+- Fully backward compatible, no database schema or API changes.  
 
 = 1.2.8 – October 10, 2025 =
 - Added `autocomplete="off"` to all password fields in the settings page to prevent browsers from auto-saving or suggesting stored passwords.  

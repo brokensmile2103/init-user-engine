@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,11 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.2.8 – October 10, 2025 =
+- Added `autocomplete="off"` to all password fields in the settings page to prevent browsers from auto-saving or suggesting stored passwords.  
+- Minor UI consistency adjustments in settings forms.  
+- No functional or database changes.
 
 = 1.2.7 – October 8, 2025 =
 - Added **Inbox Cleanup Tool** directly in the *Inbox Statistics* admin page:

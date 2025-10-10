@@ -218,7 +218,8 @@ function init_plugin_suite_user_engine_render_settings_page() {
 					<td>
 						<input type="text" class="regular-text"
 							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_site_key]"
-							value="<?php echo esc_attr( $options['turnstile_site_key'] ?? '' ); ?>" />
+							value="<?php echo esc_attr( $options['turnstile_site_key'] ?? '' ); ?>"
+							autocomplete="off" />
 						<p class="description">
 							<?php esc_html_e( 'Public site key from your Cloudflare Turnstile dashboard. Required to render the widget on the frontend.', 'init-user-engine' ); ?>
 						</p>
@@ -230,7 +231,8 @@ function init_plugin_suite_user_engine_render_settings_page() {
 					<td>
 						<input type="password" class="regular-text"
 							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_secret_key]"
-							value="<?php echo esc_attr( $options['turnstile_secret_key'] ?? '' ); ?>" />
+							value="<?php echo esc_attr( $options['turnstile_secret_key'] ?? '' ); ?>"
+							autocomplete="off" />
 						<p class="description">
 							<?php esc_html_e( 'Private secret key used for server-side verification of Turnstile responses.', 'init-user-engine' ); ?>
 						</p>

@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.2.9
+ * Version: 1.3.0
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.2.9' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.3.0' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -188,6 +188,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
     }
 
     $online_minutes = apply_filters( 'init_plugin_suite_user_engine_online_minutes', $online_minutes, $user_id, $is_vip );
+    $cash_to_coin_rate = isset( $settings['rate_coin_per_cash'] ) ? (float) $settings['rate_coin_per_cash'] : 0;
 
     $localized_data = [
         'rest_url'       => esc_url_raw( rest_url( INIT_PLUGIN_SUITE_IUE_NAMESPACE ) ),
@@ -197,6 +198,8 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         'online_minutes' => $online_minutes,
         'label_coin'     => $label_coin,
         'label_cash'     => $label_cash,
+        'rate_coin_per_cash' => $cash_to_coin_rate, // 1 Cash -> X Coin (0 = tắt)
+        'user_cash'          => init_plugin_suite_user_engine_get_cash( $user_id ),
 
         'is_vip'         => $is_vip, // bool
         'vip_expiry'     => init_plugin_suite_user_engine_get_vip_expiry(),
@@ -285,6 +288,20 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'exp_log_load_fail'        => __( 'Failed to load experience log.', 'init-user-engine' ),
             'exp_log_exp'              => __( 'EXP', 'init-user-engine' ),
             'exp_log_unknown'          => __( 'Unknown', 'init-user-engine' ),
+
+            'exchange_title'           => __( 'Exchange', 'init-user-engine' ),
+            'exchange_disabled'        => __( 'Exchange is currently disabled.', 'init-user-engine' ),
+            'exchange_rate'            => __( 'Rate', 'init-user-engine' ),
+            'exchange_amount'          => __( 'Amount', 'init-user-engine' ),
+            'exchange_receive'         => __( 'You will receive', 'init-user-engine' ),
+            'exchange_max'             => __( 'Max', 'init-user-engine' ),
+            'exchange_submit'          => __( 'Convert', 'init-user-engine' ),
+            'exchange_processing'      => __( 'Processing...', 'init-user-engine' ),
+            'exchange_invalid'         => __( 'Enter a valid amount.', 'init-user-engine' ),
+            'exchange_insufficient'    => __( 'Not enough Cash.', 'init-user-engine' ),
+            'exchange_success'         => __( 'Exchanged successfully!', 'init-user-engine' ),
+            'exchange_error'           => __( 'Exchange failed.', 'init-user-engine' ),
+            'exchange_note'            => __( 'Conversion is irreversible. Please review before confirming.', 'init-user-engine' ),
 
             'upload_avatar'            => __( 'Upload Avatar', 'init-user-engine' ),
             'avatar_drop_text'         => __( 'Drop image here or click to upload', 'init-user-engine' ),

@@ -21,6 +21,9 @@ $exp_now      = (int) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_exp
 $exp_required = init_plugin_suite_user_engine_exp_required( $level );
 
 $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $user_id );
+
+$options     = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
+$rate_enable = (float) ( $options['rate_coin_per_cash'] ?? 0 );
 ?>
 
 <div class="iue-dashboard">
@@ -45,11 +48,11 @@ $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $use
 			<ul class="iue-user-stats">
 				<li class="iue-coin">
 					<span class="iue-icon" data-iue-icon="coin"></span>
-					<span class="iue-value-coin"><?php echo esc_html( $coin ); ?></span>
+					<span class="iue-value-coin"><?php echo esc_html( number_format( $coin, 0, ',', '.' ) ); ?></span>
 				</li>
 				<li class="iue-cash">
 					<span class="iue-icon" data-iue-icon="cash"></span>
-					<span class="iue-value-cash"><?php echo esc_html( $cash ); ?></span>
+					<span class="iue-value-cash"><?php echo esc_html( number_format( $cash, 0, ',', '.' ) ); ?></span>
 				</li>
 			</ul>
 		</div>
@@ -101,6 +104,14 @@ $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $use
 				<span><?php esc_html_e( 'Transaction History', 'init-user-engine' ); ?></span>
 			</a>
 		</li>
+		<?php if ( $rate_enable > 0 ) : ?>
+		<li>
+			<a href="#" role="button" class="iue-menu-link" data-action="exchange">
+				<span class="iue-icon" data-iue-icon="exchange"></span>
+				<span><?php esc_html_e( 'Exchange', 'init-user-engine' ); ?></span>
+			</a>
+		</li>
+		<?php endif; ?>
 		<li>
 			<a href="#" role="button" class="iue-menu-link" data-action="referral">
 				<span class="iue-icon" data-iue-icon="referral"></span>

@@ -1238,3 +1238,48 @@ msgstr ""
 
 msgid "Cleanup failed: invalid or missing type."
 msgstr ""
+
+msgid "Exchange Rate: Cash → Coin"
+msgstr ""
+
+msgid "Coin received for 1 Cash. Set to 0 to disable conversion."
+msgstr ""
+
+msgid "Exchange"
+msgstr ""
+
+msgid "Exchange is currently disabled."
+msgstr ""
+
+msgid "Rate"
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "You will receive"
+msgstr ""
+
+msgid "Max"
+msgstr ""
+
+msgid "Convert"
+msgstr ""
+
+msgid "Processing..."
+msgstr ""
+
+msgid "Enter a valid amount."
+msgstr ""
+
+msgid "Not enough Cash."
+msgstr ""
+
+msgid "Exchanged successfully!"
+msgstr ""
+
+msgid "Exchange failed."
+msgstr ""
+
+msgid "Conversion is irreversible. Please review before confirming."
+msgstr ""

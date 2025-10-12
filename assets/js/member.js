@@ -81,6 +81,11 @@ function initMenuClick() {
             return;
         }
 
+        if (action === 'exchange') {
+            loadExchangeModal();
+            return;
+        }
+
         if (action === 'edit-profile') {
             loadEditProfileModal();
             return;
@@ -148,6 +153,12 @@ document.addEventListener('keydown', function (e) {
     if (key === 'p') {
         e.preventDefault();
         loadEditProfileModal();
+        return;
+    }
+
+    if (key === 'x') {
+        e.preventDefault();
+        loadExchangeModal();
         return;
     }
 
@@ -288,7 +299,7 @@ const IUE_Icons = {
     
     coin: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><ellipse fill="none" stroke="currentColor" cx="10" cy="4.64" rx="7.5" ry="3.14"></ellipse><path fill="none" stroke="currentColor" d="M17.5,8.11 C17.5,9.85 14.14,11.25 10,11.25 C5.86,11.25 2.5,9.84 2.5,8.11"></path><path fill="none" stroke="currentColor" d="M17.5,11.25 C17.5,12.99 14.14,14.39 10,14.39 C5.86,14.39 2.5,12.98 2.5,11.25"></path><path fill="none" stroke="currentColor" d="M17.49,4.64 L17.5,14.36 C17.5,16.1 14.14,17.5 10,17.5 C5.86,17.5 2.5,16.09 2.5,14.36 L2.5,4.64"></path></svg>`,
     cash: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><rect width="17" height="12" fill="none" stroke="currentColor" x="1.5" y="4.5"></rect><rect width="18" height="3" x="1" y="7"></rect></svg>`,
-    
+    exchange: `<svg width="20" height="20" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M6 15.04V8H5v7.04L1.35 11.4l-.7.7 4.85 4.86 4.85-4.86-.7-.7zm-.51.5h.02zM15.65 5.6 12 1.96v7.1h-1v-7.1L7.35 5.6l-.7-.7L11.5.04l4.85 4.86z"/></svg>`,
     star: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><polygon fill="none" stroke="currentColor" stroke-width="1.01" points="10 2 12.63 7.27 18.5 8.12 14.25 12.22 15.25 18 10 15.27 4.75 18 5.75 12.22 1.5 8.12 7.37 7.27"></polygon></svg>`,
     camera: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="10" cy="10.8" r="3.8"></circle><path fill="none" stroke="currentColor" d="M1,4.5 C0.7,4.5 0.5,4.7 0.5,5 L0.5,17 C0.5,17.3 0.7,17.5 1,17.5 L19,17.5 C19.3,17.5 19.5,17.3 19.5,17 L19.5,5 C19.5,4.7 19.3,4.5 19,4.5 L13.5,4.5 L13.5,2.9 C13.5,2.6 13.3,2.5 13,2.5 L7,2.5 C6.7,2.5 6.5,2.6 6.5,2.9 L6.5,4.5 L1,4.5 L1,4.5 Z"></path></svg>`,
     diamond: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M15 3h-.4l-.2.2h-.1v.1l-.1.1L1 17.4l-.6.5.5.7 23 29.7q.2.5.7.7l.4.6.5-.6q.5-.2.5-.7l23-29.7.6-.7-.6-.6L36 3.5l-.2-.2-.2-.2V3zm.8 2h7l-9 9.7zm11.5 0h6.9l2 9.7zm-2.3.5L35.7 17H14.2zm11.7 1.8L46 17h-7.2zm-23.4 0L11.2 17H4zM3.8 19h7.5L21 41.2zm9.7 0h23L25 45.5zm25.1 0h7.6L29 41.2z" transform="scale(5.12)" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode:normal"/></svg>`,
@@ -625,8 +636,8 @@ function initCheckin() {
         .then(res => res.json())
         .then(data => {
             if (data.status === 'reward_claimed') {
-                if (typeof data.coin !== 'undefined') coinEl.textContent = data.coin;
-                if (typeof data.cash !== 'undefined') cashEl.textContent = data.cash;
+                if (typeof data.coin !== 'undefined') coinEl.textContent = iueFmt(data.coin);
+                if (typeof data.cash !== 'undefined') cashEl.textContent = iueFmt(data.cash);
                 if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
 
                 document.dispatchEvent(new CustomEvent('iue:reward:claimed', { detail: data }));
@@ -686,8 +697,8 @@ function initCheckin() {
                 checkinBox.dataset.checkin = '1';
                 streakEl.textContent = data.streak;
 
-                if (typeof data.coin !== 'undefined') coinEl.textContent = data.coin;
-                if (typeof data.cash !== 'undefined') cashEl.textContent = data.cash;
+                if (typeof data.coin !== 'undefined') coinEl.textContent = iueFmt(data.coin);
+                if (typeof data.cash !== 'undefined') cashEl.textContent = iueFmt(data.cash);
                 if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
 
                 document.dispatchEvent(new CustomEvent('iue:checkin:success', { detail: data }));
@@ -765,8 +776,9 @@ function renderDailyTaskItem(task) {
         ? InitUserEngineData.label_cash || 'Cash'
         : InitUserEngineData.label_coin || 'Coin';
 
+    const amountStr = iueFmt(reward.amount || 0);
     const statusEl = completed
-        ? `<span class="iue-amount-positive">+${reward.amount} ${label}</span>`
+        ? `<span class="iue-amount-positive">+${amountStr} ${label}</span>`
         : `<span class="iue-amount-negative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><g stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><path d="m9 9 6 6m0-6-6 6" stroke-linecap="round"/></g></svg></span>`;
 
     return `
@@ -1070,10 +1082,10 @@ function updateInboxUnreadIndicator() {
         if (!badge) {
             const span = document.createElement('span');
             span.className = 'iue-badge';
-            span.textContent = stillUnread;
+            span.textContent = iueFmt(stillUnread);
             menuInbox?.querySelector('span')?.appendChild(span);
         } else {
-            badge.textContent = stillUnread;
+            badge.textContent = iueFmt(stillUnread);
         }
 
         // Nếu chưa có dot thì tạo lại
@@ -1165,7 +1177,7 @@ function loadExpLog(page = 1) {
 }
 
 function renderExpLogItem(entry, i18n = {}) {
-    const amount  = Math.abs(parseInt(entry.amount || 0, 10));
+    const amount  = Math.abs(iueParse(entry.amount));
     const sign    = entry.change === 'deduct' ? '–' : '+';
     const message = entry.message || (i18n.exp_log_unknown || 'Unknown');
     const rawTime = entry.time || '';
@@ -1182,7 +1194,7 @@ function renderExpLogItem(entry, i18n = {}) {
 
     return `
         <div class="iue-exp-log-item">
-            <strong>${i18n.exp_log_exp || 'EXP'}</strong>: ${sign}${amount} ${message} · ${formattedTime}
+            <strong>${i18n.exp_log_exp || 'EXP'}</strong>: ${sign}${iueFmt(amount)} ${message} · ${formattedTime}
         </div>
     `;
 }
@@ -1320,15 +1332,15 @@ function loadReferral() {
             <h4>${t.referral_benefits || 'Referral Benefits'}</h4>
             <div class="iue-referral-benefit-row">
                 <strong>${t.you_get || 'You get:'}</strong>
-                +${rewards.ref_reward_coin || 0} ${InitUserEngineData.label_coin}, 
-                +${rewards.ref_reward_exp || 0} EXP, 
-                +${rewards.ref_reward_cash || 0} ${InitUserEngineData.label_cash}
+                +${iueFmt(rewards.ref_reward_coin || 0)} ${InitUserEngineData.label_coin}, 
+                +${iueFmt(rewards.ref_reward_exp || 0)} EXP, 
+                +${iueFmt(rewards.ref_reward_cash || 0)} ${InitUserEngineData.label_cash}
             </div>
             <div class="iue-referral-benefit-row">
                 <strong>${t.friend_get || 'Your friend gets:'}</strong>
-                +${rewards.ref_new_coin || 0} ${InitUserEngineData.label_coin}, 
-                +${rewards.ref_new_exp || 0} EXP, 
-                +${rewards.ref_new_cash || 0} ${InitUserEngineData.label_cash}
+                +${iueFmt(rewards.ref_new_coin || 0)} ${InitUserEngineData.label_coin}, 
+                +${iueFmt(rewards.ref_new_exp || 0)} EXP, 
+                +${iueFmt(rewards.ref_new_cash || 0)} ${InitUserEngineData.label_cash}
             </div>
         </div>
     `;
@@ -1552,7 +1564,7 @@ function renderError(container, message) {
 function renderTransactionItem(entry) {
     const rawType  = entry.type || 'unknown';
     const type     = rawType.toLowerCase();
-    const amount   = Math.abs(parseInt(entry.amount || 0, 10));
+    const amount   = Math.abs(iueParse(entry.amount));
     const change   = (entry.change || '').trim();
     const sign     = change === '-' ? '–' : '+';
     const message  = entry.message || 'Unknown action';
@@ -1569,7 +1581,7 @@ function renderTransactionItem(entry) {
         <div class="iue-transaction-item">
             <div class="iue-trans-row">
                 <span class="iue-trans-message">${message}</span>
-                <span class="${amountClass}">${sign}${amount} ${label}</span>
+                <span class="${amountClass}">${sign}${iueFmt(amount)} ${label}</span>
             </div>
             <div class="iue-trans-meta">${timeStr}</div>
         </div>
@@ -1711,6 +1723,140 @@ function loadVipModal() {
     });
 }
 
+// EXCHANGE: Cash -> Coin
+function loadExchangeModal() {
+    const t = InitUserEngineData.i18n || {};
+    const rate = parseFloat(InitUserEngineData.rate_coin_per_cash || 0);
+    const labelCoin = InitUserEngineData.label_coin || 'Coin';
+    const labelCash = InitUserEngineData.label_cash || 'Cash';
+
+    // Nếu tắt quy đổi
+    if (!rate || rate <= 0) {
+        showUserEngineModal(t.exchange_title || 'Exchange', `
+            <div class="iue-exchange-disabled">
+                <p>${t.exchange_disabled || 'Exchange is currently disabled.'}</p>
+            </div>
+        `, 'small');
+        return;
+    }
+
+    const currentCoin = (() => {
+        const el = document.querySelector('.iue-value-coin');
+        return el ? iueParse(el.textContent) : 0;
+    })();
+
+    const currentCash = (() => {
+        const el = document.querySelector('.iue-value-cash');
+        return el ? iueParse(el.textContent) : 0;
+    })();
+
+    showUserEngineModal(t.exchange_title || 'Exchange', `
+        <div class="iue-exchange-box">
+            <div class="iue-exchange-rate">
+                <strong>${t.exchange_rate || 'Rate'}:</strong>
+                1 ${labelCash} → ${rate} ${labelCoin}
+            </div>
+
+            <div class="iue-exchange-balance">
+                <div>${labelCash}: <strong class="iue-ex-balance-cash">${currentCash.toLocaleString()}</strong></div>
+                <div>${labelCoin}: <strong class="iue-ex-balance-coin">${currentCoin.toLocaleString()}</strong></div>
+            </div>
+
+            <div class="iue-form-group">
+                <label for="iue-exchange-cash">${t.exchange_amount || 'Amount'} (${labelCash})</label>
+                <input type="number" id="iue-exchange-cash" min="1" step="1" placeholder="0" />
+                <button type="button" class="iue-btn iue-btn-mini" id="iue-exchange-max">${t.exchange_max || 'Max'}</button>
+            </div>
+
+            <div class="iue-exchange-preview">
+                <span>${t.exchange_receive || 'You will receive'}:</span>
+                <strong><span id="iue-exchange-coin">0</span> ${labelCoin}</strong>
+            </div>
+
+            <div class="iue-form-actions">
+                <button id="iue-exchange-submit" class="iue-btn">${t.exchange_submit || 'Convert'}</button>
+            </div>
+
+            <p class="iue-exchange-note">
+                ${t.exchange_note || 'Conversion is irreversible. Please review before confirming.'}
+            </p>
+        </div>
+    `, 'small');
+
+    const input = document.getElementById('iue-exchange-cash');
+    const receiveEl = document.getElementById('iue-exchange-coin');
+    const btnMax = document.getElementById('iue-exchange-max');
+    const btnSubmit = document.getElementById('iue-exchange-submit');
+
+    function recompute() {
+        const val = Math.max(0, parseInt(input.value || '0', 10));
+        const coins = Math.floor(val * rate);
+        receiveEl.textContent = coins.toLocaleString('vi-VN'); // ví dụ: 1.000.000
+    }
+
+    input?.addEventListener('input', recompute);
+    btnMax?.addEventListener('click', () => {
+        input.value = String(currentCash);
+        recompute();
+    });
+
+    btnSubmit?.addEventListener('click', () => {
+        const cashAmount = parseInt(input.value || '0', 10);
+        if (!cashAmount || cashAmount <= 0) {
+            InitUserEngineToast.show(t.exchange_invalid || 'Enter a valid amount.', 'warning');
+            return;
+        }
+        if (cashAmount > currentCash) {
+            InitUserEngineToast.show(t.exchange_insufficient || 'Not enough Cash.', 'error');
+            return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = t.exchange_processing || 'Processing...';
+
+        fetch(`${InitUserEngineData.rest_url}/exchange`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': InitUserEngineData.nonce
+            },
+            body: JSON.stringify({ cash: cashAmount })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res && (res.status === 'exchanged')) {
+                // cập nhật số dư trong dashboard
+                const coinEl = document.querySelector('.iue-value-coin');
+                const cashEl = document.querySelector('.iue-value-cash');
+                if (coinEl && typeof res.balances?.coin !== 'undefined') {
+                    coinEl.textContent = iueFmt(res.balances.coin);
+                }
+                if (cashEl && typeof res.balances?.cash !== 'undefined') {
+                    cashEl.textContent = iueFmt(res.balances.cash);
+                }
+
+                InitUserEngineToast.show(t.exchange_success || 'Exchanged successfully!', 'success');
+                closeModal();
+            } else {
+                const msg = (res && (res.message || res.code)) || (t.exchange_error || 'Exchange failed.');
+                InitUserEngineToast.show(msg, 'error');
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = t.exchange_submit || 'Convert';
+            }
+        })
+        .catch(err => {
+            console.error('[Init User Engine] Exchange error:', err);
+            InitUserEngineToast.show(t.exchange_error || 'Exchange failed.', 'error');
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = t.exchange_submit || 'Convert';
+        });
+    });
+
+    // init icons in modal if any
+    initUserEngineIcons(document.getElementById('iue-modal'));
+}
+
 // UTILS
 function renderPagination({ page, totalPages, onClick, maxVisible = 5 }) {
     if (totalPages <= 1) return null;
@@ -1839,6 +1985,13 @@ function setupConfirmableButton(button, options = {}) {
         }
     });
 }
+
+// Number formatting helpers
+const iueFmt = (n) => {
+  const v = typeof n === 'string' ? parseInt(n.replace(/[^\d-]/g, ''), 10) : Number(n);
+  return Number.isFinite(v) ? v.toLocaleString('vi-VN') : '0';
+};
+const iueParse = (text) => parseInt(String(text || '0').replace(/[^\d-]/g, ''), 10) || 0;
 
 // Init
 document.addEventListener('DOMContentLoaded', function () {

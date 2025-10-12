@@ -25,84 +25,108 @@ function init_plugin_suite_user_engine_register_rest_routes() {
     register_rest_route( $namespace, '/checkin', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_checkin',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // POST /claim-reward – Nhận thưởng sau khi online 10 phút
     register_rest_route( $namespace, '/claim-reward', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_claim_reward',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // GET /transactions – Lấy lịch sử giao dịch
     register_rest_route( $namespace, '/transactions', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_user_engine_api_get_transactions',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ]);
 
     // GET /daily-tasks – Lấy nhiệm vụ hàng ngày
     register_rest_route( $namespace, '/daily-tasks', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_user_engine_api_get_daily_tasks',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ]);
 
     // GET /exp-log – Lấy log EXP riêng
     register_rest_route( $namespace, '/exp-log', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_user_engine_api_get_exp_log',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // GET /inbox – Lấy danh sách inbox
     register_rest_route( $namespace, '/inbox', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_user_engine_api_get_inbox',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // POST /inbox/mark-read
     register_rest_route( $namespace, '/inbox/mark-read', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_mark_inbox_read',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ]);
 
     // POST /inbox/mark-all-read
     register_rest_route( $namespace, '/inbox/mark-all-read', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_mark_inbox_all_read',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ]);
 
     // POST /inbox/delete – Xoá 1 tin nhắn
     register_rest_route( $namespace, '/inbox/delete', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_delete_inbox_item',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // POST /inbox/delete-all – Xoá toàn bộ hộp thư
     register_rest_route( $namespace, '/inbox/delete-all', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_delete_inbox_all',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // POST /vip/purchase – Mua gói VIP
     register_rest_route( $namespace, '/vip/purchase', [
         'methods'             => 'POST',
         'callback'            => 'init_plugin_suite_user_engine_api_purchase_vip',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // GET /referral-log – Lấy lịch sử giới thiệu
     register_rest_route( $namespace, '/referral-log', [
         'methods'             => 'GET',
         'callback'            => 'init_plugin_suite_user_engine_api_get_referral_log',
-        'permission_callback' => '__return_true',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
     ] );
 
     // POST /avatar – Upload avatar mới
@@ -140,6 +164,15 @@ function init_plugin_suite_user_engine_register_rest_routes() {
             return is_user_logged_in();
         },
     ]);
+
+    // POST /exchange – Convert Cash to Coin
+    register_rest_route( $namespace, '/exchange', [
+        'methods'             => 'POST',
+        'callback'            => 'init_plugin_suite_user_engine_api_exchange_cash_to_coin',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
+    ] );
 }
 
 // Enhanced Captcha với better validation
@@ -767,13 +800,31 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
     $data = $request->get_json_params();
 
     $honeypot = sanitize_text_field( $data['iue_hp'] ?? '' );
-    if ( ! empty($honeypot) ) {
+    if ( ! empty( $honeypot ) ) {
         return new WP_Error( 'spam_detected', __( 'Spam detected.', 'init-user-engine' ), [ 'status' => 400 ] );
     }
 
+    // Lấy thông tin user hiện tại
+    $user_info = get_userdata( $user_id );
+
+    // Sanitize tên hiển thị
     $display_name = sanitize_text_field( $data['display_name'] ?? '' );
-    $bio          = sanitize_textarea_field( $data['bio'] ?? '' );
-    $password     = $data['new_password'] ?? '';
+
+    // Loại bỏ toàn bộ khoảng trắng kể cả unicode
+    $display_name = trim( preg_replace( '/\p{Z}+|[\s]+/u', '', $display_name ) );
+
+    // Nếu sanitize xong mà rỗng => fallback sang nickname hoặc username
+    if ( empty( $display_name ) ) {
+        $nickname = get_user_meta( $user_id, 'nickname', true );
+        if ( ! empty( trim( $nickname ) ) ) {
+            $display_name = trim( $nickname );
+        } else {
+            $display_name = $user_info->user_login;
+        }
+    }
+
+    $bio      = sanitize_textarea_field( $data['bio'] ?? '' );
+    $password = $data['new_password'] ?? '';
 
     $facebook = esc_url_raw( $data['facebook'] ?? '' );
     $twitter  = esc_url_raw( $data['twitter'] ?? '' );
@@ -802,11 +853,11 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
 
     do_action( 'init_plugin_suite_user_engine_after_update_profile', $user_id, $data );
 
-    return rest_ensure_response([
+    return rest_ensure_response( [
         'success' => true,
         'data'    => [
             'display_name' => $display_name,
             'bio'          => $bio,
-        ]
-    ]);
+        ],
+    ] );
 }

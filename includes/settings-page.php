@@ -126,6 +126,10 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['ref_new_exp']      = absint( $input['ref_new_exp'] ?? 20 );
 	$output['ref_new_cash']     = absint( $input['ref_new_cash'] ?? 0 );
 
+	$rate_raw = $input['rate_coin_per_cash'] ?? 0;
+	$rate_val = is_numeric( $rate_raw ) ? (float) $rate_raw : 0;
+	$output['rate_coin_per_cash'] = max( 0, $rate_val );
+
 	return $output;
 }
 
@@ -164,6 +168,17 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<input type="text" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[label_cash]"
 							value="<?php echo esc_attr( $options['label_cash'] ?? 'Cash' ); ?>" class="regular-text" />
 						<p class="description"><?php esc_html_e( 'Label for premium currency or real-money equivalent (e.g., Cash, Kim cương).', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Exchange Rate: Cash → Coin', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0" step="0.0001"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[rate_coin_per_cash]"
+							value="<?php echo esc_attr( $options['rate_coin_per_cash'] ?? 0 ); ?>" />
+						<p class="description">
+							<?php esc_html_e( 'Coin received for 1 Cash. Set to 0 to disable conversion.', 'init-user-engine' ); ?>
+						</p>
 					</td>
 				</tr>
 				<tr>

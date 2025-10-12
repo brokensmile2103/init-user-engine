@@ -1238,3 +1238,48 @@ msgstr "Đã dọn xong loại “%1$s”. Đã xóa %2$d tin nhắn."
 
 msgid "Cleanup failed: invalid or missing type."
 msgstr "Dọn dẹp thất bại: loại không hợp lệ hoặc thiếu."
+
+msgid "Exchange Rate: Cash → Coin"
+msgstr "Tỉ giá: Cash → Coin"
+
+msgid "Coin received for 1 Cash. Set to 0 to disable conversion."
+msgstr "Số Coin nhận được khi đổi 1 Cash. Đặt 0 để tắt quy đổi."
+
+msgid "Exchange"
+msgstr "Đổi tiền"
+
+msgid "Exchange is currently disabled."
+msgstr "Tính năng đổi tiền hiện đang tắt."
+
+msgid "Rate"
+msgstr "Tỷ lệ"
+
+msgid "Amount"
+msgstr "Số lượng"
+
+msgid "You will receive"
+msgstr "Bạn sẽ nhận"
+
+msgid "Max"
+msgstr "Tối đa"
+
+msgid "Convert"
+msgstr "Đổi"
+
+msgid "Processing..."
+msgstr "Đang xử lý..."
+
+msgid "Enter a valid amount."
+msgstr "Vui lòng nhập số hợp lệ."
+
+msgid "Not enough Cash."
+msgstr "Không đủ Cash."
+
+msgid "Exchanged successfully!"
+msgstr "Đổi thành công!"
+
+msgid "Exchange failed."
+msgstr "Đổi thất bại."
+
+msgid "Conversion is irreversible. Please review before confirming."
+msgstr "Giao dịch không thể hoàn tác. Vui lòng kiểm tra trước khi xác nhận."

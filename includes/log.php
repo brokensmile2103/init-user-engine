@@ -146,35 +146,59 @@ function init_plugin_suite_user_engine_get_exp_log( $user_id ) {
 
 function init_plugin_suite_user_engine_format_exp_log( $entry ) {
 	$source = $entry['source'] ?? 'unknown';
+	$label  = '';
 
 	switch ( $source ) {
 		case 'daily_login':
-			return __( 'EXP from daily login', 'init-user-engine' );
+			$label = __( 'EXP from daily login', 'init-user-engine' );
+			break;
 		case 'user_register':
-			return __( 'Welcome EXP for registration', 'init-user-engine' );
+			$label = __( 'Welcome EXP for registration', 'init-user-engine' );
+			break;
 		case 'update_profile':
-			return __( 'EXP for profile update', 'init-user-engine' );
+			$label = __( 'EXP for profile update', 'init-user-engine' );
+			break;
 		case ( preg_match( '/^level_up_(\d+)$/', $source, $m ) ? true : false ):
-			// translators: %d is the new level number
-			return sprintf( __( 'EXP reset after level %d up', 'init-user-engine' ), $m[1] );
+			// translators: %d is level
+			$label = sprintf( __( 'EXP reset after level %d up', 'init-user-engine' ), $m[1] );
+			break;
 		case ( preg_match( '/^milestone_(\d+)$/', $source, $m ) ? true : false ):
-			// translators: %d is the number of days in the milestone
-			return sprintf( __( 'EXP for %d-day streak milestone', 'init-user-engine' ), $m[1] );
+			// translators: %d is streak
+			$label = sprintf( __( 'EXP for %d-day streak milestone', 'init-user-engine' ), $m[1] );
+			break;
 		case 'reward':
-			return __( 'EXP reward after staying online', 'init-user-engine' );
+			$label = __( 'EXP reward after staying online', 'init-user-engine' );
+			break;
 		case 'referral':
-			return __( 'EXP gained for inviting a friend', 'init-user-engine' );
+			$label = __( 'EXP gained for inviting a friend', 'init-user-engine' );
+			break;
 		case 'referral_new':
-			return __( 'EXP gained from referral signup', 'init-user-engine' );
+			$label = __( 'EXP gained from referral signup', 'init-user-engine' );
+			break;
 		case 'woo_order':
-			return __( 'EXP from WooCommerce order', 'init-user-engine' );
+			$label = __( 'EXP from WooCommerce order', 'init-user-engine' );
+			break;
 		case 'comment_post':
-			return __( 'EXP from posting a comment', 'init-user-engine' );
+			$label = __( 'EXP from posting a comment', 'init-user-engine' );
+			break;
 		case 'publish_post':
-			return __( 'EXP from publishing a post', 'init-user-engine' );
+			$label = __( 'EXP from publishing a post', 'init-user-engine' );
+			break;
 		default:
-			return ucfirst( str_replace( '_', ' ', $source ) );
+			$label = ucfirst( str_replace( '_', ' ', $source ) );
+			break;
 	}
+
+	/**
+	 * Allow developers to modify or add custom labels for EXP log sources.
+	 *
+	 * @since 1.0.1
+	 *
+	 * @param string $label  The formatted label.
+	 * @param string $source The original source key.
+	 * @param array  $entry  The full EXP log entry.
+	 */
+	return apply_filters( 'init_plugin_suite_user_engine_exp_log_label', $label, $source, $entry );
 }
 
 // REST: transaction history

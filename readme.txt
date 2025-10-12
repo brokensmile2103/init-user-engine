@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.9
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,18 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.3.0 – October 12, 2025 =
+- Added Coin Exchange system:
+  - Users can now convert Cash → Coin with a configurable rate.
+  - Added real-time conversion preview, validation, and rate display.
+  - Includes optional min/max limits via filters for full customization.
+  - Fully integrated with transaction log and dark mode UI.
+- Improved profile update reliability:
+  - Added smart fallback for empty or invalid display names → automatically uses nickname or username.
+  - Prevented saving blank or whitespace-only display names after sanitization.
+  - Ensured consistent and safe user display names across all update scenarios.
+- No database or API changes. Fully backward compatible.
 
 = 1.2.9 – October 10, 2025 =
 - Upgraded multi-user inbox sender to use **bulk insert** for massive scalability.  

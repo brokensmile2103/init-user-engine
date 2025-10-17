@@ -1283,3 +1283,33 @@ msgstr "Đổi thất bại."
 
 msgid "Conversion is irreversible. Please review before confirming."
 msgstr "Giao dịch không thể hoàn tác. Vui lòng kiểm tra trước khi xác nhận."
+
+msgid "Recent Top-up Logs"
+msgstr "Nhật ký nạp gần đây"
+
+msgid "No logs yet."
+msgstr "Chưa có nhật ký nào."
+
+msgid "Showing up to the latest 100 entries."
+msgstr "Hiển thị tối đa 100 mục gần nhất."
+
+msgid "Quantity"
+msgstr "Số lượng"
+
+msgid "Target"
+msgstr "Đối tượng"
+
+msgid "Time"
+msgstr "Thời gian"
+
+msgid "User ID #%d (not found)"
+msgstr "Người dùng #%d (không tồn tại)"
+
+msgid "Selected users"
+msgstr "Người dùng được chọn"
+
+msgid "Apply to active VIPs"
+msgstr "Áp dụng cho VIP còn hạn"
+
+msgid "Choose who will receive this top-up."
+msgstr "Chọn nhóm người nhận cho lần nạp này."

@@ -381,3 +381,138 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 
 	return rest_ensure_response( $output );
 }
+
+/**
+ * Add admin top-up log (latest 100 entries)
+ * Format: quantity|type(coin|cash)|target(VIP|ALL|user:{count}|uid:{id}|user_id:{id})|time
+ *
+ * @param int         $quantity Positive or negative number.
+ * @param string      $type     'coin' or 'cash'.
+ * @param string      $target   'VIP', 'ALL', 'user:{count}', 'uid:{id}', or 'user_id:{id}'.
+ * @param string|null $time     Optional timestamp. Default: current_time().
+ * @return void
+ */
+function init_plugin_suite_user_engine_add_topup_log( $quantity, $type, $target, $time = null ) {
+    $quantity = (int) $quantity;
+    $type     = $type === 'cash' ? 'cash' : 'coin';
+    $time     = $time ?: current_time( 'mysql' );
+
+    $sanitize = static function( $s ) {
+        return str_replace( ['|', ';'], '', (string) $s );
+    };
+
+    // Chuẩn hoá target tối thiểu để tránh lưu sai ký tự phân tách
+    $target = $sanitize( $target );
+
+    $entry = implode( '|', [
+        $quantity,
+        $sanitize( $type ),
+        $target,
+        $sanitize( $time ),
+    ] );
+
+    $key = 'init_plugin_suite_user_engine_topup_logs';
+    $raw = get_option( $key, '' );
+    $raw = is_string( $raw ) ? trim( $raw ) : '';
+
+    if ( $raw === '' ) {
+        $raw = $entry;
+    } else {
+        $raw .= ';' . $entry;
+    }
+
+    $parts = array_filter( array_map( 'trim', explode( ';', $raw ) ) );
+    if ( count( $parts ) > 100 ) {
+        $parts = array_slice( $parts, -100 );
+    }
+
+    update_option( $key, implode( ';', $parts ), false ); // autoload = no
+}
+
+/**
+ * Get all top-up logs as array
+ *
+ * @return array
+ */
+function init_plugin_suite_user_engine_get_topup_logs() {
+    $key = 'init_plugin_suite_user_engine_topup_logs';
+    $raw = get_option( $key, '' );
+    $raw = is_string( $raw ) ? trim( $raw ) : '';
+    if ( $raw === '' ) return [];
+
+    $rows = array_filter( array_map( 'trim', explode( ';', $raw ) ) );
+    return array_map( function( $line ) {
+        [$qty, $type, $target, $time] = array_pad( explode( '|', $line ), 4, '' );
+        return [
+            'quantity' => (int) $qty,
+            'type'     => $type,
+            'target'   => $target,
+            'time'     => $time,
+        ];
+    }, $rows );
+}
+
+/**
+ * Clear expired or old logs (optional cleanup helper)
+ *
+ * @param int $keep_days Keep logs newer than X days (default 30).
+ */
+function init_plugin_suite_user_engine_prune_topup_logs( $keep_days = 30 ) {
+    $cut  = strtotime( "-{$keep_days} days" );
+    $logs = init_plugin_suite_user_engine_get_topup_logs();
+
+    $logs = array_filter( $logs, function( $log ) use ( $cut ) {
+        return isset( $log['time'] ) && strtotime( $log['time'] ) >= $cut;
+    } );
+
+    $lines = array_map( function( $log ) {
+        return implode( '|', [
+            $log['quantity'],
+            $log['type'],
+            $log['target'],
+            $log['time'],
+        ] );
+    }, $logs );
+
+    update_option( 'init_plugin_suite_user_engine_topup_logs', implode( ';', $lines ), false );
+}
+
+/**
+ * Pretty display for log target:
+ * VIP | ALL | user:{count} | uid:{id} | user_id:{id}
+ * - 'user:{count}' luôn hiểu là số lượng (KHÔNG lookup user ID).
+ * - 'uid:{id}' hoặc 'user_id:{id}' là 1 user cụ thể (có lookup để hiển thị thân thiện).
+ */
+function init_plugin_suite_user_engine_pretty_target( $target ) {
+    $target = (string) $target;
+
+    // Case đơn giản
+    if ( $target === 'VIP' ) return __( 'Active VIPs', 'init-user-engine' );
+    if ( $target === 'ALL' ) return __( 'All members', 'init-user-engine' );
+
+    // user:{count} => chỉ là số lượng, không phải user ID
+    if ( preg_match( '/^user:(\d+)$/', $target, $m ) ) {
+        $n = max( 0, (int) $m[1] );
+        // translators: %d = number of users.
+        return sprintf( _n( '%d user', '%d users', $n, 'init-user-engine' ), $n );
+    }
+
+    // uid:{id} hoặc user_id:{id} => 1 user cụ thể
+    if ( preg_match( '/^(?:uid|user_id):(\d+)$/', $target, $m ) ) {
+        $uid = (int) $m[1];
+        if ( $uid > 0 ) {
+            $u = get_userdata( $uid );
+            if ( $u ) {
+                $name  = $u->display_name ?: $u->user_login;
+                $login = $u->user_login;
+                /* translators: 1: Display Name, 2: user_login, 3: ID */
+                return sprintf( __( 'User: %1$s (@%2$s, #%3$d)', 'init-user-engine' ), $name, $login, $u->ID );
+            }
+            // translators: %d = user ID that was not found.
+            return sprintf( __( 'User ID #%d (not found)', 'init-user-engine' ), $uid );
+        }
+    }
+
+    // Mặc định giữ nguyên
+    return $target;
+}

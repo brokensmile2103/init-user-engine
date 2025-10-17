@@ -16,3 +16,6 @@ $option_name = defined( 'INIT_PLUGIN_SUITE_IUE_OPTION' )
 
 // Single site
 delete_option( $option_name );
+
+// Delete persistent top-up logs
+delete_option( 'init_plugin_suite_user_engine_topup_logs' );

@@ -99,4 +99,16 @@ jQuery(function ($) {
 			$selected.append($tag);
 		});
 	}
+
+	// Ẩn/hiện hàng "Select Users" theo radio
+    function toggleUserRow() {
+        var selected = document.querySelector('input[name="iue_target"]:checked');
+        var row = document.getElementById('iue-row-select-users');
+        if (!selected || !row) return;
+        row.style.display = (selected.value === 'selected') ? '' : 'none';
+    }
+    document.addEventListener('change', function(e){
+        if (e.target && e.target.name === 'iue_target') toggleUserRow();
+    });
+    toggleUserRow();
 });

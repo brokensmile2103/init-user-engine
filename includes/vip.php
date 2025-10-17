@@ -137,3 +137,62 @@ function init_plugin_suite_user_engine_api_purchase_vip( WP_REST_Request $reques
 		'package_id'  => $package_id,
 	] );
 }
+
+/**
+ * Get all ACTIVE VIP users (not expired)
+ *
+ * @param string $return 'ids' (default) or 'objects'
+ * @return array
+ */
+function init_plugin_suite_user_engine_get_active_vip_users( $return = 'ids' ) {
+    $now = current_time( 'timestamp' );
+
+    $fields = ($return === 'objects') ? 'all' : 'ids';
+
+    $query = new WP_User_Query( [
+        'fields' => $fields,
+        'number' => -1, // lấy hết
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+        'meta_query' => [
+            [
+                'key'     => 'iue_vip_expire',
+                'value'   => $now,
+                'compare' => '>',
+                'type'    => 'NUMERIC',
+            ],
+        ],
+        'orderby' => 'meta_value_num',
+        'order'   => 'DESC',
+    ] );
+
+    $results = $query->get_results();
+
+    if ( $return === 'objects' ) {
+        return is_array( $results ) ? $results : [];
+    }
+
+    // đảm bảo mảng số nguyên
+    return array_map( 'intval', is_array( $results ) ? $results : [] );
+}
+
+/**
+ * (Optional) Đếm nhanh số VIP còn hạn
+ */
+function init_plugin_suite_user_engine_count_active_vip_users() {
+    $now = current_time( 'timestamp' );
+    $q = new WP_User_Query( [
+        'fields' => 'ID',
+        'number' => 1,
+        'count_total' => true,
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+        'meta_query' => [
+            [
+                'key'     => 'iue_vip_expire',
+                'value'   => $now,
+                'compare' => '>',
+                'type'    => 'NUMERIC',
+            ],
+        ],
+    ] );
+    return (int) $q->get_total();
+}

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,26 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.3.1 – October 17, 2025 =
+- Enhanced Admin Top-up Tool:
+  - Replaced old checkboxes with radio buttons for selecting recipients (Selected users / Active VIPs / All members).
+  - Added automatic log display under the form showing up to 100 recent top-up entries.
+  - Logs include amount, type, recipient info (linked to user profile when applicable), and timestamp.
+  - Improved layout spacing and usability for cleaner admin experience.
+- Added Persistent Top-up Log System:
+  - Introduced helper functions `init_plugin_suite_user_engine_add_topup_log()` and `init_plugin_suite_user_engine_get_topup_logs()`.
+  - Standardized log entry format: `quantity|type(coin|cash)|target(VIP|ALL|uid:{id}|user:{count})|time`.
+  - Automatically trims to the latest 100 entries.
+  - Stored via `update_option()` with autoload disabled.
+- Improved User Display in Logs:
+  - User targets now show as clickable links to admin profile pages.
+  - Fallback added for deleted or invalid users.
+  - VIP, ALL, and multi-user targets show readable labels.
+- Backward Compatibility:
+  - Compatible with legacy `iue_send_all` and `iue_send_vip` fields.
+  - No database or API changes.
+  - Existing balance, inbox, and transaction logic remain unchanged.
 
 = 1.3.0 – October 12, 2025 =
 - Added Coin Exchange system:

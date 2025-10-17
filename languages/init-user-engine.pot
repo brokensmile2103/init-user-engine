@@ -1283,3 +1283,33 @@ msgstr ""
 
 msgid "Conversion is irreversible. Please review before confirming."
 msgstr ""
+
+msgid "Recent Top-up Logs"
+msgstr ""
+
+msgid "No logs yet."
+msgstr ""
+
+msgid "Showing up to the latest 100 entries."
+msgstr ""
+
+msgid "Quantity"
+msgstr ""
+
+msgid "Target"
+msgstr ""
+
+msgid "Time"
+msgstr ""
+
+msgid "User ID #%d (not found)"
+msgstr ""
+
+msgid "Selected users"
+msgstr ""
+
+msgid "Apply to active VIPs"
+msgstr ""
+
+msgid "Choose who will receive this top-up."
+msgstr ""

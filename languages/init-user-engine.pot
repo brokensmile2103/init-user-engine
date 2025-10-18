@@ -1313,3 +1313,45 @@ msgstr ""
 
 msgid "Choose who will receive this top-up."
 msgstr ""
+
+msgid "Avatar Upload Policy"
+msgstr ""
+
+msgid "Default (do not disable)"
+msgstr ""
+
+msgid "Disable avatar upload (everyone)"
+msgstr ""
+
+msgid "Allow only VIPs to upload avatar"
+msgstr ""
+
+msgid "Control site-wide avatar upload permission."
+msgstr ""
+
+msgid "Ban Avatar Upload"
+msgstr ""
+
+msgid "Unban Avatar Upload"
+msgstr ""
+
+msgid "Ban this user from uploading avatar?"
+msgstr ""
+
+msgid "Allow this user to upload avatar again?"
+msgstr ""
+
+msgid "Currently: BANNED"
+msgstr ""
+
+msgid "Currently: Allowed"
+msgstr ""
+
+msgid "User is now banned from uploading avatar."
+msgstr ""
+
+msgid "User is now allowed to upload avatar."
+msgstr ""
+
+msgid "Failed to toggle avatar upload permission."
+msgstr ""

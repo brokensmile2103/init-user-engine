@@ -240,6 +240,39 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				<?php endif; ?>
 
 				<?php
+				// -- Avatar upload ban toggle (next to Remove VIP)
+				$__iue_avatar_ban = get_user_meta( $user_id, 'iue_avatar_ban', true );
+				$__iue_avatar_ban_active = ( $__iue_avatar_ban !== '' && $__iue_avatar_ban !== null && $__iue_avatar_ban !== '0' && $__iue_avatar_ban !== 0 );
+
+				// Build secure URL to toggle ban
+				$__iue_toggle_avatar_ban_url = wp_nonce_url(
+					admin_url( 'admin-post.php?action=iue_toggle_avatar_ban&user_id=' . $user_id . '&to=' . ( $__iue_avatar_ban_active ? 'off' : 'on' ) ),
+					'iue_toggle_avatar_ban_' . $user_id
+				);
+
+				// Button label + confirm text
+				$__iue_btn_label = $__iue_avatar_ban_active
+					? __( 'Unban Avatar Upload', 'init-user-engine' )
+					: __( 'Ban Avatar Upload', 'init-user-engine' );
+
+				$__iue_confirm = $__iue_avatar_ban_active
+					? __( 'Allow this user to upload avatar again?', 'init-user-engine' )
+					: __( 'Ban this user from uploading avatar?', 'init-user-engine' );
+				?>
+
+				<p class="iue-meta" style="margin-top:6px;">
+					<a class="button button-secondary" href="<?php echo esc_url( $__iue_toggle_avatar_ban_url ); ?>"
+					   onclick="return confirm('<?php echo esc_attr( $__iue_confirm ); ?>');">
+						<?php echo esc_html( $__iue_btn_label ); ?>
+					</a>
+					<span class="description" style="margin-left:8px;">
+						<?php echo $__iue_avatar_ban_active
+							? esc_html__( 'Currently: BANNED', 'init-user-engine' )
+							: esc_html__( 'Currently: Allowed', 'init-user-engine' ); ?>
+					</span>
+				</p>
+
+				<?php
 				// ==================== NEW: Recent Transactions (up to 100) ====================
 				$__tx_log = [];
 				if ( function_exists( 'init_plugin_suite_user_engine_get_transaction_log' ) ) {
@@ -585,6 +618,66 @@ add_action( 'admin_post_iue_remove_vip', function () {
 	exit;
 } );
 
+/**
+ * Toggle per-user ban for avatar upload via admin-post.
+ * URL: admin-post.php?action=iue_toggle_avatar_ban&user_id=###&to=on|off&_wpnonce=...
+ */
+add_action( 'admin_post_iue_toggle_avatar_ban', function () {
+	if ( ! is_admin() ) {
+		wp_die();
+	}
+
+	$user_id = isset( $_GET['user_id'] ) ? absint( wp_unslash( $_GET['user_id'] ) ) : 0;
+	$to      = isset( $_GET['to'] ) ? sanitize_key( wp_unslash( $_GET['to'] ) ) : '';
+
+	if ( ! $user_id ) {
+		wp_safe_redirect( add_query_arg( 'iue_avatar_ban', 'fail', admin_url() ) );
+		exit;
+	}
+
+	$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'iue_toggle_avatar_ban_' . $user_id ) ) {
+		wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
+	}
+	if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		wp_die( esc_html__( 'You do not have permission to edit this user.', 'init-user-engine' ) );
+	}
+
+	$ban_on = ( $to === 'on' );
+
+	if ( $ban_on ) {
+		update_user_meta( $user_id, 'iue_avatar_ban', 1 );
+		$flag = 'on';
+	} else {
+		// sạch sẽ DB: xóa hẳn meta khi unban
+		delete_user_meta( $user_id, 'iue_avatar_ban' );
+		$flag = 'off';
+	}
+
+	/**
+	 * Hook for audit/integrations
+	 *
+	 * @param int  $user_id
+	 * @param bool $banned_after
+	 */
+	do_action( 'init_plugin_suite_user_engine_avatar_ban_toggled', $user_id, $ban_on );
+
+	$back = wp_get_referer();
+	if ( ! $back ) {
+		$back = get_edit_user_link( $user_id );
+	}
+
+	$notice_nonce = wp_create_nonce( 'iue_notice_' . get_current_user_id() );
+	wp_safe_redirect( add_query_arg(
+		array(
+			'iue_avatar_ban' => $flag, // on|off
+			'_iue_notice'    => $notice_nonce,
+		),
+		$back
+	) );
+	exit;
+} );
+
 // Show an admin notice after VIP removal
 add_action( 'admin_notices', function () {
 	// Đọc GET an toàn (unslash + sanitize)
@@ -618,5 +711,33 @@ add_action( 'admin_notices', function () {
 		'<div class="%1$s notice is-dismissible"><p>%2$s</p></div>',
 		esc_attr( $class ),
 		esc_html( $msg )
+	);
+} );
+
+add_action( 'admin_notices', function () {
+	$flag = isset( $_GET['iue_avatar_ban'] ) ? sanitize_text_field( wp_unslash( $_GET['iue_avatar_ban'] ) ) : '';
+	$notice_nonce = isset( $_GET['_iue_notice'] ) ? sanitize_text_field( wp_unslash( $_GET['_iue_notice'] ) ) : '';
+
+	if ( empty( $flag ) || empty( $notice_nonce ) || ! wp_verify_nonce( $notice_nonce, 'iue_notice_' . get_current_user_id() ) ) {
+		return;
+	}
+
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( $screen && ! in_array( $screen->id, array( 'profile', 'user-edit' ), true ) ) {
+		return;
+	}
+
+	$map = array(
+		'on'   => array( 'class' => 'updated', 'msg' => __( 'User is now banned from uploading avatar.', 'init-user-engine' ) ),
+		'off'  => array( 'class' => 'updated', 'msg' => __( 'User is now allowed to upload avatar.', 'init-user-engine' ) ),
+		'fail' => array( 'class' => 'error',   'msg' => __( 'Failed to toggle avatar upload permission.', 'init-user-engine' ) ),
+	);
+
+	$row = isset( $map[ $flag ] ) ? $map[ $flag ] : $map['fail'];
+
+	printf(
+		'<div class="%1$s notice is-dismissible"><p>%2$s</p></div>',
+		esc_attr( $row['class'] ),
+		esc_html( $row['msg'] )
 	);
 } );

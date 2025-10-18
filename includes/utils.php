@@ -96,8 +96,9 @@ function init_plugin_suite_user_engine_get_avatar( $user_id = 0, $size = 50, $ar
 	];
 	$args = wp_parse_args( $args, $default_args );
 
-	$is_vip = $args['force_badge'] || init_plugin_suite_user_engine_is_vip( $user_id );
-	$avatar = get_avatar( $user_id, $size, '', $args['alt'], [ 'class' => $args['class'] ] );
+	$is_vip 		   = $args['force_badge'] || init_plugin_suite_user_engine_is_vip( $user_id );
+	$avatar 		   = get_avatar( $user_id, $size, '', $args['alt'], [ 'class' => $args['class'] ] );
+	$can_upload_avatar = init_plugin_suite_user_engine_can_upload_avatar( $user_id );
 
 	// Nếu không cần overlay và không VIP → return nguyên avatar
 	if ( ! $args['overlay'] && ! $is_vip ) {
@@ -105,13 +106,13 @@ function init_plugin_suite_user_engine_get_avatar( $user_id = 0, $size = 50, $ar
 	}
 
 	// Build overlay nếu có
-	$overlay_html = $args['overlay']
+	$overlay_html = $args['overlay'] && $can_upload_avatar
 		? '<span class="iue-avatar-overlay"><span class="iue-icon" data-iue-icon="camera"></span></span>'
 		: '';
 
 	return sprintf(
 		'<div class="iue-avatar-wrapper"%s>%s%s%s</div>',
-		$args['overlay'] ? ' data-iue-avatar-trigger' : '',
+		$args['overlay'] && $can_upload_avatar ? ' data-iue-avatar-trigger' : '',
 		$avatar,
 		$overlay_html,
 		$is_vip ? '<span class="iue-vip-badge">VIP</span>' : ''
@@ -294,4 +295,45 @@ function init_plugin_suite_user_engine_verify_turnstile( $token, $remote_ip = ''
 	}
 
 	return new WP_Error( 'turnstile_invalid', __( 'Captcha verification failed. Please try again.', 'init-user-engine' ), [ 'status' => 400 ] );
+}
+
+/**
+ * Check if a user can upload an avatar.
+ *
+ * Logic:
+ * - If user has meta 'iue_avatar_ban' truthy (not empty, not 0, not "0") → deny.
+ * - If option 'avatar_upload_policy' is:
+ *     - 'disable_all' → deny all.
+ *     - 'vip_only' → allow only VIPs (via init_plugin_suite_user_engine_is_vip()).
+ *     - 'default' → allow everyone.
+ *
+ * @param int $user_id
+ * @return bool True if allowed, false if denied.
+ */
+function init_plugin_suite_user_engine_can_upload_avatar( $user_id ) {
+	$user_id = absint( $user_id );
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
+	$policy  = $options['avatar_upload_policy'] ?? 'default';
+
+	// 1. Check per-user ban meta
+	$ban_val = get_user_meta( $user_id, 'iue_avatar_ban', true );
+	if ( $ban_val !== '' && $ban_val !== null && $ban_val !== '0' && $ban_val !== 0 ) {
+		return false;
+	}
+
+	// 2. Global policy
+	switch ( $policy ) {
+		case 'disable_all':
+			return false;
+
+		case 'vip_only':
+			return init_plugin_suite_user_engine_is_vip( $user_id );
+
+		default:
+			return true;
+	}
 }

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,25 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.3.2 – October 18, 2025 =
+- Added **Avatar Upload Permission System**:
+  - Introduced new helper function `init_plugin_suite_user_engine_can_upload_avatar( $user_id )` for unified permission checking.
+  - Supports multi-layer policy:
+    - Global disable (`disable_all`)
+    - VIP-only mode (`vip_only`) using `init_plugin_suite_user_engine_is_vip()`
+    - Per-user ban via `iue_avatar_ban` user meta.
+  - Fully integrated into REST endpoints `upload_avatar` and `remove_avatar` for backend-level enforcement.
+  - Automatically blocks upload and deletion attempts from banned or non-VIP users according to policy.
+- Enhanced **Admin User Metabox**:
+  - Added “Ban Avatar Upload” / “Unban Avatar Upload” button next to “Remove VIP”.
+  - Toggles the `iue_avatar_ban` meta instantly via secure `admin-post` action.
+  - Includes full nonce verification, capability checks, redirect notices, and audit hook `init_plugin_suite_user_engine_avatar_ban_toggled`.
+  - Displays current avatar permission state (“Allowed” / “BANNED”) beside the button.
+- Improved **Security and Consistency**:
+  - Backend guards prevent unauthorized file handling even if frontend modified.
+  - Added HTTP 403 and 423 codes for forbidden or locked states to ensure clear API responses.
+  - Unified `wp_die()` and `WP_Error` patterns across user-related endpoints.
 
 = 1.3.1 – October 17, 2025 =
 - Enhanced Admin Top-up Tool:

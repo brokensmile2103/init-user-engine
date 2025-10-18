@@ -370,6 +370,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // AVATAR
 function iueShowAvatarModal() {
     const wrapper = document.querySelector('.iue-avatar-wrapper[data-iue-avatar-trigger]');
+    // ví dụ flag từ server: InitUserEngineData.can_upload_avatar === false
+    if (wrapper && !InitUserEngineData.can_upload_avatar) {
+        return;
+    }
+
     const img = wrapper?.querySelector('img');
     let currentSrc = img?.src || '';
 

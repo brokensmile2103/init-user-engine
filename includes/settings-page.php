@@ -75,6 +75,10 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['label_coin']           	 = sanitize_text_field( $input['label_coin'] ?? 'Coin' );
 	$output['label_cash']           	 = sanitize_text_field( $input['label_cash'] ?? 'Cash' );
 
+	$policy 							 = sanitize_text_field( $input['avatar_upload_policy'] ?? 'default' );
+	$allowed_policies 					 = ['default', 'disable_all', 'vip_only'];
+	$output['avatar_upload_policy'] 	 = in_array( $policy, $allowed_policies, true ) ? $policy : 'default';
+
 	$output['hide_admin_bar_subscriber'] = ! empty( $input['hide_admin_bar_subscriber'] ) ? 1 : 0;
 	$output['disable_gravatar'] 		 = ! empty( $input['disable_gravatar'] ) ? 1 : 0;
 	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
@@ -178,6 +182,33 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							value="<?php echo esc_attr( $options['rate_coin_per_cash'] ?? 0 ); ?>" />
 						<p class="description">
 							<?php esc_html_e( 'Coin received for 1 Cash. Set to 0 to disable conversion.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Avatar Upload Policy', 'init-user-engine' ); ?></th>
+					<td>
+						<?php $current = $options['avatar_upload_policy'] ?? 'default'; ?>
+						<label style="display:block;margin-bottom:6px;">
+							<input type="radio"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
+								value="default" <?php checked( $current, 'default' ); ?> />
+							<?php esc_html_e( 'Default (do not disable)', 'init-user-engine' ); ?>
+						</label>
+						<label style="display:block;margin-bottom:6px;">
+							<input type="radio"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
+								value="disable_all" <?php checked( $current, 'disable_all' ); ?> />
+							<?php esc_html_e( 'Disable avatar upload (everyone)', 'init-user-engine' ); ?>
+						</label>
+						<label style="display:block;">
+							<input type="radio"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
+								value="vip_only" <?php checked( $current, 'vip_only' ); ?> />
+							<?php esc_html_e( 'Allow only VIPs to upload avatar', 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'Control site-wide avatar upload permission.', 'init-user-engine' ); ?>
 						</p>
 					</td>
 				</tr>

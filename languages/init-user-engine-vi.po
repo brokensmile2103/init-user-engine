@@ -1313,3 +1313,45 @@ msgstr "Áp dụng cho VIP còn hạn"
 
 msgid "Choose who will receive this top-up."
 msgstr "Chọn nhóm người nhận cho lần nạp này."
+
+msgid "Avatar Upload Policy"
+msgstr "Chính sách tải lên avatar"
+
+msgid "Default (do not disable)"
+msgstr "Mặc định (không tắt)"
+
+msgid "Disable avatar upload (everyone)"
+msgstr "Tắt tải lên avatar (mọi người)"
+
+msgid "Allow only VIPs to upload avatar"
+msgstr "Chỉ cho phép VIP tải lên avatar"
+
+msgid "Control site-wide avatar upload permission."
+msgstr "Kiểm soát quyền tải lên avatar trên toàn hệ thống."
+
+msgid "Ban Avatar Upload"
+msgstr "Cấm tải lên ảnh đại diện"
+
+msgid "Unban Avatar Upload"
+msgstr "Gỡ cấm tải lên ảnh đại diện"
+
+msgid "Ban this user from uploading avatar?"
+msgstr "Cấm người dùng này tải lên ảnh đại diện?"
+
+msgid "Allow this user to upload avatar again?"
+msgstr "Cho phép người dùng này tải lên ảnh đại diện trở lại?"
+
+msgid "Currently: BANNED"
+msgstr "Trạng thái hiện tại: ĐANG BỊ CẤM"
+
+msgid "Currently: Allowed"
+msgstr "Trạng thái hiện tại: ĐƯỢC PHÉP"
+
+msgid "User is now banned from uploading avatar."
+msgstr "Người dùng hiện đã bị cấm tải lên ảnh đại diện."
+
+msgid "User is now allowed to upload avatar."
+msgstr "Người dùng hiện đã được phép tải lên ảnh đại diện."
+
+msgid "Failed to toggle avatar upload permission."
+msgstr "Không thể thay đổi quyền tải lên ảnh đại diện."

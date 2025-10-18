@@ -374,6 +374,9 @@
 .iue-avatar-wrapper {
 	position: relative;
 	display: inline-block;
+}
+
+.iue-avatar-wrapper[data-iue-avatar-trigger] {
 	cursor: pointer;
 }
 

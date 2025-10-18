@@ -654,6 +654,15 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
         return new WP_Error( 'unauthorized', 'Not logged in.', [ 'status' => 403 ] );
     }
 
+    // Guard: policy + VIP + per-user ban
+    if ( ! init_plugin_suite_user_engine_can_upload_avatar( get_current_user_id() ) ) {
+        return new WP_Error(
+            'forbidden_avatar_upload',
+            __( 'You are not allowed to upload an avatar.', 'init-user-engine' ),
+            [ 'status' => 403 ]
+        );
+    }
+
     $file = $request->get_file_params()['avatar'] ?? null;
     if ( ! $file || ! $file['tmp_name'] ) {
         return new WP_Error( 'no_file', 'No file uploaded.', [ 'status' => 400 ] );
@@ -730,6 +739,29 @@ function init_plugin_suite_user_engine_api_remove_avatar( WP_REST_Request $reque
     $user_id = get_current_user_id();
     if ( ! $user_id ) {
         return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
+    }
+
+    // Guard: preserve evidence when user is banned from avatar changes
+    $ban_val = get_user_meta( $user_id, 'iue_avatar_ban', true );
+    if ( $ban_val !== '' && $ban_val !== null && $ban_val !== '0' && $ban_val !== 0 ) {
+        return new WP_Error(
+            'avatar_locked',
+            __( 'Avatar removal is locked for review.', 'init-user-engine' ),
+            [ 'status' => 423 ] // 423 Locked
+        );
+    }
+
+    /**
+     * Allow project-level override (e.g. moderators).
+     * Return false to block removal even if not banned.
+     */
+    $can_remove = (bool) apply_filters( 'init_user_engine_can_remove_avatar', true, $user_id, $ban_val );
+    if ( ! $can_remove ) {
+        return new WP_Error(
+            'forbidden_remove_avatar',
+            __( 'You are not allowed to remove the avatar.', 'init-user-engine' ),
+            [ 'status' => 403 ]
+        );
     }
 
     $avatar_url = get_user_meta( $user_id, 'iue_custom_avatar', true );

@@ -1080,7 +1080,16 @@ msgstr ""
 msgid "Turn off captcha validation during registration."
 msgstr ""
 
-msgid "Use only if you trust your traffic or rely on external protection (e.g., Cloudflare)."
+msgid "DANGER — Captcha will be COMPLETELY DISABLED."
+msgstr ""
+
+msgid "This removes all captcha protections including Cloudflare Turnstile. FOR TESTING ONLY — NEVER enable on production sites."
+msgstr ""
+
+msgid "Use only if you fully trust your traffic or have strong external protection services (e.g., Cloudflare WAF or Rate Limit)."
+msgstr ""
+
+msgid "When both keys are provided, Cloudflare Turnstile will automatically replace the default captcha system on the registration form."
 msgstr ""
 
 msgid "How many sides does a square have?"

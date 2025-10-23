@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (!hasCaptcha) return;
 			try {
 				const timestamp = Date.now();
-				const res = await fetch(`/wp-json/inituser/v1/captcha?_=${timestamp}`, {
+				const res = await fetch(`${InitUserEngineData.rest_url}/captcha?_=${timestamp}`, {
 					headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
 				});
 				if (!res.ok) throw new Error('Failed to load captcha');
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					payload.captcha_answer = parseInt(captchaAnswer);
 				}
 
-				const response = await fetch('/wp-json/inituser/v1/register', {
+				const response = await fetch(`${InitUserEngineData.rest_url}/register`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
 					body: JSON.stringify(payload)

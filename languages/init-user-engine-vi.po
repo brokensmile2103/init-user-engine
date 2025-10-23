@@ -1080,8 +1080,17 @@ msgstr "Tắt Captcha"
 msgid "Turn off captcha validation during registration."
 msgstr "Tắt xác thực Captcha trong quá trình đăng ký."
 
-msgid "Use only if you trust your traffic or rely on external protection (e.g., Cloudflare)."
-msgstr "Chỉ sử dụng nếu bạn tin tưởng nguồn truy cập hoặc dựa vào lớp bảo vệ bên ngoài (ví dụ: Cloudflare)."
+msgid "DANGER — Captcha will be COMPLETELY DISABLED."
+msgstr "CẢNH BÁO — Captcha sẽ bị TẮT HOÀN TOÀN."
+
+msgid "This removes all captcha protections including Cloudflare Turnstile. FOR TESTING ONLY — NEVER enable on production sites."
+msgstr "Tùy chọn này sẽ tắt toàn bộ lớp bảo vệ Captcha, bao gồm cả Cloudflare Turnstile. CHỈ DÙNG để kiểm thử — TUYỆT ĐỐI không bật trên môi trường production."
+
+msgid "Use only if you fully trust your traffic or have strong external protection services (e.g., Cloudflare WAF or Rate Limit)."
+msgstr "Chỉ nên bật nếu bạn hoàn toàn tin tưởng nguồn truy cập hoặc có lớp bảo vệ mạnh bên ngoài (ví dụ: Cloudflare WAF hoặc Rate Limit)."
+
+msgid "When both keys are provided, Cloudflare Turnstile will automatically replace the default captcha system on the registration form."
+msgstr "Khi điền đủ cả hai khóa, Cloudflare Turnstile sẽ tự động thay thế hệ thống Captcha mặc định trên biểu mẫu đăng ký."
 
 msgid "How many sides does a square have?"
 msgstr "Một hình vuông có bao nhiêu cạnh?"

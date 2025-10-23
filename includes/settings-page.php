@@ -251,12 +251,30 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							/>
 							<?php esc_html_e( 'Turn off captcha validation during registration.', 'init-user-engine' ); ?>
 						</label>
-						<p class="description"><?php esc_html_e( 'Use only if you trust your traffic or rely on external protection (e.g., Cloudflare).', 'init-user-engine' ); ?></p>
+						<p class="description" role="alert" style="margin-top:8px;">
+							<span style="display:inline-block; padding:8px 10px; border-radius:6px; background:#fff3f3; border:1px solid #f5c2c2;">
+								<strong style="color:#c00; font-weight:700;">
+									<?php esc_html_e( 'DANGER — Captcha will be COMPLETELY DISABLED.', 'init-user-engine' ); ?>
+								</strong>
+								<br>
+								<small style="color:#7a0000; display:block; margin-top:2px;">
+									<?php esc_html_e( 'This removes all captcha protections including Cloudflare Turnstile. FOR TESTING ONLY — NEVER enable on production sites.', 'init-user-engine' ); ?>
+								</small>
+							</span>
+						</p>
+						<p class="description" style="margin-top:6px;">
+							<?php esc_html_e( 'Use only if you fully trust your traffic or have strong external protection services (e.g., Cloudflare WAF or Rate Limit).', 'init-user-engine' ); ?>
+						</p>
 					</td>
 				</tr>
 
 				<tr>
-					<th colspan="2"><h2><?php esc_html_e( 'Cloudflare Turnstile', 'init-user-engine' ); ?></h2></th>
+					<th colspan="2">
+						<h2><?php esc_html_e( 'Cloudflare Turnstile', 'init-user-engine' ); ?></h2>
+						<p class="description" style="margin-top:4px;">
+							<?php esc_html_e( 'When both keys are provided, Cloudflare Turnstile will automatically replace the default captcha system on the registration form.', 'init-user-engine' ); ?>
+						</p>
+					</th>
 				</tr>
 
 				<tr>

@@ -6,37 +6,88 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 		wp_die( esc_html__( 'You do not have permission to access this page.', 'init-user-engine' ) );
 	}
 
-	$sent = false;
+	$sent  = false;
 	$error = '';
 
-	if ( isset( $_POST['iue_send_notice_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['iue_send_notice_nonce'] ) ), 'iue_send_notice' ) ) {
+	if (
+		isset( $_POST['iue_send_notice_nonce'] )
+		&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['iue_send_notice_nonce'] ) ), 'iue_send_notice' )
+	) {
 		$title    = sanitize_text_field( wp_unslash( $_POST['iue_title'] ?? '' ) );
 		$content  = wp_kses_post( wp_unslash( $_POST['iue_content'] ?? '' ) );
-		
-		// Lấy toàn bộ user ID nếu gửi toàn bộ
-		if ( ! empty( $_POST['iue_send_all'] ) ) {
-		    $users = get_users( [ 'fields' => 'ID' ] );
-		    $user_ids = array_map( 'absint', $users );
-		} else {
-		    $user_ids_raw = sanitize_text_field( wp_unslash( $_POST['iue_user_ids'] ?? '' ) );
-			$user_ids = array_filter( array_map( 'absint', explode( ',', $user_ids_raw ) ) );
-		}
-
 		$type     = sanitize_key( $_POST['iue_type'] ?? 'system' );
 		$priority = sanitize_key( $_POST['iue_priority'] ?? 'normal' );
 		$link     = esc_url_raw( wp_unslash( $_POST['iue_link'] ?? '' ) );
 		$pinned   = ! empty( $_POST['iue_pinned'] ) ? 1 : 0;
 		$expire   = ! empty( $_POST['iue_expire'] ) ? strtotime( sanitize_text_field( wp_unslash( $_POST['iue_expire'] ) ) ) : null;
 
+		// Recipients: selected | vip | all (đồng bộ với Top-up)
+		$target_radio = sanitize_key( $_POST['iue_target'] ?? 'selected' ); // 'all' | 'vip' | 'selected'
+		if ( 'all' === $target_radio ) {
+			$user_ids = get_users( [ 'fields' => 'ID' ] );
+			$user_ids = array_map( 'absint', $user_ids );
+		} elseif ( 'vip' === $target_radio ) {
+			// YÊU CẦU hàm VIP có sẵn, không fallback
+			$user_ids = (array) init_plugin_suite_user_engine_get_active_vip_users( 'ids' );
+			$user_ids = array_map( 'absint', $user_ids );
+		} else {
+			$user_ids_raw = sanitize_text_field( wp_unslash( $_POST['iue_user_ids'] ?? '' ) );
+			$user_ids     = array_filter( array_map( 'absint', explode( ',', $user_ids_raw ) ) );
+		}
+
 		if ( empty( $title ) || empty( $content ) || empty( $user_ids ) ) {
 			$error = __( 'Please fill in all required fields.', 'init-user-engine' );
 		} else {
-			init_plugin_suite_user_engine_send_inbox_to_users( $user_ids, $title, $content, $type, [], $expire, $priority, $link, $pinned );
-			do_action( 'init_plugin_suite_user_engine_admin_send_notice', $user_ids, $title, $content, $type, $priority, $link, $pinned, $expire );
+			// Gửi THEO LÔ cho ổn định (đồng bộ phong cách Top-up)
+			$chunk_size = (int) apply_filters( 'init_user_engine_inbox_bulk_chunk_size', 500, $user_ids, $title, 'notice' );
+			$chunk_size = max( 1, $chunk_size );
+
+			$chunks = array_chunk( $user_ids, $chunk_size );
+			foreach ( $chunks as $uids ) {
+				// Optional: đính kèm meta nhẹ để phân biệt thông điệp admin
+				$meta = [ 'admin_notice' => 1 ];
+				init_plugin_suite_user_engine_send_inbox_to_users(
+					$uids,
+					$title,
+					$content,
+					$type,
+					$meta,
+					$expire,
+					$priority,
+					$link,
+					$pinned
+				);
+			}
+
+			/**
+			 * Hook theo dõi sự kiện gửi thông báo từ admin.
+			 *
+			 * @param int[]  $user_ids Danh sách user nhận.
+			 * @param string $title    Tiêu đề.
+			 * @param string $content  Nội dung (đã qua wp_kses_post).
+			 * @param string $type     system|gift|event|warning|...
+			 * @param string $priority normal|high
+			 * @param string $link     URL đính kèm (nếu có).
+			 * @param int    $pinned   1|0.
+			 * @param int|null $expire Unix timestamp hoặc null.
+			 * @param string $target_radio 'all'|'vip'|'selected'
+			 */
+			do_action(
+				'init_plugin_suite_user_engine_admin_send_notice',
+				$user_ids,
+				$title,
+				$content,
+				$type,
+				$priority,
+				$link,
+				$pinned,
+				$expire,
+				$target_radio
+			);
+
 			$sent = true;
 		}
 	}
-
 	?>
 	<div class="wrap iue-notice-wrapper">
 		<h1><?php esc_html_e( 'Send Notification', 'init-user-engine' ); ?></h1>
@@ -59,6 +110,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 							placeholder="<?php esc_attr_e( 'Enter notification title...', 'init-user-engine' ); ?>">
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><label for="iue_content"><?php esc_html_e( 'Content', 'init-user-engine' ); ?></label></th>
 					<td>
@@ -66,7 +118,31 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 							placeholder="<?php esc_attr_e( 'Write your message content here...', 'init-user-engine' ); ?>"></textarea>
 					</td>
 				</tr>
+
+				<!-- Recipients: đồng bộ Top-up -->
 				<tr>
+					<th scope="row"><?php esc_html_e( 'Recipients', 'init-user-engine' ); ?></th>
+					<td>
+						<fieldset>
+							<label>
+								<input type="radio" name="iue_target" value="selected" checked>
+								<?php esc_html_e( 'Selected users', 'init-user-engine' ); ?>
+							</label><br>
+							<label>
+								<input type="radio" name="iue_target" value="vip">
+								<?php esc_html_e( 'Apply to active VIPs', 'init-user-engine' ); ?>
+							</label><br>
+							<label>
+								<input type="radio" name="iue_target" value="all">
+								<?php esc_html_e( 'Apply to all members', 'init-user-engine' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Choose who will receive this notification.', 'init-user-engine' ); ?></p>
+						</fieldset>
+					</td>
+				</tr>
+
+				<!-- Hàng chọn user: đồng bộ Top-up -->
+				<tr id="iue-row-select-users">
 					<th scope="row"><?php esc_html_e( 'Select Users', 'init-user-engine' ); ?></th>
 					<td style="position: relative;">
 						<input type="text" id="iue_user_search" class="regular-text"
@@ -77,13 +153,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 						<p class="description"><?php esc_html_e( 'Selected user IDs will appear here.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
-				<tr>
-				    <th scope="row">&nbsp;</th>
-				    <td>
-				        <label><input type="checkbox" name="iue_send_all" value="1"> <?php esc_html_e( 'Send to all members', 'init-user-engine' ); ?></label>
-				        <p class="description"><?php esc_html_e( 'This will override the user ID field and send to all registered users.', 'init-user-engine' ); ?></p>
-				    </td>
-				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Type', 'init-user-engine' ); ?></th>
 					<td>
@@ -95,6 +165,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 						</fieldset>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Priority', 'init-user-engine' ); ?></th>
 					<td>
@@ -104,6 +175,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 						</fieldset>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><label for="iue_link"><?php esc_html_e( 'Optional Link', 'init-user-engine' ); ?></label></th>
 					<td>
@@ -111,10 +183,12 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 							placeholder="<?php esc_attr_e( 'https://example.com/optional-link', 'init-user-engine' ); ?>">
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row">&nbsp;</th>
 					<td><label><input type="checkbox" name="iue_pinned" value="1"> <?php esc_html_e( 'Pin this message', 'init-user-engine' ); ?></label></td>
 				</tr>
+
 				<tr>
 					<th scope="row"><label for="iue_expire"><?php esc_html_e( 'Expire At (optional)', 'init-user-engine' ); ?></label></th>
 					<td>

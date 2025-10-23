@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,26 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.3.3 – October 23, 2025 =
+- Enhanced **Admin Notification Tool**:
+  - Fully synchronized recipient selection UI and backend logic with the **Top-up Tool**.
+  - Added unified recipient options:
+    - **Selected users** (manual input with live search)
+    - **Active VIPs** (fetched via `init_plugin_suite_user_engine_get_active_vip_users( 'ids' )`)
+    - **All members** (retrieved using `get_users( [ 'fields' => 'ID' ] )`)
+  - Replaced old “Send to all” checkbox with radio-based recipient selection for consistency.
+  - Integrated automatic user resolution for VIP group — uses the same helper function as Top-up.
+  - Added bulk message delivery with chunked sending through `init_user_engine_inbox_bulk_chunk_size` filter (default: 500).
+  - Retains full compatibility with existing inbox delivery logic, meta, and hooks.
+- Improved **Admin UI Consistency**:
+  - Recipient selection block now mirrors the Top-up Tool layout and markup.
+  - “Select Users” interface unified for both tools (search, display, hidden ID handling).
+  - Maintains identical sanitization, nonce verification, and capability checks.
+- Stability and Backward Compatibility:
+  - No functional or database schema changes.
+  - Does not alter inbox logic, message structure, or stored metadata.
+  - Fully backward compatible with all prior notification and VIP systems.
 
 = 1.3.2 – October 18, 2025 =
 - Added **Avatar Upload Permission System**:

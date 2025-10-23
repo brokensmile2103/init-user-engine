@@ -70,8 +70,8 @@ Base: `/wp-json/inituser/v1/`
 - `init_plugin_suite_user_engine_render_level_badge` – Customize level badge HTML  
 - `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic  
-- `init_user_engine_captcha_bank` – Extend the captcha question bank with custom items  
-- `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount  
+- `init_plugin_suite_user_engine_captcha_bank` – Extend the captcha question bank with custom items  
+- `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount  
 
 ### Actions
 

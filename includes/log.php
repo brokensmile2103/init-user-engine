@@ -107,7 +107,7 @@ function init_plugin_suite_user_engine_format_log_message( $entry ) {
 	 * 
 	 * @since 1.0.0
 	 */
-	return apply_filters( 'init_user_engine_format_log_message', $message, $entry, $source, $type, $amount );
+	return apply_filters( 'init_plugin_suite_user_engine_format_log_message', $message, $entry, $source, $type, $amount );
 }
 
 // Log EXP separately

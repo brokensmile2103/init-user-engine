@@ -275,7 +275,7 @@ function init_plugin_suite_user_engine_api_get_captcha() {
          * Cho phép mở rộng ngân hàng câu hỏi qua hook.
          * Dev có thể add thêm phần tử ['question' => '...', 'answer' => (int)].
          */
-        $questions = apply_filters( 'init_user_engine_captcha_bank', $questions );
+        $questions = apply_filters( 'init_plugin_suite_user_engine_captcha_bank', $questions );
 
         $selected = $questions[array_rand($questions)];
         $question = $selected['question'];
@@ -341,7 +341,7 @@ function init_plugin_suite_user_engine_api_get_captcha() {
 function init_plugin_suite_user_engine_api_register_user( WP_REST_Request $request ) {
     // ---- CHECK GLOBAL REGISTRATION SETTING ----
     $settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
-    
+
     if ( ! empty( $settings['disable_registration'] ) ) {
         return new WP_Error(
             'registration_disabled',

@@ -89,8 +89,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
 - `init_plugin_suite_user_engine_after_register` – Hook after successful user registration (pass user ID and submitted data)
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
-- `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
-- `init_user_engine_captcha_bank` – Extend or modify the internal captcha question bank used for fallback validation
+- `init_plugin_suite_user_engine_captcha_bank` – Extend or modify the internal captcha question bank used for fallback validation
+- `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
 
 === Actions ===
 

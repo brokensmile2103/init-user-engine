@@ -8,8 +8,21 @@ function init_plugin_suite_user_engine_get_cash( $user_id ) {
 
 // Set cash value for a user (auto-fix negative)
 function init_plugin_suite_user_engine_set_cash( $user_id, $value ) {
-	$value = max( 0, (int) $value );
-	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_cash', $value );
+    $value      = max( 0, (int) $value );
+    $old_value  = (int) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_cash', 0 );
+
+    // Update meta
+    init_plugin_suite_user_engine_update_meta( $user_id, 'iue_cash', $value );
+
+    // Fire action after cash value changes
+    /**
+     * Fires after a user's cash balance has been updated.
+     *
+     * @param int $user_id   The ID of the user whose cash balance changed.
+     * @param int $value     The new cash balance value.
+     * @param int $old_value The previous cash balance value.
+     */
+    do_action( 'init_plugin_suite_user_engine_cash_changed', $user_id, $value, $old_value );
 }
 
 // Add cash to user and return new total

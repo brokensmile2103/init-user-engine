@@ -8,8 +8,21 @@ function init_plugin_suite_user_engine_get_coin( $user_id ) {
 
 // Set coin value for a user (clamped to >= 0)
 function init_plugin_suite_user_engine_set_coin( $user_id, $value ) {
-	$value = max( 0, (int) $value );
+	$value      = max( 0, (int) $value );
+	$old_value  = (int) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin', 0 );
+
+	// Update meta
 	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_coin', $value );
+
+	// Fire action after coin value changes
+	/**
+	 * Fires after a user's coin balance has been updated.
+	 *
+	 * @param int $user_id   The ID of the user whose coin balance changed.
+	 * @param int $value     The new coin balance value.
+	 * @param int $old_value The previous coin balance value.
+	 */
+	do_action( 'init_plugin_suite_user_engine_coin_changed', $user_id, $value, $old_value );
 }
 
 // Add coin to user and return new total

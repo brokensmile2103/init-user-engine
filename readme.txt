@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_after_register` – Hook after successful user registration (pass user ID and submitted data)
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
 - `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
+- `init_user_engine_captcha_bank` – Extend or modify the internal captcha question bank used for fallback validation
 
 === Actions ===
 
@@ -104,6 +105,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_vip_purchased` – After VIP is purchased  
 - `init_plugin_suite_user_engine_add_exp` – Triggered when adding EXP via hook  
 - `init_plugin_suite_user_engine_add_coin` – Triggered when adding coin via hook  
+- `init_plugin_suite_user_engine_coin_changed` – After user’s Coin balance is updated  
+- `init_plugin_suite_user_engine_cash_changed` – After user’s Cash balance is updated  
 - `init_plugin_suite_user_engine_admin_send_notice` – When admin sends notification via wp-admin.
 
 === REST API Endpoints ===
@@ -149,6 +152,33 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+== Changelog ==
+
+= 1.3.4 – October 23, 2025 =
+- Enhanced **Captcha Security System**:
+  - Expanded captcha question bank with 40+ new math and logic-based variations.
+  - Introduced 4 smart captcha modes:
+    - **Symbolic math** (`+`, `−`, `×`)
+    - **Text-based math** (e.g., “What is 5 plus 3?”)
+    - **General knowledge numerics** (e.g., “How many days in a week?”)
+    - **Contextual variants** (e.g., “Double 4 is?”, “Give the next even number after 7.”)
+  - Added internal hook `init_user_engine_captcha_bank` to allow external extensions to register new captcha questions.
+  - Localized all captcha questions and added full translator context for `%` placeholders.
+  - Ensured all captcha answers are numeric-only for maximum bot resistance.
+- Added **Disable Captcha** setting:
+  - Allows disabling all captcha validations (including Turnstile) for testing environments.
+  - Includes strong “DANGER” warning and contextual description to prevent misuse.
+  - Automatically bypasses both frontend and backend captcha logic when enabled.
+- Added **Disable New Registrations** feature:
+  - Completely blocks new user registrations across both REST API and WordPress forms.
+  - Integrates with registration endpoint for immediate early return.
+  - Prevents rendering of registration form on login/register templates when active.
+  - Designed for maintenance or private-access environments.
+- Improved **Multi-Layer Bot Protection**:
+  - Combined honeypot, custom captcha, and Cloudflare Turnstile verification.
+  - Added global registration lockout switch for full shutdown mode.
+  - Enhanced IP-based rate limiting and token expiration safeguards.
 
 = 1.3.3 – October 23, 2025 =
 - Enhanced **Admin Notification Tool**:

@@ -1364,3 +1364,108 @@ msgstr ""
 
 msgid "Failed to toggle avatar upload permission."
 msgstr ""
+
+msgid "Disable New Registrations"
+msgstr ""
+
+msgid "Temporarily close all new user registrations."
+msgstr ""
+
+msgid "When enabled, the Init User Engine will stop accepting new sign-ups through its system. This does not affect other plugins or WordPress default registration."
+msgstr ""
+
+msgid "Perfect for maintenance periods or when you want to keep the community invite-only."
+msgstr ""
+
+msgid "How many sides does a triangle have?"
+msgstr ""
+
+msgid "How many quarters make a whole (1.00)?"
+msgstr ""
+
+msgid "How many seasons are in a year?"
+msgstr ""
+
+msgid "How many wheels does a bicycle have?"
+msgstr ""
+
+msgid "How many days are in a fortnight?"
+msgstr ""
+
+msgid "How many decades are in a century?"
+msgstr ""
+
+msgid "How many zeros are in one thousand?"
+msgstr ""
+
+msgid "How many centimeters are in a meter?"
+msgstr ""
+
+msgid "How many millimeters are in a centimeter?"
+msgstr ""
+
+msgid "How many days are in June?"
+msgstr ""
+
+msgid "How many days are in July?"
+msgstr ""
+
+msgid "How many even numbers are there between 1 and 5?"
+msgstr ""
+
+msgid "How many vowels are in the word \"code\"?"
+msgstr ""
+
+msgid "How many corners does a rectangle have?"
+msgstr ""
+
+msgid "How many feet are in a yard?"
+msgstr ""
+
+msgid "How many halves are in a whole?"
+msgstr ""
+
+msgid "How many thirds are in a whole?"
+msgstr ""
+
+msgid "How many letters are in the word \"seven\"?"
+msgstr ""
+
+msgid "How many minutes are in 2 hours?"
+msgstr ""
+
+msgid "How many days are in 3 weeks?"
+msgstr ""
+
+msgid "How many months are in 2 years?"
+msgstr ""
+
+msgid "How many quarters are in a year?"
+msgstr ""
+
+msgid "How many digits are there in a PIN like \"1234\"?"
+msgstr ""
+
+msgid "How many letters are in the word \"ten\"?"
+msgstr ""
+
+msgid "Give the next even number after %d."
+msgstr ""
+
+msgid "How many letters are there in the word \"cat\"? (hint: c-a-t)"
+msgstr ""
+
+msgid "Add %1$d apples and %2$d apples."
+msgstr ""
+
+msgid "How many sides does a regular pentagon have?"
+msgstr ""
+
+msgid "Count the digits in \"%s\"."
+msgstr ""
+
+msgid "Double %d is?"
+msgstr ""
+
+msgid "Half of %d is?"
+msgstr ""

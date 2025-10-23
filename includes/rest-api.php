@@ -178,108 +178,177 @@ function init_plugin_suite_user_engine_register_rest_routes() {
 // Enhanced Captcha với better validation
 function init_plugin_suite_user_engine_api_get_captcha() {
     $session_id = wp_generate_password(16, false, false);
-    $timestamp = time();
+    $timestamp  = time();
 
-    $mode = wp_rand(0, 2); // 0: symbols, 1: text, 2: mixed
+    // 0: ký hiệu + - × ; 1: chữ plus/minus/times ; 2: ngân hàng kiến thức số cơ bản ; 3: biến thể ngữ cảnh (mẹo)
+    $mode = wp_rand(0, 3);
 
-    if ($mode === 0) {
+    // ===== MODE 0: Biểu thức ký hiệu =====
+    if ( $mode === 0 ) {
         $ops = ['+', '-', '×'];
-        $op = $ops[array_rand($ops)];
-        $a = wp_rand(1, 12);
-        $b = wp_rand(1, 9);
+        $op  = $ops[array_rand($ops)];
+        $a   = wp_rand(2, 19);
+        $b   = wp_rand(1, 9);
 
-        if ($op === '-' && $b > $a) {
-            $temp = $a;
-            $a = $b;
-            $b = $temp;
+        if ( $op === '-' && $b > $a ) {
+            list($a, $b) = [$b, $a];
         }
 
-        if ($op === '+') {
-            $answer = $a + $b;
-        } elseif ($op === '-') {
-            $answer = $a - $b;
-        } else {
-            $answer = $a * $b;
-        }
+        if ( $op === '+' )       { $answer = $a + $b; }
+        elseif ( $op === '-' )  { $answer = $a - $b; }
+        else                    { $answer = $a * $b; }
 
-        // translators: %1$d and %3$d are numbers, %2$s is the operator (+, −, ×)
-        $question = sprintf(__('%1$d %2$s %3$d = ?', 'init-user-engine'), $a, $op, $b);
+        // translators: %1$d and %3$d are numbers; %2$s is the operator (+, −, ×).
+        $question = sprintf( __('%1$d %2$s %3$d = ?', 'init-user-engine'), $a, $op, $b );
 
-    } elseif ($mode === 1) {
+    // ===== MODE 1: Biểu thức chữ =====
+    } elseif ( $mode === 1 ) {
         $ops = ['plus', 'minus', 'times'];
-        $op = $ops[array_rand($ops)];
-        $a = wp_rand(1, 12);
-        $b = wp_rand(1, 9);
+        $op  = $ops[array_rand($ops)];
+        $a   = wp_rand(2, 19);
+        $b   = wp_rand(1, 9);
 
-        if ($op === 'minus' && $b > $a) {
-            $temp = $a;
-            $a = $b;
-            $b = $temp;
+        if ( $op === 'minus' && $b > $a ) {
+            list($a, $b) = [$b, $a];
         }
 
-        if ($op === 'plus') {
-            $answer = $a + $b;
-            // translators: %1$d and %2$d are numbers
-            $question = sprintf(__('What is %1$d plus %2$d?', 'init-user-engine'), $a, $b);
-        } elseif ($op === 'minus') {
-            $answer = $a - $b;
-            // translators: %1$d and %2$d are numbers
-            $question = sprintf(__('What is %1$d minus %2$d?', 'init-user-engine'), $a, $b);
+        if ( $op === 'plus' ) {
+            $answer  = $a + $b;
+            // translators: %1$d and %2$d are numbers.
+            $question = sprintf( __('What is %1$d plus %2$d?', 'init-user-engine'), $a, $b );
+        } elseif ( $op === 'minus' ) {
+            $answer  = $a - $b;
+            // translators: %1$d and %2$d are numbers.
+            $question = sprintf( __('What is %1$d minus %2$d?', 'init-user-engine'), $a, $b );
         } else {
-            $answer = $a * $b;
-            // translators: %1$d and %2$d are numbers
-            $question = sprintf(__('What is %1$d times %2$d?', 'init-user-engine'), $a, $b);
+            $answer  = $a * $b;
+            // translators: %1$d and %2$d are numbers.
+            $question = sprintf( __('What is %1$d times %2$d?', 'init-user-engine'), $a, $b );
         }
 
-    } else {
+    // ===== MODE 2: Ngân hàng kiến thức số cơ bản (mở rộng) =====
+    } elseif ( $mode === 2 ) {
         $questions = [
-            ['question' => __('How many days in a week?', 'init-user-engine'), 'answer' => 7],
-            ['question' => __('How many hours in a day?', 'init-user-engine'), 'answer' => 24],
-            ['question' => __('How many minutes in an hour?', 'init-user-engine'), 'answer' => 60],
-            ['question' => __('How many months in a year?', 'init-user-engine'), 'answer' => 12],
-            ['question' => __('What is 10 divided by 2?', 'init-user-engine'), 'answer' => 5],
-            ['question' => __('What is 3 squared?', 'init-user-engine'), 'answer' => 9],
-            ['question' => __('How many sides does a square have?', 'init-user-engine'), 'answer' => 4],
-            ['question' => __('How many legs does a spider have?', 'init-user-engine'), 'answer' => 8],
-            ['question' => __('How many letters are in the English alphabet?', 'init-user-engine'), 'answer' => 26],
-            ['question' => __('What is 100 divided by 25?', 'init-user-engine'), 'answer' => 4],
-            ['question' => __('What is 2 cubed?', 'init-user-engine'), 'answer' => 8],
-            ['question' => __('How many days in February (non-leap year)?', 'init-user-engine'), 'answer' => 28],
-            ['question' => __('How many fingers do humans normally have in total?', 'init-user-engine'), 'answer' => 10],
-            ['question' => __('What is 5 times 6?', 'init-user-engine'), 'answer' => 30],
-            ['question' => __('What is 9 minus 4?', 'init-user-engine'), 'answer' => 5],
-            ['question' => __('What is 7 plus 8?', 'init-user-engine'), 'answer' => 15],
+            ['question' => __('How many days in a week?', 'init-user-engine'),                             'answer' => 7],
+            ['question' => __('How many months in a year?', 'init-user-engine'),                           'answer' => 12],
+            ['question' => __('How many minutes in an hour?', 'init-user-engine'),                         'answer' => 60],
+            ['question' => __('How many hours in a day?', 'init-user-engine'),                             'answer' => 24],
+            ['question' => __('How many days in February (non-leap year)?', 'init-user-engine'),           'answer' => 28],
+            ['question' => __('How many sides does a square have?', 'init-user-engine'),                   'answer' => 4],
+            ['question' => __('How many sides does a triangle have?', 'init-user-engine'),                 'answer' => 3],
+            ['question' => __('How many legs does a spider have?', 'init-user-engine'),                    'answer' => 8],
+            ['question' => __('How many letters are in the English alphabet?', 'init-user-engine'),        'answer' => 26],
+            ['question' => __('What is 10 divided by 2?', 'init-user-engine'),                             'answer' => 5],
+            ['question' => __('What is 100 divided by 25?', 'init-user-engine'),                           'answer' => 4],
+            ['question' => __('What is 2 cubed?', 'init-user-engine'),                                     'answer' => 8],
+            ['question' => __('What is 3 squared?', 'init-user-engine'),                                   'answer' => 9],
+            ['question' => __('What is 5 times 6?', 'init-user-engine'),                                   'answer' => 30],
+            ['question' => __('What is 9 minus 4?', 'init-user-engine'),                                   'answer' => 5],
+            ['question' => __('What is 7 plus 8?', 'init-user-engine'),                                    'answer' => 15],
+            ['question' => __('How many quarters make a whole (1.00)?', 'init-user-engine'),               'answer' => 4],
+            ['question' => __('How many seasons are in a year?', 'init-user-engine'),                      'answer' => 4],
+            ['question' => __('How many wheels does a bicycle have?', 'init-user-engine'),                 'answer' => 2],
+            ['question' => __('How many fingers do humans normally have in total?', 'init-user-engine'),   'answer' => 10],
+            ['question' => __('How many days are in a fortnight?', 'init-user-engine'),                    'answer' => 14],
+            ['question' => __('How many decades are in a century?', 'init-user-engine'),                   'answer' => 10],
+            ['question' => __('How many zeros are in one thousand?', 'init-user-engine'),                  'answer' => 3],
+            ['question' => __('How many centimeters are in a meter?', 'init-user-engine'),                 'answer' => 100],
+            ['question' => __('How many millimeters are in a centimeter?', 'init-user-engine'),            'answer' => 10],
+            ['question' => __('How many days are in June?', 'init-user-engine'),                           'answer' => 30],
+            ['question' => __('How many days are in July?', 'init-user-engine'),                           'answer' => 31],
+            ['question' => __('How many even numbers are there between 1 and 5?', 'init-user-engine'),     'answer' => 2],  // 2,4
+            ['question' => __('How many vowels are in the word "code"?', 'init-user-engine'),              'answer' => 2],  // o,e
+            ['question' => __('How many corners does a rectangle have?', 'init-user-engine'),              'answer' => 4],
+            ['question' => __('How many feet are in a yard?', 'init-user-engine'),                         'answer' => 3],
+            ['question' => __('How many halves are in a whole?', 'init-user-engine'),                      'answer' => 2],
+            ['question' => __('How many thirds are in a whole?', 'init-user-engine'),                      'answer' => 3],
+            ['question' => __('How many letters are in the word "seven"?', 'init-user-engine'),            'answer' => 5],
+            ['question' => __('How many minutes are in 2 hours?', 'init-user-engine'),                     'answer' => 120],
+            ['question' => __('How many days are in 3 weeks?', 'init-user-engine'),                        'answer' => 21],
+            ['question' => __('How many months are in 2 years?', 'init-user-engine'),                      'answer' => 24],
+            ['question' => __('How many quarters are in a year?', 'init-user-engine'),                     'answer' => 4],
+            ['question' => __('How many digits are there in a PIN like "1234"?', 'init-user-engine'),      'answer' => 4],
+            ['question' => __('How many letters are in the word "ten"?', 'init-user-engine'),              'answer' => 3],
         ];
+
+        /**
+         * Cho phép mở rộng ngân hàng câu hỏi qua hook.
+         * Dev có thể add thêm phần tử ['question' => '...', 'answer' => (int)].
+         */
+        $questions = apply_filters( 'init_user_engine_captcha_bank', $questions );
 
         $selected = $questions[array_rand($questions)];
         $question = $selected['question'];
-        $answer = $selected['answer'];
+        $answer   = (int) $selected['answer'];
+
+    // ===== MODE 3: Biến thể ngữ cảnh (tránh hardcode/phishing mẫu) =====
+    } else {
+        // Tạo một vài mẫu hỏi đổi câu chữ nhưng vẫn trả lời số
+        $templates = [
+            // translators: %d is a number.
+            function() { $x = wp_rand(2,9); return [ sprintf( __('Give the next even number after %d.', 'init-user-engine'), $x ), ($x % 2 === 0) ? $x+2 : $x+1 ]; },
+
+            // (no placeholders) kept as sprintf for consistency; translators note not required.
+            function() { $x = wp_rand(3,9); return [ sprintf( __('How many letters are there in the word "cat"? (hint: c-a-t)', 'init-user-engine') ), 3 ]; },
+
+            // translators: %1$d and %2$d are numbers (counts of apples).
+            function() { $a = wp_rand(2,7); $b = wp_rand(2,7); return [ sprintf( __('Add %1$d apples and %2$d apples.', 'init-user-engine'), $a, $b ), $a+$b ]; },
+
+            // (no placeholders) kept as sprintf for consistency; translators note not required.
+            function() { $x = wp_rand(2,5); return [ sprintf( __('How many sides does a regular pentagon have?', 'init-user-engine') ), 5 ]; },
+
+            // translators: %s is a repeated numeric string like "1111".
+            function() { $x = wp_rand(2,6); return [ sprintf( __('Count the digits in "%s".', 'init-user-engine'), str_repeat('1', $x) ), $x ]; },
+
+            // translators: %d is a number to be doubled.
+            function() { $a = wp_rand(2,9); return [ sprintf( __('Double %d is?', 'init-user-engine'), $a ), 2*$a ]; },
+
+            // translators: %d is the resulting number after halving.
+            function() { $a = wp_rand(2,9); return [ sprintf( __('Half of %d is?', 'init-user-engine'), 2*$a ), $a ]; },
+        ];
+
+        $maker    = $templates[array_rand($templates)];
+        list($question, $answer) = $maker();
+        $answer = (int) $answer;
     }
 
-    $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
-    $ip = init_plugin_suite_user_engine_get_real_ip();
-    $key_data = $session_id . '|' . $timestamp . '|' . substr(md5($user_agent . $ip), 0, 8);
+    // ===== Token hóa + chống tái sử dụng =====
+    $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+    $ip         = function_exists('init_plugin_suite_user_engine_get_real_ip') ? init_plugin_suite_user_engine_get_real_ip() : '';
+
+    // Gắn UA+IP hash nhẹ để giảm lạm dụng token cross-client
+    $key_data    = $session_id . '|' . $timestamp . '|' . substr( md5( $user_agent . $ip ), 0, 8 );
     $captcha_key = 'iue_captcha_' . hash('sha256', $key_data);
 
     $captcha_data = [
-        'answer'   => $answer,
-        'session'  => $session_id,
-        'timestamp'=> $timestamp,
-        'ip'       => $ip,
-        'attempts' => 0
+        'answer'    => (int) $answer,
+        'session'   => $session_id,
+        'timestamp' => $timestamp,
+        'ip'        => $ip,
+        'attempts'  => 0,
     ];
 
-    set_transient($captcha_key, $captcha_data, 15 * MINUTE_IN_SECONDS);
+    set_transient( $captcha_key, $captcha_data, 15 * MINUTE_IN_SECONDS );
 
     return [
         'question' => $question,
-        'token'    => base64_encode($key_data),
-        'expires'  => $timestamp + (15 * MINUTE_IN_SECONDS)
+        'token'    => base64_encode( $key_data ),
+        'expires'  => $timestamp + ( 15 * MINUTE_IN_SECONDS ),
     ];
 }
 
 // Enhanced register function
 function init_plugin_suite_user_engine_api_register_user( WP_REST_Request $request ) {
+    // ---- CHECK GLOBAL REGISTRATION SETTING ----
+    $settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+    if ( ! empty( $settings['disable_registration'] ) ) {
+        return new WP_Error(
+            'registration_disabled',
+            __( 'New registrations are currently disabled.', 'init-user-engine' ),
+            [ 'status' => 403 ]
+        );
+    }
+
     $data     = $request->get_json_params();
     $username = sanitize_user( $data['username'] ?? '' );
     $email    = sanitize_email( $data['email'] ?? '' );

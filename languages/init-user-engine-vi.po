@@ -1364,3 +1364,108 @@ msgstr "Người dùng hiện đã được phép tải lên ảnh đại diện
 
 msgid "Failed to toggle avatar upload permission."
 msgstr "Không thể thay đổi quyền tải lên ảnh đại diện."
+
+msgid "Disable New Registrations"
+msgstr "Tắt đăng ký mới"
+
+msgid "Temporarily close all new user registrations."
+msgstr "Tạm thời đóng toàn bộ đăng ký người dùng mới."
+
+msgid "When enabled, the Init User Engine will stop accepting new sign-ups through its system. This does not affect other plugins or WordPress default registration."
+msgstr "Khi bật tùy chọn này, Init User Engine sẽ ngừng chấp nhận đăng ký tài khoản mới qua hệ thống của plugin. Thiết lập này không ảnh hưởng đến các plugin khác hoặc cơ chế đăng ký mặc định của WordPress."
+
+msgid "Perfect for maintenance periods or when you want to keep the community invite-only."
+msgstr "Rất phù hợp khi bảo trì hệ thống hoặc khi bạn muốn giới hạn đăng ký chỉ qua lời mời."
+
+msgid "How many sides does a triangle have?"
+msgstr "Hình tam giác có bao nhiêu cạnh?"
+
+msgid "How many quarters make a whole (1.00)?"
+msgstr "Có bao nhiêu phần tư tạo thành một đơn vị (1.00)?"
+
+msgid "How many seasons are in a year?"
+msgstr "Một năm có bao nhiêu mùa?"
+
+msgid "How many wheels does a bicycle have?"
+msgstr "Một chiếc xe đạp có bao nhiêu bánh?"
+
+msgid "How many days are in a fortnight?"
+msgstr "Một khoảng thời gian hai tuần (fortnight) có bao nhiêu ngày?"
+
+msgid "How many decades are in a century?"
+msgstr "Một thế kỷ có bao nhiêu thập kỷ?"
+
+msgid "How many zeros are in one thousand?"
+msgstr "Số 1000 có bao nhiêu số 0?"
+
+msgid "How many centimeters are in a meter?"
+msgstr "Một mét có bao nhiêu xentimét?"
+
+msgid "How many millimeters are in a centimeter?"
+msgstr "Một xentimét có bao nhiêu milimét?"
+
+msgid "How many days are in June?"
+msgstr "Tháng Sáu có bao nhiêu ngày?"
+
+msgid "How many days are in July?"
+msgstr "Tháng Bảy có bao nhiêu ngày?"
+
+msgid "How many even numbers are there between 1 and 5?"
+msgstr "Có bao nhiêu số chẵn trong khoảng từ 1 đến 5?"
+
+msgid "How many vowels are in the word \"code\"?"
+msgstr "Trong từ \"code\" có bao nhiêu nguyên âm?"
+
+msgid "How many corners does a rectangle have?"
+msgstr "Hình chữ nhật có bao nhiêu góc?"
+
+msgid "How many feet are in a yard?"
+msgstr "Một yard có bao nhiêu foot?"
+
+msgid "How many halves are in a whole?"
+msgstr "Một đơn vị có bao nhiêu nửa?"
+
+msgid "How many thirds are in a whole?"
+msgstr "Một đơn vị có bao nhiêu phần ba?"
+
+msgid "How many letters are in the word \"seven\"?"
+msgstr "Trong từ \"seven\" có bao nhiêu chữ cái?"
+
+msgid "How many minutes are in 2 hours?"
+msgstr "2 giờ có bao nhiêu phút?"
+
+msgid "How many days are in 3 weeks?"
+msgstr "3 tuần có bao nhiêu ngày?"
+
+msgid "How many months are in 2 years?"
+msgstr "2 năm có bao nhiêu tháng?"
+
+msgid "How many quarters are in a year?"
+msgstr "Một năm có bao nhiêu quý?"
+
+msgid "How many digits are there in a PIN like \"1234\"?"
+msgstr "Một mã PIN như \"1234\" có bao nhiêu chữ số?"
+
+msgid "How many letters are in the word \"ten\"?"
+msgstr "Trong từ \"ten\" có bao nhiêu chữ cái?"
+
+msgid "Give the next even number after %d."
+msgstr "Hãy cho biết số chẵn kế tiếp sau %d."
+
+msgid "How many letters are there in the word \"cat\"? (hint: c-a-t)"
+msgstr "Từ \"cat\" có bao nhiêu chữ cái? (gợi ý: c-a-t)"
+
+msgid "Add %1$d apples and %2$d apples."
+msgstr "Cộng %1$d quả táo và %2$d quả táo."
+
+msgid "How many sides does a regular pentagon have?"
+msgstr "Hình ngũ giác đều có bao nhiêu cạnh?"
+
+msgid "Count the digits in \"%s\"."
+msgstr "Đếm số chữ số trong \"%s\"."
+
+msgid "Double %d is?"
+msgstr "Gấp đôi %d là?"
+
+msgid "Half of %d is?"
+msgstr "Một nửa của %d là?"

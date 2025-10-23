@@ -61,24 +61,28 @@ Base: `/wp-json/inituser/v1/`
 ### Filters
 
 - `init_plugin_suite_user_engine_localized_data` – Modify frontend JS data  
-- `init_plugin_suite_user_engine_exp_required` – EXP required per level  
-- `init_plugin_suite_user_engine_vip_prices` – Change VIP pricing  
-- `init_plugin_suite_user_engine_referral_rewards` – Customize referral bonuses  
-- `init_plugin_suite_user_engine_calculated_coin_amount` – Tweak coin reward  
-- `init_plugin_suite_user_engine_format_inbox` – Modify inbox output  
-- `init_plugin_suite_user_engine_render_level_badge` – Custom level badge HTML  
-- `init_plugin_suite_user_engine_validate_register_fields` – Extend registration logic
-- `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
-- `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
+- `init_plugin_suite_user_engine_exp_required` – Modify EXP required per level  
+- `init_plugin_suite_user_engine_vip_prices` – Modify VIP package prices  
+- `init_plugin_suite_user_engine_referral_rewards` – Modify referral rewards  
+- `init_plugin_suite_user_engine_calculated_coin_amount` – Modify coin reward before apply  
+- `init_plugin_suite_user_engine_calculated_exp_amount` – Modify EXP reward before apply  
+- `init_plugin_suite_user_engine_format_inbox` – Modify formatted inbox data  
+- `init_plugin_suite_user_engine_render_level_badge` – Customize level badge HTML  
+- `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
+- `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic  
+- `init_user_engine_captcha_bank` – Extend the captcha question bank with custom items  
+- `init_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount  
 
 ### Actions
 
-- `init_plugin_suite_user_engine_level_up` – User leveled up  
-- `init_plugin_suite_user_engine_exp_added` – EXP added  
-- `init_plugin_suite_user_engine_transaction_logged` – Coin/cash transaction  
-- `init_plugin_suite_user_engine_inbox_inserted` – New message created  
-- `init_plugin_suite_user_engine_vip_purchased` – VIP purchased  
-- `init_plugin_suite_user_engine_after_register` – New user registered  
+- `init_plugin_suite_user_engine_level_up` – When user levels up  
+- `init_plugin_suite_user_engine_exp_added` – After EXP is added  
+- `init_plugin_suite_user_engine_transaction_logged` – After coin/cash is logged  
+- `init_plugin_suite_user_engine_inbox_inserted` – After new inbox message is created  
+- `init_plugin_suite_user_engine_vip_purchased` – After VIP is purchased  
+- `init_plugin_suite_user_engine_after_register` – After successful user registration  
+- `init_plugin_suite_user_engine_coin_changed` – After user's coin balance changes  
+- `init_plugin_suite_user_engine_cash_changed` – After user's cash balance changes  
 
 ## Installation
 

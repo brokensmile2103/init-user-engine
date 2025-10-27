@@ -56,7 +56,7 @@ function init_plugin_suite_user_engine_send_inbox_to_users(
     $pinned    = 0
 ) {
     // Cho phép tuỳ chỉnh kích thước batch qua filter (mặc định 500)
-    $chunk_size = (int) apply_filters( 'init_user_engine_inbox_bulk_chunk_size', 500, $user_ids, $title, $type );
+    $chunk_size = (int) apply_filters( 'init_plugin_suite_user_engine_inbox_bulk_chunk_size', 500, $user_ids, $title, $type );
 
     // Dùng hàm bulk mới cho hiệu năng
     $inserted = init_plugin_suite_user_engine_send_inbox_to_users_bulk(

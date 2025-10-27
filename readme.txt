@@ -2,9 +2,9 @@
 Contributors: brokensmile.2103
 Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -153,135 +153,146 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
-== Changelog ==
+= 1.3.5 – October 27, 2025 =
+- Refined **Submit Button UI** (Login + Register):
+  - Modern, minimal interaction — **no glow, no shadows**
+  - Subtle hover/active feedback using `transform` and `filter` (crisp, non-flashy)
+  - Preserves theme colors: `var(--iue-theme-color)` → `var(--iue-theme-active-color)` gradient
+  - Improved `:focus-visible` outline for accessibility; zero layout shift
+  - Affected selectors:  
+    `.iue-login-form input[type="submit"]`,  
+    `.iue-login-form .login-submit input[type="submit"]`,  
+    `.iue-register-form button.iue-submit`
+- Developer note:
+  - No markup changes required; CSS-only update and backward compatible.
 
 = 1.3.4 – October 23, 2025 =
 - Enhanced **Captcha Security System**:
-  - Expanded captcha question bank with 40+ new math and logic-based variations.
+  - Expanded captcha question bank with 40+ new math and logic-based variations
   - Introduced 4 smart captcha modes:
     - **Symbolic math** (`+`, `−`, `×`)
     - **Text-based math** (e.g., “What is 5 plus 3?”)
     - **General knowledge numerics** (e.g., “How many days in a week?”)
     - **Contextual variants** (e.g., “Double 4 is?”, “Give the next even number after 7.”)
-  - Added internal hook `init_user_engine_captcha_bank` to allow external extensions to register new captcha questions.
-  - Localized all captcha questions and added full translator context for `%` placeholders.
-  - Ensured all captcha answers are numeric-only for maximum bot resistance.
+  - Added internal hook `init_user_engine_captcha_bank` to allow external extensions to register new captcha questions
+  - Localized all captcha questions and added full translator context for `%` placeholders
+  - Ensured all captcha answers are numeric-only for maximum bot resistance
 - Added **Disable Captcha** setting:
-  - Allows disabling all captcha validations (including Turnstile) for testing environments.
-  - Includes strong “DANGER” warning and contextual description to prevent misuse.
-  - Automatically bypasses both frontend and backend captcha logic when enabled.
+  - Allows disabling all captcha validations (including Turnstile) for testing environments
+  - Includes strong “DANGER” warning and contextual description to prevent misuse
+  - Automatically bypasses both frontend and backend captcha logic when enabled
 - Added **Disable New Registrations** feature:
-  - Completely blocks new user registrations across both REST API and WordPress forms.
-  - Integrates with registration endpoint for immediate early return.
-  - Prevents rendering of registration form on login/register templates when active.
-  - Designed for maintenance or private-access environments.
+  - Completely blocks new user registrations across both REST API and WordPress forms
+  - Integrates with registration endpoint for immediate early return
+  - Prevents rendering of registration form on login/register templates when active
+  - Designed for maintenance or private-access environments
 - Improved **Multi-Layer Bot Protection**:
-  - Combined honeypot, custom captcha, and Cloudflare Turnstile verification.
-  - Added global registration lockout switch for full shutdown mode.
-  - Enhanced IP-based rate limiting and token expiration safeguards.
+  - Combined honeypot, custom captcha, and Cloudflare Turnstile verification
+  - Added global registration lockout switch for full shutdown mode
+  - Enhanced IP-based rate limiting and token expiration safeguards
 
 = 1.3.3 – October 23, 2025 =
 - Enhanced **Admin Notification Tool**:
-  - Fully synchronized recipient selection UI and backend logic with the **Top-up Tool**.
+  - Fully synchronized recipient selection UI and backend logic with the **Top-up Tool**
   - Added unified recipient options:
     - **Selected users** (manual input with live search)
     - **Active VIPs** (fetched via `init_plugin_suite_user_engine_get_active_vip_users( 'ids' )`)
     - **All members** (retrieved using `get_users( [ 'fields' => 'ID' ] )`)
-  - Replaced old “Send to all” checkbox with radio-based recipient selection for consistency.
-  - Integrated automatic user resolution for VIP group — uses the same helper function as Top-up.
-  - Added bulk message delivery with chunked sending through `init_user_engine_inbox_bulk_chunk_size` filter (default: 500).
-  - Retains full compatibility with existing inbox delivery logic, meta, and hooks.
+  - Replaced old “Send to all” checkbox with radio-based recipient selection for consistency
+  - Integrated automatic user resolution for VIP group — uses the same helper function as Top-up
+  - Added bulk message delivery with chunked sending through `init_user_engine_inbox_bulk_chunk_size` filter (default: 500)
+  - Retains full compatibility with existing inbox delivery logic, meta, and hooks
 - Improved **Admin UI Consistency**:
-  - Recipient selection block now mirrors the Top-up Tool layout and markup.
-  - “Select Users” interface unified for both tools (search, display, hidden ID handling).
-  - Maintains identical sanitization, nonce verification, and capability checks.
+  - Recipient selection block now mirrors the Top-up Tool layout and markup
+  - “Select Users” interface unified for both tools (search, display, hidden ID handling)
+  - Maintains identical sanitization, nonce verification, and capability checks
 - Stability and Backward Compatibility:
-  - No functional or database schema changes.
-  - Does not alter inbox logic, message structure, or stored metadata.
-  - Fully backward compatible with all prior notification and VIP systems.
+  - No functional or database schema changes
+  - Does not alter inbox logic, message structure, or stored metadata
+  - Fully backward compatible with all prior notification and VIP systems
 
 = 1.3.2 – October 18, 2025 =
 - Added **Avatar Upload Permission System**:
-  - Introduced new helper function `init_plugin_suite_user_engine_can_upload_avatar( $user_id )` for unified permission checking.
+  - Introduced new helper function `init_plugin_suite_user_engine_can_upload_avatar( $user_id )` for unified permission checking
   - Supports multi-layer policy:
     - Global disable (`disable_all`)
     - VIP-only mode (`vip_only`) using `init_plugin_suite_user_engine_is_vip()`
-    - Per-user ban via `iue_avatar_ban` user meta.
-  - Fully integrated into REST endpoints `upload_avatar` and `remove_avatar` for backend-level enforcement.
-  - Automatically blocks upload and deletion attempts from banned or non-VIP users according to policy.
+    - Per-user ban via `iue_avatar_ban` user meta
+  - Fully integrated into REST endpoints `upload_avatar` and `remove_avatar` for backend-level enforcement
+  - Automatically blocks upload and deletion attempts from banned or non-VIP users according to policy
 - Enhanced **Admin User Metabox**:
-  - Added “Ban Avatar Upload” / “Unban Avatar Upload” button next to “Remove VIP”.
-  - Toggles the `iue_avatar_ban` meta instantly via secure `admin-post` action.
-  - Includes full nonce verification, capability checks, redirect notices, and audit hook `init_plugin_suite_user_engine_avatar_ban_toggled`.
-  - Displays current avatar permission state (“Allowed” / “BANNED”) beside the button.
+  - Added “Ban Avatar Upload” / “Unban Avatar Upload” button next to “Remove VIP”
+  - Toggles the `iue_avatar_ban` meta instantly via secure `admin-post` action
+  - Includes full nonce verification, capability checks, redirect notices, and audit hook `init_plugin_suite_user_engine_avatar_ban_toggled`
+  - Displays current avatar permission state (“Allowed” / “BANNED”) beside the button
 - Improved **Security and Consistency**:
-  - Backend guards prevent unauthorized file handling even if frontend modified.
-  - Added HTTP 403 and 423 codes for forbidden or locked states to ensure clear API responses.
-  - Unified `wp_die()` and `WP_Error` patterns across user-related endpoints.
+  - Backend guards prevent unauthorized file handling even if frontend modified
+  - Added HTTP 403 and 423 codes for forbidden or locked states to ensure clear API responses
+  - Unified `wp_die()` and `WP_Error` patterns across user-related endpoints
 
 = 1.3.1 – October 17, 2025 =
 - Enhanced Admin Top-up Tool:
-  - Replaced old checkboxes with radio buttons for selecting recipients (Selected users / Active VIPs / All members).
-  - Added automatic log display under the form showing up to 100 recent top-up entries.
-  - Logs include amount, type, recipient info (linked to user profile when applicable), and timestamp.
-  - Improved layout spacing and usability for cleaner admin experience.
+  - Replaced old checkboxes with radio buttons for selecting recipients (Selected users / Active VIPs / All members)
+  - Added automatic log display under the form showing up to 100 recent top-up entries
+  - Logs include amount, type, recipient info (linked to user profile when applicable), and timestamp
+  - Improved layout spacing and usability for cleaner admin experience
 - Added Persistent Top-up Log System:
-  - Introduced helper functions `init_plugin_suite_user_engine_add_topup_log()` and `init_plugin_suite_user_engine_get_topup_logs()`.
-  - Standardized log entry format: `quantity|type(coin|cash)|target(VIP|ALL|uid:{id}|user:{count})|time`.
-  - Automatically trims to the latest 100 entries.
-  - Stored via `update_option()` with autoload disabled.
+  - Introduced helper functions `init_plugin_suite_user_engine_add_topup_log()` and `init_plugin_suite_user_engine_get_topup_logs()`
+  - Standardized log entry format: `quantity|type(coin|cash)|target(VIP|ALL|uid:{id}|user:{count})|time`
+  - Automatically trims to the latest 100 entries
+  - Stored via `update_option()` with autoload disabled
 - Improved User Display in Logs:
-  - User targets now show as clickable links to admin profile pages.
-  - Fallback added for deleted or invalid users.
-  - VIP, ALL, and multi-user targets show readable labels.
+  - User targets now show as clickable links to admin profile pages
+  - Fallback added for deleted or invalid users
+  - VIP, ALL, and multi-user targets show readable labels
 - Backward Compatibility:
-  - Compatible with legacy `iue_send_all` and `iue_send_vip` fields.
-  - No database or API changes.
-  - Existing balance, inbox, and transaction logic remain unchanged.
+  - Compatible with legacy `iue_send_all` and `iue_send_vip` fields
+  - No database or API changes
+  - Existing balance, inbox, and transaction logic remain unchanged
 
 = 1.3.0 – October 12, 2025 =
 - Added Coin Exchange system:
-  - Users can now convert Cash → Coin with a configurable rate.
-  - Added real-time conversion preview, validation, and rate display.
-  - Includes optional min/max limits via filters for full customization.
-  - Fully integrated with transaction log and dark mode UI.
+  - Users can now convert Cash → Coin with a configurable rate
+  - Added real-time conversion preview, validation, and rate display
+  - Includes optional min/max limits via filters for full customization
+  - Fully integrated with transaction log and dark mode UI
 - Improved profile update reliability:
-  - Added smart fallback for empty or invalid display names → automatically uses nickname or username.
-  - Prevented saving blank or whitespace-only display names after sanitization.
-  - Ensured consistent and safe user display names across all update scenarios.
-- No database or API changes. Fully backward compatible.
+  - Added smart fallback for empty or invalid display names → automatically uses nickname or username
+  - Prevented saving blank or whitespace-only display names after sanitization
+  - Ensured consistent and safe user display names across all update scenarios
+- No database or API changes. Fully backward compatible
 
 = 1.2.9 – October 10, 2025 =
-- Upgraded multi-user inbox sender to use **bulk insert** for massive scalability.  
-  - Converts thousands of single inserts into optimized batched queries.  
-  - Handles large user arrays efficiently with automatic chunking for stability.  
-- Simplified inbox table creation for new installations (no index changes applied).  
-- Significantly improved performance when sending inbox messages to large user bases (e.g., 10,000+ users).  
+- Upgraded multi-user inbox sender to use **bulk insert** for massive scalability
+  - Converts thousands of single inserts into optimized batched queries
+  - Handles large user arrays efficiently with automatic chunking for stability
+- Simplified inbox table creation for new installations (no index changes applied)
+- Significantly improved performance when sending inbox messages to large user bases (e.g., 10,000+ users) 
 - Refactored **Admin Tools**:
-  - **Notification Tool** now uses the new bulk inbox sender for instant multi-user delivery.
-  - **Top-up Tool** updated to integrate with the new inbox system while keeping balance and log logic fully intact.
-- Fully backward compatible, no database schema or API changes.  
+  - **Notification Tool** now uses the new bulk inbox sender for instant multi-user delivery
+  - **Top-up Tool** updated to integrate with the new inbox system while keeping balance and log logic fully intact
+- Fully backward compatible, no database schema or API changes
 
 = 1.2.8 – October 10, 2025 =
-- Added `autocomplete="off"` to all password fields in the settings page to prevent browsers from auto-saving or suggesting stored passwords.  
-- Minor UI consistency adjustments in settings forms.  
-- No functional or database changes.
+- Added `autocomplete="off"` to all password fields in the settings page to prevent browsers from auto-saving or suggesting stored passwords
+- Minor UI consistency adjustments in settings forms
+- No functional or database changes
 
 = 1.2.7 – October 8, 2025 =
 - Added **Inbox Cleanup Tool** directly in the *Inbox Statistics* admin page:
-  - Introduced new “Cleanup Inbox by Type” block under the **Refresh Data** section.
-  - Allows administrators to permanently delete all inbox messages of a selected `type`.
-  - Automatically lists all existing message types for quick selection.
-  - Includes nonce verification, capability checks, and confirmation prompt for safety.
-  - Displays success or error notice with deleted message count after operation.
+  - Introduced new “Cleanup Inbox by Type” block under the **Refresh Data** section
+  - Allows administrators to permanently delete all inbox messages of a selected `type`
+  - Automatically lists all existing message types for quick selection
+  - Includes nonce verification, capability checks, and confirmation prompt for safety
+  - Displays success or error notice with deleted message count after operation
 - Enhanced date range filter security:
-  - Added nonce field and verification for the “Date Range” dropdown form.
-  - Removed WPCS `NonceVerification.Recommended` warnings on GET processing.
+  - Added nonce field and verification for the “Date Range” dropdown form
+  - Removed WPCS `NonceVerification.Recommended` warnings on GET processing
 - Improved overall PHPCS compliance for the statistics module:
-  - Explicitly documented safe cases for display-only notices.
-  - Limited PHPCS ignores to justified database queries only.
-- Fully backward compatible with existing inbox data and analytics logic.
-- No database schema changes or new dependencies introduced.
+  - Explicitly documented safe cases for display-only notices
+  - Limited PHPCS ignores to justified database queries only
+- Fully backward compatible with existing inbox data and analytics logic
+- No database schema changes or new dependencies introduced
 
 = 1.2.6 – October 5, 2025 =
 - Enhanced Admin User Metabox for better visibility of user activity and communication:

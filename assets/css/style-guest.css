@@ -142,21 +142,33 @@
 	letter-spacing: 0.5px;
 	border: none;
 	border-radius: 9999px;
-	background: linear-gradient(135deg, var(--iue-theme-color), var(--iue-theme-active-color));
 	color: #fff;
+	background: linear-gradient(135deg, var(--iue-theme-color), var(--iue-theme-active-color));
 	cursor: pointer;
-	transition: background 0.2s ease, transform 0.1s ease;
+	transition: transform 0.2s ease, opacity 0.25s ease, filter 0.25s ease;
 }
+
+/* hover: nhẹ, có cảm giác responsive mà không lòe loẹt */
 .iue-login-form input[type="submit"]:hover,
 .iue-register-form button.iue-submit:hover {
-	background: linear-gradient(135deg, var(--iue-theme-active-color), var(--iue-theme-color));
 	transform: translateY(-1px);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+	filter: brightness(1.05) saturate(1.1);
 }
+
+/* active: cảm giác nhấn thực */
 .iue-login-form input[type="submit"]:active,
 .iue-register-form button.iue-submit:active {
-	transform: scale(0.98);
+	transform: scale(0.985);
+	filter: brightness(0.9);
 }
+
+/* focus: viền tinh tế, không shadow */
+.iue-login-form input[type="submit"]:focus-visible,
+.iue-register-form button.iue-submit:focus-visible {
+	outline: 2px solid var(--iue-theme-active-color);
+	outline-offset: 3px;
+}
+
 
 /* ==== Forgot / Register Link ==== */
 .iue-reset-link,

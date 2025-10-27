@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -153,6 +153,18 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.3.6 – October 27, 2025 =
+- Fixed **Critical Display Name Sanitization Bug**:
+  - Resolved an issue where the `update_profile` endpoint removed all whitespace from display names (e.g., “Nguyễn Văn A” → “NguyễnVănA”)
+  - Adjusted sanitization to preserve natural spacing while still preventing XSS and invalid characters
+- Improved **Display Name Fallback Logic**:
+  - Enhanced empty-name handling to ensure proper fallback to nickname or username
+  - Uses stricter validation for better reliability across multilingual inputs
+- Developer Note:
+  - No database or schema changes
+  - Backward compatible and safe for immediate deployment
+  - Affected endpoint: `init_plugin_suite_user_engine_api_update_profile()`
+
 = 1.3.5 – October 27, 2025 =
 - Refined **Submit Button UI** (Login + Register):
   - Modern, minimal interaction — **no glow, no shadows**
@@ -164,7 +176,7 @@ You can search users, customize message type, link, priority, and even set expir
     `.iue-login-form .login-submit input[type="submit"]`,  
     `.iue-register-form button.iue-submit`
 - Developer note:
-  - No markup changes required; CSS-only update and backward compatible.
+  - No markup changes required; CSS-only update and backward compatible
 
 = 1.3.4 – October 23, 2025 =
 - Enhanced **Captcha Security System**:

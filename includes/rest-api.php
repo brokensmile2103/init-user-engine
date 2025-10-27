@@ -905,23 +905,19 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
         return new WP_Error( 'spam_detected', __( 'Spam detected.', 'init-user-engine' ), [ 'status' => 400 ] );
     }
 
-    // Lấy thông tin user hiện tại
     $user_info = get_userdata( $user_id );
 
-    // Sanitize tên hiển thị
-    $display_name = sanitize_text_field( $data['display_name'] ?? '' );
+    // Giữ khoảng trắng hợp lệ giữa các từ, không xoá hết như trước
+    $display_name_raw = $data['display_name'] ?? '';
+    $display_name = trim( wp_strip_all_tags( $display_name_raw ) );
 
-    // Loại bỏ toàn bộ khoảng trắng kể cả unicode
-    $display_name = trim( preg_replace( '/\p{Z}+|[\s]+/u', '', $display_name ) );
+    // Gộp nhiều khoảng trắng liên tiếp thành 1 khoảng trắng
+    $display_name = preg_replace( '/\s+/u', ' ', $display_name );
 
-    // Nếu sanitize xong mà rỗng => fallback sang nickname hoặc username
-    if ( empty( $display_name ) ) {
-        $nickname = get_user_meta( $user_id, 'nickname', true );
-        if ( ! empty( trim( $nickname ) ) ) {
-            $display_name = trim( $nickname );
-        } else {
-            $display_name = $user_info->user_login;
-        }
+    // Nếu sau khi sanitize mà rỗng => fallback
+    if ( $display_name === '' ) {
+        $nickname = trim( (string) get_user_meta( $user_id, 'nickname', true ) );
+        $display_name = $nickname !== '' ? $nickname : $user_info->user_login;
     }
 
     $bio      = sanitize_textarea_field( $data['bio'] ?? '' );
@@ -933,18 +929,15 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
     $website  = esc_url_raw( $data['website'] ?? '' );
     $gender   = sanitize_key( $data['gender'] ?? '' );
 
-    // Cập nhật user core
     wp_update_user( [
         'ID'           => $user_id,
         'display_name' => $display_name,
     ] );
 
-    // Cập nhật mật khẩu nếu có
-    if ( ! empty( $password ) ) {
+    if ( $password !== '' ) {
         wp_set_password( $password, $user_id );
     }
 
-    // Cập nhật các meta
     update_user_meta( $user_id, 'description', $bio );
     update_user_meta( $user_id, 'iue_facebook', $facebook );
     update_user_meta( $user_id, 'iue_twitter', $twitter );

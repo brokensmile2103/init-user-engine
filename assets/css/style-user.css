@@ -1150,7 +1150,6 @@
 .iue-form-group textarea:focus,
 .iue-form-group select:focus {
 	border-color: var(--iue-theme-color);
-	box-shadow: 0 0 0 2px rgba(0, 128, 255, 0.15);
 }
 
 /* Textarea fixed height */

@@ -1469,3 +1469,147 @@ msgstr "Gấp đôi %d là?"
 
 msgid "Half of %d is?"
 msgstr "Một nửa của %d là?"
+
+msgid "Redeem Codes"
+msgstr "Mã quy đổi"
+
+msgid "Redeem Code"
+msgstr "Mã quy đổi"
+
+msgid "Redeem now"
+msgstr "Đổi ngay"
+
+msgid "Create a Redeem Code"
+msgstr "Tạo mã quy đổi"
+
+msgid "You do not have permission to access this page."
+msgstr "Bạn không có quyền truy cập trang này."
+
+msgid "Code"
+msgstr "Mã"
+
+msgid "Leave empty to auto-generate"
+msgstr "Để trống để tự tạo mã"
+
+msgid "Usage Type"
+msgstr "Loại sử dụng"
+
+msgid "Single use"
+msgstr "Dùng 1 lần"
+
+msgid "Multi-use (X times)"
+msgstr "Dùng nhiều lần (X lần)"
+
+msgid "Locked to specific user"
+msgstr "Khóa với một người dùng cụ thể"
+
+msgid "Max Uses (X)"
+msgstr "Số lần sử dụng tối đa (X)"
+
+msgid "Example: 5"
+msgstr "Ví dụ: 5"
+
+msgid "Select User"
+msgstr "Chọn người dùng"
+
+msgid "Search username or display name..."
+msgstr "Tìm bằng tên đăng nhập hoặc tên hiển thị..."
+
+msgid "Only 1 user can be selected."
+msgstr "Chỉ được chọn 1 người dùng."
+
+msgid "Coin Amount"
+msgstr "Số lượng Coin"
+
+msgid "Cash Amount"
+msgstr "Số lượng Cash"
+
+msgid "Create Redeem Code"
+msgstr "Tạo mã quy đổi"
+
+msgid "Existing Redeem Codes"
+msgstr "Danh sách mã quy đổi"
+
+msgid "No redeem codes found."
+msgstr "Không tìm thấy mã quy đổi nào."
+
+msgid "Used"
+msgstr "Đã sử dụng"
+
+msgid "Status"
+msgstr "Trạng thái"
+
+msgid "Actions"
+msgstr "Thao tác"
+
+msgid "Disabled"
+msgstr "Đã vô hiệu"
+
+msgid "Disable"
+msgstr "Vô hiệu"
+
+msgid "Disable this code?"
+msgstr "Vô hiệu mã này?"
+
+msgid "&laquo; Previous"
+msgstr "« Trước"
+
+msgid "Next &raquo;"
+msgstr "Tiếp »"
+
+msgid "Enter redeem code..."
+msgstr "Nhập mã quy đổi..."
+
+msgid "Redeem"
+msgstr "Đổi mã"
+
+msgid "Processing..."
+msgstr "Đang xử lý..."
+
+msgid "Redeem successful!"
+msgstr "Đổi mã thành công!"
+
+msgid "You received:"
+msgstr "Bạn đã nhận được:"
+
+msgid "You will receive:"
+msgstr "Bạn sẽ nhận được:"
+
+msgid "Invalid redeem code."
+msgstr "Mã không hợp lệ."
+
+msgid "This code has expired."
+msgstr "Mã đã hết hạn."
+
+msgid "This code is not active yet."
+msgstr "Mã chưa đến thời gian sử dụng."
+
+msgid "This code has already been used."
+msgstr "Mã này đã được sử dụng."
+
+msgid "This code has already been used up."
+msgstr "Mã này đã hết số lần sử dụng."
+
+msgid "This code is assigned to another user."
+msgstr "Mã này dành cho người dùng khác."
+
+msgid "Please enter a redeem code."
+msgstr "Vui lòng nhập mã."
+
+msgid "Failed to redeem code."
+msgstr "Không thể đổi mã."
+
+msgid "You have already used this code."
+msgstr "Bạn đã sử dụng mã này rồi."
+
+msgid "Could not redeem code, please try again."
+msgstr "Không thể đổi mã, vui lòng thử lại."
+
+msgid "Redeemed by user"
+msgstr "Được đổi bởi người dùng"
+
+msgid "Redeem code reward"
+msgstr "Phần thưởng đổi mã"
+
+msgid "You received: %s."
+msgstr "Bạn đã nhận: %s."

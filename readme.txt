@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -153,91 +153,97 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.3.7 – October 29, 2025 =
+- Added Redeem Code Module (Gift Code / Voucher System):
+  - Admin can create redeem codes with 3 usage modes: single use (auto-disabled after first redemption), multi-use with configurable limit, and user-locked mode
+  - Supports auto-generation of random codes when left blank
+  - Added optional validity window (Valid from → Valid to) for time-limited campaigns
+  - Displays usage count as used/max_uses and status badge (Active/Disabled)
+- Added Automatic Reward Distribution:
+  - Adds Coin/Cash to user balance with full transaction logging via `init_plugin_suite_user_engine_log_transaction()`
+  - Sends inbox notification to redeemer confirming awarded rewards
+  - Integrated with existing balance and transaction systems
+- Enhanced Redemption Security:
+  - Enforced one-time redemption per user even for multi-use codes
+  - Uses metadata on code record to store user_id, username, display name, and redemption timestamp
+  - Added database-level concurrency safety using `START TRANSACTION` and `SELECT ... FOR UPDATE` to prevent race conditions
+  - Users attempting to redeem same code twice receive "You have already used this code" error
+- Added REST Endpoint:
+  - `POST /redeem-code` for logged-in users
+  - Returns structured response: `{ success, message, coin, cash }`
+  - Automatically disables code when usage limit reached
+- Improved Admin UI:
+  - Integrated with existing user search UI (same as Inbox Tool & Top-Up Tool)
+  - Supports selecting specific user for locked-code mode through live search
+  - Maintains consistent layout and interaction patterns
+- Database and Compatibility:
+  - Metadata now stores redeemed users (JSON format)
+  - ACID-protected redemption operations (atomic + thread-safe)
+  - Fully backward compatible with existing Coin/Cash/VIP/Inbox systems
+  - No breaking changes to existing APIs
+
 = 1.3.6 – October 27, 2025 =
-- Fixed **Critical Display Name Sanitization Bug**:
-  - Resolved an issue where the `update_profile` endpoint removed all whitespace from display names (e.g., “Nguyễn Văn A” → “NguyễnVănA”)
-  - Adjusted sanitization to preserve natural spacing while still preventing XSS and invalid characters
-- Improved **Display Name Fallback Logic**:
+- Fixed Critical Display Name Sanitization Bug:
+  - Resolved issue where `update_profile` endpoint removed all whitespace from display names (e.g., "Nguyễn Văn A" → "NguyễnVănA")
+  - Adjusted sanitization to preserve natural spacing while preventing XSS and invalid characters
+- Improved Display Name Fallback Logic:
   - Enhanced empty-name handling to ensure proper fallback to nickname or username
   - Uses stricter validation for better reliability across multilingual inputs
-- Developer Note:
-  - No database or schema changes
-  - Backward compatible and safe for immediate deployment
-  - Affected endpoint: `init_plugin_suite_user_engine_api_update_profile()`
+- No database or schema changes. Backward compatible and safe for immediate deployment. Affected endpoint: `init_plugin_suite_user_engine_api_update_profile()`
 
 = 1.3.5 – October 27, 2025 =
-- Refined **Submit Button UI** (Login + Register):
-  - Modern, minimal interaction — **no glow, no shadows**
-  - Subtle hover/active feedback using `transform` and `filter` (crisp, non-flashy)
+- Refined Submit Button UI (Login + Register):
+  - Modern, minimal interaction with no glow or shadows
+  - Subtle hover/active feedback using transform and filter (crisp, non-flashy)
   - Preserves theme colors: `var(--iue-theme-color)` → `var(--iue-theme-active-color)` gradient
-  - Improved `:focus-visible` outline for accessibility; zero layout shift
-  - Affected selectors:  
-    `.iue-login-form input[type="submit"]`,  
-    `.iue-login-form .login-submit input[type="submit"]`,  
-    `.iue-register-form button.iue-submit`
-- Developer note:
-  - No markup changes required; CSS-only update and backward compatible
+  - Improved `:focus-visible` outline for accessibility with zero layout shift
+  - Affected selectors: `.iue-login-form input[type="submit"]`, `.iue-login-form .login-submit input[type="submit"]`, `.iue-register-form button.iue-submit`
+- No markup changes required. CSS-only update and backward compatible
 
 = 1.3.4 – October 23, 2025 =
-- Enhanced **Captcha Security System**:
+- Enhanced Captcha Security System:
   - Expanded captcha question bank with 40+ new math and logic-based variations
-  - Introduced 4 smart captcha modes:
-    - **Symbolic math** (`+`, `−`, `×`)
-    - **Text-based math** (e.g., “What is 5 plus 3?”)
-    - **General knowledge numerics** (e.g., “How many days in a week?”)
-    - **Contextual variants** (e.g., “Double 4 is?”, “Give the next even number after 7.”)
+  - Introduced 4 smart captcha modes: symbolic math (`+`, `−`, `×`), text-based math (e.g., "What is 5 plus 3?"), general knowledge numerics (e.g., "How many days in a week?"), and contextual variants (e.g., "Double 4 is?", "Give the next even number after 7")
   - Added internal hook `init_user_engine_captcha_bank` to allow external extensions to register new captcha questions
   - Localized all captcha questions and added full translator context for `%` placeholders
   - Ensured all captcha answers are numeric-only for maximum bot resistance
-- Added **Disable Captcha** setting:
+- Added Disable Captcha setting:
   - Allows disabling all captcha validations (including Turnstile) for testing environments
-  - Includes strong “DANGER” warning and contextual description to prevent misuse
+  - Includes strong "DANGER" warning and contextual description to prevent misuse
   - Automatically bypasses both frontend and backend captcha logic when enabled
-- Added **Disable New Registrations** feature:
+- Added Disable New Registrations feature:
   - Completely blocks new user registrations across both REST API and WordPress forms
   - Integrates with registration endpoint for immediate early return
   - Prevents rendering of registration form on login/register templates when active
   - Designed for maintenance or private-access environments
-- Improved **Multi-Layer Bot Protection**:
-  - Combined honeypot, custom captcha, and Cloudflare Turnstile verification
-  - Added global registration lockout switch for full shutdown mode
-  - Enhanced IP-based rate limiting and token expiration safeguards
+- Improved Multi-Layer Bot Protection with combined honeypot, custom captcha, and Cloudflare Turnstile verification. Added global registration lockout switch and enhanced IP-based rate limiting
 
 = 1.3.3 – October 23, 2025 =
-- Enhanced **Admin Notification Tool**:
-  - Fully synchronized recipient selection UI and backend logic with the **Top-up Tool**
-  - Added unified recipient options:
-    - **Selected users** (manual input with live search)
-    - **Active VIPs** (fetched via `init_plugin_suite_user_engine_get_active_vip_users( 'ids' )`)
-    - **All members** (retrieved using `get_users( [ 'fields' => 'ID' ] )`)
-  - Replaced old “Send to all” checkbox with radio-based recipient selection for consistency
-  - Integrated automatic user resolution for VIP group — uses the same helper function as Top-up
+- Enhanced Admin Notification Tool:
+  - Fully synchronized recipient selection UI and backend logic with the Top-up Tool
+  - Added unified recipient options: selected users (manual input with live search), active VIPs (fetched via `init_plugin_suite_user_engine_get_active_vip_users( 'ids' )`), and all members (retrieved using `get_users( [ 'fields' => 'ID' ] )`)
+  - Replaced old "Send to all" checkbox with radio-based recipient selection for consistency
+  - Integrated automatic user resolution for VIP group using same helper function as Top-up
   - Added bulk message delivery with chunked sending through `init_user_engine_inbox_bulk_chunk_size` filter (default: 500)
   - Retains full compatibility with existing inbox delivery logic, meta, and hooks
-- Improved **Admin UI Consistency**:
+- Improved Admin UI Consistency:
   - Recipient selection block now mirrors the Top-up Tool layout and markup
-  - “Select Users” interface unified for both tools (search, display, hidden ID handling)
+  - "Select Users" interface unified for both tools (search, display, hidden ID handling)
   - Maintains identical sanitization, nonce verification, and capability checks
-- Stability and Backward Compatibility:
-  - No functional or database schema changes
-  - Does not alter inbox logic, message structure, or stored metadata
-  - Fully backward compatible with all prior notification and VIP systems
+- No functional or database schema changes. Fully backward compatible with all prior notification and VIP systems
 
 = 1.3.2 – October 18, 2025 =
-- Added **Avatar Upload Permission System**:
+- Added Avatar Upload Permission System:
   - Introduced new helper function `init_plugin_suite_user_engine_can_upload_avatar( $user_id )` for unified permission checking
-  - Supports multi-layer policy:
-    - Global disable (`disable_all`)
-    - VIP-only mode (`vip_only`) using `init_plugin_suite_user_engine_is_vip()`
-    - Per-user ban via `iue_avatar_ban` user meta
+  - Supports multi-layer policy: global disable (`disable_all`), VIP-only mode (`vip_only`) using `init_plugin_suite_user_engine_is_vip()`, and per-user ban via `iue_avatar_ban` user meta
   - Fully integrated into REST endpoints `upload_avatar` and `remove_avatar` for backend-level enforcement
   - Automatically blocks upload and deletion attempts from banned or non-VIP users according to policy
-- Enhanced **Admin User Metabox**:
-  - Added “Ban Avatar Upload” / “Unban Avatar Upload” button next to “Remove VIP”
+- Enhanced Admin User Metabox:
+  - Added "Ban Avatar Upload" / "Unban Avatar Upload" button next to "Remove VIP"
   - Toggles the `iue_avatar_ban` meta instantly via secure `admin-post` action
   - Includes full nonce verification, capability checks, redirect notices, and audit hook `init_plugin_suite_user_engine_avatar_ban_toggled`
-  - Displays current avatar permission state (“Allowed” / “BANNED”) beside the button
-- Improved **Security and Consistency**:
+  - Displays current avatar permission state ("Allowed" / "BANNED") beside the button
+- Improved Security and Consistency:
   - Backend guards prevent unauthorized file handling even if frontend modified
   - Added HTTP 403 and 423 codes for forbidden or locked states to ensure clear API responses
   - Unified `wp_die()` and `WP_Error` patterns across user-related endpoints

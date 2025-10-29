@@ -91,6 +91,9 @@ function init_plugin_suite_user_engine_format_log_message( $entry ) {
 		case 'unlock_reward':
 			$message = __( 'Chapter unlock reward', 'init-user-engine' );
 			break;
+		case 'redeem_code':
+			$message = __( 'Redeem code reward', 'init-user-engine' );
+			break;
 		default:
 			$message = ucfirst( str_replace( '_', ' ', $source ) );
 			break;

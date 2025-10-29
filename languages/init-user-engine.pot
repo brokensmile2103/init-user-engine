@@ -1469,3 +1469,147 @@ msgstr ""
 
 msgid "Half of %d is?"
 msgstr ""
+
+msgid "Redeem Codes"
+msgstr ""
+
+msgid "Redeem Code"
+msgstr ""
+
+msgid "Redeem now"
+msgstr ""
+
+msgid "Create a Redeem Code"
+msgstr ""
+
+msgid "You do not have permission to access this page."
+msgstr ""
+
+msgid "Code"
+msgstr ""
+
+msgid "Leave empty to auto-generate"
+msgstr ""
+
+msgid "Usage Type"
+msgstr ""
+
+msgid "Single use"
+msgstr ""
+
+msgid "Multi-use (X times)"
+msgstr ""
+
+msgid "Locked to specific user"
+msgstr ""
+
+msgid "Max Uses (X)"
+msgstr ""
+
+msgid "Example: 5"
+msgstr ""
+
+msgid "Select User"
+msgstr ""
+
+msgid "Search username or display name..."
+msgstr ""
+
+msgid "Only 1 user can be selected."
+msgstr ""
+
+msgid "Coin Amount"
+msgstr ""
+
+msgid "Cash Amount"
+msgstr ""
+
+msgid "Create Redeem Code"
+msgstr ""
+
+msgid "Existing Redeem Codes"
+msgstr ""
+
+msgid "No redeem codes found."
+msgstr ""
+
+msgid "Used"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Disable"
+msgstr ""
+
+msgid "Disable this code?"
+msgstr ""
+
+msgid "&laquo; Previous"
+msgstr ""
+
+msgid "Next &raquo;"
+msgstr ""
+
+msgid "Enter redeem code..."
+msgstr ""
+
+msgid "Redeem"
+msgstr ""
+
+msgid "Processing..."
+msgstr ""
+
+msgid "Redeem successful!"
+msgstr ""
+
+msgid "You received:"
+msgstr ""
+
+msgid "You will receive:"
+msgstr ""
+
+msgid "Invalid redeem code."
+msgstr ""
+
+msgid "This code has expired."
+msgstr ""
+
+msgid "This code is not active yet."
+msgstr ""
+
+msgid "This code has already been used."
+msgstr ""
+
+msgid "This code has already been used up."
+msgstr ""
+
+msgid "This code is assigned to another user."
+msgstr ""
+
+msgid "Please enter a redeem code."
+msgstr ""
+
+msgid "Failed to redeem code."
+msgstr ""
+
+msgid "You have already used this code."
+msgstr ""
+
+msgid "Could not redeem code, please try again."
+msgstr ""
+
+msgid "Redeemed by user"
+msgstr ""
+
+msgid "Redeem code reward"
+msgstr ""
+
+msgid "You received: %s."
+msgstr ""

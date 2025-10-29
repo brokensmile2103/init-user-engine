@@ -119,6 +119,12 @@ $rate_enable = (float) ( $options['rate_coin_per_cash'] ?? 0 );
 			</a>
 		</li>
 		<li>
+			<a href="#" role="button" class="iue-menu-link" data-action="redeem-code">
+				<span class="iue-icon" data-iue-icon="gift"></span>
+				<span><?php esc_html_e( 'Redeem Code', 'init-user-engine' ); ?></span>
+			</a>
+		</li>
+		<li>
 			<a href="#" role="button" class="iue-menu-link" data-action="edit-profile">
 				<span class="iue-icon" data-iue-icon="user"></span>
 				<span><?php esc_html_e( 'Edit Profile', 'init-user-engine' ); ?></span>

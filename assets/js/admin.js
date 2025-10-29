@@ -2,7 +2,8 @@ jQuery(function ($) {
 	const $input = $('#iue_user_search');
 	const $result = $('#iue_user_results');
 	const $selected = $('#iue_user_selected');
-	const $hidden = $('#iue_user_ids');
+	const isRedeemCode = $('#iue_user_lock').length > 0;
+	const $hidden = isRedeemCode ? $('#iue_user_lock') : $('#iue_user_ids');
 	const selectedMap = new Map();
 	let timer;
 	let activeIndex = -1;
@@ -82,10 +83,27 @@ jQuery(function ($) {
 	});
 
 	function renderSelected() {
-		const ids = Array.from(selectedMap.keys());
-		$hidden.val(ids.join(','));
-		$selected.empty();
+		let ids = Array.from(selectedMap.keys());
 
+		if (isRedeemCode) {
+			const first = ids[0] || null;
+
+			// Lưu user trước khi clear
+			let userObj = first ? selectedMap.get(first) : null;
+
+			selectedMap.clear();
+
+			if (first && userObj) {
+				selectedMap.set(first, userObj);
+				ids = [first];
+			} else {
+				ids = [];
+			}
+		}
+
+		$hidden.val(ids.join(','));
+
+		$selected.empty();
 		selectedMap.forEach(user => {
 			const $tag = $('<span class="iue-user-tag">')
 				.text(`${user.name} (${user.login})`)
@@ -112,3 +130,14 @@ jQuery(function ($) {
     });
     toggleUserRow();
 });
+
+(function(){
+    const typeField = document.querySelector('select[name="iue_type"]');
+    const rowMulti  = document.querySelector('.redeem-multi-row');
+    const rowUser   = document.querySelector('.redeem-user-row');
+
+    typeField.addEventListener('change', function() {
+        rowMulti.style.display = (this.value === 'multi') ? '' : 'none';
+        rowUser.style.display  = (this.value === 'user_locked') ? '' : 'none';
+    });
+})();

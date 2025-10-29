@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.3.6
+ * Version: 1.3.7
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.3.6' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.3.7' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -49,6 +49,7 @@ require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'inbox.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'hooks.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'vip.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'referral.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'redeem-codes-handler.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'utils.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'user-metabox.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'settings-page.php';
@@ -341,6 +342,25 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'update_failed'            => __( 'Could not update profile.', 'init-user-engine' ),
             'fetch_profile_failed'     => __( 'Could not load profile data.', 'init-user-engine' ),
             'error_generic'            => __( 'An error occurred while updating.', 'init-user-engine' ),
+
+            'redeem_now'                => __( 'Redeem now', 'init-user-engine' ),
+            'redeem_title'              => __( 'Redeem Code', 'init-user-engine' ),
+            'redeem_placeholder'        => __( 'Enter redeem code...', 'init-user-engine' ),
+            'redeem_submit'             => __( 'Redeem', 'init-user-engine' ),
+            'redeem_processing'         => __( 'Processing...', 'init-user-engine' ),
+
+            'redeem_success'            => __( 'Redeem successful!', 'init-user-engine' ),
+            'redeem_you_will_receive'   => __( 'You will receive:', 'init-user-engine' ),
+
+            'redeem_invalid'            => __( 'Invalid redeem code.', 'init-user-engine' ),
+            'redeem_expired'            => __( 'This code has expired.', 'init-user-engine' ),
+            'redeem_not_started'        => __( 'This code is not active yet.', 'init-user-engine' ),
+            'redeem_used'               => __( 'This code has already been used.', 'init-user-engine' ),
+            'redeem_used_up'            => __( 'This code has already been used up.', 'init-user-engine' ),
+            'redeem_assigned_other'     => __( 'This code is assigned to another user.', 'init-user-engine' ),
+            'redeem_empty'              => __( 'Please enter a redeem code.', 'init-user-engine' ),
+
+            'redeem_error'              => __( 'Failed to redeem code.', 'init-user-engine' ),
         ],
     ];
 

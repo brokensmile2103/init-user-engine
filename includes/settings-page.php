@@ -55,6 +55,16 @@ add_action( 'admin_menu', function () {
 
 	require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'tools/topup.php';
 
+	add_submenu_page(
+	    INIT_PLUGIN_SUITE_IUE_SLUG,
+	    __( 'Redeem Codes', 'init-user-engine' ),
+	    __( 'Redeem Codes', 'init-user-engine' ),
+	    'manage_options',
+	    'init-user-engine-redeem-codes',
+	    'init_plugin_suite_user_engine_render_redeem_codes_page'
+	);
+
+	require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'tools/redeem-codes.php';
 } );
 
 // Register settings

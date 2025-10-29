@@ -86,6 +86,11 @@ function initMenuClick() {
             return;
         }
 
+        if (action === 'redeem-code') {
+            loadRedeemModal();
+            return;
+        }
+
         if (action === 'edit-profile') {
             loadEditProfileModal();
             return;
@@ -162,6 +167,12 @@ document.addEventListener('keydown', function (e) {
         return;
     }
 
+    if (key === 'c') {
+        e.preventDefault();
+        loadRedeemModal();
+        return;
+    }
+
     if (/^[1-9]$/.test(key)) {
         const index = parseInt(key, 10) - 1;
         const menuLinks = document.querySelectorAll('.iue-menu-link');
@@ -169,6 +180,26 @@ document.addEventListener('keydown', function (e) {
             e.preventDefault();
             menuLinks[index].click();
         }
+    }
+});
+
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-iue-redeem]');
+    if (!btn) return;
+
+    e.preventDefault();
+
+    const code = btn.getAttribute('data-code') || '';
+    if (typeof loadRedeemModal === 'function') {
+        loadRedeemModal();
+
+        setTimeout(() => {
+            const input = document.querySelector('#iue-redeem-input, [data-redeem-input]');
+            if (input && code) {
+                input.value = code;
+                try { input.focus(); input.select(); } catch (err) {}
+            }
+        }, 0);
     }
 });
 
@@ -325,7 +356,6 @@ const IUE_Icons = {
     // Common actions
     copy: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><rect width="12" height="16" fill="none" stroke="currentColor" x="3.5" y="2.5"></rect><polyline fill="none" stroke="currentColor" points="5 0.5 17.5 0.5 17.5 17"></polyline></svg>`,
     gift: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 485 485" xml:space="preserve"><path d="M0 69.9V415h485V70zm455 30v93.3h-35.5a46.3 46.3 0 0 0-74.5-50.3l-47.5 44.7-47.4-44.6-.2-.1a46.3 46.3 0 0 0-74.4 50.3H30V99.9zm-79.2 93.3-8-.2v.2h-32.4l30-28.2q4.6-4.1 10.8-4.2a16.2 16.2 0 0 1 .8 32.4zm-148.6-.2-8 .2H218a16.2 16.2 0 1 1 11.7-28.2l30 28.2h-32.4zM30 385.1v-162h222.5v67.7h30v-67.6h30v107.6h30V223.2H455v162z"></path></svg>`,
-    friends: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><line fill="none" stroke="currentColor" stroke-width="1.1" x1="13.4" y1="14" x2="6.3" y2="10.7"></line><line fill="none" stroke="currentColor" stroke-width="1.1" x1="13.5" y1="5.5" x2="6.5" y2="8.8"></line><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="15.5" cy="4.6" r="2.3"></circle><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="15.5" cy="14.8" r="2.3"></circle><circle fill="none" stroke="currentColor" stroke-width="1.1" cx="4.5" cy="9.8" r="2.3"></circle></svg>`,
     check: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.1" points="4,10 8,15 17,4"></polyline></svg>`,
 };
 
@@ -857,24 +887,69 @@ function loadInbox(page = 1) {
 function renderInboxItem(entry) {
     const id = entry.id || 0;
     const title = entry.title || 'No title';
-    const content = entry.content || '';
+    const content = entry.content || ''; // từ server là plain text (đã strip)
     const time = entry.time;
     const isRead = entry.status === 'read';
-    const link = entry.link || null;
+    const link = entry.link || null; // giờ mình không gửi link nữa nên sẽ là null
     const priorityClass = entry.priority === 'high' ? ' iue-high-priority' : '';
     const pinnedClass = entry.pinned ? ' iue-pinned' : '';
+    const redeemCode = entry.metadata && entry.metadata.redeem_code ? String(entry.metadata.redeem_code) : '';
+
+    // --- helpers ---
+    const escapeHtml = (s) =>
+        String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+    const escRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // highlight 1 lần đầu tiên gặp token (an toàn vì content đã được escape trước)
+    function highlightToken(escapedText, token, tag = 'mark') {
+        if (!escapedText || !token) return escapedText;
+        const re = new RegExp(`\\b${escRe(token)}\\b`);
+        return escapedText.replace(re, (m) => `<${tag}>${m}</${tag}>`);
+    }
+
+    // Cho phép đổi tag qua global config, mặc định 'mark'
+    const highlightTag = (window.InitUserEngineUI && window.InitUserEngineUI.highlightTag) || 'mark';
+
+    // Escape trước rồi mới highlight để đảm bảo XSS-safe
+    const contentEscaped = escapeHtml(content);
+    const contentHighlighted = redeemCode
+        ? highlightToken(contentEscaped, redeemCode, highlightTag)
+        : contentEscaped;
 
     const header = `
         <div class="iue-inbox-header">
-            <strong>${title}</strong>
-            <small>${time}</small>
+            <strong>${escapeHtml(title)}</strong>
+            <small>${escapeHtml(time || '')}</small>
         </div>
     `;
 
-    const body = `<div class="iue-inbox-content">${content}</div>`;
+    // Không bọc <a>, để user copy dễ – nội dung đã highlight
+    const body = `<div class="iue-inbox-content">${contentHighlighted}</div>`;
+
+    const contentBlock = `
+        <div class="iue-inbox-content-wrap">
+            ${header + body}
+        </div>
+    `;
+
+    // Giữ điều kiện của bro: chỉ hiện nút khi có redeemCode và có created_by
+    const extraCta = (redeemCode && entry.metadata && entry.metadata.created_by) ? `
+        <button class="iue-inbox-redeem-now"
+                data-iue-redeem
+                data-code="${escapeHtml(redeemCode)}">
+            ${InitUserEngineData?.i18n?.redeem_now || 'Redeem now'}
+        </button>
+    ` : '';
 
     const actions = `
         <div class="iue-inbox-actions">
+            ${extraCta}
             <button class="iue-inbox-more" data-id="${id}" aria-haspopup="true">
                 <span class="iue-icon" data-iue-icon="more"></span>
             </button>
@@ -882,12 +957,6 @@ function renderInboxItem(entry) {
                 <button class="iue-inbox-read" data-id="${id}" ${isRead ? 'disabled' : ''}>${InitUserEngineData.i18n.mark_as_read}</button>
                 <button class="iue-inbox-delete" data-id="${id}">${InitUserEngineData.i18n.delete}</button>
             </div>
-        </div>
-    `;
-
-    const contentBlock = `
-        <div class="iue-inbox-content-wrap">
-            ${link ? `<a href="${link}" class="iue-inbox-link" target="_blank" rel="noopener noreferrer">${header + body}</a>` : header + body}
         </div>
     `;
 
@@ -1860,6 +1929,125 @@ function loadExchangeModal() {
 
     // init icons in modal if any
     initUserEngineIcons(document.getElementById('iue-modal'));
+}
+
+function loadRedeemModal() {
+    const t = InitUserEngineData.i18n || {};
+    const labelCoin = InitUserEngineData.label_coin || 'Coin';
+    const labelCash = InitUserEngineData.label_cash || 'Cash';
+
+    // UI modal
+    showUserEngineModal(
+        t.redeem_title || 'Redeem Code',
+        `
+        <div class="iue-redeem-box">
+            <div class="iue-form-group">
+                <input type="text" id="iue-redeem-input" class="iue-input"
+                       placeholder="${t.redeem_placeholder || 'Enter redeem code...'}" />
+            </div>
+
+            <div class="iue-form-actions">
+                <button id="iue-redeem-submit" class="iue-btn">
+                    ${t.redeem_submit || 'Redeem'}
+                </button>
+            </div>
+
+            <p class="iue-redeem-note">
+                ${t.redeem_you_will_receive || 'You will receive:'}
+                <span class="iue-muted">${labelCoin}, ${labelCash}</span>
+            </p>
+        </div>
+        `,
+        'small'
+    );
+
+    initUserEngineIcons(document.getElementById('iue-modal'));
+
+    const input  = document.getElementById('iue-redeem-input');
+    const submit = document.getElementById('iue-redeem-submit');
+
+    function doRedeem() {
+        const code = (input.value || '').trim();
+        if (!code) {
+            InitUserEngineToast.show(t.redeem_empty || 'Please enter a redeem code.', 'warning');
+            input.focus();
+            return;
+        }
+
+        submit.disabled = true;
+        const originalText = submit.textContent;
+        submit.textContent = t.redeem_processing || 'Processing...';
+
+        fetch(`${InitUserEngineData.rest_url}/redeem-code`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': InitUserEngineData.nonce
+            },
+            body: JSON.stringify({ code })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res && res.success) {
+                // cập nhật số dư trên dashboard nếu có
+                const coinEl = document.querySelector('.iue-value-coin');
+                const cashEl = document.querySelector('.iue-value-cash');
+
+                if (coinEl && typeof res.coin !== 'undefined') {
+                    const current = iueParse(coinEl.textContent);
+                    coinEl.textContent = iueFmt(current + Number(res.coin || 0));
+                }
+                if (cashEl && typeof res.cash !== 'undefined') {
+                    const current = iueParse(cashEl.textContent);
+                    cashEl.textContent = iueFmt(current + Number(res.cash || 0));
+                }
+
+                InitUserEngineToast.show(t.redeem_success || 'Redeem successful!', 'success');
+
+                // phát event cho hiệu ứng nếu muốn nghe bên ngoài
+                document.dispatchEvent(new CustomEvent('iue:redeem:success', { detail: res }));
+
+                closeModal();
+            } else {
+                // map message từ server về i18n client nếu có
+                const msg = (res && res.message) || t.redeem_error || 'Failed to redeem code.';
+                // ưu tiên các key đã định nghĩa
+                let uiMsg = msg;
+                if (/Invalid redeem code/i.test(msg)) uiMsg = t.redeem_invalid || msg;
+                else if (/expired/i.test(msg))      uiMsg = t.redeem_expired || msg;
+                else if (/not active yet/i.test(msg)) uiMsg = t.redeem_not_started || msg;
+                else if (/used up/i.test(msg))      uiMsg = t.redeem_used_up || msg;
+                else if (/already been used/i.test(msg)) uiMsg = t.redeem_used || msg;
+                else if (/assigned to another user/i.test(msg)) uiMsg = t.redeem_assigned_other || msg;
+
+                InitUserEngineToast.show(uiMsg, 'error');
+                submit.disabled = false;
+                submit.textContent = originalText;
+                input.focus();
+            }
+        })
+        .catch(err => {
+            console.error('[Init User Engine] Redeem error:', err);
+            InitUserEngineToast.show(t.redeem_error || 'Failed to redeem code.', 'error');
+            submit.disabled = false;
+            submit.textContent = originalText;
+        });
+    }
+
+    // click nút
+    submit?.addEventListener('click', doRedeem);
+
+    // enter để submit
+    input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            doRedeem();
+        }
+    });
+
+    // auto focus
+    setTimeout(() => input?.focus(), 50);
 }
 
 // UTILS

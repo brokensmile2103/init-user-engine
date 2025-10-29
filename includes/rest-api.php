@@ -173,6 +173,15 @@ function init_plugin_suite_user_engine_register_rest_routes() {
             return is_user_logged_in();
         },
     ] );
+
+    // POST /redeem-code – Áp dụng mã redeem
+    register_rest_route( $namespace, '/redeem-code', [
+        'methods'             => 'POST',
+        'callback'            => 'init_plugin_suite_user_engine_api_redeem_code',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
+    ] );
 }
 
 // Enhanced Captcha với better validation

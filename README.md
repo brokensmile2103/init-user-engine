@@ -1,6 +1,6 @@
 # Init User Engine – Gamified, Fast, Frontend-First
 
-> Add a modern, gamified user system to WordPress with EXP levels, coin wallet, VIP, referral, and full JS modals – all powered by REST API.
+> Add a modern, gamified user system to WordPress with EXP levels, Coin/Cash wallet, VIP, referral, and full JS modals – all powered by REST API.
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
@@ -12,20 +12,20 @@
 
 Init User Engine is a gamified user module built from scratch for frontend-first WordPress sites. Everything runs via REST API and Vanilla JS — no jQuery, no PHP-based forms, no bloat.
 
-You get full control over user interactions: check-in, VIP purchase, coin/EXP rewards, inbox notifications, referral tracking — all in one slick modal dashboard.
+You get full control over user interactions: check-in, VIP purchase, Coin/EXP rewards, inbox notifications, referral tracking — all in one slick modal dashboard.
 
 ## Features
 
 - Shortcode `[init_user_engine]` to display avatar + modal dashboard
 - EXP & level system with streaks, milestones, and bonuses
-- Coin & cash wallet with transaction history
+- Coin & Cash wallet with transaction history
 - Daily check-in + online time reward
 - VIP membership system with coin-based purchases
 - Referral system with cookie-based tracking
 - Built-in inbox system (custom DB table)
 - Custom avatar upload & preview
 - Admin panel to send targeted notifications
-- Redeem Code / Gift Code system with auto rewards (coin/cash)
+- Redeem Code / Gift Code system with auto rewards (Coin/Cash)
 - REST API for all user actions – no reloads, no delays
 - Fully i18n-ready with JS-based validation & messages
 - Lightweight, modern UI – no jQuery, no dependencies
@@ -56,7 +56,7 @@ Base: `/wp-json/inituser/v1/`
 - `GET  /profile/me` – Get current user profile  
 - `POST /profile/update` – Update profile information  
 - `GET  /daily-tasks` – Get list of completed daily tasks and rewards
-- `POST /redeem-code` – Redeem gift code → returns `{ success, message, coin, cash }`
+- `POST /redeem-code` – Redeem gift code → returns `{ success, message, Coin, Cash }`
 
 ## Developer Hooks
 
@@ -66,7 +66,7 @@ Base: `/wp-json/inituser/v1/`
 - `init_plugin_suite_user_engine_exp_required` – Modify EXP required per level  
 - `init_plugin_suite_user_engine_vip_prices` – Modify VIP package prices  
 - `init_plugin_suite_user_engine_referral_rewards` – Modify referral rewards  
-- `init_plugin_suite_user_engine_calculated_coin_amount` – Modify coin reward before apply  
+- `init_plugin_suite_user_engine_calculated_coin_amount` – Modify Coin reward before apply  
 - `init_plugin_suite_user_engine_calculated_exp_amount` – Modify EXP reward before apply  
 - `init_plugin_suite_user_engine_format_inbox` – Modify formatted inbox data  
 - `init_plugin_suite_user_engine_render_level_badge` – Customize level badge HTML  
@@ -79,12 +79,12 @@ Base: `/wp-json/inituser/v1/`
 
 - `init_plugin_suite_user_engine_level_up` – When user levels up  
 - `init_plugin_suite_user_engine_exp_added` – After EXP is added  
-- `init_plugin_suite_user_engine_transaction_logged` – After coin/cash is logged  
+- `init_plugin_suite_user_engine_transaction_logged` – After Coin/Cash is logged  
 - `init_plugin_suite_user_engine_inbox_inserted` – After new inbox message is created  
 - `init_plugin_suite_user_engine_vip_purchased` – After VIP is purchased  
 - `init_plugin_suite_user_engine_after_register` – After successful user registration  
-- `init_plugin_suite_user_engine_coin_changed` – After user's coin balance changes  
-- `init_plugin_suite_user_engine_cash_changed` – After user's cash balance changes  
+- `init_plugin_suite_user_engine_coin_changed` – After user's Coin balance changes  
+- `init_plugin_suite_user_engine_cash_changed` – After user's Cash balance changes  
 
 ## Installation
 

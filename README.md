@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.3.6-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.3.7-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -25,6 +25,7 @@ You get full control over user interactions: check-in, VIP purchase, coin/EXP re
 - Built-in inbox system (custom DB table)
 - Custom avatar upload & preview
 - Admin panel to send targeted notifications
+- Redeem Code / Gift Code system with auto rewards (coin/cash)
 - REST API for all user actions – no reloads, no delays
 - Fully i18n-ready with JS-based validation & messages
 - Lightweight, modern UI – no jQuery, no dependencies

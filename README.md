@@ -56,6 +56,7 @@ Base: `/wp-json/inituser/v1/`
 - `GET  /profile/me` – Get current user profile  
 - `POST /profile/update` – Update profile information  
 - `GET  /daily-tasks` – Get list of completed daily tasks and rewards
+- `POST /redeem-code` – Redeem gift code → returns `{ success, message, coin, cash }`
 
 ## Developer Hooks
 

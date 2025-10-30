@@ -4,11 +4,11 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.7
+Stable tag: 1.3.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Gamified user engine with EXP levels, coin wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
+Gamified user engine with EXP levels, Coin/Cash wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
 
 == Description ==
 
@@ -19,7 +19,7 @@ No jQuery. Minimal settings. Smart by default.
 What you get:
 
 - Display user avatar and dashboard via shortcode
-- Show level, EXP, coin/cash, and full user wallet
+- Show level, EXP, Coin/Cash, and full user wallet
 - Let users check-in daily and receive timed rewards
 - Auto-track referral registrations with reward system
 - Allow users to buy VIP status using in-site currency
@@ -39,8 +39,9 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - Coin & Cash wallet system with transaction logs  
 - Daily check-in with streak milestones & online bonus timer  
 - Inbox system with pagination, read/claim/delete  
-- VIP membership system with coin-based purchase & expiry  
+- VIP membership system with Coin-based purchase & expiry  
 - Referral module with cookie-based signup tracking  
+- Redeem Code / Gift Code module – code in, rewards out
 - REST API for all features (read/write/modify)  
 - Action/filter hooks for full customization  
 - Pure Vanilla JS frontend – no jQuery, no server bloat  
@@ -50,7 +51,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 
 1. Settings with options for theme color, currency labels, and admin bar/Gravatar control.
 2. Custom Links section for setting Register and Lost Password URLs.
-3. Check-in Reward configuration, including coin, EXP, and cash per check-in.
+3. Check-in Reward configuration, including Coin, EXP, and Cash per check-in.
 4. Online Reward configuration based on active time with reward values.
 5. VIP Pricing (by Coin) options for various durations, including lifetime.
 6. VIP Bonus settings to configure extra Coin/EXP for VIP users.
@@ -59,7 +60,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 9. Login modal interface for non-logged-in users.
 10. Registration modal with username, email, and password fields.
 11. Avatar button with dropdown panel showing user info, level, stats, and quick links.
-12. VIP Membership modal with coin-based purchase options and expiration note.
+12. VIP Membership modal with Coin-based purchase options and expiration note.
 13. Inbox modal showing system messages, rewards, and user notifications.
 14. Transaction history modal showing all reward activities (check-in, referral, online time...).
 15. Referral modal with shareable code/link, social sharing buttons, and referral history.
@@ -79,7 +80,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_vip_prices` – Modify VIP package prices  
 - `init_plugin_suite_user_engine_referral_rewards` – Modify referral rewards  
 - `init_plugin_suite_user_engine_localized_data` – Modify frontend JS data  
-- `init_plugin_suite_user_engine_calculated_coin_amount` – Modify coin reward before apply  
+- `init_plugin_suite_user_engine_calculated_coin_amount` – Modify Coin reward before apply  
 - `init_plugin_suite_user_engine_calculated_exp_amount` – Modify EXP reward before apply  
 - `init_plugin_suite_user_engine_exp_required` – Modify EXP required per level  
 - `init_plugin_suite_user_engine_checkin_milestones` – Set milestone streak days  
@@ -91,12 +92,13 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
 - `init_plugin_suite_user_engine_captcha_bank` – Extend or modify the internal captcha question bank used for fallback validation
 - `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
+- `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)
 
 === Actions ===
 
 - `init_plugin_suite_user_engine_level_up` – When user levels up  
 - `init_plugin_suite_user_engine_exp_added` – After EXP is added  
-- `init_plugin_suite_user_engine_transaction_logged` – After coin/cash is logged  
+- `init_plugin_suite_user_engine_transaction_logged` – After Coin/Cash is logged  
 - `init_plugin_suite_user_engine_exp_logged` – After EXP log is recorded  
 - `init_plugin_suite_user_engine_inbox_inserted` – After new inbox message  
 - `init_plugin_suite_user_engine_referral_completed` – When referral is completed  
@@ -104,7 +106,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_after_claim_reward` – After user claims reward  
 - `init_plugin_suite_user_engine_vip_purchased` – After VIP is purchased  
 - `init_plugin_suite_user_engine_add_exp` – Triggered when adding EXP via hook  
-- `init_plugin_suite_user_engine_add_coin` – Triggered when adding coin via hook  
+- `init_plugin_suite_user_engine_add_coin` – Triggered when adding Coin via hook  
 - `init_plugin_suite_user_engine_coin_changed` – After user’s Coin balance is updated  
 - `init_plugin_suite_user_engine_cash_changed` – After user’s Cash balance is updated  
 - `init_plugin_suite_user_engine_admin_send_notice` – When admin sends notification via wp-admin.
@@ -116,7 +118,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `POST /register` – Create a new user account  
 - `POST /checkin` – Daily check-in  
 - `POST /claim-reward` – Claim reward after online duration  
-- `GET  /transactions` – Get coin/cash transaction log  
+- `GET  /transactions` – Get Coin/Cash transaction log  
 - `GET  /exp-log` – Get EXP log  
 - `GET  /inbox` – Get inbox messages  
 - `POST /inbox/mark-read` – Mark a message as read  
@@ -130,6 +132,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `GET  /profile/me` – Get current user profile  
 - `POST /profile/update` – Update profile information
 - `GET  /daily-tasks` – Get list of completed daily tasks and rewards
+- `POST /exchange` – Convert Cash → Coin based on exchange rate
+- `POST /redeem-code` – Redeem gift code (returns Coin/Cash rewards)
 
 == Frequently Asked Questions ==
 
@@ -138,7 +142,7 @@ The frontend is written in modular Vanilla JS with minimal HTML structure.
 Override styles via your theme or inject custom JS as needed.
 
 = Where is user data stored? =  
-- `user_meta`: EXP, level, coin, cash, VIP, referral  
+- `user_meta`: EXP, level, Coin, Cash, VIP, referral  
 - `wp_init_user_engine_inbox`: inbox messages (custom DB table)
 
 = Can I extend or integrate it? =  
@@ -152,6 +156,15 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.3.8 – October 31, 2025 =
+- Added option for VIPs to keep the original GIF avatar (no cropping)
+- Non-GIF formats still follow standard cropping and resizing (50px / 80px)
+- Added max upload size setting (`avatar_max_upload_mb`)
+- Added admin warning: large GIFs may impact performance
+- REST API now returns `url_orig`, `url_80`, and `url_50`
+- Frontend now prioritizes avatar display: original → 80px → 50px
+- Added filter `init_plugin_suite_user_engine_should_keep_original` to override logic
 
 = 1.3.7 – October 29, 2025 =
 - Added Redeem Code Module (Gift Code / Voucher System):
@@ -415,10 +428,10 @@ You can search users, customize message type, link, priority, and even set expir
 = 1.1.8 – September 17, 2025 =
 - Added admin user metabox on profile/edit screens showing wallet, EXP, VIP, and inbox statistics
 - Displayed Coin, Cash, Level, and EXP progress with dynamic progress bar
-- Integrated VIP information including total purchases, expiry date, lifetime detection, and coin spent
+- Integrated VIP information including total purchases, expiry date, lifetime detection, and Coin spent
 - Implemented inbox quick stats with total, unread, last 7 days, and last message timestamp
 - Linked inbox statistics directly to full analytics page for quick navigation
-- Included helper functions with safe fallbacks for coin, cash, VIP, and inbox stats to ensure robustness
+- Included helper functions with safe fallbacks for Coin, Cash, VIP, and inbox stats to ensure robustness
 - Fixed missing version parameter in `wp_register_style()` to comply with WordPress coding standards
 - Enhanced inline admin CSS with proper versioning using `INIT_PLUGIN_SUITE_IUE_VERSION`
 
@@ -520,7 +533,7 @@ You can search users, customize message type, link, priority, and even set expir
 = 1.0.6 – July 28, 2025 =
 - Added Daily Task modal with REST API support
 - Built daily tasks for check-in, online activity, and other actions based on real user logs
-- Rewards now dynamically reflect actual amount and type (coin/cash) from transaction data
+- Rewards now dynamically reflect actual amount and type (Coin/Cash) from transaction data
 - Tasks only appear if completed, ensuring a clean and relevant UI
 - Supported extensible task system via `init_plugin_suite_user_engine_daily_tasks` filter
 - Added `translators:` comments for all `sprintf()` translation strings in CAPTCHA module
@@ -549,7 +562,7 @@ You can search users, customize message type, link, priority, and even set expir
 = 1.0.2 – July 21, 2025 =
 - Added Edit Profile modal with support for display name, bio, password, social links, website, and gender
 - Built REST API endpoints for fetching and updating user profile
-- Created Admin Top-up tool for Coins and Cash
+- Created Admin Top-up tool for Coin and Cash
 - Supports selecting specific users or sending to all members
 - Logs transaction and sends inbox notification upon top-up
 
@@ -566,11 +579,11 @@ You can search users, customize message type, link, priority, and even set expir
 - Initial release  
 - Shortcode `[init_user_engine]` for frontend avatar + dashboard  
 - EXP system with level-up bonus and milestone logic  
-- Coin & cash wallet with transaction log  
+- Coin & Cash wallet with transaction log  
 - Daily check-in with online timer reward  
-- REST API for EXP, coin, inbox, VIP, referral  
+- REST API for EXP, Coin, inbox, VIP, referral  
 - Inbox system with pagination and actions  
-- VIP purchase system via coin  
+- VIP purchase system via Coin  
 - Referral system using cookie-based signup tracking 
 - Avatar module with upload/remove and REST API support 
 

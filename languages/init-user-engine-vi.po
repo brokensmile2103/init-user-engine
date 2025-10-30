@@ -438,9 +438,6 @@ msgstr "Đang tải lên..."
 msgid "Please select a valid image."
 msgstr "Vui lòng chọn một hình ảnh hợp lệ."
 
-msgid "Image too large (max 10MB)"
-msgstr "Ảnh quá lớn (tối đa 10MB)"
-
 msgid "Upload failed. Please try again."
 msgstr "Tải lên thất bại. Vui lòng thử lại."
 
@@ -1323,6 +1320,9 @@ msgstr "Áp dụng cho VIP còn hạn"
 msgid "Choose who will receive this top-up."
 msgstr "Chọn nhóm người nhận cho lần nạp này."
 
+msgid "Avatar"
+msgstr "Ảnh đại diện"
+
 msgid "Avatar Upload Policy"
 msgstr "Chính sách tải lên avatar"
 
@@ -1613,3 +1613,27 @@ msgstr "Phần thưởng đổi mã"
 
 msgid "You received: %s."
 msgstr "Bạn đã nhận: %s."
+
+msgid "Keep Original Avatar (GIF) for VIPs"
+msgstr "Giữ ảnh đại diện gốc (GIF) cho VIP"
+
+msgid "Allow VIP users to keep the original uploaded GIF avatar (no cropping)."
+msgstr "Cho phép tài khoản VIP giữ ảnh GIF gốc khi tải lên (không crop)."
+
+msgid "Only applies to GIF files. Other image formats (PNG/JPG/WebP) will still be cropped and resized."
+msgstr "Chỉ áp dụng cho ảnh GIF. Các định dạng khác (PNG/JPG/WebP) sẽ vẫn bị crop và resize như bình thường."
+
+msgid "Warning: GIF avatars can be large and may affect performance. Enable only if you understand the risks."
+msgstr "Cảnh báo: Ảnh GIF có thể rất nặng và ảnh hưởng hiệu năng. Chỉ bật nếu bạn hiểu rõ rủi ro."
+
+msgid "Max Avatar Upload Size (MB)"
+msgstr "Giới hạn kích thước ảnh đại diện (MB)"
+
+msgid "Limit for avatar file size in megabytes. Set to 0 to disable the limit."
+msgstr "Giới hạn dung lượng ảnh đại diện theo MB. Đặt 0 để tắt giới hạn."
+
+msgid "Image too large (max %sMB)"
+msgstr "Ảnh quá lớn (tối đa %sMB)"
+
+msgid "Avatar upload blocked: VIP only."
+msgstr "Không thể tải lên avatar: chỉ dành cho VIP."

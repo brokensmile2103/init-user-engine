@@ -89,6 +89,12 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$allowed_policies 					 = ['default', 'disable_all', 'vip_only'];
 	$output['avatar_upload_policy'] 	 = in_array( $policy, $allowed_policies, true ) ? $policy : 'default';
 
+	$output['avatar_vip_keep_original']  = ! empty( $input['avatar_vip_keep_original'] ) ? 1 : 0;
+
+	$max_mb_raw 						 = $input['avatar_max_upload_mb'] ?? '';
+	$max_mb_val	 						 = is_numeric( $max_mb_raw ) ? (float) $max_mb_raw : 0;
+	$output['avatar_max_upload_mb'] 	 = max( 0, $max_mb_val );
+
 	$output['hide_admin_bar_subscriber'] = ! empty( $input['hide_admin_bar_subscriber'] ) ? 1 : 0;
 	$output['disable_gravatar'] 		 = ! empty( $input['disable_gravatar'] ) ? 1 : 0;
 	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
@@ -169,6 +175,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Used as the main highlight color in user modals.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Coin Label', 'init-user-engine' ); ?></th>
 					<td>
@@ -177,6 +184,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Singular label used to represent the virtual currency (e.g., Xu, Coin).', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Cash Label', 'init-user-engine' ); ?></th>
 					<td>
@@ -185,6 +193,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Label for premium currency or real-money equivalent (e.g., Cash, Kim cương).', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Exchange Rate: Cash → Coin', 'init-user-engine' ); ?></th>
 					<td>
@@ -196,33 +205,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						</p>
 					</td>
 				</tr>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Avatar Upload Policy', 'init-user-engine' ); ?></th>
-					<td>
-						<?php $current = $options['avatar_upload_policy'] ?? 'default'; ?>
-						<label style="display:block;margin-bottom:6px;">
-							<input type="radio"
-								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
-								value="default" <?php checked( $current, 'default' ); ?> />
-							<?php esc_html_e( 'Default (do not disable)', 'init-user-engine' ); ?>
-						</label>
-						<label style="display:block;margin-bottom:6px;">
-							<input type="radio"
-								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
-								value="disable_all" <?php checked( $current, 'disable_all' ); ?> />
-							<?php esc_html_e( 'Disable avatar upload (everyone)', 'init-user-engine' ); ?>
-						</label>
-						<label style="display:block;">
-							<input type="radio"
-								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
-								value="vip_only" <?php checked( $current, 'vip_only' ); ?> />
-							<?php esc_html_e( 'Allow only VIPs to upload avatar', 'init-user-engine' ); ?>
-						</label>
-						<p class="description">
-							<?php esc_html_e( 'Control site-wide avatar upload permission.', 'init-user-engine' ); ?>
-						</p>
-					</td>
-				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Hide Admin Bar (Subscriber)', 'init-user-engine' ); ?></th>
 					<td>
@@ -234,20 +217,6 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							/>
 							<?php esc_html_e( 'Hide admin bar on frontend for users with Subscriber role.', 'init-user-engine' ); ?>
 						</label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Disable Gravatar Completely', 'init-user-engine' ); ?></th>
-					<td>
-						<label>
-							<input type="checkbox"
-								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[disable_gravatar]"
-								value="1"
-								<?php checked( $options['disable_gravatar'] ?? 0, 1 ); ?>
-							/>
-							<?php esc_html_e( 'Disable all Gravatar calls and use a local default SVG instead.', 'init-user-engine' ); ?>
-						</label>
-						<p class="description"><?php esc_html_e( 'Improves performance by preventing external requests to gravatar.com.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 
@@ -294,6 +263,87 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							<?php esc_html_e( 'When enabled, the Init User Engine will stop accepting new sign-ups through its system. This does not affect other plugins or WordPress default registration.', 'init-user-engine' ); ?><br>
 							<?php esc_html_e( 'Perfect for maintenance periods or when you want to keep the community invite-only.', 'init-user-engine' ); ?>
 						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'Avatar', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Avatar Upload Policy', 'init-user-engine' ); ?></th>
+					<td>
+						<?php $current = $options['avatar_upload_policy'] ?? 'default'; ?>
+						<label style="display:block;margin-bottom:6px;">
+							<input type="radio"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
+								value="default" <?php checked( $current, 'default' ); ?> />
+							<?php esc_html_e( 'Default (do not disable)', 'init-user-engine' ); ?>
+						</label>
+						<label style="display:block;margin-bottom:6px;">
+							<input type="radio"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
+								value="disable_all" <?php checked( $current, 'disable_all' ); ?> />
+							<?php esc_html_e( 'Disable avatar upload (everyone)', 'init-user-engine' ); ?>
+						</label>
+						<label style="display:block;">
+							<input type="radio"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_upload_policy]"
+								value="vip_only" <?php checked( $current, 'vip_only' ); ?> />
+							<?php esc_html_e( 'Allow only VIPs to upload avatar', 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'Control site-wide avatar upload permission.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Keep Original Avatar (GIF) for VIPs', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_vip_keep_original]"
+								value="1"
+								<?php checked( $options['avatar_vip_keep_original'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Allow VIP users to keep the original uploaded GIF avatar (no cropping).', 'init-user-engine' ); ?>
+						</label>
+
+						<p class="description">
+							<?php esc_html_e( 'Only applies to GIF files. Other image formats (PNG/JPG/WebP) will still be cropped and resized.', 'init-user-engine' ); ?>
+						</p>
+
+						<p class="description" style="color:#d63638;font-weight:600;">
+							<?php esc_html_e( 'Warning: GIF avatars can be large and may affect performance. Enable only if you understand the risks.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Max Avatar Upload Size (MB)', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0" step="0.1"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_max_upload_mb]"
+							value="<?php echo esc_attr( $options['avatar_max_upload_mb'] ?? 10 ); ?>" />
+						<p class="description">
+							<?php esc_html_e( 'Limit for avatar file size in megabytes. Set to 0 to disable the limit.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Disable Gravatar Completely', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[disable_gravatar]"
+								value="1"
+								<?php checked( $options['disable_gravatar'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Disable all Gravatar calls and use a local default SVG instead.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description"><?php esc_html_e( 'Improves performance by preventing external requests to gravatar.com.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 
@@ -362,6 +412,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'Custom Links', 'init-user-engine' ); ?></h2></th>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Custom Register URL', 'init-user-engine' ); ?></th>
 					<td>
@@ -370,6 +421,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Redirect here when user clicks "Register". Leave blank to use default wp-login.php?action=register.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Custom Lost Password URL', 'init-user-engine' ); ?></th>
 					<td>
@@ -382,6 +434,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'Check-in Reward', 'init-user-engine' ); ?></h2></th>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Coin Reward', 'init-user-engine' ); ?></th>
 					<td>
@@ -390,6 +443,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Coin awarded each time the user checks in daily.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'EXP Reward', 'init-user-engine' ); ?></th>
 					<td>
@@ -398,6 +452,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'EXP gained from daily check-in.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Cash Reward', 'init-user-engine' ); ?></th>
 					<td>
@@ -410,6 +465,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'Comment Reward', 'init-user-engine' ); ?></h2></th>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'EXP per Comment', 'init-user-engine' ); ?></th>
 					<td>
@@ -419,6 +475,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'EXP awarded for each valid comment.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Coin per Comment', 'init-user-engine' ); ?></th>
 					<td>
@@ -428,6 +485,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Coin awarded for each valid comment.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Daily Comment Cap', 'init-user-engine' ); ?></th>
 					<td>
@@ -441,6 +499,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'Online Reward', 'init-user-engine' ); ?></h2></th>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Minutes Required', 'init-user-engine' ); ?></th>
 					<td>
@@ -449,6 +508,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Minimum minutes user must stay online to receive reward.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Coin Reward', 'init-user-engine' ); ?></th>
 					<td>
@@ -457,6 +517,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Coin rewarded when online duration is met.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'EXP Reward', 'init-user-engine' ); ?></th>
 					<td>
@@ -515,6 +576,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'VIP Bonus', 'init-user-engine' ); ?></h2></th>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Bonus Coin (%)', 'init-user-engine' ); ?></th>
 					<td>
@@ -523,6 +585,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Extra Coin gained when VIP, in percent.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Bonus EXP (%)', 'init-user-engine' ); ?></th>
 					<td>
@@ -543,6 +606,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Coin reward given to the person who shared their referral link.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'EXP for Referrer', 'init-user-engine' ); ?></th>
 					<td>
@@ -550,6 +614,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'EXP granted to referrer when someone registers through their link.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Cash for Referrer', 'init-user-engine' ); ?></th>
 					<td>
@@ -565,6 +630,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Coin bonus for new user who signs up via referral.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'EXP for New User', 'init-user-engine' ); ?></th>
 					<td>
@@ -572,6 +638,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'EXP bonus for the new referred user.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Cash for New User', 'init-user-engine' ); ?></th>
 					<td>

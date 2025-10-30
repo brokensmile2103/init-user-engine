@@ -733,7 +733,8 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
     }
 
     // Guard: policy + VIP + per-user ban
-    if ( ! init_plugin_suite_user_engine_can_upload_avatar( get_current_user_id() ) ) {
+    $user_id = get_current_user_id();
+    if ( ! init_plugin_suite_user_engine_can_upload_avatar( $user_id ) ) {
         return new WP_Error(
             'forbidden_avatar_upload',
             __( 'You are not allowed to upload an avatar.', 'init-user-engine' ),
@@ -746,23 +747,61 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
         return new WP_Error( 'no_file', 'No file uploaded.', [ 'status' => 400 ] );
     }
 
+    // === Enforce max size (MB) from settings (0 = no limit)
+    $settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+    $max_mb   = isset( $settings['avatar_max_upload_mb'] ) && is_numeric( $settings['avatar_max_upload_mb'] )
+        ? max( 0, (float) $settings['avatar_max_upload_mb'] )
+        : 0.0;
+
+    if ( $max_mb > 0 && ! empty( $file['size'] ) && ( (int) $file['size'] > $max_mb * 1024 * 1024 ) ) {
+        return new WP_Error(
+            'file_too_large',
+            sprintf(
+                /* translators: %s = max size in MB */
+                __( 'Image too large (max %sMB)', 'init-user-engine' ),
+                rtrim( rtrim( number_format( (float) $max_mb, 2, '.', '' ), '0' ), '.' )
+            ),
+            [ 'status' => 400 ]
+        );
+    }
+
     require_once ABSPATH . 'wp-admin/includes/file.php';
     require_once ABSPATH . 'wp-admin/includes/image.php';
 
-    $upload_dir = wp_upload_dir();
+    $upload_dir    = wp_upload_dir();
     $avatar_subdir = '/init-user-engine/avatars/';
-    $avatar_dir = $upload_dir['basedir'] . $avatar_subdir;
+    $avatar_dir    = $upload_dir['basedir'] . $avatar_subdir;
 
     if ( ! file_exists( $avatar_dir ) ) {
         wp_mkdir_p( $avatar_dir );
     }
 
+    // Let WP sanitize + unique + move như bình thường
     $move = wp_handle_upload( $file, [ 'test_form' => false, 'upload_error_handler' => null ] );
     if ( isset( $move['error'] ) ) {
         return new WP_Error( 'upload_failed', $move['error'], [ 'status' => 500 ] );
     }
 
-    $tmp_file = $move['file'];
+    // Double-check size sau khi WP xử lý
+    if ( $max_mb > 0 ) {
+        $moved_size = @filesize( $move['file'] );
+        if ( $moved_size && $moved_size > $max_mb * 1024 * 1024 ) {
+            wp_delete_file( $move['file'] );
+            return new WP_Error(
+                'file_too_large',
+                sprintf(
+                    /* translators: %s = max size in MB */
+                    __( 'Image too large (max %sMB)', 'init-user-engine' ),
+                    rtrim( rtrim( number_format( (float) $max_mb, 2, '.', '' ), '0' ), '.' )
+                ),
+                [ 'status' => 400 ]
+            );
+        }
+    }
+
+    $tmp_file  = $move['file'];
+    $mime_type = ! empty( $move['type'] ) ? strtolower( (string) $move['type'] ) : '';
+    $ext       = strtolower( pathinfo( $tmp_file, PATHINFO_EXTENSION ) );
 
     $editor = wp_get_image_editor( $tmp_file );
     if ( is_wp_error( $editor ) ) {
@@ -770,45 +809,93 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
         return $editor;
     }
 
-    $size = $editor->get_size();
-    $short = min( $size['width'], $size['height'] );
-    $x = floor( ( $size['width']  - $short ) / 2 );
-    $y = floor( ( $size['height'] - $short ) / 2 );
+    $size   = $editor->get_size();
+    $short  = min( $size['width'], $size['height'] );
+    $x      = max( 0, (int) floor( ( $size['width']  - $short ) / 2 ) );
+    $y      = max( 0, (int) floor( ( $size['height'] - $short ) / 2 ) );
 
-    $editor->crop( $x, $y, $short, $short );
-
-    $user_id = get_current_user_id();
     $timestamp = time();
-    $basename = "avatar-{$user_id}-{$timestamp}";
+    $basename  = "avatar-{$user_id}-{$timestamp}";
 
-    // Resize & save 50x50
+    // VIP flag + chỉ giữ ORIGINAL mặc định khi là GIF
+    $is_vip            = init_plugin_suite_user_engine_is_vip( $user_id );
+    $vip_keep_flag     = ! empty( $settings['avatar_vip_keep_original'] ) && $is_vip;
+    $default_keep_orig = $vip_keep_flag && ( $mime_type === 'image/gif' || $ext === 'gif' );
+
+    // Filter cho phép override quyết định giữ original
+    $keep_original = apply_filters(
+        'init_plugin_suite_user_engine_should_keep_original',
+        $default_keep_orig,
+        $user_id,
+        $mime_type,
+        $ext,
+        $settings
+    );
+
+    $url_orig = '';
+    if ( $keep_original ) {
+        // Lưu file gốc cạnh các size, hậu tố -orig.(ext gốc nếu hợp lệ, fallback gif->gif luôn)
+        $save_ext = ( $ext ?: 'gif' );
+        $allowed_ext = [ 'gif', 'jpg', 'jpeg', 'png', 'webp' ];
+        if ( ! in_array( $save_ext, $allowed_ext, true ) ) {
+            $save_ext = 'gif';
+        }
+
+        $orig_name = wp_unique_filename( $avatar_dir, "{$basename}-orig.{$save_ext}" );
+        $orig_path = trailingslashit( $avatar_dir ) . $orig_name;
+
+        if ( ! @copy( $tmp_file, $orig_path ) ) {
+            // Nếu copy fail, thử save lại (có thể mất animation)
+            $editor_orig = wp_get_image_editor( $tmp_file );
+            if ( ! is_wp_error( $editor_orig ) ) {
+                $editor_orig->save( $orig_path );
+            } else {
+                wp_delete_file( $tmp_file );
+                return new WP_Error( 'save_original_failed', __( 'Could not save original file.', 'init-user-engine' ), [ 'status' => 500 ] );
+            }
+        }
+
+        $url_orig = $upload_dir['baseurl'] . str_replace( $upload_dir['basedir'], '', $orig_path );
+        update_user_meta( $user_id, 'iue_custom_avatar', esc_url_raw( $url_orig ) );
+    }
+
+    // ===== Tạo bản 50/80 (crop vuông trung tâm) =====
+    // 50x50
+    $editor->crop( $x, $y, $short, $short );
     $editor->resize( 50, 50, true );
     $saved_50 = $editor->save( "{$avatar_dir}{$basename}-50.jpg" );
 
-    // Reload editor & resize 80x80
-    $editor = wp_get_image_editor( $tmp_file );
-    if ( ! is_wp_error( $editor ) ) {
-        $editor->crop( $x, $y, $short, $short );
-        $editor->resize( 80, 80, true );
-        $saved_80 = $editor->save( "{$avatar_dir}{$basename}-80.jpg" );
+    // 80x80
+    $editor80 = wp_get_image_editor( $tmp_file );
+    if ( ! is_wp_error( $editor80 ) ) {
+        $editor80->crop( $x, $y, $short, $short );
+        $editor80->resize( 80, 80, true );
+        $saved_80 = $editor80->save( "{$avatar_dir}{$basename}-80.jpg" );
+    } else {
+        $saved_80 = null;
     }
 
+    // Xong việc với file tạm do WP upload
     wp_delete_file( $tmp_file );
 
     if ( is_wp_error( $saved_50 ) ) {
         return $saved_50;
     }
 
-    $relative_url = str_replace( $upload_dir['basedir'], '', $saved_50['path'] );
-    $url_50 = $upload_dir['baseurl'] . $relative_url;
+    $url_50 = $upload_dir['baseurl'] . str_replace( $upload_dir['basedir'], '', $saved_50['path'] );
+    $url_80 = ( isset( $saved_80['path'] ) && $saved_80['path'] )
+        ? $upload_dir['baseurl'] . str_replace( $upload_dir['basedir'], '', $saved_80['path'] )
+        : '';
 
-    update_user_meta( $user_id, 'iue_custom_avatar', esc_url_raw( $url_50 ) );
+    // Nếu KHÔNG giữ original → meta trỏ về 50 như cũ
+    if ( ! $keep_original ) {
+        update_user_meta( $user_id, 'iue_custom_avatar', esc_url_raw( $url_50 ) );
+    }
 
     return [
-        'url_50' => esc_url_raw( $url_50 ),
-        'url_80' => isset( $saved_80['path'] )
-            ? esc_url_raw( $upload_dir['baseurl'] . str_replace( $upload_dir['basedir'], '', $saved_80['path'] ) )
-            : '',
+        'url_50'   => esc_url_raw( $url_50 ),
+        'url_80'   => esc_url_raw( $url_80 ),
+        'url_orig' => $keep_original ? esc_url_raw( $url_orig ) : '',
     ];
 }
 

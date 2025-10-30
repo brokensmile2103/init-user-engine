@@ -438,9 +438,6 @@ msgstr ""
 msgid "Please select a valid image."
 msgstr ""
 
-msgid "Image too large (max 10MB)"
-msgstr ""
-
 msgid "Upload failed. Please try again."
 msgstr ""
 
@@ -1323,6 +1320,9 @@ msgstr ""
 msgid "Choose who will receive this top-up."
 msgstr ""
 
+msgid "Avatar"
+msgstr ""
+
 msgid "Avatar Upload Policy"
 msgstr ""
 
@@ -1612,4 +1612,28 @@ msgid "Redeem code reward"
 msgstr ""
 
 msgid "You received: %s."
+msgstr ""
+
+msgid "Keep Original Avatar (GIF) for VIPs"
+msgstr ""
+
+msgid "Allow VIP users to keep the original uploaded GIF avatar (no cropping)."
+msgstr ""
+
+msgid "Only applies to GIF files. Other image formats (PNG/JPG/WebP) will still be cropped and resized."
+msgstr ""
+
+msgid "Warning: GIF avatars can be large and may affect performance. Enable only if you understand the risks."
+msgstr ""
+
+msgid "Max Avatar Upload Size (MB)"
+msgstr ""
+
+msgid "Limit for avatar file size in megabytes. Set to 0 to disable the limit."
+msgstr ""
+
+msgid "Image too large (max %sMB)"
+msgstr ""
+
+msgid "Avatar upload blocked: VIP only."
 msgstr ""

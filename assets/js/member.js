@@ -397,6 +397,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initUserEngineBadges();
 });
 
+// ===== Avatar size helpers (dùng biến mới) =====
+function iueGetAvatarMaxBytes() {
+    const mb = Number(InitUserEngineData?.avatar_max_upload_mb) || 0;
+    return mb > 0 ? mb * 1024 * 1024 : 0; // 0 => no limit
+}
+
+function iueShowTooLargeToast() {
+    const msg = InitUserEngineData?.i18n?.avatar_too_large
+        || (InitUserEngineData?.avatar_max_upload_mb > 0
+            ? `Image too large (max ${InitUserEngineData.avatar_max_upload_mb}MB)`
+            : 'Image too large');
+    InitUserEngineToast.show(msg, 'warning');
+}
+
 // AVATAR
 function iueShowAvatarModal() {
     const wrapper = document.querySelector('.iue-avatar-wrapper[data-iue-avatar-trigger]');
@@ -485,11 +499,9 @@ document.addEventListener('change', (e) => {
     const file = input.files[0];
     if (!file || !file.type.startsWith('image/')) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-        InitUserEngineToast.show(
-            InitUserEngineData.i18n.avatar_too_large || 'Image too large (max 10MB)',
-            'warning'
-        );
+    const maxBytes = iueGetAvatarMaxBytes();
+    if (maxBytes > 0 && file.size > maxBytes) {
+        iueShowTooLargeToast();
         return;
     }
 
@@ -515,11 +527,9 @@ document.addEventListener('click', (e) => {
         return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-        InitUserEngineToast.show(
-            InitUserEngineData.i18n.avatar_too_large || 'Image too large (max 10MB)',
-            'warning'
-        );
+    const maxBytes = iueGetAvatarMaxBytes();
+    if (maxBytes > 0 && file.size > maxBytes) {
+        iueShowTooLargeToast();
         return;
     }
 
@@ -538,7 +548,7 @@ document.addEventListener('click', (e) => {
     })
     .then(res => res.json())
     .then(data => {
-        const finalUrl = data.url_80 || data.url_50;
+        const finalUrl = data.url_orig || data.url_80 || data.url_50;
         if (!finalUrl) throw new Error('Upload failed');
 
         document.querySelectorAll('img.iue-avatar-img').forEach(img => {
@@ -890,46 +900,34 @@ function renderInboxItem(entry) {
     const content = entry.content || ''; // từ server là plain text (đã strip)
     const time = entry.time;
     const isRead = entry.status === 'read';
-    const link = entry.link || null; // giờ mình không gửi link nữa nên sẽ là null
+    const link = entry.link || null;
     const priorityClass = entry.priority === 'high' ? ' iue-high-priority' : '';
     const pinnedClass = entry.pinned ? ' iue-pinned' : '';
-    const redeemCode = entry.metadata && entry.metadata.redeem_code ? String(entry.metadata.redeem_code) : '';
+    const redeemCode = entry.metadata?.redeem_code ? String(entry.metadata.redeem_code) : '';
 
     // --- helpers ---
-    const escapeHtml = (s) =>
-        String(s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-
     const escRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // highlight 1 lần đầu tiên gặp token (an toàn vì content đã được escape trước)
-    function highlightToken(escapedText, token, tag = 'mark') {
-        if (!escapedText || !token) return escapedText;
+    // highlight 1 lần đầu tiên gặp token
+    function highlightToken(rawText, token, tag = 'mark') {
+        if (!rawText || !token) return rawText;
         const re = new RegExp(`\\b${escRe(token)}\\b`);
-        return escapedText.replace(re, (m) => `<${tag}>${m}</${tag}>`);
+        return rawText.replace(re, (m) => `<${tag}>${m}</${tag}>`);
     }
 
-    // Cho phép đổi tag qua global config, mặc định 'mark'
-    const highlightTag = (window.InitUserEngineUI && window.InitUserEngineUI.highlightTag) || 'mark';
+    const highlightTag = (window.InitUserEngineUI?.highlightTag) || 'mark';
 
-    // Escape trước rồi mới highlight để đảm bảo XSS-safe
-    const contentEscaped = escapeHtml(content);
     const contentHighlighted = redeemCode
-        ? highlightToken(contentEscaped, redeemCode, highlightTag)
-        : contentEscaped;
+        ? highlightToken(content, redeemCode, highlightTag)
+        : content;
 
     const header = `
         <div class="iue-inbox-header">
-            <strong>${escapeHtml(title)}</strong>
-            <small>${escapeHtml(time || '')}</small>
+            <strong>${title}</strong>
+            <small>${time || ''}</small>
         </div>
     `;
 
-    // Không bọc <a>, để user copy dễ – nội dung đã highlight
     const body = `<div class="iue-inbox-content">${contentHighlighted}</div>`;
 
     const contentBlock = `
@@ -938,11 +936,10 @@ function renderInboxItem(entry) {
         </div>
     `;
 
-    // Giữ điều kiện của bro: chỉ hiện nút khi có redeemCode và có created_by
-    const extraCta = (redeemCode && entry.metadata && entry.metadata.created_by) ? `
+    const extraCta = (redeemCode && entry.metadata?.created_by) ? `
         <button class="iue-inbox-redeem-now"
                 data-iue-redeem
-                data-code="${escapeHtml(redeemCode)}">
+                data-code="${redeemCode}">
             ${InitUserEngineData?.i18n?.redeem_now || 'Redeem now'}
         </button>
     ` : '';

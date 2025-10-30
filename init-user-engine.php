@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.3.7
+ * Version: 1.3.8
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.3.7' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.3.8' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -192,17 +192,23 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
     $online_minutes = apply_filters( 'init_plugin_suite_user_engine_online_minutes', $online_minutes, $user_id, $is_vip );
     $cash_to_coin_rate = isset( $settings['rate_coin_per_cash'] ) ? (float) $settings['rate_coin_per_cash'] : 0;
 
+    $avatar_max_upload_mb = 10;
+    if ( isset( $settings['avatar_max_upload_mb'] ) && is_numeric( $settings['avatar_max_upload_mb'] ) ) {
+        $avatar_max_upload_mb = max( 0, (float) $settings['avatar_max_upload_mb'] );
+    }
+
     $localized_data = [
-        'rest_url'       => esc_url_raw( rest_url( INIT_PLUGIN_SUITE_IUE_NAMESPACE ) ),
-        'nonce'          => wp_create_nonce( 'wp_rest' ),
-        'current_user'   => $user_id,
-        'user_coin'      => init_plugin_suite_user_engine_get_coin( $user_id ),
-        'online_minutes' => $online_minutes,
-        'label_coin'     => $label_coin,
-        'label_cash'     => $label_cash,
-        'rate_coin_per_cash' => $cash_to_coin_rate, // 1 Cash -> X Coin (0 = tắt)
-        'user_cash'          => init_plugin_suite_user_engine_get_cash( $user_id ),
-        'can_upload_avatar'  => init_plugin_suite_user_engine_can_upload_avatar( $user_id ),
+        'rest_url'             => esc_url_raw( rest_url( INIT_PLUGIN_SUITE_IUE_NAMESPACE ) ),
+        'nonce'                => wp_create_nonce( 'wp_rest' ),
+        'current_user'         => $user_id,
+        'user_coin'            => init_plugin_suite_user_engine_get_coin( $user_id ),
+        'online_minutes'       => $online_minutes,
+        'label_coin'           => $label_coin,
+        'label_cash'           => $label_cash,
+        'rate_coin_per_cash'   => $cash_to_coin_rate,
+        'user_cash'            => init_plugin_suite_user_engine_get_cash( $user_id ),
+        'can_upload_avatar'    => init_plugin_suite_user_engine_can_upload_avatar( $user_id ),
+        'avatar_max_upload_mb' => $avatar_max_upload_mb,
 
         'is_vip'         => $is_vip, // bool
         'vip_expiry'     => init_plugin_suite_user_engine_get_vip_expiry(),
@@ -215,7 +221,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'vip_price_6' => absint( $settings['vip_price_6'] ?? 999999 ),
         ] ),
 
-        'referral_code' => init_plugin_suite_user_engine_encode_user_id( $user_id ),
+        'referral_code'    => init_plugin_suite_user_engine_encode_user_id( $user_id ),
         'referral_rewards' => apply_filters( 'init_plugin_suite_user_engine_referral_rewards', [
             'ref_reward_coin' => absint( $settings['ref_reward_coin'] ?? 100 ),
             'ref_reward_exp'  => absint( $settings['ref_reward_exp']  ?? 50 ),
@@ -311,7 +317,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'avatar_save'              => __( 'Save Avatar', 'init-user-engine' ),
             'avatar_uploading'         => __( 'Uploading...', 'init-user-engine' ),
             'avatar_invalid'           => __( 'Please select a valid image.', 'init-user-engine' ),
-            'avatar_too_large'         => __( 'Image too large (max 10MB)', 'init-user-engine' ),
+            'avatar_too_large'         => sprintf( /* translators: %s = max upload size in MB */ __( 'Image too large (max %sMB)', 'init-user-engine' ), $avatar_max_upload_mb ),
             'avatar_upload_fail'       => __( 'Upload failed. Please try again.', 'init-user-engine' ),
             'avatar_remove'            => __( 'Remove Avatar', 'init-user-engine' ),
             'avatar_remove_confirm'    => __( 'Are you sure you want to remove your avatar?', 'init-user-engine' ),

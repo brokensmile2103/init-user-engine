@@ -1637,3 +1637,51 @@ msgstr "Ảnh quá lớn (tối đa %sMB)"
 
 msgid "Avatar upload blocked: VIP only."
 msgstr "Không thể tải lên avatar: chỉ dành cho VIP."
+
+msgid "Locked User"
+msgstr "Người dùng được khóa"
+
+msgid "View Usage"
+msgstr "Xem sử dụng"
+
+msgid "Usage History"
+msgstr "Lịch sử sử dụng"
+
+msgid "No usage yet."
+msgstr "Chưa có lượt sử dụng."
+
+msgid "User"
+msgstr "Người dùng"
+
+msgid "Meta"
+msgstr "Meta"
+
+msgid "None"
+msgstr "Không có"
+
+msgid "Not locked"
+msgstr "Không khóa"
+
+msgid "User ID: %d"
+msgstr "ID người dùng: %d"
+
+msgid "%1$s (%2$s) — ID: %3$d"
+msgstr "%1$s (%2$s) — ID: %3$d"
+
+msgid "logged"
+msgstr "ghi nhận"
+
+msgid "Close"
+msgstr "Đóng"
+
+msgid "You received a redeem code!"
+msgstr "Bạn đã nhận được một mã quy đổi!"
+
+msgid "You have been assigned a redeem code: %s. You can use it in the Redeem section."
+msgstr "Bạn đã được cấp một mã quy đổi: %s. Bạn có thể sử dụng tại phần Đổi mã."
+
+msgid "Redeem Code Success"
+msgstr "Đổi mã thành công"
+
+msgid "%1$d %2$s"
+msgstr "%1$d %2$s"

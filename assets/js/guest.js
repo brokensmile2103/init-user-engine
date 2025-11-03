@@ -39,11 +39,11 @@ document.addEventListener('DOMContentLoaded', function () {
 	const modal   = document.getElementById('init-user-engine-login-modal');
 	const closeBtn= document.getElementById('init-user-engine-modal-close');
 
+	if (!avatar || !modal || !closeBtn) return;
+
 	// SVG (giữ nguyên nếu cần dùng chỗ khác)
 	const svgEye = `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle fill="none" stroke="currentColor" cx="10" cy="10" r="3.45"></circle><path fill="none" stroke="currentColor" d="m19.5,10c-2.4,3.66-5.26,7-9.5,7h0,0,0c-4.24,0-7.1-3.34-9.49-7C2.89,6.34,5.75,3,9.99,3h0,0,0c4.25,0,7.11,3.34,9.5,7Z"></path></svg>`;
 	const svgEyeOff = `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path fill="none" stroke="currentColor" d="m7.56,7.56c.62-.62,1.49-1.01,2.44-1.01,1.91,0,3.45,1.54,3.45,3.45,0,.95-.39,1.82-1.01,2.44"></path><path fill="none" stroke="currentColor" d="m19.5,10c-2.4,3.66-5.26,7-9.5,7h0,0,0c-4.24,0-7.1-3.34-9.49-7C2.89,6.34,5.75,3,9.99,3h0,0,0c4.25,0,7.11,3.34,9.5,7Z"></path><line fill="none" stroke="currentColor" x1="2.5" y1="2.5" x2="17.5" y2="17.5"></line></svg>`;
-
-	if (!avatar || !modal || !closeBtn) return;
 
 	function openLoginModal() {
 		modal.classList.add('open');
@@ -379,6 +379,60 @@ document.addEventListener('DOMContentLoaded', function () {
 			const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 			if (prefersDark) modal.classList.add('dark');
 		}
+	})();
+
+	// === PASSWORD TOGGLE ===
+	(function () {
+
+		function attachToggle(input) {
+			if (!input || input.dataset.iuePwdEnhanced === "1") return;
+
+			// Wrap input
+			const wrap = document.createElement("div");
+			wrap.className = "iue-password-wrapper";
+			input.parentNode.insertBefore(wrap, input);
+			wrap.appendChild(input);
+
+			// Button eye toggle
+			const btn = document.createElement("button");
+			btn.type = "button";
+			btn.className = "iue-password-toggle";
+			btn.innerHTML = svgEye;
+			wrap.appendChild(btn);
+
+			// Toggle function
+			const toggle = () => {
+			    const show = input.type === "password";
+			    const cursorPos = input.selectionStart; // nhớ vị trí caret
+
+			    input.type = show ? "text" : "password";
+			    btn.innerHTML = show ? svgEyeOff : svgEye;
+
+			    // Focus lại và restore caret
+			    input.focus();
+			    input.setSelectionRange(cursorPos, cursorPos);
+			};
+
+			// Click icon → toggle (và ĐỪNG đóng modal)
+			btn.addEventListener("click", (e) => {
+				e.preventDefault();
+				e.stopPropagation();  // không cho click lan lên modal overlay
+				toggle();
+			});
+
+			// đánh dấu đã gắn
+			input.dataset.iuePwdEnhanced = "1";
+		}
+
+		// Gắn ngay cho login
+		attachToggle(document.getElementById("user_pass"));
+
+		// Theo dõi register form để gắn khi xuất hiện
+		const observer = new MutationObserver(() => {
+			attachToggle(document.getElementById("iue_register_password"));
+		});
+		observer.observe(document.body, { childList: true, subtree: true });
+
 	})();
 
 	window.openLoginModal = openLoginModal;

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.8
+Stable tag: 1.3.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -157,7 +157,16 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
-= 1.3.8 – October 31, 2025 =
+= 1.3.9 – November 03, 2025 =
+- Added Password Visibility Toggle (Show/Hide Password) for Login & Register forms
+  - Works regardless of password value (UX-friendly)
+  - Uses built-in eye/eye-off SVG icons (no external assets)
+  - Prevents modal from closing when clicking the eye icon
+  - Zero markup changes — JavaScript enhancement only
+- Improved modal behavior: eliminated early-return issue preventing scripts from running on pages without avatar/modal
+- Internal code cleanup to ensure password toggle attaches even with lazy-loaded register form
+
+= 1.3.8 – October 30, 2025 =
 - Added option for VIPs to keep the original GIF avatar (no cropping)
 - Non-GIF formats still follow standard cropping and resizing (50px / 80px)
 - Added max upload size setting (`avatar_max_upload_mb`)

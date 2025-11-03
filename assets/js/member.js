@@ -897,8 +897,8 @@ function loadInbox(page = 1) {
 function renderInboxItem(entry) {
     const id = entry.id || 0;
     const title = entry.title || 'No title';
-    const content = entry.content || ''; // từ server là plain text (đã strip)
-    const time = entry.time;
+    const content = entry.content || ''; // server trả plain text (đã strip)
+    const time = entry.time || '';
     const isRead = entry.status === 'read';
     const link = entry.link || null;
     const priorityClass = entry.priority === 'high' ? ' iue-high-priority' : '';
@@ -908,7 +908,7 @@ function renderInboxItem(entry) {
     // --- helpers ---
     const escRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // highlight 1 lần đầu tiên gặp token
+    // highlight 1 lần đầu tiên gặp token (dùng tag tuỳ config)
     function highlightToken(rawText, token, tag = 'mark') {
         if (!rawText || !token) return rawText;
         const re = new RegExp(`\\b${escRe(token)}\\b`);
@@ -917,6 +917,7 @@ function renderInboxItem(entry) {
 
     const highlightTag = (window.InitUserEngineUI?.highlightTag) || 'mark';
 
+    // Chỉ áp dụng highlight khi CÓ redeem_code
     const contentHighlighted = redeemCode
         ? highlightToken(content, redeemCode, highlightTag)
         : content;
@@ -924,18 +925,23 @@ function renderInboxItem(entry) {
     const header = `
         <div class="iue-inbox-header">
             <strong>${title}</strong>
-            <small>${time || ''}</small>
+            <small>${time}</small>
         </div>
     `;
 
     const body = `<div class="iue-inbox-content">${contentHighlighted}</div>`;
 
+    // Giữ NGUYÊN logic link như cũ
+    const contentInner = header + body;
     const contentBlock = `
         <div class="iue-inbox-content-wrap">
-            ${header + body}
+            ${link
+                ? `<a href="${link}" class="iue-inbox-link" target="_blank" rel="noopener noreferrer">${contentInner}</a>`
+                : contentInner}
         </div>
     `;
 
+    // Chỉ hiển thị CTA Redeem khi có redeem_code và có created_by
     const extraCta = (redeemCode && entry.metadata?.created_by) ? `
         <button class="iue-inbox-redeem-now"
                 data-iue-redeem
@@ -951,8 +957,12 @@ function renderInboxItem(entry) {
                 <span class="iue-icon" data-iue-icon="more"></span>
             </button>
             <div class="iue-inbox-menu" data-id="${id}" hidden>
-                <button class="iue-inbox-read" data-id="${id}" ${isRead ? 'disabled' : ''}>${InitUserEngineData.i18n.mark_as_read}</button>
-                <button class="iue-inbox-delete" data-id="${id}">${InitUserEngineData.i18n.delete}</button>
+                <button class="iue-inbox-read" data-id="${id}" ${isRead ? 'disabled' : ''}>
+                    ${InitUserEngineData?.i18n?.mark_as_read || 'Mark as read'}
+                </button>
+                <button class="iue-inbox-delete" data-id="${id}">
+                    ${InitUserEngineData?.i18n?.delete || 'Delete'}
+                </button>
             </div>
         </div>
     `;

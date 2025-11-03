@@ -1637,3 +1637,51 @@ msgstr ""
 
 msgid "Avatar upload blocked: VIP only."
 msgstr ""
+
+msgid "Locked User"
+msgstr ""
+
+msgid "View Usage"
+msgstr ""
+
+msgid "Usage History"
+msgstr ""
+
+msgid "No usage yet."
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Meta"
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Not locked"
+msgstr ""
+
+msgid "User ID: %d"
+msgstr ""
+
+msgid "%1$s (%2$s) — ID: %3$d"
+msgstr ""
+
+msgid "logged"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "You received a redeem code!"
+msgstr ""
+
+msgid "You have been assigned a redeem code: %s. You can use it in the Redeem section."
+msgstr ""
+
+msgid "Redeem Code Success"
+msgstr ""
+
+msgid "%1$d %2$s"
+msgstr ""

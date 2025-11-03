@@ -131,12 +131,16 @@ jQuery(function ($) {
     toggleUserRow();
 });
 
-(function(){
+(function () {
     const typeField = document.querySelector('select[name="iue_type"]');
     const rowMulti  = document.querySelector('.redeem-multi-row');
     const rowUser   = document.querySelector('.redeem-user-row');
 
-    typeField.addEventListener('change', function() {
+    if (!typeField || !rowMulti || !rowUser) {
+        return;
+    }
+
+    typeField.addEventListener('change', function () {
         rowMulti.style.display = (this.value === 'multi') ? '' : 'none';
         rowUser.style.display  = (this.value === 'user_locked') ? '' : 'none';
     });

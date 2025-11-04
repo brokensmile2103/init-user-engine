@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.9
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -157,7 +157,21 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
-= 1.3.9 – November 03, 2025 =
+= 1.4.0 – November 4, 2025 =
+- Improved **Admin User Overview** security model
+  - Any user can view their own overview (Coin, Cash, Level, VIP info, Inbox)
+  - Action buttons (Remove VIP / Toggle Avatar Upload Ban / Inbox Statistics) are now restricted to administrators only
+  - UI gracefully disables restricted actions for non-admin users instead of hiding them
+- Added server-side permission guards for sensitive actions
+  - `iue_remove_vip` and `iue_toggle_avatar_ban` now require `manage_options`
+  - Requests are validated using capability check + nonce verification
+  - Prevents URL/REST crafting or manual calls to admin-post endpoints
+- Improved admin notices behavior
+  - Success/error messages only appear for administrators
+  - Notices limited to `profile.php` and `user-edit.php` screens
+- Minor code cleanup and consistency improvements to maintainable structure
+
+= 1.3.9 – November 3, 2025 =
 - Added Password Visibility Toggle (Show/Hide Password) for Login & Register forms
   - Works regardless of password value (UX-friendly)
   - Uses built-in eye/eye-off SVG icons (no external assets)

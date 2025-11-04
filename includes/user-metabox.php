@@ -230,7 +230,7 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				);
 
 				// Show button only if currently VIP, lifetime, or has an expiry set
-				if ( $is_lifetime || $is_vip || (int) $vip_expiry > 0 ) : ?>
+				if ( current_user_can('manage_options') && ( $is_lifetime || $is_vip || (int) $vip_expiry > 0 ) ) : ?>
 					<p class="iue-meta" style="margin-top:10px;">
 						<a class="button button-secondary" href="<?php echo esc_url( $__iue_remove_vip_url ); ?>"
 						   onclick="return confirm('<?php echo esc_attr__( 'Are you sure you want to remove this user’s VIP status?', 'init-user-engine' ); ?>');">
@@ -260,6 +260,7 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 					: __( 'Ban this user from uploading avatar?', 'init-user-engine' );
 				?>
 
+				<?php if ( current_user_can('manage_options') ) : ?>
 				<p class="iue-meta" style="margin-top:6px;">
 					<a class="button button-secondary" href="<?php echo esc_url( $__iue_toggle_avatar_ban_url ); ?>"
 					   onclick="return confirm('<?php echo esc_attr( $__iue_confirm ); ?>');">
@@ -271,6 +272,7 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 							: esc_html__( 'Currently: Allowed', 'init-user-engine' ); ?>
 					</span>
 				</p>
+				<?php endif; ?>
 
 				<?php
 				// ==================== NEW: Recent Transactions (up to 100) ====================
@@ -334,11 +336,13 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 						?>
 					</strong>
 				</p>
+				<?php if ( current_user_can('manage_options') ) : ?>
 				<p class="iue-meta">
 					<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=init-user-engine-inbox-stats' ) ); ?>">
 						<?php esc_html_e( 'Open Inbox Statistics', 'init-user-engine' ); ?>
 					</a>
 				</p>
+				<?php endif; ?>
 
 				<?php
 				// ==================== NEW: Recent Inbox (up to 100) ====================
@@ -526,30 +530,25 @@ function init_plugin_suite_user_engine_get_admin_user_extra_stats( $user_id ) {
  * URL pattern: admin-post.php?action=iue_remove_vip&user_id=###&_wpnonce=...
  */
 add_action( 'admin_post_iue_remove_vip', function () {
-	if ( ! is_admin() ) {
-		wp_die();
-	}
+	if ( ! is_admin() ) wp_die();
 
-	$user_id = isset( $_GET['user_id'] )
-		? absint( wp_unslash( $_GET['user_id'] ) )
-		: 0;
+    // Server-side guard: chỉ Admin mới chạy được
+    if ( ! current_user_can('manage_options') ) {
+        wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+    }
 
-	if ( ! $user_id ) {
-		wp_safe_redirect( add_query_arg( 'iue_vip_removed', '0', admin_url() ) );
-		exit;
-	}
+    // Input
+    $user_id = isset($_GET['user_id']) ? absint( wp_unslash($_GET['user_id']) ) : 0;
+    if ( ! $user_id ) {
+        wp_safe_redirect( add_query_arg( 'iue_vip_removed', '0', admin_url() ) );
+        exit;
+    }
 
-	// Nonce + capability checks (UNSLASH + SANITIZE trước khi verify)
-	$nonce = isset( $_GET['_wpnonce'] )
-		? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) )
-		: '';
-
-	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'iue_remove_vip_' . $user_id ) ) {
-		wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
-	}
-	if ( ! current_user_can( 'edit_user', $user_id ) ) {
-		wp_die( esc_html__( 'You do not have permission to edit this user.', 'init-user-engine' ) );
-	}
+    // Nonce
+    $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field( wp_unslash($_GET['_wpnonce']) ) : '';
+    if ( ! $nonce || ! wp_verify_nonce( $nonce, 'iue_remove_vip_' . $user_id ) ) {
+        wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
+    }
 
 	$now = current_time( 'timestamp' );
 
@@ -623,38 +622,37 @@ add_action( 'admin_post_iue_remove_vip', function () {
  * URL: admin-post.php?action=iue_toggle_avatar_ban&user_id=###&to=on|off&_wpnonce=...
  */
 add_action( 'admin_post_iue_toggle_avatar_ban', function () {
-	if ( ! is_admin() ) {
-		wp_die();
-	}
+    if ( ! is_admin() ) wp_die();
 
-	$user_id = isset( $_GET['user_id'] ) ? absint( wp_unslash( $_GET['user_id'] ) ) : 0;
-	$to      = isset( $_GET['to'] ) ? sanitize_key( wp_unslash( $_GET['to'] ) ) : '';
+    // Server-side guard: chỉ Admin mới chạy được
+    if ( ! current_user_can('manage_options') ) {
+        wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+    }
 
-	if ( ! $user_id ) {
-		wp_safe_redirect( add_query_arg( 'iue_avatar_ban', 'fail', admin_url() ) );
-		exit;
-	}
+    $user_id = isset($_GET['user_id']) ? absint( wp_unslash($_GET['user_id']) ) : 0;
+    $to_raw  = isset($_GET['to']) ? sanitize_key( wp_unslash($_GET['to']) ) : '';
+    $to      = in_array( $to_raw, array('on','off'), true ) ? $to_raw : '';
 
-	$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'iue_toggle_avatar_ban_' . $user_id ) ) {
-		wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
-	}
-	if ( ! current_user_can( 'edit_user', $user_id ) ) {
-		wp_die( esc_html__( 'You do not have permission to edit this user.', 'init-user-engine' ) );
-	}
+    if ( ! $user_id || $to === '' ) {
+        wp_safe_redirect( add_query_arg( 'iue_avatar_ban', 'fail', admin_url() ) );
+        exit;
+    }
 
-	$ban_on = ( $to === 'on' );
+    $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field( wp_unslash($_GET['_wpnonce']) ) : '';
+    if ( ! $nonce || ! wp_verify_nonce( $nonce, 'iue_toggle_avatar_ban_' . $user_id ) ) {
+        wp_die( esc_html__( 'Security check failed.', 'init-user-engine' ) );
+    }
 
-	if ( $ban_on ) {
-		update_user_meta( $user_id, 'iue_avatar_ban', 1 );
-		$flag = 'on';
-	} else {
-		// sạch sẽ DB: xóa hẳn meta khi unban
-		delete_user_meta( $user_id, 'iue_avatar_ban' );
-		$flag = 'off';
-	}
+    $ban_on = ( $to === 'on' );
+    if ( $ban_on ) {
+        update_user_meta( $user_id, 'iue_avatar_ban', 1 );
+        $flag = 'on';
+    } else {
+        delete_user_meta( $user_id, 'iue_avatar_ban' );
+        $flag = 'off';
+    }
 
-	/**
+    /**
 	 * Hook for audit/integrations
 	 *
 	 * @param int  $user_id
@@ -662,24 +660,21 @@ add_action( 'admin_post_iue_toggle_avatar_ban', function () {
 	 */
 	do_action( 'init_plugin_suite_user_engine_avatar_ban_toggled', $user_id, $ban_on );
 
-	$back = wp_get_referer();
-	if ( ! $back ) {
-		$back = get_edit_user_link( $user_id );
-	}
+    $back = wp_get_referer();
+    if ( ! $back ) $back = get_edit_user_link( $user_id );
 
-	$notice_nonce = wp_create_nonce( 'iue_notice_' . get_current_user_id() );
-	wp_safe_redirect( add_query_arg(
-		array(
-			'iue_avatar_ban' => $flag, // on|off
-			'_iue_notice'    => $notice_nonce,
-		),
-		$back
-	) );
-	exit;
-} );
+    $notice_nonce = wp_create_nonce( 'iue_notice_' . get_current_user_id() );
+    wp_safe_redirect( add_query_arg( array(
+        'iue_avatar_ban' => $flag,
+        '_iue_notice'    => $notice_nonce,
+    ), $back ) );
+    exit;
+});
 
 // Show an admin notice after VIP removal
 add_action( 'admin_notices', function () {
+	if ( ! current_user_can('manage_options') ) return;
+	
 	// Đọc GET an toàn (unslash + sanitize)
 	$flag = isset( $_GET['iue_vip_removed'] )
 		? sanitize_text_field( wp_unslash( $_GET['iue_vip_removed'] ) )
@@ -715,6 +710,8 @@ add_action( 'admin_notices', function () {
 } );
 
 add_action( 'admin_notices', function () {
+	if ( ! current_user_can('manage_options') ) return;
+	
 	$flag = isset( $_GET['iue_avatar_ban'] ) ? sanitize_text_field( wp_unslash( $_GET['iue_avatar_ban'] ) ) : '';
 	$notice_nonce = isset( $_GET['_iue_notice'] ) ? sanitize_text_field( wp_unslash( $_GET['_iue_notice'] ) ) : '';
 

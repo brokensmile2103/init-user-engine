@@ -48,14 +48,14 @@ function init_plugin_suite_user_engine_check_table() {
 
     // INBOX
     $inbox_table = $wpdb->prefix . 'init_user_engine_inbox';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$inbox_table'" ) !== $inbox_table ) {
         init_plugin_suite_user_engine_create_inbox_table();
     }
 
     // REDEEM CODE
     $redeem_table = $wpdb->prefix . 'init_user_engine_redeem_codes';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$redeem_table'" ) !== $redeem_table ) {
         init_plugin_suite_user_engine_create_redeem_code_table();
     }

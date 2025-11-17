@@ -29,8 +29,8 @@ function init_plugin_suite_user_engine_set_coin( $user_id, $value ) {
 function init_plugin_suite_user_engine_add_coin( $user_id, $amount ) {
 	$amount = (int) $amount;
 
-	// Bonus Coin nếu là VIP
-	if ( init_plugin_suite_user_engine_is_vip( $user_id ) ) {
+	// Chỉ cộng bonus nếu là VIP và amount > 0
+	if ( $amount > 0 && init_plugin_suite_user_engine_is_vip( $user_id ) ) {
 		$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
 		$bonus   = absint( $options['vip_bonus_coin'] ?? 0 );
 
@@ -42,6 +42,7 @@ function init_plugin_suite_user_engine_add_coin( $user_id, $amount ) {
 	$coin = init_plugin_suite_user_engine_get_coin( $user_id );
 	$amount = apply_filters( 'init_plugin_suite_user_engine_calculated_coin_amount', $amount, $user_id );
 	$coin += $amount;
+
 	init_plugin_suite_user_engine_set_coin( $user_id, $coin );
 
 	return $coin;

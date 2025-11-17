@@ -451,7 +451,7 @@ function init_plugin_suite_user_engine_get_inbox_quick_stats( $user_id ) {
 	$table = init_plugin_suite_user_engine_get_inbox_table();
 
 	// Check table exists
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table}'" ) !== $table ) {
 		return $stats;
 	}
@@ -459,7 +459,7 @@ function init_plugin_suite_user_engine_get_inbox_quick_stats( $user_id ) {
 	$now = current_time( 'timestamp' );
 	$seven_days_ago = $now - ( 7 * DAY_IN_SECONDS );
 
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$stats['total']  = (int) $wpdb->get_var( $wpdb->prepare(
 		"SELECT COUNT(*) FROM {$table} WHERE user_id = %d",
 		$user_id

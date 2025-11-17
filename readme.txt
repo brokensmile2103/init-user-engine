@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -156,6 +156,18 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.1 – November 17, 2025 =
+- Fixed VIP bonus logic when modifying Coin balance
+  - Bonus percentage now applies **only when adding** positive Coin amounts
+  - Negative adjustments (deducting Coin) **no longer receive bonus**
+- Added support for `data-iue="register"`
+  - Automatically opens the modal **and switches directly to the Register tab**
+  - Ignores custom register URL mode (only toggles modal when active)
+- Improved WPCS compatibility
+  - Added targeted `phpcs:ignore` rules for PluginCheck false positives
+  - Clean handling of dynamic table names in prepared SQL queries
+- No other changes; fast patch release for immediate correctness
 
 = 1.4.0 – November 4, 2025 =
 - Improved **Admin User Overview** security model

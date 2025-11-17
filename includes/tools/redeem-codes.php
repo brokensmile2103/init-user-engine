@@ -24,13 +24,13 @@ function init_plugin_suite_user_engine_render_redeem_codes_page() {
     $cache_key_total = 'iue_rc_total';
     $total = wp_cache_get( $cache_key_total, 'iue' );
     if ( false === $total ) {
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_codes}" );
         wp_cache_set( $cache_key_total, $total, 'iue', 60 ); // 60s
     }
 
     // Lấy danh sách code
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $codes = $wpdb->get_results(
         $wpdb->prepare(
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- dynamic table name từ $wpdb->prefix an toàn
@@ -59,7 +59,7 @@ function init_plugin_suite_user_engine_render_redeem_codes_page() {
 
     if ( $view_code_id > 0 && wp_verify_nonce( $view_nonce, 'iue_redeem_view_' . $view_code_id ) ) {
         // Lấy code để đọc metadata
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $code_row = $wpdb->get_row(
             $wpdb->prepare(
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- dynamic table name từ $wpdb->prefix an toàn

@@ -31,8 +31,8 @@ function init_plugin_suite_user_engine_set_level( $user_id, $level ) {
 function init_plugin_suite_user_engine_add_exp( $user_id, $exp_added = 0 ) {
 	$exp_added = (int) $exp_added;
 
-	// Bonus EXP nếu là VIP
-	if ( init_plugin_suite_user_engine_is_vip( $user_id ) ) {
+	// Bonus EXP nếu là VIP và $exp_added > 0
+	if ( $exp_added > 0 && init_plugin_suite_user_engine_is_vip( $user_id ) ) {
 		$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
 		$bonus   = absint( $options['vip_bonus_exp'] ?? 0 );
 

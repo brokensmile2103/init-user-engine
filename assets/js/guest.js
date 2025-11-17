@@ -87,6 +87,27 @@ document.addEventListener('DOMContentLoaded', function () {
 		el.addEventListener('click', function (e) { e.preventDefault(); openLoginModal(); });
 	});
 
+	// Trigger qua data-iue="register"
+	document.querySelectorAll('[data-iue="register"]').forEach(el => {
+		el.addEventListener('click', function (e) {
+			e.preventDefault();
+
+			// Mở modal trước
+			openLoginModal();
+
+			// Rồi chuyển sang tab Đăng ký (nếu đang dùng modal, không phải custom URL)
+			const registerLink = document.getElementById('iue-register-link');
+			if (registerLink) {
+				const hasCustomUrl = registerLink.dataset.hasCustomUrl === '1';
+
+				// Nếu không có custom URL → dùng toggle form trong modal
+				if (!hasCustomUrl) {
+					registerLink.click();
+				}
+			}
+		});
+	});
+
 	// Toggle login/register
 	(function toggleLoginRegisterForm() {
 		const registerLink = document.getElementById('iue-register-link');

@@ -15,7 +15,7 @@ add_action( 'admin_init', function () {
         $table = $wpdb->prefix . 'init_user_engine_redeem_codes';
 
         // Đọc input có isset + unslash + sanitize (không dùng trực tiếp $_POST trong ?:)
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $code_raw  = isset( $_POST['iue_code'] ) ? wp_unslash( $_POST['iue_code'] ) : '';
         $code      = sanitize_text_field( $code_raw !== '' ? $code_raw : wp_generate_password( 10, false, false ) );
         $type      = sanitize_key( isset( $_POST['iue_type'] ) ? wp_unslash( $_POST['iue_type'] ) : 'single' );
@@ -138,7 +138,7 @@ function init_plugin_suite_user_engine_api_redeem_code( WP_REST_Request $request
     $wpdb->query( 'START TRANSACTION' );
 
     // Khoá hàng để tránh race condition
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $row = $wpdb->get_row(
         $wpdb->prepare(
             // Tên bảng động từ $wpdb->prefix là an toàn, cần ignore interpolated rule

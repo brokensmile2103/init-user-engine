@@ -1,45 +1,61 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-	// Log a transaction (coin, cash) with type/source/change
-	function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount, $source, $change = 'add' ) {
-		if ( ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
-			return false;
-		}
-
-		if ( ! in_array( $change, [ 'add', 'deduct' ], true ) ) {
-			return false;
-		}
-
-		$log = (array) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin_cash_log', [] );
-
-		$is_vip = init_plugin_suite_user_engine_is_vip( $user_id );
-
-		$log[] = [
-			'type'      => $type,
-			'amount'    => absint( $amount ),
-			'change'    => $change,
-			'source'    => $source,
-			'time'      => current_time( 'Y-m-d H:i:s' ),
-			'vip_bonus' => $is_vip,
-		];
-
-		if ( count( $log ) > 100 ) {
-			$log = array_slice( $log, -100 );
-		}
-
-		init_plugin_suite_user_engine_update_meta( $user_id, 'iue_coin_cash_log', $log );
-
-		do_action( 'init_plugin_suite_user_engine_transaction_logged', $user_id, end( $log ) );
-
-		return true;
+// Log a transaction (coin, cash) with type/source/change
+function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount, $source, $change = 'add' ) {
+	if ( ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
+		return false;
 	}
 
-	// Get user's transaction log
-	function init_plugin_suite_user_engine_get_transaction_log( $user_id ) {
-		$log = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin_cash_log', [] );
-		return is_array( $log ) ? $log : [];
+	if ( ! in_array( $change, [ 'add', 'deduct' ], true ) ) {
+		return false;
 	}
+
+	$log = (array) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin_cash_log', [] );
+
+	$is_vip = init_plugin_suite_user_engine_is_vip( $user_id );
+	$original_amount = absint( $amount );
+	$final_amount    = $original_amount;
+
+	// Apply VIP bonus (chỉ áp dụng cho coin và change = add)
+	if ( $type === 'coin' && $change === 'add' && $is_vip ) {
+		$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+		$bonus   = absint( $options['vip_bonus_coin'] ?? 0 );
+
+		if ( $bonus > 0 ) {
+			$final_amount += (int) round( $original_amount * $bonus / 100 );
+		}
+	}
+
+	// Ghi log
+	$log[] = [
+		'type'           => $type,
+		'amount'         => $final_amount,        // amount đã + bonus
+		'original'       => $original_amount,     // amount trước khi + bonus
+		'change'         => $change,
+		'source'         => $source,
+		'time'           => current_time( 'Y-m-d H:i:s' ),
+		'vip_bonus'      => $is_vip,
+		'bonus_percent'  => $is_vip ? ( $options['vip_bonus_coin'] ?? 0 ) : 0,
+	];
+
+	// Giữ tối đa 100 log
+	if ( count( $log ) > 100 ) {
+		$log = array_slice( $log, -100 );
+	}
+
+	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_coin_cash_log', $log );
+
+	do_action( 'init_plugin_suite_user_engine_transaction_logged', $user_id, end( $log ) );
+
+	return true;
+}
+
+// Get user's transaction log
+function init_plugin_suite_user_engine_get_transaction_log( $user_id ) {
+	$log = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin_cash_log', [] );
+	return is_array( $log ) ? $log : [];
+}
 
 // Format a log entry into readable message
 function init_plugin_suite_user_engine_format_log_message( $entry ) {

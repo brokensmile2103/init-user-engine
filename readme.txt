@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -156,6 +156,22 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.2 – November 19, 2025 =
+- Updated **transaction logging system** for Coin & Cash
+  - VIP users now automatically receive the correct **bonus %** directly inside the log entry
+  - Log entries now include:
+    - `original` (amount before bonus)
+    - `amount` (amount after bonus)
+    - `vip_bonus` flag and `bonus_percent` value
+  - Ensures perfectly aligned behavior with `init_plugin_suite_user_engine_add_coin()`
+- Improved accuracy of VIP-related operations
+  - Bonus only applies to **Coin** and only when **adding** (no bonus for deductions)
+  - Avoids mismatch between displayed history and real balance changes
+- Enhanced internal data consistency
+  - Log entries capped at 100 items with stable array slicing
+  - Ensures clean, lightweight meta storage over long-term usage
+- Minor structural refinement for better readability and maintainable code paths
 
 = 1.4.1 – November 17, 2025 =
 - Fixed VIP bonus logic when modifying Coin balance

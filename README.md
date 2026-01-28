@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.4.2-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.4.3-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -75,6 +75,8 @@ Base: `/wp-json/inituser/v1/`
 - `init_plugin_suite_user_engine_captcha_bank` – Extend the captcha question bank with custom items  
 - `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
 - `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)
+- `init_plugin_suite_user_engine_vip_expire_soon_threshold` – Modify the threshold (in seconds) used to determine when VIP is considered close to expiration  
+- `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element
 
 ### Actions
 

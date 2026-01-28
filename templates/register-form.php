@@ -41,7 +41,6 @@
 				</div>
 			</p>
 		<?php else : ?>
-			<!-- Fallback captcha cũ -->
 			<p class="iue-form-group iue-register-captcha">
 				<label for="iue_register_captcha_answer"><?php esc_html_e( 'Captcha', 'init-user-engine' ); ?></label><br>
 				<span id="iue-captcha-question" class="iue-captcha-question"><?php esc_html_e( 'Loading...', 'init-user-engine' ); ?></span><br>

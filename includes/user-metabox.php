@@ -374,7 +374,7 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 									</div>
 									<span class="iue-badge"><?php echo esc_html( $__type ); ?></span>
 									<span class="iue-badge" style="background:#f5f5f5;color:#444;border-color:#e1e1e1;"><?php echo esc_html( $__status ); ?></span>
-									<span class="iue-right"><?php echo esc_html( wp_date( 'M j, Y H:i', $__created ) ); ?></span>
+									<span class="iue-right"><?php echo esc_html( date_i18n( 'M j, Y H:i', $__created, true ) ); ?></span>
 								</li>
 							<?php endforeach; ?>
 						</ul>

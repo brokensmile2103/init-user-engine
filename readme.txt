@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,11 +88,13 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_render_level_badge` – Customize level badge HTML  
 - `init_plugin_suite_user_engine_inbox_insert_data` – Modify inbox data before inserting into database  
 - `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
-- `init_plugin_suite_user_engine_after_register` – Hook after successful user registration (pass user ID and submitted data)
-- `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic
-- `init_plugin_suite_user_engine_captcha_bank` – Extend or modify the internal captcha question bank used for fallback validation
-- `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
-- `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)
+- `init_plugin_suite_user_engine_after_register` – Hook after successful user registration (pass user ID and submitted data)  
+- `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic  
+- `init_plugin_suite_user_engine_captcha_bank` – Extend or modify the internal captcha question bank used for fallback validation  
+- `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount  
+- `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)  
+- `init_plugin_suite_user_engine_vip_expire_soon_threshold` – Modify the threshold (in seconds) used to determine when VIP is considered close to expiration  
+- `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element
 
 === Actions ===
 
@@ -156,6 +158,19 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.3 – November 28, 2025 =
+- Added VIP state–aware body classes for frontend customization
+  - Automatically adds `iue-vip` for active VIP users
+  - Adds `iue-vip-expired` for users whose VIP has expired
+  - Adds `iue-expire-soon` when VIP is close to expiration (default: ≤ 1 day)
+- Introduced extensibility hooks for VIP presentation logic
+  - New filter `init_plugin_suite_user_engine_vip_expire_soon_threshold` to customize the “expire soon” window
+  - New filter `init_plugin_suite_user_engine_body_vip_classes` to allow developers to add or modify VIP-related body classes
+- Improved separation between VIP core logic and UI layer
+  - Enables lightweight CSS-based customization without conditional checks
+  - Keeps VIP business logic isolated and stable
+- Minor internal refinement for consistency and long-term maintainability
 
 = 1.4.2 – November 19, 2025 =
 - Updated **transaction logging system** for Coin & Cash

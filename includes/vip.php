@@ -196,3 +196,66 @@ function init_plugin_suite_user_engine_count_active_vip_users() {
     ] );
     return (int) $q->get_total();
 }
+
+/**
+ * Add VIP-related classes to body
+ */
+add_filter( 'body_class', 'init_plugin_suite_user_engine_add_vip_body_class' );
+function init_plugin_suite_user_engine_add_vip_body_class( $classes ) {
+
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return $classes;
+	}
+
+	$expire = (int) init_plugin_suite_user_engine_get_meta(
+		$user_id,
+		'iue_vip_expire',
+		0
+	);
+
+	if ( ! $expire ) {
+		return $classes; // chưa từng VIP
+	}
+
+	$now = current_time( 'timestamp' );
+
+	if ( $expire > $now ) {
+
+		// Đang là VIP
+		$classes[] = 'iue-vip';
+
+		/**
+		 * Threshold (seconds) để coi là "sắp hết hạn"
+		 * Mặc định: 1 ngày
+		 */
+		$expire_soon_threshold = (int) apply_filters(
+			'init_plugin_suite_user_engine_vip_expire_soon_threshold',
+			DAY_IN_SECONDS,
+			$user_id,
+			$expire
+		);
+
+		if ( ( $expire - $now ) <= $expire_soon_threshold ) {
+			$classes[] = 'iue-expire-soon';
+		}
+
+	} else {
+		// Từng là VIP nhưng đã hết hạn
+		$classes[] = 'iue-vip-expired';
+	}
+
+	/**
+	 * Allow other developers to add/remove body classes related to IUE VIP
+	 *
+	 * @param array $classes
+	 * @param int   $user_id
+	 * @param int   $expire
+	 */
+	return apply_filters(
+		'init_plugin_suite_user_engine_body_vip_classes',
+		$classes,
+		$user_id,
+		$expire
+	);
+}

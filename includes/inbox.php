@@ -87,27 +87,61 @@ function init_plugin_suite_user_engine_send_inbox_to_users(
 }
 
 // Get inbox messages (paginated)
-function init_plugin_suite_user_engine_get_inbox( $user_id, $page = 1, $per_page = 20 ) {
-	global $wpdb;
+function init_plugin_suite_user_engine_get_inbox( $user_id, $page = 1, $per_page = 20, $filter = 'all' ) {
+    global $wpdb;
 
-	$offset = ( $page - 1 ) * $per_page;
-	$table  = init_plugin_suite_user_engine_get_inbox_table();
+    $offset = ( $page - 1 ) * $per_page;
+    $table  = init_plugin_suite_user_engine_get_inbox_table();
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	$results = $wpdb->get_results(
-		$wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT * FROM {$table} WHERE user_id = %d ORDER BY created_at DESC LIMIT %d OFFSET %d",
-			$user_id, $per_page, $offset
-		),
-		ARRAY_A
-	);
+    $where  = [ 'user_id = %d' ];
+    $params = [ (int) $user_id ];
 
-	foreach ( $results as &$item ) {
-		$item['metadata'] = maybe_unserialize( $item['metadata'] );
-	}
+    // ===== filter logic =====
+    if ( 'unread' === $filter ) {
+        $where[] = "status = 'unread'";
+    }
+    elseif ( in_array( $filter, [ 'system', 'rewards', 'activity' ], true ) ) {
 
-	return $results;
+        $map = init_plugin_suite_user_engine_get_inbox_group_map();
+
+        if ( ! empty( $map[ $filter ] ) ) {
+            $types = array_map( 'sanitize_key', (array) $map[ $filter ] );
+
+            $placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+            $where[] = "type IN ($placeholders)";
+            $params  = array_merge( $params, $types );
+        }
+    }
+    elseif ( 'other' === $filter ) {
+
+        $map = init_plugin_suite_user_engine_get_inbox_group_map();
+        $all = array_map( 'sanitize_key', array_merge( ...array_values( $map ) ) );
+
+        if ( ! empty( $all ) ) {
+            $placeholders = implode( ',', array_fill( 0, count( $all ), '%s' ) );
+            $where[] = "type NOT IN ($placeholders)";
+            $params  = array_merge( $params, $all );
+        }
+    }
+
+    $where_sql = implode( ' AND ', $where );
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $results = $wpdb->get_results(
+        // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+        $wpdb->prepare(
+        	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+            array_merge( $params, [ (int) $per_page, (int) $offset ] )
+        ),
+        ARRAY_A
+    );
+
+    foreach ( $results as &$item ) {
+        $item['metadata'] = maybe_unserialize( $item['metadata'] );
+    }
+
+    return $results;
 }
 
 // Count all inbox messages
@@ -219,7 +253,8 @@ function init_plugin_suite_user_engine_api_get_inbox( WP_REST_Request $request )
 	$page     = max( 1, (int) $request->get_param( 'page' ) );
 	$per_page = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
 	$total    = init_plugin_suite_user_engine_count_inbox( $user_id );
-	$data     = init_plugin_suite_user_engine_get_inbox( $user_id, $page, $per_page );
+	$filter   = sanitize_key( $request->get_param( 'filter' ) ?: 'all' );
+	$data 	  = init_plugin_suite_user_engine_get_inbox( $user_id, $page, $per_page, $filter );
 
 	$formatted = array_map( 'init_plugin_suite_user_engine_format_inbox', $data );
 
@@ -561,4 +596,34 @@ function init_plugin_suite_user_engine_send_inbox_to_users_bulk(
     return init_plugin_suite_user_engine_insert_inbox_bulk(
         $user_ids, $title, $content, $type, $meta, $expire, $priority, $link, $pinned, $chunk_size
     );
+}
+
+/**
+ * Map inbox type → group
+ */
+function init_plugin_suite_user_engine_get_inbox_group_map() {
+    return [
+        'system' => [
+            'system',
+            'welcome',
+            'vip',
+            'withdraw_request_result',
+            'level_up',
+            'checkin',
+        ],
+        'rewards' => [
+            'lucky_wheel_result',
+            'loot_box_reward',
+            'review_reward',
+            'gift',
+            'gift_received',
+        ],
+        'activity' => [
+            'chapter_update',
+            'recommendation',
+            'comment_like',
+            'comment_reply',
+            'tag_notification',
+        ],
+    ];
 }

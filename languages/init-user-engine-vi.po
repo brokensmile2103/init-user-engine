@@ -1685,3 +1685,24 @@ msgstr "Đổi mã thành công"
 
 msgid "%1$d %2$s"
 msgstr "%1$d %2$s"
+
+msgid "Number of single-use codes to generate. The Code field will be used as prefix."
+msgstr "Số lượng mã dùng một lần cần tạo. Trường Mã sẽ được dùng làm tiền tố."
+
+msgid "All"
+msgstr "Tất cả"
+
+msgid "System"
+msgstr "Hệ thống"
+
+msgid "Rewards"
+msgstr "Phần thưởng"
+
+msgid "Activity"
+msgstr "Hoạt động"
+
+msgid "No messages in this category."
+msgstr "Không có tin nhắn trong mục này."
+
+msgid "View all messages"
+msgstr "Xem tất cả tin nhắn"

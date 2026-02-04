@@ -1685,3 +1685,24 @@ msgstr ""
 
 msgid "%1$d %2$s"
 msgstr ""
+
+msgid "Number of single-use codes to generate. The Code field will be used as prefix."
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "System"
+msgstr ""
+
+msgid "Rewards"
+msgstr ""
+
+msgid "Activity"
+msgstr ""
+
+msgid "No messages in this category."
+msgstr ""
+
+msgid "View all messages"
+msgstr ""

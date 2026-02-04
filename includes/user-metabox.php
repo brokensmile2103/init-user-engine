@@ -43,6 +43,7 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 		.iue-right { margin-left:auto; color:#666; font-size:11px; white-space:nowrap; }
 		.iue-title { font-weight:600; }
 		.iue-dim { color:#666; font-size:12px; }
+		@media (max-width: 480px){ .iue-hidden-xs { display:none; } }
 	';
 	wp_register_style(
 	    'iue-admin-inline-style',
@@ -372,7 +373,7 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 											<div class="iue-dim"><?php echo esc_html( $__content ); ?></div>
 										<?php endif; ?>
 									</div>
-									<span class="iue-badge"><?php echo esc_html( $__type ); ?></span>
+									<span class="iue-badge iue-hidden-xs"><?php echo esc_html( $__type ); ?></span>
 									<span class="iue-badge" style="background:#f5f5f5;color:#444;border-color:#e1e1e1;"><?php echo esc_html( $__status ); ?></span>
 									<span class="iue-right"><?php echo esc_html( date_i18n( 'M j, Y H:i', $__created, true ) ); ?></span>
 								</li>

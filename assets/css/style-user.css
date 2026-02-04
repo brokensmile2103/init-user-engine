@@ -1809,3 +1809,90 @@
 .iue-inbox-content mark {
   padding:1px 3px; border-radius:3px;
 }
+
+/* ===============================
+   Inbox Filters (Tabs)
+================================= */
+
+.iue-inbox-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.iue-inbox-tabs button {
+    padding: 6px 14px;
+    font-size: 13px;
+    border-radius: 999px;
+    border: none;
+    background: #ececec;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+/* hover */
+.iue-inbox-tabs button:hover {
+    background: #e0e0e0;
+}
+
+/* active tab */
+.iue-inbox-tabs button.active {
+    background: var(--iue-theme-color);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ===============================
+   Empty state (filter empty)
+================================= */
+
+.iue-empty-wrap {
+    text-align: center;
+    padding: 26px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+/* View all button */
+.iue-back-all {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 999px;
+    border: none;
+    background: var(--iue-theme-color);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.iue-back-all:hover {
+    background: var(--iue-theme-active-color);
+}
+
+/* ===============================
+   Dark mode
+================================= */
+
+#iue-modal.dark .iue-inbox-tabs button {
+    background: #3a3a3a;
+    color: #ddd;
+}
+
+#iue-modal.dark .iue-inbox-tabs button:hover {
+    background: #4a4a4a;
+}
+
+#iue-modal.dark .iue-inbox-tabs button.active {
+    background: var(--iue-theme-color);
+    color: #fff;
+}
+
+#iue-modal.dark .iue-back-all {
+    background: var(--iue-theme-color);
+    color: #fff;
+}

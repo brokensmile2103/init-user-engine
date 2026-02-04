@@ -184,6 +184,16 @@ function init_plugin_suite_user_engine_render_redeem_codes_page() {
                     </td>
                 </tr>
 
+                <tr class="redeem-single-qty-row">
+                    <th><label for="iue_single_qty"><?php esc_html_e( 'Quantity', 'init-user-engine' ); ?></label></th>
+                    <td>
+                        <input type="number" id="iue_single_qty" name="iue_single_qty" class="small-text" min="1" max="100" value="1">
+                        <p class="description">
+                            <?php esc_html_e( 'Number of single-use codes to generate. The Code field will be used as prefix.', 'init-user-engine' ); ?>
+                        </p>
+                    </td>
+                </tr>
+
                 <tr class="redeem-multi-row" style="display:none;">
                     <th><label><?php esc_html_e( 'Max Uses (X)', 'init-user-engine' ); ?></label></th>
                     <td>
@@ -343,6 +353,22 @@ function init_plugin_suite_user_engine_render_redeem_codes_page() {
                                    onclick="return confirm('<?php echo esc_attr__( 'Disable this code?', 'init-user-engine' ); ?>');">
                                    <?php esc_html_e( 'Disable', 'init-user-engine' ); ?>
                                 </a>
+                                &nbsp;|&nbsp;
+                                <?php if ( (int) $c->used_count === 0 ) : ?>
+                                    <?php
+                                    $delete_url = wp_nonce_url(
+                                        admin_url( 'admin.php?page=init-user-engine-redeem-codes&delete=' . (int) $c->id ),
+                                        'iue_redeem_delete_' . (int) $c->id
+                                    );
+                                    ?>
+                                    <a href="<?php echo esc_url( $delete_url ); ?>"
+                                       onclick="return confirm('<?php echo esc_attr__( 'Delete this unused code permanently?', 'init-user-engine' ); ?>');"
+                                       style="color:#b32d2e;">
+                                       <?php esc_html_e( 'Delete', 'init-user-engine' ); ?>
+                                    </a>
+                                <?php else : ?>
+                                    <span class="description"><?php esc_html_e( 'Used', 'init-user-engine' ); ?></span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

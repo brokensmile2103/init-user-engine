@@ -837,15 +837,19 @@ function renderDailyTaskItem(task) {
 }
 
 // INBOX
-function loadInbox(page = 1) {
+let currentInboxFilter = 'all';
+
+function loadInbox(page = 1, filter = currentInboxFilter) {
+    currentInboxFilter = filter;
     const perPage = 20;
-    const endpoint = `${InitUserEngineData.rest_url}/inbox?page=${page}&per_page=${perPage}`;
+    const endpoint =
+        `${InitUserEngineData.rest_url}/inbox?page=${page}&per_page=${perPage}&filter=${filter}`;
     const headers = {
         'Content-Type': 'application/json',
         'X-WP-Nonce': InitUserEngineData.nonce
     };
 
-    showUserEngineModal(InitUserEngineData.i18n.inbox_title, `<div class="iue-loading"><svg width="30" height="30" viewBox="0 0 25 25" fill="none"><path d="M4.5 12.5a8 8 0 1 0 8-8" stroke="currentColor" stroke-width="1"/></svg></div>`);
+    showUserEngineModal(InitUserEngineData.i18n.inbox_title, `<div class="iue-loading"><svg width="30" height="30" viewBox="0 0 25 25" fill="none"><path d="M4.5 12.5a8 8 0 1 0 8-8" stroke="currentColor" stroke-width="1"/></svg></div>`, 'large');
 
     fetch(endpoint, { method: 'GET', credentials: 'include', headers })
         .then(res => res.json())
@@ -856,7 +860,28 @@ function loadInbox(page = 1) {
             const { data, total_pages, page } = res;
 
             if (!Array.isArray(data) || data.length === 0) {
-                container.innerHTML = `<p class="iue-empty">${InitUserEngineData.i18n.no_messages}</p>`;
+                const isAll = filter === 'all';
+
+                container.innerHTML = `
+                    <div class="iue-empty-wrap">
+                        <p class="iue-empty">
+                            ${isAll
+                                ? InitUserEngineData.i18n.no_messages
+                                : (InitUserEngineData.i18n.no_messages_in_filter || 'No messages in this category.')
+                            }
+                        </p>
+                        ${!isAll
+                            ? `<button class="iue-back-all">${InitUserEngineData.i18n.view_all || 'View all messages'}</button>`
+                            : ''
+                        }
+                    </div>
+                `;
+
+                if (!isAll) {
+                    container.querySelector('.iue-back-all')
+                        ?.addEventListener('click', () => loadInbox(1, 'all'));
+                }
+
                 return;
             }
 
@@ -871,7 +896,30 @@ function loadInbox(page = 1) {
                 </div>
             `;
 
-            container.innerHTML = controls;
+            const tabs = `
+                <div class="iue-inbox-tabs">
+                    <button data-filter="all" class="${filter==='all'?'active':''}">
+                        ${InitUserEngineData.i18n.inbox_all || 'All'}
+                    </button>
+                    <button data-filter="unread" class="${filter==='unread'?'active':''}">
+                        ${InitUserEngineData.i18n.inbox_unread || 'Unread'}
+                    </button>
+                    <button data-filter="system" class="${filter==='system'?'active':''}">
+                        ${InitUserEngineData.i18n.inbox_system || 'System'}
+                    </button>
+                    <button data-filter="rewards" class="${filter==='rewards'?'active':''}">
+                        ${InitUserEngineData.i18n.inbox_rewards || 'Rewards'}
+                    </button>
+                    <button data-filter="activity" class="${filter==='activity'?'active':''}">
+                        ${InitUserEngineData.i18n.inbox_activity || 'Activity'}
+                    </button>
+                    <button data-filter="other" class="${filter==='other'?'active':''}">
+                        ${InitUserEngineData.i18n.inbox_other || 'Other'}
+                    </button>
+                </div>
+                `;
+
+            container.innerHTML = tabs + controls;
             container.appendChild(listEl);
 
             const pagination = renderPagination({
@@ -1057,6 +1105,13 @@ function attachInboxEvents(container) {
     if (deleteAllBtn) {
         setupConfirmableButton(deleteAllBtn, { onConfirm: deleteInboxAll });
     }
+
+    // Nhóm
+    container.querySelectorAll('.iue-inbox-tabs button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            loadInbox(1, btn.dataset.filter);
+        });
+    });
 }
 
 function deleteInboxItem(id, btn) {

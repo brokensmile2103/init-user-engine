@@ -6,30 +6,126 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 add_action( 'admin_init', function () {
 
+    // =============================
     // CREATE CODE
+    // =============================
     if (
         isset( $_POST['iue_redeem_code_nonce'] )
-        && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['iue_redeem_code_nonce'] ) ), 'iue_redeem_code_create' )
+        && wp_verify_nonce(
+            sanitize_text_field( wp_unslash( $_POST['iue_redeem_code_nonce'] ) ),
+            'iue_redeem_code_create'
+        )
     ) {
         global $wpdb;
+
         $table = $wpdb->prefix . 'init_user_engine_redeem_codes';
 
-        // Đọc input có isset + unslash + sanitize (không dùng trực tiếp $_POST trong ?:)
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $code_raw  = isset( $_POST['iue_code'] ) ? wp_unslash( $_POST['iue_code'] ) : '';
-        $code      = sanitize_text_field( $code_raw !== '' ? $code_raw : wp_generate_password( 10, false, false ) );
-        $type      = sanitize_key( isset( $_POST['iue_type'] ) ? wp_unslash( $_POST['iue_type'] ) : 'single' );
-        $coin      = intval( isset( $_POST['iue_coin'] ) ? wp_unslash( $_POST['iue_coin'] ) : 0 );
-        $cash      = intval( isset( $_POST['iue_cash'] ) ? wp_unslash( $_POST['iue_cash'] ) : 0 );
-        $max_uses  = intval( isset( $_POST['iue_max_uses'] ) ? wp_unslash( $_POST['iue_max_uses'] ) : 1 );
-        $user_lock = intval( isset( $_POST['iue_user_lock'] ) ? wp_unslash( $_POST['iue_user_lock'] ) : 0 );
+        // ===== sanitize inputs =====
+        $code_raw  = isset( $_POST['iue_code'] ) ? sanitize_text_field( wp_unslash( $_POST['iue_code'] ) ) : '';
+        $type      = sanitize_key( $_POST['iue_type'] ?? 'single' );
+        $coin      = intval( $_POST['iue_coin'] ?? 0 );
+        $cash      = intval( $_POST['iue_cash'] ?? 0 );
+        $max_uses  = intval( $_POST['iue_max_uses'] ?? 1 );
+        $user_lock = intval( $_POST['iue_user_lock'] ?? 0 );
+
+        // single batch quantity
+        $qty = intval( $_POST['iue_single_qty'] ?? 1 );
+        $qty = max( 1, min( 500, $qty ) );
+
+        $now     = time();
+        $user_id = get_current_user_id();
+
+        $has_prefix = ( $code_raw !== '' );
+
+        /*
+        =====================================
+        ============ SINGLE MODE ============
+        =====================================
+        */
+        if ( 'single' === $type ) {
+
+            // ===== CASE 1: admin nhập 1 mã thủ công → giữ nguyên =====
+            if ( $code_raw !== '' && $qty === 1 ) {
+
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                $wpdb->insert(
+                    $table,
+                    [
+                        'code'        => $code_raw, // ⭐ EXACT, không random
+                        'type'        => 'single',
+                        'coin_amount' => $coin,
+                        'cash_amount' => $cash,
+                        'max_uses'    => 1,
+                        'user_lock'   => null,
+                        'status'      => 'active',
+                        'created_at'  => $now,
+                        'updated_at'  => $now,
+                        'created_by'  => $user_id,
+                    ]
+                );
+
+                wp_safe_redirect( admin_url( 'admin.php?page=init-user-engine-redeem-codes' ) );
+                exit;
+            }
+
+            // ===== CASE 2: batch generate =====
+            $len = ( $code_raw !== '' ) ? 6 : 10;
+
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->query( 'START TRANSACTION' );
+
+            for ( $i = 0; $i < $qty; $i++ ) {
+
+                $suffix = wp_generate_password( $len, false, false );
+
+                $final_code = $code_raw !== ''
+                    ? $code_raw . '_' . $suffix
+                    : $suffix;
+
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                $wpdb->insert(
+                    $table,
+                    [
+                        'code'        => $final_code,
+                        'type'        => 'single',
+                        'coin_amount' => $coin,
+                        'cash_amount' => $cash,
+                        'max_uses'    => 1,
+                        'user_lock'   => null,
+                        'status'      => 'active',
+                        'created_at'  => $now,
+                        'updated_at'  => $now,
+                        'created_by'  => $user_id,
+                    ]
+                );
+            }
+
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->query( 'COMMIT' );
+
+            wp_safe_redirect( admin_url( 'admin.php?page=init-user-engine-redeem-codes' ) );
+            exit;
+        }
+
+        /*
+        =====================================
+        ===== NORMAL (multi / locked) ========
+        =====================================
+        */
 
         if ( 'single' === $type || 'user_locked' === $type ) {
             $max_uses = 1;
         }
 
-        // Insert tạo code (transaction-less, data-changing → không cache)
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $len = $has_prefix ? 6 : 10;
+
+        $suffix = wp_generate_password( $len, false, false );
+
+        $code = $has_prefix
+            ? $code_raw . '_' . $suffix
+            : $suffix;
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->insert(
             $table,
             [
@@ -40,19 +136,19 @@ add_action( 'admin_init', function () {
                 'max_uses'    => $max_uses,
                 'user_lock'   => $user_lock ?: null,
                 'status'      => 'active',
-                'created_at'  => time(),
-                'updated_at'  => time(),
-                'created_by'  => get_current_user_id(),
+                'created_at'  => $now,
+                'updated_at'  => $now,
+                'created_by'  => $user_id,
             ]
         );
 
-        // Gửi inbox cho user_locked
+        // ===== inbox cho user_locked =====
         if ( 'user_locked' === $type && $user_lock > 0 ) {
 
             $title = __( 'You received a redeem code!', 'init-user-engine' );
 
             $content = sprintf(
-                /* translators: %s is the redeem code assigned to the user */
+                /* translators: %s: redeem code string assigned to the user */
                 __( 'You have been assigned a redeem code: %s. You can use it in the Redeem section.', 'init-user-engine' ),
                 $code
             );
@@ -61,11 +157,11 @@ add_action( 'admin_init', function () {
                 'redeem_code' => (string) $code,
                 'coin'        => (int) $coin,
                 'cash'        => (int) $cash,
-                'created_by'  => (int) get_current_user_id(),
+                'created_by'  => (int) $user_id,
             ];
 
             init_plugin_suite_user_engine_send_inbox(
-                (int) $user_lock,
+                $user_lock,
                 $title,
                 $content,
                 'system',
@@ -79,22 +175,55 @@ add_action( 'admin_init', function () {
         exit;
     }
 
-    // DISABLE CODE
+    /*
+    =====================================
+    ============ DISABLE ================
+    =====================================
+    */
     if ( isset( $_GET['disable'], $_GET['_wpnonce'] ) ) {
 
         $id    = absint( $_GET['disable'] );
         $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 
         if ( wp_verify_nonce( $nonce, "iue_redeem_disable_$id" ) ) {
+
             global $wpdb;
             $table = $wpdb->prefix . 'init_user_engine_redeem_codes';
 
-            // Update trạng thái (data-changing → không cache)
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->update(
                 $table,
                 [ 'status' => 'disabled', 'updated_at' => time() ],
                 [ 'id' => $id ]
+            );
+        }
+
+        wp_safe_redirect( admin_url( 'admin.php?page=init-user-engine-redeem-codes' ) );
+        exit;
+    }
+
+    // =============================
+    // DELETE CODE (unused only)
+    // =============================
+    if ( isset( $_GET['delete'], $_GET['_wpnonce'] ) ) {
+
+        $id    = absint( $_GET['delete'] );
+        $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        if ( wp_verify_nonce( $nonce, "iue_redeem_delete_$id" ) ) {
+
+            global $wpdb;
+            $table = $wpdb->prefix . 'init_user_engine_redeem_codes';
+
+            // chỉ xóa khi chưa dùng
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->delete(
+                $table,
+                [
+                    'id'         => $id,
+                    'used_count' => 0,
+                ],
+                [ '%d', '%d' ]
             );
         }
 

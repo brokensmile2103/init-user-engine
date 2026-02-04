@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,7 +159,20 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
-= 1.4.3 – November 28, 2025 =
+= 1.4.4 – February 4, 2026 =
+- Added bulk generation for single-use redeem codes
+  - Supports quantity-based creation with automatic prefix usage
+  - Generates random 6-character suffix using `wp_generate_password()`
+  - When quantity = 1, uses the exact input code (no random suffix appended)
+- Added safe delete action for redeem codes (only unused codes can be removed)
+- Improved redeem code creation flow with better validation, sanitization, and consistent behavior across modes
+- Upgraded Inbox system with categorized filters
+  - Added filters: All, Unread, System, Rewards, Activity, Other
+  - Server-side filtering with correct pagination
+  - Logical grouping of message types for cleaner UX
+- Minor UI and internal refinements for consistency and maintainability
+
+= 1.4.3 – January 28, 2026 =
 - Added VIP state–aware body classes for frontend customization
   - Automatically adds `iue-vip` for active VIP users
   - Adds `iue-vip-expired` for users whose VIP has expired

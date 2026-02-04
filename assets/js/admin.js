@@ -133,15 +133,22 @@ jQuery(function ($) {
 
 (function () {
     const typeField = document.querySelector('select[name="iue_type"]');
+
     const rowMulti  = document.querySelector('.redeem-multi-row');
     const rowUser   = document.querySelector('.redeem-user-row');
+    const rowSingle = document.querySelector('.redeem-single-qty-row');
 
-    if (!typeField || !rowMulti || !rowUser) {
-        return;
+    if (!typeField) return;
+
+    function updateRows() {
+        const val = typeField.value;
+
+        if (rowMulti)  rowMulti.style.display  = (val === 'multi') ? '' : 'none';
+        if (rowUser)   rowUser.style.display   = (val === 'user_locked') ? '' : 'none';
+        if (rowSingle) rowSingle.style.display = (val === 'single') ? '' : 'none';
     }
 
-    typeField.addEventListener('change', function () {
-        rowMulti.style.display = (this.value === 'multi') ? '' : 'none';
-        rowUser.style.display  = (this.value === 'user_locked') ? '' : 'none';
-    });
+    typeField.addEventListener('change', updateRows);
+
+    updateRows(); // init on load
 })();

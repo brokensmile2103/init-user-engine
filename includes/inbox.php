@@ -145,18 +145,52 @@ function init_plugin_suite_user_engine_get_inbox( $user_id, $page = 1, $per_page
 }
 
 // Count all inbox messages
-function init_plugin_suite_user_engine_count_inbox( $user_id ) {
-	global $wpdb;
-	$table = init_plugin_suite_user_engine_get_inbox_table();
+function init_plugin_suite_user_engine_count_inbox( $user_id, $filter = 'all' ) {
+    global $wpdb;
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	return (int) $wpdb->get_var(
-		$wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT COUNT(*) FROM {$table} WHERE user_id = %d",
-			$user_id
-		)
-	);
+    $table = init_plugin_suite_user_engine_get_inbox_table();
+
+    $where  = [ 'user_id = %d' ];
+    $params = [ $user_id ];
+
+    if ( 'unread' === $filter ) {
+        $where[] = "status = 'unread'";
+    }
+    elseif ( in_array( $filter, [ 'system', 'rewards', 'activity' ], true ) ) {
+
+        $map = init_plugin_suite_user_engine_get_inbox_group_map();
+
+        if ( ! empty( $map[ $filter ] ) ) {
+            $types = $map[ $filter ];
+            $placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+
+            $where[] = "type IN ($placeholders)";
+            $params  = array_merge( $params, $types );
+        }
+    }
+    elseif ( 'other' === $filter ) {
+
+        $map = init_plugin_suite_user_engine_get_inbox_group_map();
+        $all = array_merge( ...array_values( $map ) );
+
+        if ( ! empty( $all ) ) {
+            $placeholders = implode( ',', array_fill( 0, count( $all ), '%s' ) );
+
+            $where[] = "type NOT IN ($placeholders)";
+            $params  = array_merge( $params, $all );
+        }
+    }
+
+    $where_sql = implode( ' AND ', $where );
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    return (int) $wpdb->get_var(
+        $wpdb->prepare(
+        	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+            "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}",
+            $params
+        )
+    );
 }
 
 // Get count of unread inbox messages for a user
@@ -252,8 +286,8 @@ function init_plugin_suite_user_engine_api_get_inbox( WP_REST_Request $request )
 
 	$page     = max( 1, (int) $request->get_param( 'page' ) );
 	$per_page = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
-	$total    = init_plugin_suite_user_engine_count_inbox( $user_id );
 	$filter   = sanitize_key( $request->get_param( 'filter' ) ?: 'all' );
+	$total 	  = init_plugin_suite_user_engine_count_inbox( $user_id, $filter );
 	$data 	  = init_plugin_suite_user_engine_get_inbox( $user_id, $page, $per_page, $filter );
 
 	$formatted = array_map( 'init_plugin_suite_user_engine_format_inbox', $data );

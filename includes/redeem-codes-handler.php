@@ -51,7 +51,7 @@ add_action( 'admin_init', function () {
                 $wpdb->insert(
                     $table,
                     [
-                        'code'        => $code_raw, // ⭐ EXACT, không random
+                        'code'        => $code_raw, // EXACT, không random
                         'type'        => 'single',
                         'coin_amount' => $coin,
                         'cash_amount' => $cash,

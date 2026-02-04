@@ -925,7 +925,7 @@ function loadInbox(page = 1, filter = currentInboxFilter) {
             const pagination = renderPagination({
                 page,
                 totalPages: total_pages,
-                onClick: loadInbox
+                onClick: (p) => loadInbox(p, currentInboxFilter)
             });
 
             if (pagination) container.appendChild(pagination);

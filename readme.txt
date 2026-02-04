@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,12 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.5 – February 4, 2026 =
+- Fixed Inbox pagination not respecting the active filter
+- Total message count and total pages are now calculated per category
+- Prevents incorrect page numbers when switching between filters
+- Ensures accurate server-side pagination and consistent navigation
 
 = 1.4.4 – February 4, 2026 =
 - Added bulk generation for single-use redeem codes

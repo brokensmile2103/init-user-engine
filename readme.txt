@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,12 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.6 – February 7, 2026 =
+- Fixed redeem code generation logic to respect custom codes
+- Single-use codes now preserve exact input when quantity is 1
+- Prefix + random suffix only applies to batch generation (qty > 1)
+- Multi-use and locked codes no longer force random suffixes
 
 = 1.4.5 – February 4, 2026 =
 - Fixed Inbox pagination not respecting the active filter

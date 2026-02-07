@@ -35,8 +35,6 @@ add_action( 'admin_init', function () {
         $now     = time();
         $user_id = get_current_user_id();
 
-        $has_prefix = ( $code_raw !== '' );
-
         /*
         =====================================
         ============ SINGLE MODE ============
@@ -44,7 +42,7 @@ add_action( 'admin_init', function () {
         */
         if ( 'single' === $type ) {
 
-            // ===== CASE 1: admin nhập 1 mã thủ công → giữ nguyên =====
+            // ===== CASE 1: admin nhập 1 mã thủ công (qty = 1) → giữ nguyên =====
             if ( $code_raw !== '' && $qty === 1 ) {
 
                 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
@@ -68,19 +66,18 @@ add_action( 'admin_init', function () {
                 exit;
             }
 
-            // ===== CASE 2: batch generate =====
-            $len = ( $code_raw !== '' ) ? 6 : 10;
-
+            // ===== CASE 2: batch generate (qty > 1) =====
+            // Chỉ dùng prefix + random khi qty > 1
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->query( 'START TRANSACTION' );
 
             for ( $i = 0; $i < $qty; $i++ ) {
 
-                $suffix = wp_generate_password( $len, false, false );
+                $suffix = wp_generate_password( 6, false, false );
 
                 $final_code = $code_raw !== ''
                     ? $code_raw . '_' . $suffix
-                    : $suffix;
+                    : wp_generate_password( 10, false, false );
 
                 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
                 $wpdb->insert(
@@ -117,13 +114,10 @@ add_action( 'admin_init', function () {
             $max_uses = 1;
         }
 
-        $len = $has_prefix ? 6 : 10;
-
-        $suffix = wp_generate_password( $len, false, false );
-
-        $code = $has_prefix
-            ? $code_raw . '_' . $suffix
-            : $suffix;
+        // Tôn trọng custom code, chỉ random khi không nhập gì
+        $code = $code_raw !== ''
+            ? $code_raw
+            : wp_generate_password( 10, false, false );
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->insert(

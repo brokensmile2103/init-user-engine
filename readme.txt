@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.6
+Stable tag: 1.4.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,13 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.7 – March 24, 2026 =
+- Added wp_cache support for unread Inbox count
+- Reduced database load by caching COUNT(*) queries per user
+- Cache is automatically cleared on insert, read, delete, and bulk operations
+- Introduced centralized cache helpers and consistent naming
+- Improved performance and internal code structure for better maintainability
 
 = 1.4.6 – February 7, 2026 =
 - Fixed redeem code generation logic to respect custom codes

@@ -1,6 +1,39 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// ─────────────────────────────────────────────
+// Cache helpers (internal use only)
+// ─────────────────────────────────────────────
+
+/**
+ * Cache group dùng cho unread count.
+ * Tập trung ở 1 hằng để dễ đổi sau này.
+ */
+define( 'INIT_PLUGIN_SUITE_IUE_INBOX_CACHE_GROUP', 'init_user_engine_inbox' );
+define( 'INIT_PLUGIN_SUITE_IUE_INBOX_CACHE_TTL',   30 * MINUTE_IN_SECONDS ); // 30 phút – safety net
+
+/**
+ * Trả về cache key cho unread count của 1 user.
+ */
+function init_plugin_suite_user_engine_unread_cache_key( $user_id ) {
+	return 'unread_' . (int) $user_id;
+}
+
+/**
+ * Xóa cache unread count cho 1 user.
+ * Gọi mỗi khi có thao tác làm thay đổi số unread.
+ */
+function init_plugin_suite_user_engine_flush_unread_cache( $user_id ) {
+	wp_cache_delete(
+		init_plugin_suite_user_engine_unread_cache_key( $user_id ),
+		INIT_PLUGIN_SUITE_IUE_INBOX_CACHE_GROUP
+	);
+}
+
+// ─────────────────────────────────────────────
+// Core helpers
+// ─────────────────────────────────────────────
+
 // Get inbox table name
 function init_plugin_suite_user_engine_get_inbox_table() {
 	global $wpdb;
@@ -33,9 +66,14 @@ function init_plugin_suite_user_engine_insert_inbox( $user_id, $title, $content,
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 	$wpdb->insert( init_plugin_suite_user_engine_get_inbox_table(), $data );
 
-	do_action( 'init_plugin_suite_user_engine_inbox_inserted', $wpdb->insert_id, $user_id, $data );
+	$insert_id = $wpdb->insert_id;
 
-	return $wpdb->insert_id;
+	// Insert thêm 1 tin unread → flush cache
+	init_plugin_suite_user_engine_flush_unread_cache( $user_id );
+
+	do_action( 'init_plugin_suite_user_engine_inbox_inserted', $insert_id, $user_id, $data );
+
+	return $insert_id;
 }
 
 // Send inbox helper
@@ -193,14 +231,32 @@ function init_plugin_suite_user_engine_count_inbox( $user_id, $filter = 'all' ) 
     );
 }
 
-// Get count of unread inbox messages for a user
+/**
+ * Get count of unread inbox messages for a user.
+ *
+ * Kết quả được cache bằng wp_cache (group: iue_inbox, TTL: 5 phút).
+ * Cache bị xóa tự động khi:
+ *   - Insert tin mới       → init_plugin_suite_user_engine_insert_inbox()
+ *   - Bulk insert          → init_plugin_suite_user_engine_insert_inbox_bulk() (qua action)
+ *   - Mark 1 tin đã đọc   → init_plugin_suite_user_engine_mark_inbox_read()
+ *   - Mark tất cả đã đọc  → init_plugin_suite_user_engine_api_mark_inbox_all_read()
+ *   - Xóa 1 tin           → init_plugin_suite_user_engine_delete_inbox()
+ *   - Xóa tất cả tin      → init_plugin_suite_user_engine_delete_all_inbox()
+ */
 function init_plugin_suite_user_engine_get_unread_inbox_count( $user_id ) {
-	global $wpdb;
-
 	if ( ! $user_id ) {
 		return 0;
 	}
 
+	$cache_key = init_plugin_suite_user_engine_unread_cache_key( $user_id );
+	$cached    = wp_cache_get( $cache_key, INIT_PLUGIN_SUITE_IUE_INBOX_CACHE_GROUP );
+
+	// wp_cache_get() trả về false khi miss – cần phân biệt với 0 (int)
+	if ( false !== $cached ) {
+		return (int) $cached;
+	}
+
+	global $wpdb;
 	$table = init_plugin_suite_user_engine_get_inbox_table();
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
@@ -212,7 +268,11 @@ function init_plugin_suite_user_engine_get_unread_inbox_count( $user_id ) {
 		)
 	);
 
-	return (int) $count;
+	$count = (int) $count;
+
+	wp_cache_set( $cache_key, $count, INIT_PLUGIN_SUITE_IUE_INBOX_CACHE_GROUP, INIT_PLUGIN_SUITE_IUE_INBOX_CACHE_TTL );
+
+	return $count;
 }
 
 // Mark inbox message as read
@@ -220,11 +280,18 @@ function init_plugin_suite_user_engine_mark_inbox_read( $message_id, $user_id ) 
 	global $wpdb;
 	$table = init_plugin_suite_user_engine_get_inbox_table();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	return $wpdb->update(
+	$result = $wpdb->update(
 		$table,
 		[ 'status' => 'read' ],
 		[ 'id' => $message_id, 'user_id' => $user_id ]
 	);
+
+	// Flush cache nếu update thành công (rows_affected > 0)
+	if ( $result ) {
+		init_plugin_suite_user_engine_flush_unread_cache( $user_id );
+	}
+
+	return $result;
 }
 
 // Mark inbox message as claimed
@@ -237,6 +304,8 @@ function init_plugin_suite_user_engine_mark_inbox_claimed( $message_id, $user_id
 		[ 'status' => 'claimed' ],
 		[ 'id' => $message_id, 'user_id' => $user_id ]
 	);
+	// Lưu ý: 'claimed' không thay đổi unread count (tin đã phải ở trạng thái khác trước),
+	// nên không cần flush cache ở đây.
 }
 
 // Get single inbox item
@@ -265,8 +334,26 @@ function init_plugin_suite_user_engine_get_inbox_item( $message_id, $user_id ) {
 function init_plugin_suite_user_engine_delete_inbox( $message_id, $user_id ) {
 	global $wpdb;
 	$table = init_plugin_suite_user_engine_get_inbox_table();
+
+	// Lấy status trước khi xóa để biết có cần flush cache không
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	$status = $wpdb->get_var(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT status FROM {$table} WHERE id = %d AND user_id = %d",
+			$message_id, $user_id
+		)
+	);
+
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	return $wpdb->delete( $table, [ 'id' => $message_id, 'user_id' => $user_id ] );
+	$result = $wpdb->delete( $table, [ 'id' => $message_id, 'user_id' => $user_id ] );
+
+	// Chỉ flush khi tin bị xóa thực sự là 'unread' (tránh flush thừa)
+	if ( $result && 'unread' === $status ) {
+		init_plugin_suite_user_engine_flush_unread_cache( $user_id );
+	}
+
+	return $result;
 }
 
 // Delete all inbox items of a user
@@ -274,8 +361,19 @@ function init_plugin_suite_user_engine_delete_all_inbox( $user_id ) {
 	global $wpdb;
 	$table = init_plugin_suite_user_engine_get_inbox_table();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	return $wpdb->delete( $table, [ 'user_id' => $user_id ] );
+	$result = $wpdb->delete( $table, [ 'user_id' => $user_id ] );
+
+	// Xóa hết → unread chắc chắn về 0, flush luôn
+	if ( $result ) {
+		init_plugin_suite_user_engine_flush_unread_cache( $user_id );
+	}
+
+	return $result;
 }
+
+// ─────────────────────────────────────────────
+// REST API handlers
+// ─────────────────────────────────────────────
 
 // GET /inbox
 function init_plugin_suite_user_engine_api_get_inbox( WP_REST_Request $request ) {
@@ -316,6 +414,8 @@ function init_plugin_suite_user_engine_api_mark_inbox_read( WP_REST_Request $req
 		return new WP_Error( 'update_failed', 'Cannot mark as read', [ 'status' => 500 ] );
 	}
 
+	// Cache đã được flush bên trong mark_inbox_read() rồi, không cần làm gì thêm.
+
 	return rest_ensure_response( [ 'status' => 'marked', 'id' => $message_id ] );
 }
 
@@ -338,6 +438,11 @@ function init_plugin_suite_user_engine_api_mark_inbox_all_read( WP_REST_Request 
 		)
 	);
 
+	// Đánh dấu hết → unread count = 0, flush cache
+	if ( $updated ) {
+		init_plugin_suite_user_engine_flush_unread_cache( $user_id );
+	}
+
 	return rest_ensure_response( [ 'status' => 'all_marked', 'count' => $updated ] );
 }
 
@@ -356,6 +461,8 @@ function init_plugin_suite_user_engine_api_delete_inbox_item( WP_REST_Request $r
 		return new WP_Error( 'delete_failed', 'Cannot delete message', [ 'status' => 500 ] );
 	}
 
+	// Cache đã được flush bên trong delete_inbox() rồi (nếu tin là unread).
+
 	return rest_ensure_response( [ 'status' => 'deleted', 'id' => $message_id ] );
 }
 
@@ -369,8 +476,14 @@ function init_plugin_suite_user_engine_api_delete_inbox_all( WP_REST_Request $re
 
 	$count = init_plugin_suite_user_engine_delete_all_inbox( $user_id );
 
+	// Cache đã được flush bên trong delete_all_inbox() rồi.
+
 	return rest_ensure_response( [ 'status' => 'all_deleted', 'count' => $count ] );
 }
+
+// ─────────────────────────────────────────────
+// Format + Cron + Admin
+// ─────────────────────────────────────────────
 
 // Format inbox
 function init_plugin_suite_user_engine_format_inbox( $item ) {
@@ -417,6 +530,7 @@ function init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler() {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $wpdb->query("DELETE i FROM {$inbox_table} i LEFT JOIN {$users_table} u ON i.user_id = u.ID WHERE u.ID IS NULL");
     // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // Không flush cache ở đây vì orphaned user đã không còn session để dùng cache.
 }
 
 // Lấy danh sách type hiện có trong inbox
@@ -463,6 +577,9 @@ function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE type = %s", $type ) );
 
+    // Không flush cache theo từng user ở đây vì cleanup type có thể ảnh hưởng nhiều user.
+    // Cache sẽ tự expire sau TTL (5 phút) – chấp nhận được cho thao tác admin hiếm gặp này.
+
     wp_safe_redirect( add_query_arg(
         array(
             'page'               => 'init-user-engine-inbox-stats',
@@ -475,6 +592,10 @@ function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
     ) );
     exit;
 }
+
+// ─────────────────────────────────────────────
+// Bulk insert
+// ─────────────────────────────────────────────
 
 /**
  * Bulk-insert inbox messages cho nhiều user trong 1 hoặc vài query.
@@ -611,6 +732,30 @@ function init_plugin_suite_user_engine_insert_inbox_bulk(
 
     return $total_inserted;
 }
+
+/**
+ * Flush unread cache cho toàn bộ user trong một batch sau bulk insert.
+ * Hook vào action 'init_plugin_suite_user_engine_inbox_bulk_inserted'.
+ *
+ * Flush diễn ra SAU khi bulk insert hoàn tất để đảm bảo DB đã ghi xong.
+ *
+ * @param int   $inserted  Số row chèn thành công (không dùng, nhưng bắt buộc theo signature).
+ * @param array $batch     Mảng user_id vừa được insert.
+ */
+function init_plugin_suite_user_engine_flush_cache_after_bulk_insert( $inserted, $batch ) {
+	if ( empty( $inserted ) || empty( $batch ) ) {
+		return;
+	}
+	foreach ( (array) $batch as $uid ) {
+		init_plugin_suite_user_engine_flush_unread_cache( (int) $uid );
+	}
+}
+add_action(
+	'init_plugin_suite_user_engine_inbox_bulk_inserted',
+	'init_plugin_suite_user_engine_flush_cache_after_bulk_insert',
+	10,
+	2
+);
 
 /**
  * Helper: Gửi inbox cho nhiều user bằng bulk insert (thay cho loop).

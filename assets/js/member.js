@@ -583,11 +583,11 @@ function initCheckin() {
     const cashEl      = document.querySelector('.iue-value-cash');
 
     const STORAGE_KEY_REMAINING = 'iue_checkin_remaining_seconds';
-    const STORAGE_KEY_DATE = 'iue_checkin_date';
+    const STORAGE_KEY_DATE      = 'iue_checkin_date';
     const COUNTDOWN = InitUserEngineData.online_minutes * 60;
 
     let countdownInterval = null;
-    let remainingSeconds = 0;
+    let remainingSeconds  = 0;
 
     function clearCountdown() {
         if (countdownInterval) clearInterval(countdownInterval);
@@ -600,25 +600,23 @@ function initCheckin() {
         countdownEl.textContent = `${min}:${sec}`;
     }
 
-    function saveRemainingTime(seconds) {
-        const today = new Date().toDateString();
-        localStorage.setItem(STORAGE_KEY_REMAINING, seconds);
-        localStorage.setItem(STORAGE_KEY_DATE, today);
+    // Chỉ lưu khi unload/hidden, không lưu mỗi giây
+    function saveRemainingTime() {
+        if (remainingSeconds > 0) {
+            localStorage.setItem(STORAGE_KEY_REMAINING, remainingSeconds);
+            localStorage.setItem(STORAGE_KEY_DATE, new Date().toLocaleDateString('en-CA')); // YYYY-MM-DD theo local
+        }
     }
 
     function getRemainingTime() {
         const savedDate = localStorage.getItem(STORAGE_KEY_DATE);
-        const today = new Date().toDateString();
-        
-        // Nếu đã qua ngày mới, xóa dữ liệu cũ
+        const today = new Date().toLocaleDateString('en-CA');
         if (savedDate !== today) {
-            localStorage.removeItem(STORAGE_KEY_REMAINING);
-            localStorage.removeItem(STORAGE_KEY_DATE);
-            return 0;
+            clearStoredTime();
+            return null; // null = khác ngày, thiết bị khác hoặc ngày mới
         }
-        
-        const remaining = parseInt(localStorage.getItem(STORAGE_KEY_REMAINING) || '0', 10);
-        return remaining;
+        const val = parseInt(localStorage.getItem(STORAGE_KEY_REMAINING) || '0', 10);
+        return val > 0 ? val : null;
     }
 
     function clearStoredTime() {
@@ -635,17 +633,12 @@ function initCheckin() {
         updateCountdownDisplay(remainingSeconds);
 
         countdownInterval = setInterval(() => {
-            // Chỉ đếm khi tab đang active
-            if (document.hidden) {
-                return;
-            }
+            if (document.hidden) return; // Tab ẩn không đếm
 
             remainingSeconds--;
-            
+
             if (remainingSeconds > 0) {
                 updateCountdownDisplay(remainingSeconds);
-                // Lưu thời gian còn lại sau mỗi giây
-                saveRemainingTime(remainingSeconds);
             } else {
                 clearCountdown();
                 clearStoredTime();
@@ -654,19 +647,9 @@ function initCheckin() {
             }
         }, 1000);
 
-        // Lưu trạng thái khi tab bị ẩn
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && remainingSeconds > 0) {
-                saveRemainingTime(remainingSeconds);
-            }
-        });
-
-        // Lưu trạng thái khi tắt trang
-        window.addEventListener('beforeunload', () => {
-            if (remainingSeconds > 0) {
-                saveRemainingTime(remainingSeconds);
-            }
-        });
+        // Lưu khi ẩn tab hoặc tắt trang
+        document.addEventListener('visibilitychange', saveRemainingTime);
+        window.addEventListener('beforeunload', saveRemainingTime);
     }
 
     function claimReward() {
@@ -681,8 +664,8 @@ function initCheckin() {
         .then(res => res.json())
         .then(data => {
             if (data.status === 'reward_claimed') {
-                if (typeof data.coin !== 'undefined') coinEl.textContent = iueFmt(data.coin);
-                if (typeof data.cash !== 'undefined') cashEl.textContent = iueFmt(data.cash);
+                if (typeof data.coin  !== 'undefined') coinEl.textContent = iueFmt(data.coin);
+                if (typeof data.cash  !== 'undefined') cashEl.textContent = iueFmt(data.cash);
                 if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
 
                 document.dispatchEvent(new CustomEvent('iue:reward:claimed', { detail: data }));
@@ -702,27 +685,22 @@ function initCheckin() {
     function checkExistingCountdown() {
         const checkin = checkinBox.dataset.checkin === '1';
         const rewarded = checkinBox.dataset.rewarded === '1';
-
         if (!checkin || rewarded) return false;
 
         const remaining = getRemainingTime();
-        
-        if (remaining > 0) {
+
+        if (remaining !== null) {
+            // Cùng thiết bị, cùng ngày → tiếp tục đếm
             startCountdown(remaining);
             return true;
-        } else if (remaining === 0 && localStorage.getItem(STORAGE_KEY_DATE)) {
-            // Nếu đã hết thời gian nhưng chưa claim reward
-            clearStoredTime();
-            claimReward();
-            return false;
+        } else {
+            // Thiết bị khác hoặc ngày mới → đếm từ đầu
+            startCountdown(COUNTDOWN);
+            return true;
         }
-
-        return false;
     }
 
-    if (checkExistingCountdown()) {
-        return;
-    }
+    if (checkExistingCountdown()) return;
 
     button.addEventListener('click', () => {
         button.disabled = true;
@@ -742,8 +720,8 @@ function initCheckin() {
                 checkinBox.dataset.checkin = '1';
                 streakEl.textContent = data.streak;
 
-                if (typeof data.coin !== 'undefined') coinEl.textContent = iueFmt(data.coin);
-                if (typeof data.cash !== 'undefined') cashEl.textContent = iueFmt(data.cash);
+                if (typeof data.coin  !== 'undefined') coinEl.textContent = iueFmt(data.coin);
+                if (typeof data.cash  !== 'undefined') cashEl.textContent = iueFmt(data.cash);
                 if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
 
                 document.dispatchEvent(new CustomEvent('iue:checkin:success', { detail: data }));

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.7
+Stable tag: 1.4.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,12 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.8 – March 25, 2026 =
+- Fixed check-in countdown not starting on new devices after login
+- Countdown now resets to full duration on unrecognized devices
+- Remaining time is saved only on tab hide and page unload, not every second
+- Fixed date comparison using locale-aware format to prevent UTC offset mismatch
 
 = 1.4.7 – March 24, 2026 =
 - Added wp_cache support for unread Inbox count

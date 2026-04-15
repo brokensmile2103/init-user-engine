@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.8
+Stable tag: 1.4.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)  
 - `init_plugin_suite_user_engine_vip_expire_soon_threshold` – Modify the threshold (in seconds) used to determine when VIP is considered close to expiration  
 - `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element
+- `init_plugin_suite_user_engine_theme_colors` – Modify theme color system (primary and active colors)
 
 === Actions ===
 
@@ -158,6 +159,11 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.4.9 – April 15, 2026 =
+- Added filter to override theme color system (theme_color, theme_active_color)
+- Introduced centralized color hook for easier customization from themes and addons
+- Ensured safe fallback when filter returns incomplete or invalid values
 
 = 1.4.8 – March 25, 2026 =
 - Fixed check-in countdown not starting on new devices after login

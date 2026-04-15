@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.4.8
+ * Version: 1.4.9
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.4.8' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.4.9' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -81,6 +81,24 @@ function init_plugin_suite_user_engine_enqueue_guest_assets() {
 
     $theme_color = isset( $settings['theme_color'] ) ? sanitize_hex_color( $settings['theme_color'] ) : '#0073aa';
     $theme_active_color = init_plugin_suite_user_engine_darken_color( $theme_color, 20 );
+
+    $colors = apply_filters(
+        'init_plugin_suite_user_engine_theme_colors',
+        [
+            'theme_color'        => $theme_color,
+            'theme_active_color' => $theme_active_color,
+        ],
+        $settings
+    );
+
+    // Fallback an toàn (tránh dev khác phá key)
+    $theme_color = isset( $colors['theme_color'] )
+        ? sanitize_hex_color( $colors['theme_color'] )
+        : $theme_color;
+
+    $theme_active_color = isset( $colors['theme_active_color'] )
+        ? sanitize_hex_color( $colors['theme_active_color'] )
+        : $theme_active_color;
 
     $custom_css = ":root {
         --iue-theme-color: {$theme_color};
@@ -161,6 +179,24 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
 
     $theme_color = isset( $settings['theme_color'] ) ? sanitize_hex_color( $settings['theme_color'] ) : '#0073aa';
     $theme_active_color = init_plugin_suite_user_engine_darken_color( $theme_color, 20 );
+
+    $colors = apply_filters(
+        'init_plugin_suite_user_engine_theme_colors',
+        [
+            'theme_color'        => $theme_color,
+            'theme_active_color' => $theme_active_color,
+        ],
+        $settings
+    );
+
+    // Fallback an toàn (tránh dev khác phá key)
+    $theme_color = isset( $colors['theme_color'] )
+        ? sanitize_hex_color( $colors['theme_color'] )
+        : $theme_color;
+
+    $theme_active_color = isset( $colors['theme_active_color'] )
+        ? sanitize_hex_color( $colors['theme_active_color'] )
+        : $theme_active_color;
 
     $custom_css = ":root {
         --iue-theme-color: {$theme_color};

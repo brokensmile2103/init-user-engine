@@ -419,6 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			btn.type = "button";
 			btn.className = "iue-password-toggle";
 			btn.innerHTML = svgEye;
+			btn.tabIndex = -1;
 			wrap.appendChild(btn);
 
 			// Toggle function

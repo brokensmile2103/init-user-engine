@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.9
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,17 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.0 – April 21, 2026 =
+- Migrated transaction log (coin/cash) and EXP log from user meta to dedicated database tables
+- Introduced `init_user_engine_transaction_log` and `init_user_engine_exp_log` tables for better scalability
+- Automatic data migration from old user meta (`iue_coin_cash_log`, `iue_exp_log`) with cleanup on completion
+- Migration runs in batches of 200 users to prevent timeouts on large sites and resumes if interrupted
+- REST API pagination for transaction and EXP history now uses true COUNT + OFFSET instead of loading all records
+- Added `wp_cache` support for transaction and EXP log reads with automatic invalidation on write
+- Database schema check is now version-gated to avoid redundant queries on every admin load
+- Schema and migration are also triggered via `upgrader_process_complete` for reliable update handling
+- Full backward compatibility maintained: all hooks, filters, and i18n strings are preserved
 
 = 1.4.9 – April 15, 2026 =
 - Added filter to override theme color system (theme_color, theme_active_color)

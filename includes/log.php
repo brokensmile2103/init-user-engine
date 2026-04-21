@@ -1,7 +1,82 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-// Log a transaction (coin, cash) with type/source/change
+// ==========================
+// Internal DB helpers
+// ==========================
+
+/**
+ * Trả về tên bảng transaction log (có prefix).
+ *
+ * @return string
+ */
+function init_plugin_suite_user_engine_txn_table() {
+	global $wpdb;
+	return $wpdb->prefix . 'init_user_engine_transaction_log';
+}
+
+/**
+ * Trả về tên bảng EXP log (có prefix).
+ *
+ * @return string
+ */
+function init_plugin_suite_user_engine_exp_table() {
+	global $wpdb;
+	return $wpdb->prefix . 'init_user_engine_exp_log';
+}
+
+// ==========================
+// Cache helpers
+// ==========================
+
+function init_plugin_suite_user_engine_cache_group() {
+	return 'iue_logs';
+}
+
+function init_plugin_suite_user_engine_cache_ttl() {
+	return 10 * MINUTE_IN_SECONDS;
+}
+
+/**
+ * Cache key cho danh sách log (dùng trong get_transaction_log / get_exp_log).
+ *
+ * @param string $type    'txn' | 'exp'
+ * @param int    $user_id
+ * @return string
+ */
+function init_plugin_suite_user_engine_cache_key( $type, $user_id ) {
+	return "{$type}_log_user_" . (int) $user_id;
+}
+
+/**
+ * Cache key cho COUNT(*) của REST API pagination.
+ * Tách riêng khỏi cache list vì vòng đời và mục đích khác nhau.
+ *
+ * @param string $type    'txn' | 'exp'
+ * @param int    $user_id
+ * @return string
+ */
+function init_plugin_suite_user_engine_count_cache_key( $type, $user_id ) {
+	return "{$type}_count_user_" . (int) $user_id;
+}
+
+// ==========================
+// Transaction log (coin/cash)
+// ==========================
+
+/**
+ * Ghi một giao dịch coin/cash vào DB.
+ *
+ * Tương đương hàm cũ dùng user meta iue_coin_cash_log.
+ * Giữ nguyên toàn bộ logic VIP bonus và hook.
+ *
+ * @param int    $user_id
+ * @param string $type    'coin' | 'cash'
+ * @param int    $amount  Số lượng (dương)
+ * @param string $source  Nguồn giao dịch
+ * @param string $change  'add' | 'deduct'
+ * @return bool
+ */
 function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount, $source, $change = 'add' ) {
 	if ( ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
 		return false;
@@ -11,11 +86,10 @@ function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount
 		return false;
 	}
 
-	$log = (array) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin_cash_log', [] );
-
-	$is_vip = init_plugin_suite_user_engine_is_vip( $user_id );
+	$is_vip          = init_plugin_suite_user_engine_is_vip( $user_id );
 	$original_amount = absint( $amount );
 	$final_amount    = $original_amount;
+	$bonus_percent   = 0;
 
 	// Apply VIP bonus (chỉ áp dụng cho coin và change = add)
 	if ( $type === 'coin' && $change === 'add' && $is_vip ) {
@@ -23,48 +97,130 @@ function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount
 		$bonus   = absint( $options['vip_bonus_coin'] ?? 0 );
 
 		if ( $bonus > 0 ) {
+			$bonus_percent = $bonus;
 			$final_amount += (int) round( $original_amount * $bonus / 100 );
 		}
 	}
 
-	// Ghi log
-	$log[] = [
-		'type'           => $type,
-		'amount'         => $final_amount,        // amount đã + bonus
-		'original'       => $original_amount,     // amount trước khi + bonus
-		'change'         => $change,
-		'source'         => $source,
-		'time'           => current_time( 'Y-m-d H:i:s' ),
-		'vip_bonus'      => $is_vip,
-		'bonus_percent'  => $is_vip ? ( $options['vip_bonus_coin'] ?? 0 ) : 0,
-	];
+	global $wpdb;
+	$table = init_plugin_suite_user_engine_txn_table();
 
-	// Giữ tối đa 100 log
-	if ( count( $log ) > 100 ) {
-		$log = array_slice( $log, -100 );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+	$inserted = $wpdb->insert(
+		$table,
+		[
+			'user_id'         => (int) $user_id,
+			'type'            => $type,
+			'amount'          => $final_amount,
+			'original_amount' => $original_amount,
+			'change_type'     => $change,
+			'source'          => sanitize_text_field( $source ),
+			'vip_bonus'       => $is_vip ? 1 : 0,
+			'bonus_percent'   => $bonus_percent,
+			'logged_at'       => current_time( 'Y-m-d H:i:s' ),
+		],
+		[ '%d', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%s' ]
+	);
+
+	if ( ! $inserted ) {
+		return false;
 	}
 
-	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_coin_cash_log', $log );
+	// Tái tạo $entry theo format cũ để các hook cũ vẫn nhận được đúng dữ liệu
+	$entry = [
+		'type'          => $type,
+		'amount'        => $final_amount,
+		'original'      => $original_amount,
+		'change'        => $change,
+		'source'        => $source,
+		'time'          => current_time( 'Y-m-d H:i:s' ),
+		'vip_bonus'     => $is_vip,
+		'bonus_percent' => $bonus_percent,
+	];
 
-	do_action( 'init_plugin_suite_user_engine_transaction_logged', $user_id, end( $log ) );
+	do_action( 'init_plugin_suite_user_engine_transaction_logged', $user_id, $entry );
 
 	return true;
 }
 
-// Get user's transaction log
+/**
+ * Lấy toàn bộ transaction log của user từ DB.
+ *
+ * Kết quả trả về theo format mảng cũ (tương thích ngược) để các đoạn code
+ * khác trong plugin đọc log vẫn hoạt động bình thường.
+ *
+ * @param int $user_id
+ * @return array  Mảng các entry theo thứ tự tăng dần (cũ → mới), tối đa 100 entry.
+ */
 function init_plugin_suite_user_engine_get_transaction_log( $user_id ) {
-	$log = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_coin_cash_log', [] );
-	return is_array( $log ) ? $log : [];
+	$user_id   = (int) $user_id;
+	$cache_key = init_plugin_suite_user_engine_cache_key( 'txn', $user_id );
+	$group     = init_plugin_suite_user_engine_cache_group();
+
+	$cached = wp_cache_get( $cache_key, $group );
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
+	global $wpdb;
+	$table = init_plugin_suite_user_engine_txn_table();
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $rows ) ) {
+		wp_cache_set( $cache_key, [], $group, init_plugin_suite_user_engine_cache_ttl() );
+		return [];
+	}
+
+	$data = array_map( 'init_plugin_suite_user_engine_txn_row_to_legacy', $rows );
+
+	wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
+
+	return $data;
 }
 
-// Format a log entry into readable message
+/**
+ * Chuyển 1 row DB transaction sang format mảng legacy (giống meta cũ).
+ *
+ * @param array $row
+ * @return array
+ */
+function init_plugin_suite_user_engine_txn_row_to_legacy( array $row ) {
+	return [
+		'type'          => $row['type'],
+		'amount'        => (int) $row['amount'],
+		'original'      => (int) $row['original_amount'],
+		'change'        => $row['change_type'],
+		'source'        => $row['source'],
+		'time'          => $row['logged_at'],
+		'vip_bonus'     => (bool) $row['vip_bonus'],
+		'bonus_percent' => (int) $row['bonus_percent'],
+		// Thêm id DB để dùng nội bộ nếu cần
+		'_id'           => (int) $row['id'],
+	];
+}
+
+/**
+ * Format một log entry thành chuỗi thông báo dễ đọc.
+ * Giữ nguyên toàn bộ switch-case và chuỗi i18n cũ.
+ *
+ * @param array $entry  Entry theo format legacy hoặc row DB.
+ * @return string
+ */
 function init_plugin_suite_user_engine_format_log_message( $entry ) {
 	$source = $entry['source'] ?? 'unknown';
 	$type   = $entry['type'] ?? '';
 	$amount = absint( $entry['amount'] ?? 0 );
-	
+
 	$message = '';
-	
+
 	switch ( $source ) {
 		case 'daily_login':
 			$message = __( 'Daily login bonus', 'init-user-engine' );
@@ -114,32 +270,66 @@ function init_plugin_suite_user_engine_format_log_message( $entry ) {
 			$message = ucfirst( str_replace( '_', ' ', $source ) );
 			break;
 	}
-	
+
 	/**
 	 * Filter to customize log message format
-	 * 
+	 *
 	 * @param string $message The formatted message
 	 * @param array  $entry   The original log entry data
 	 * @param string $source  The source of the log entry
 	 * @param string $type    The type of the log entry
 	 * @param int    $amount  The amount value
-	 * 
+	 *
 	 * @since 1.0.0
 	 */
 	return apply_filters( 'init_plugin_suite_user_engine_format_log_message', $message, $entry, $source, $type, $amount );
 }
 
-// Log EXP separately
+// ==========================
+// EXP log
+// ==========================
+
+/**
+ * Ghi một entry EXP vào DB.
+ *
+ * Tương đương hàm cũ dùng user meta iue_exp_log.
+ *
+ * @param int    $user_id
+ * @param int    $amount
+ * @param string $source
+ * @param string $change 'add' | 'deduct'
+ * @return bool
+ */
 function init_plugin_suite_user_engine_log_exp( $user_id, $amount, $source = '', $change = 'add' ) {
 	if ( ! in_array( $change, [ 'add', 'deduct' ], true ) ) {
 		return false;
 	}
 
-	$log = (array) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_exp_log', [] );
-
 	$is_vip = init_plugin_suite_user_engine_is_vip( $user_id );
 
-	$log[] = [
+	global $wpdb;
+	$table = init_plugin_suite_user_engine_exp_table();
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+	$inserted = $wpdb->insert(
+		$table,
+		[
+			'user_id'     => (int) $user_id,
+			'amount'      => absint( $amount ),
+			'change_type' => $change,
+			'source'      => sanitize_text_field( $source ),
+			'vip_bonus'   => $is_vip ? 1 : 0,
+			'logged_at'   => current_time( 'Y-m-d H:i:s' ),
+		],
+		[ '%d', '%d', '%s', '%s', '%d', '%s' ]
+	);
+
+	if ( ! $inserted ) {
+		return false;
+	}
+
+	// Tái tạo $entry theo format cũ để hook cũ vẫn hoạt động
+	$entry = [
 		'amount'    => absint( $amount ),
 		'change'    => $change,
 		'source'    => $source,
@@ -147,22 +337,75 @@ function init_plugin_suite_user_engine_log_exp( $user_id, $amount, $source = '',
 		'vip_bonus' => $is_vip,
 	];
 
-	if ( count( $log ) > 100 ) {
-		$log = array_slice( $log, -100 );
-	}
-
-	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_exp_log', $log );
-
-	do_action( 'init_plugin_suite_user_engine_exp_logged', $user_id, end( $log ) );
+	do_action( 'init_plugin_suite_user_engine_exp_logged', $user_id, $entry );
 
 	return true;
 }
 
+/**
+ * Lấy EXP log của user từ DB.
+ *
+ * @param int $user_id
+ * @return array  Format legacy (tương thích ngược), tối đa 100 entry.
+ */
 function init_plugin_suite_user_engine_get_exp_log( $user_id ) {
-	$log = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_exp_log', [] );
-	return is_array( $log ) ? $log : [];
+	$user_id   = (int) $user_id;
+	$cache_key = init_plugin_suite_user_engine_cache_key( 'exp', $user_id );
+	$group     = init_plugin_suite_user_engine_cache_group();
+
+	$cached = wp_cache_get( $cache_key, $group );
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
+	global $wpdb;
+	$table = init_plugin_suite_user_engine_exp_table();
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $rows ) ) {
+		wp_cache_set( $cache_key, [], $group, init_plugin_suite_user_engine_cache_ttl() );
+		return [];
+	}
+
+	$data = array_map( 'init_plugin_suite_user_engine_exp_row_to_legacy', $rows );
+
+	wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
+
+	return $data;
 }
 
+/**
+ * Chuyển 1 row DB EXP sang format mảng legacy (giống meta cũ).
+ *
+ * @param array $row
+ * @return array
+ */
+function init_plugin_suite_user_engine_exp_row_to_legacy( array $row ) {
+	return [
+		'amount'    => (int) $row['amount'],
+		'change'    => $row['change_type'],
+		'source'    => $row['source'],
+		'time'      => $row['logged_at'],
+		'vip_bonus' => (bool) $row['vip_bonus'],
+		'_id'       => (int) $row['id'],
+	];
+}
+
+/**
+ * Format một EXP log entry thành label.
+ * Giữ nguyên toàn bộ switch-case và chuỗi i18n cũ.
+ *
+ * @param array $entry
+ * @return string
+ */
 function init_plugin_suite_user_engine_format_exp_log( $entry ) {
 	$source = $entry['source'] ?? 'unknown';
 	$label  = '';
@@ -220,35 +463,74 @@ function init_plugin_suite_user_engine_format_exp_log( $entry ) {
 	return apply_filters( 'init_plugin_suite_user_engine_exp_log_label', $label, $source, $entry );
 }
 
-// REST: transaction history
+// ==========================
+// REST API: Transaction history
+// ==========================
+
+/**
+ * REST handler: lấy lịch sử giao dịch coin/cash của user hiện tại.
+ * Hỗ trợ phân trang qua ?page=&per_page=
+ *
+ * COUNT(*) được cache riêng (txn_count_user_{id}) để tránh query nặng mỗi lần
+ * chuyển trang. Cache tự động bị xóa khi có giao dịch mới được ghi.
+ * Các page result không cache vì offset thay đổi liên tục và lợi ích thấp.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_get_transactions( WP_REST_Request $request ) {
 	$user_id = get_current_user_id();
 	if ( ! $user_id ) {
 		return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
 	}
 
-	$log_all = init_plugin_suite_user_engine_get_transaction_log( $user_id ) ?: [];
+	global $wpdb;
+	$table     = init_plugin_suite_user_engine_txn_table();
+	$group     = init_plugin_suite_user_engine_cache_group();
+	$count_key = init_plugin_suite_user_engine_count_cache_key( 'txn', $user_id );
+	$page      = max( 1, (int) $request->get_param( 'page' ) );
+	$per_page  = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
+	$offset    = ( $page - 1 ) * $per_page;
 
-	$page        = max( 1, (int) $request->get_param( 'page' ) );
-	$per_page    = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
-	$total       = count( $log_all );
-	$total_pages = ceil($total / $per_page);
-	$offset      = ( $page - 1 ) * $per_page;
+	// Cache COUNT(*) — query này chạy mỗi lần chuyển trang nên cần cache
+	$total = wp_cache_get( $count_key, $group );
+	if ( false === $total ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $table WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id
+			)
+		);
+		wp_cache_set( $count_key, $total, $group, init_plugin_suite_user_engine_cache_ttl() );
+	}
 
-	$log_page = array_slice( array_reverse( $log_all ), $offset, $per_page );
+	$total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
 
-	$data = array_values( array_map( function( $entry ) {
-		if ( ! is_array( $entry ) ) return null;
+	// Page result không cache — offset thay đổi liên tục, index đã đủ nhanh
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id, $per_page, $offset
+		),
+		ARRAY_A
+	);
 
-		return [
-			'type'    => strtoupper( $entry['type'] ?? 'UNKNOWN' ),
-			'amount'  => (int) ( $entry['amount'] ?? 0 ),
-			'change'  => ( $entry['change'] === 'deduct' ) ? '-' : '+',
-			'source'  => $entry['source'] ?? 'unknown',
+	$data = [];
+	foreach ( (array) $rows as $row ) {
+		if ( ! is_array( $row ) ) continue;
+
+		$entry  = init_plugin_suite_user_engine_txn_row_to_legacy( $row );
+		$data[] = [
+			'type'    => strtoupper( $row['type'] ?? 'UNKNOWN' ),
+			'amount'  => (int) ( $row['amount'] ?? 0 ),
+			'change'  => ( $row['change_type'] === 'deduct' ) ? '-' : '+',
+			'source'  => $row['source'] ?? 'unknown',
 			'message' => init_plugin_suite_user_engine_format_log_message( $entry ),
-			'time'    => $entry['time'] ?? current_time( 'Y-m-d H:i:s' ),
+			'time'    => $row['logged_at'] ?? current_time( 'Y-m-d H:i:s' ),
 		];
-	}, array_filter( $log_page, 'is_array' ) ) );
+	}
 
 	return rest_ensure_response( [
 		'page'        => $page,
@@ -259,34 +541,69 @@ function init_plugin_suite_user_engine_api_get_transactions( WP_REST_Request $re
 	] );
 }
 
-// REST: EXP history
+// ==========================
+// REST API: EXP history
+// ==========================
+
+/**
+ * REST handler: lấy lịch sử EXP của user hiện tại.
+ *
+ * COUNT(*) được cache riêng (exp_count_user_{id}), tự động xóa khi có EXP mới.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_get_exp_log( WP_REST_Request $request ) {
 	$user_id = get_current_user_id();
 	if ( ! $user_id ) {
 		return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
 	}
 
-	$log_all = init_plugin_suite_user_engine_get_exp_log( $user_id ) ?: [];
+	global $wpdb;
+	$table     = init_plugin_suite_user_engine_exp_table();
+	$group     = init_plugin_suite_user_engine_cache_group();
+	$count_key = init_plugin_suite_user_engine_count_cache_key( 'exp', $user_id );
+	$page      = max( 1, (int) $request->get_param( 'page' ) );
+	$per_page  = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
+	$offset    = ( $page - 1 ) * $per_page;
 
-	$page        = max( 1, (int) $request->get_param( 'page' ) );
-	$per_page    = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
-	$total       = count( $log_all );
-	$total_pages = ceil( $total / $per_page );
-	$offset      = ( $page - 1 ) * $per_page;
+	// Cache COUNT(*) — tương tự transaction endpoint
+	$total = wp_cache_get( $count_key, $group );
+	if ( false === $total ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $table WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id
+			)
+		);
+		wp_cache_set( $count_key, $total, $group, init_plugin_suite_user_engine_cache_ttl() );
+	}
 
-	$log_page = array_slice( array_reverse( $log_all ), $offset, $per_page );
+	$total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
 
-	$data = array_values( array_map( function( $entry ) {
-		if ( ! is_array( $entry ) ) return null;
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id, $per_page, $offset
+		),
+		ARRAY_A
+	);
 
-		return [
-			'amount'  => absint( $entry['amount'] ?? 0 ),
-			'change'  => ( $entry['change'] === 'deduct' ) ? '-' : '+',
-			'source'  => $entry['source'] ?? 'unknown',
+	$data = [];
+	foreach ( (array) $rows as $row ) {
+		if ( ! is_array( $row ) ) continue;
+
+		$entry  = init_plugin_suite_user_engine_exp_row_to_legacy( $row );
+		$data[] = [
+			'amount'  => absint( $row['amount'] ?? 0 ),
+			'change'  => ( $row['change_type'] === 'deduct' ) ? '-' : '+',
+			'source'  => $row['source'] ?? 'unknown',
 			'message' => init_plugin_suite_user_engine_format_exp_log( $entry ),
-			'time'    => $entry['time'] ?? current_time( 'Y-m-d H:i:s' ),
+			'time'    => $row['logged_at'] ?? current_time( 'Y-m-d H:i:s' ),
 		];
-	}, array_filter( $log_page, 'is_array' ) ) );
+	}
 
 	return rest_ensure_response( [
 		'page'        => $page,
@@ -297,7 +614,17 @@ function init_plugin_suite_user_engine_api_get_exp_log( WP_REST_Request $request
 	] );
 }
 
-// REST: daily task
+// ==========================
+// REST API: Daily tasks
+// ==========================
+
+/**
+ * REST handler: lấy danh sách daily tasks và trạng thái hoàn thành.
+ * Không thay đổi logic, chỉ dùng lại get_transaction_log() — đã được refactor sang DB.
+ *
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $request ) {
 	$user_id = get_current_user_id();
 	if ( ! $user_id ) {
@@ -308,25 +635,24 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 	$log      = init_plugin_suite_user_engine_get_transaction_log( $user_id );
 	$settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
 
-	// Lấy amount từ cài đặt, có fallback mặc định
 	$checkin_coin = isset( $settings['checkin_coin'] ) ? absint( $settings['checkin_coin'] ) : 10;
 	$online_coin  = isset( $settings['online_coin'] )  ? absint( $settings['online_coin'] )  : 100;
 
 	$tasks = [
 		[
-			'key'     => 'checkin',
-			'title'   => __( 'Check in today', 'init-user-engine' ),
-			'reward'  => [ 'type' => 'coin', 'amount' => $checkin_coin ],
-			'check'   => function( $user_id ) use ( $today ) {
+			'key'    => 'checkin',
+			'title'  => __( 'Check in today', 'init-user-engine' ),
+			'reward' => [ 'type' => 'coin', 'amount' => $checkin_coin ],
+			'check'  => function( $user_id ) use ( $today ) {
 				$last = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_last', '' );
 				return $last === $today;
 			},
 		],
 		[
-			'key'     => 'online_reward',
-			'title'   => __( 'Stay active today', 'init-user-engine' ),
-			'reward'  => [ 'type' => 'coin', 'amount' => $online_coin ],
-			'check'   => function( $user_id ) use ( $today ) {
+			'key'    => 'online_reward',
+			'title'  => __( 'Stay active today', 'init-user-engine' ),
+			'reward' => [ 'type' => 'coin', 'amount' => $online_coin ],
+			'check'  => function( $user_id ) use ( $today ) {
 				$last     = init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_last', '' );
 				$rewarded = (bool) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_rewarded', false );
 				return ( $last === $today && $rewarded );
@@ -364,7 +690,7 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 					'type'   => $type,
 					'amount' => $total_amount,
 				],
-				'check' => '__return_true', // dùng hàm thay vì closure
+				'check' => '__return_true',
 			];
 		}
 	}
@@ -378,7 +704,7 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 
 		if ( is_callable( $task['check'] ) ) {
 			try {
-				$ref = new ReflectionFunction( $task['check'] );
+				$ref       = new ReflectionFunction( $task['check'] );
 				$arg_count = $ref->getNumberOfParameters();
 
 				$completed = $arg_count > 0
@@ -401,6 +727,10 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
 	return rest_ensure_response( $output );
 }
 
+// ==========================
+// Top-up logs (không thay đổi)
+// ==========================
+
 /**
  * Add admin top-up log (latest 100 entries)
  * Format: quantity|type(coin|cash)|target(VIP|ALL|user:{count}|uid:{id}|user_id:{id})|time
@@ -412,40 +742,39 @@ function init_plugin_suite_user_engine_api_get_daily_tasks( WP_REST_Request $req
  * @return void
  */
 function init_plugin_suite_user_engine_add_topup_log( $quantity, $type, $target, $time = null ) {
-    $quantity = (int) $quantity;
-    $type     = $type === 'cash' ? 'cash' : 'coin';
-    $time     = $time ?: current_time( 'mysql' );
+	$quantity = (int) $quantity;
+	$type     = $type === 'cash' ? 'cash' : 'coin';
+	$time     = $time ?: current_time( 'mysql' );
 
-    $sanitize = static function( $s ) {
-        return str_replace( ['|', ';'], '', (string) $s );
-    };
+	$sanitize = static function( $s ) {
+		return str_replace( [ '|', ';' ], '', (string) $s );
+	};
 
-    // Chuẩn hoá target tối thiểu để tránh lưu sai ký tự phân tách
-    $target = $sanitize( $target );
+	$target = $sanitize( $target );
 
-    $entry = implode( '|', [
-        $quantity,
-        $sanitize( $type ),
-        $target,
-        $sanitize( $time ),
-    ] );
+	$entry = implode( '|', [
+		$quantity,
+		$sanitize( $type ),
+		$target,
+		$sanitize( $time ),
+	] );
 
-    $key = 'init_plugin_suite_user_engine_topup_logs';
-    $raw = get_option( $key, '' );
-    $raw = is_string( $raw ) ? trim( $raw ) : '';
+	$key = 'init_plugin_suite_user_engine_topup_logs';
+	$raw = get_option( $key, '' );
+	$raw = is_string( $raw ) ? trim( $raw ) : '';
 
-    if ( $raw === '' ) {
-        $raw = $entry;
-    } else {
-        $raw .= ';' . $entry;
-    }
+	if ( $raw === '' ) {
+		$raw = $entry;
+	} else {
+		$raw .= ';' . $entry;
+	}
 
-    $parts = array_filter( array_map( 'trim', explode( ';', $raw ) ) );
-    if ( count( $parts ) > 100 ) {
-        $parts = array_slice( $parts, -100 );
-    }
+	$parts = array_filter( array_map( 'trim', explode( ';', $raw ) ) );
+	if ( count( $parts ) > 100 ) {
+		$parts = array_slice( $parts, -100 );
+	}
 
-    update_option( $key, implode( ';', $parts ), false ); // autoload = no
+	update_option( $key, implode( ';', $parts ), false );
 }
 
 /**
@@ -454,21 +783,21 @@ function init_plugin_suite_user_engine_add_topup_log( $quantity, $type, $target,
  * @return array
  */
 function init_plugin_suite_user_engine_get_topup_logs() {
-    $key = 'init_plugin_suite_user_engine_topup_logs';
-    $raw = get_option( $key, '' );
-    $raw = is_string( $raw ) ? trim( $raw ) : '';
-    if ( $raw === '' ) return [];
+	$key = 'init_plugin_suite_user_engine_topup_logs';
+	$raw = get_option( $key, '' );
+	$raw = is_string( $raw ) ? trim( $raw ) : '';
+	if ( $raw === '' ) return [];
 
-    $rows = array_filter( array_map( 'trim', explode( ';', $raw ) ) );
-    return array_map( function( $line ) {
-        [$qty, $type, $target, $time] = array_pad( explode( '|', $line ), 4, '' );
-        return [
-            'quantity' => (int) $qty,
-            'type'     => $type,
-            'target'   => $target,
-            'time'     => $time,
-        ];
-    }, $rows );
+	$rows = array_filter( array_map( 'trim', explode( ';', $raw ) ) );
+	return array_map( function( $line ) {
+		[ $qty, $type, $target, $time ] = array_pad( explode( '|', $line ), 4, '' );
+		return [
+			'quantity' => (int) $qty,
+			'type'     => $type,
+			'target'   => $target,
+			'time'     => $time,
+		];
+	}, $rows );
 }
 
 /**
@@ -477,61 +806,97 @@ function init_plugin_suite_user_engine_get_topup_logs() {
  * @param int $keep_days Keep logs newer than X days (default 30).
  */
 function init_plugin_suite_user_engine_prune_topup_logs( $keep_days = 30 ) {
-    $cut  = strtotime( "-{$keep_days} days" );
-    $logs = init_plugin_suite_user_engine_get_topup_logs();
+	$cut  = strtotime( "-{$keep_days} days" );
+	$logs = init_plugin_suite_user_engine_get_topup_logs();
 
-    $logs = array_filter( $logs, function( $log ) use ( $cut ) {
-        return isset( $log['time'] ) && strtotime( $log['time'] ) >= $cut;
-    } );
+	$logs = array_filter( $logs, function( $log ) use ( $cut ) {
+		return isset( $log['time'] ) && strtotime( $log['time'] ) >= $cut;
+	} );
 
-    $lines = array_map( function( $log ) {
-        return implode( '|', [
-            $log['quantity'],
-            $log['type'],
-            $log['target'],
-            $log['time'],
-        ] );
-    }, $logs );
+	$lines = array_map( function( $log ) {
+		return implode( '|', [
+			$log['quantity'],
+			$log['type'],
+			$log['target'],
+			$log['time'],
+		] );
+	}, $logs );
 
-    update_option( 'init_plugin_suite_user_engine_topup_logs', implode( ';', $lines ), false );
+	update_option( 'init_plugin_suite_user_engine_topup_logs', implode( ';', $lines ), false );
 }
 
 /**
  * Pretty display for log target:
  * VIP | ALL | user:{count} | uid:{id} | user_id:{id}
- * - 'user:{count}' luôn hiểu là số lượng (KHÔNG lookup user ID).
- * - 'uid:{id}' hoặc 'user_id:{id}' là 1 user cụ thể (có lookup để hiển thị thân thiện).
  */
 function init_plugin_suite_user_engine_pretty_target( $target ) {
-    $target = (string) $target;
+	$target = (string) $target;
 
-    // Case đơn giản
-    if ( $target === 'VIP' ) return __( 'Active VIPs', 'init-user-engine' );
-    if ( $target === 'ALL' ) return __( 'All members', 'init-user-engine' );
+	if ( $target === 'VIP' ) return __( 'Active VIPs', 'init-user-engine' );
+	if ( $target === 'ALL' ) return __( 'All members', 'init-user-engine' );
 
-    // user:{count} => chỉ là số lượng, không phải user ID
-    if ( preg_match( '/^user:(\d+)$/', $target, $m ) ) {
-        $n = max( 0, (int) $m[1] );
-        // translators: %d = number of users.
-        return sprintf( _n( '%d user', '%d users', $n, 'init-user-engine' ), $n );
-    }
+	if ( preg_match( '/^user:(\d+)$/', $target, $m ) ) {
+		$n = max( 0, (int) $m[1] );
+		// translators: %d = number of users.
+		return sprintf( _n( '%d user', '%d users', $n, 'init-user-engine' ), $n );
+	}
 
-    // uid:{id} hoặc user_id:{id} => 1 user cụ thể
-    if ( preg_match( '/^(?:uid|user_id):(\d+)$/', $target, $m ) ) {
-        $uid = (int) $m[1];
-        if ( $uid > 0 ) {
-            $u = get_userdata( $uid );
-            if ( $u ) {
-                $name  = $u->display_name ?: $u->user_login;
-                $login = $u->user_login;
-                /* translators: 1: Display Name, 2: user_login, 3: ID */
-                return sprintf( __( 'User: %1$s (@%2$s, #%3$d)', 'init-user-engine' ), $name, $login, $u->ID );
-            }
-            // translators: %d = user ID that was not found.
-            return sprintf( __( 'User ID #%d (not found)', 'init-user-engine' ), $uid );
-        }
-    }
+	if ( preg_match( '/^(?:uid|user_id):(\d+)$/', $target, $m ) ) {
+		$uid = (int) $m[1];
+		if ( $uid > 0 ) {
+			$u = get_userdata( $uid );
+			if ( $u ) {
+				$name  = $u->display_name ?: $u->user_login;
+				$login = $u->user_login;
+				/* translators: 1: Display Name, 2: user_login, 3: ID */
+				return sprintf( __( 'User: %1$s (@%2$s, #%3$d)', 'init-user-engine' ), $name, $login, $u->ID );
+			}
+			// translators: %d = user ID that was not found.
+			return sprintf( __( 'User ID #%d (not found)', 'init-user-engine' ), $uid );
+		}
+	}
 
-    // Mặc định giữ nguyên
-    return $target;
+	return $target;
 }
+
+// ==========================
+// Cache invalidation
+// ==========================
+
+/**
+ * Xóa cache danh sách transaction log của user.
+ * Gọi sau khi ghi giao dịch mới.
+ *
+ * @param int $user_id
+ */
+function init_plugin_suite_user_engine_invalidate_txn_cache( $user_id ) {
+	$group = init_plugin_suite_user_engine_cache_group();
+	wp_cache_delete( init_plugin_suite_user_engine_cache_key( 'txn', $user_id ), $group );
+	wp_cache_delete( init_plugin_suite_user_engine_count_cache_key( 'txn', $user_id ), $group );
+}
+
+/**
+ * Xóa cache danh sách EXP log của user.
+ * Gọi sau khi ghi EXP mới.
+ *
+ * @param int $user_id
+ */
+function init_plugin_suite_user_engine_invalidate_exp_cache( $user_id ) {
+	$group = init_plugin_suite_user_engine_cache_group();
+	wp_cache_delete( init_plugin_suite_user_engine_cache_key( 'exp', $user_id ), $group );
+	wp_cache_delete( init_plugin_suite_user_engine_count_cache_key( 'exp', $user_id ), $group );
+}
+
+add_action(
+	'init_plugin_suite_user_engine_transaction_logged',
+	function( $user_id ) {
+		init_plugin_suite_user_engine_invalidate_txn_cache( $user_id );
+	}
+);
+
+add_action(
+	'init_plugin_suite_user_engine_exp_logged',
+	function( $user_id ) {
+		init_plugin_suite_user_engine_invalidate_exp_cache( $user_id );
+	}
+);

@@ -9,12 +9,17 @@ add_action( 'wpmu_new_blog', 'init_plugin_suite_user_engine_on_new_blog', 10, 6 
 
 // Chỉ chạy check_table khi version trong DB khác với version hiện tại của code
 add_action( 'admin_init', function() {
-    // Lấy version đã lưu trong DB
+    // 1. Tạo/cập nhật bảng nếu DB version lỗi thời
     $current_db_version = get_option( 'iue_plugin_db_version', '0.0.0' );
-    
-    // So sánh với version hiện tại trong code
     if ( version_compare( $current_db_version, INIT_PLUGIN_SUITE_IUE_VERSION, '<' ) ) {
         init_plugin_suite_user_engine_check_table();
+    }
+
+    // 2. Migration chạy độc lập — tiếp tục mỗi page load cho đến khi xong,
+    //    không phụ thuộc vào version check ở trên.
+    $done_version = (int) get_option( 'iue_log_migration_done', 0 );
+    if ( $done_version < INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
+        init_plugin_suite_user_engine_maybe_migrate_logs();
     }
 } );
 
@@ -92,9 +97,6 @@ function init_plugin_suite_user_engine_check_table() {
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$exp_table'" ) !== $exp_table ) {
         init_plugin_suite_user_engine_create_exp_log_table();
     }
-
-    // Chạy migration nếu chưa hoàn thành
-    init_plugin_suite_user_engine_maybe_migrate_logs();
 
     update_option( 'iue_plugin_db_version', INIT_PLUGIN_SUITE_IUE_VERSION );
 }
@@ -177,17 +179,6 @@ function init_plugin_suite_user_engine_create_redeem_code_table() {
 
 /**
  * Tạo bảng transaction log (coin/cash).
- * Thay thế user meta iue_coin_cash_log.
- *
- * Columns:
- *   - type:           'coin' | 'cash'
- *   - amount:         số tiền cuối (đã cộng VIP bonus nếu có)
- *   - original_amount: số tiền gốc trước khi cộng bonus
- *   - change_type:    'add' | 'deduct'  (tránh dùng `change` vì là reserved word trong MySQL)
- *   - source:         nguồn giao dịch (daily_login, woo_order, ...)
- *   - vip_bonus:      0/1 — user có VIP lúc giao dịch không
- *   - bonus_percent:  phần trăm bonus VIP được áp dụng
- *   - logged_at:      datetime giao dịch
  */
 function init_plugin_suite_user_engine_create_transaction_log_table() {
     global $wpdb;
@@ -220,14 +211,6 @@ function init_plugin_suite_user_engine_create_transaction_log_table() {
 
 /**
  * Tạo bảng EXP log.
- * Thay thế user meta iue_exp_log.
- *
- * Columns:
- *   - amount:      lượng EXP thay đổi
- *   - change_type: 'add' | 'deduct'
- *   - source:      nguồn (daily_login, level_up_5, ...)
- *   - vip_bonus:   0/1 — user có VIP lúc giao dịch không
- *   - logged_at:   datetime
  */
 function init_plugin_suite_user_engine_create_exp_log_table() {
     global $wpdb;
@@ -259,53 +242,53 @@ function init_plugin_suite_user_engine_create_exp_log_table() {
 // ==========================
 
 /**
- * Migration version key. Tăng lên nếu cần chạy lại migration.
+ * Migration version key.
  */
-define( 'INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION', 1 );
+define( 'INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION', 2 );
 
 /**
  * Chạy migration một lần duy nhất (idempotent).
- * Batch 200 users mỗi lần, lưu offset vào option để resume nếu bị gián đoạn.
- *
- * Gọi trong admin_init nên chỉ chạy khi admin load trang.
- * Với site lớn (~10k users), migration có thể mất vài lần page load.
+ * Batch 200 users mỗi lần. Không sử dụng OFFSET vì meta bị xóa sau mỗi lượt xử lý.
  */
 function init_plugin_suite_user_engine_maybe_migrate_logs() {
-    $done_version = (int) get_option( 'iue_log_migration_done', 0 );
-    if ( $done_version >= INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
-        return; // Đã migrate xong
+    if ( ! current_user_can( 'administrator' ) ) {
+        return;
     }
 
-    // Nếu bảng chưa sẵn sàng thì bỏ qua (safety)
+    $done_version = (int) get_option( 'iue_log_migration_done', 0 );
+    if ( $done_version >= INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
+        return; 
+    }
+
     global $wpdb;
     $txn_table = $wpdb->prefix . 'init_user_engine_transaction_log';
     $exp_table = $wpdb->prefix . 'init_user_engine_exp_log';
+
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$txn_table'" ) !== $txn_table ) return;
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$exp_table'" ) !== $exp_table ) return;
 
-    $batch_size  = 200;
-    $offset_key  = 'iue_log_migration_offset';
-    $offset      = (int) get_option( $offset_key, 0 );
+    $batch_size = 200;
 
-    // Lấy danh sách users có meta cần migrate (cả 2 loại)
+    // Lấy 200 user ĐẦU TIÊN còn meta. Vì sau khi xử lý ta delete_user_meta, 
+    // nên danh sách này sẽ tự động được làm mới mà không cần OFFSET.
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $user_ids = $wpdb->get_col(
         $wpdb->prepare(
             "SELECT DISTINCT user_id FROM {$wpdb->usermeta}
              WHERE meta_key IN ('iue_coin_cash_log', 'iue_exp_log')
+             AND meta_value IS NOT NULL
+             AND meta_value != ''
              ORDER BY user_id ASC
-             LIMIT %d OFFSET %d",
-            $batch_size,
-            $offset
+             LIMIT %d",
+            $batch_size
         )
     );
 
     if ( empty( $user_ids ) ) {
-        // Migrate xong toàn bộ
         update_option( 'iue_log_migration_done', INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION, false );
-        delete_option( $offset_key );
+        delete_option( 'iue_log_migration_offset' ); // Dọn dẹp offset thừa từ bản cũ
         return;
     }
 
@@ -327,22 +310,21 @@ function init_plugin_suite_user_engine_maybe_migrate_logs() {
         }
     }
 
-    // Lưu offset để lần sau tiếp tục (nếu còn user)
-    update_option( $offset_key, $offset + count( $user_ids ), false );
+    // Kiểm tra lại nếu hết sạch user thì đóng migration luôn
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $remaining = $wpdb->get_var("
+        SELECT COUNT(DISTINCT user_id)
+        FROM {$wpdb->usermeta}
+        WHERE meta_key IN ('iue_coin_cash_log', 'iue_exp_log')
+    ");
 
-    // Nếu batch này < batch_size thì không còn user nào nữa
-    if ( count( $user_ids ) < $batch_size ) {
-        update_option( 'iue_log_migration_done', INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION, false );
-        delete_option( $offset_key );
+    if ($remaining == 0) {
+        update_option('iue_log_migration_done', INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION, false);
     }
 }
 
 /**
  * Insert các entries transaction (coin/cash) của 1 user vào DB.
- * Bỏ qua entry đã tồn tại (dựa trên user_id + logged_at + source + change_type + amount).
- *
- * @param int   $user_id
- * @param array $entries  Mảng log từ user meta.
  */
 function init_plugin_suite_user_engine_migrate_transaction_entries( $user_id, array $entries ) {
     global $wpdb;
@@ -360,12 +342,10 @@ function init_plugin_suite_user_engine_migrate_transaction_entries( $user_id, ar
         $bonus_percent   = (int) ( $entry['bonus_percent'] ?? 0 );
         $logged_at       = ! empty( $entry['time'] ) ? $entry['time'] : current_time( 'Y-m-d H:i:s' );
 
-        // Validate datetime format
         if ( ! preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $logged_at ) ) {
             $logged_at = current_time( 'Y-m-d H:i:s' );
         }
 
-        // Idempotent: skip nếu đã có bản ghi giống hệt (cùng user, source, time, amount, change_type)
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $exists = $wpdb->get_var(
             $wpdb->prepare(
@@ -396,9 +376,6 @@ function init_plugin_suite_user_engine_migrate_transaction_entries( $user_id, ar
 
 /**
  * Insert các entries EXP của 1 user vào DB.
- *
- * @param int   $user_id
- * @param array $entries  Mảng log từ user meta.
  */
 function init_plugin_suite_user_engine_migrate_exp_entries( $user_id, array $entries ) {
     global $wpdb;
@@ -442,15 +419,13 @@ function init_plugin_suite_user_engine_migrate_exp_entries( $user_id, array $ent
     }
 }
 
-// Sự kiện chạy khi update plugin thành công
+// Sự kiện chạy khi update plugin
 add_action( 'upgrader_process_complete', 'init_plugin_suite_user_engine_on_update', 10, 2 );
 
 function init_plugin_suite_user_engine_on_update( $upgrader_object, $options ) {
-    // Kiểm tra xem có đúng là hành động update plugin không
     if ( isset( $options['action'] ) && $options['action'] === 'update' && $options['type'] === 'plugin' ) {
         if ( isset( $options['plugins'] ) && is_array( $options['plugins'] ) ) {
             foreach ( $options['plugins'] as $plugin_path ) {
-                // Nếu path của plugin đang update có chứa slug 'init-user-engine'
                 if ( strpos( $plugin_path, INIT_PLUGIN_SUITE_IUE_SLUG ) !== false ) {
                     init_plugin_suite_user_engine_check_table();
                     break;

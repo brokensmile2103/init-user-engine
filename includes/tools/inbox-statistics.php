@@ -527,14 +527,22 @@ function init_plugin_suite_user_engine_render_inbox_dashboard_widget() {
     global $wpdb;
     $table = init_plugin_suite_user_engine_get_inbox_table();
     
-    // Check if table exists
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$table}'") !== $table) {
-        echo '<div style="text-align: center; padding: 20px; color: #d63638;">';
-        echo '<h3>' . esc_html__('📭 Inbox Table Not Found', 'init-user-engine') . '</h3>';
-        echo '<p>' . esc_html__('Please check your plugin installation.', 'init-user-engine') . '</p>';
-        echo '</div>';
-        return;
+    // Option flag: đã xác nhận bảng tồn tại
+    $option_key = 'iue_inbox_table_exists';
+
+    if (!get_option($option_key)) {
+        // Check if table exists
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$table}'") !== $table) {
+            echo '<div style="text-align: center; padding: 20px; color: #d63638;">';
+            echo '<h3>' . esc_html__('📭 Inbox Table Not Found', 'init-user-engine') . '</h3>';
+            echo '<p>' . esc_html__('Please check your plugin installation.', 'init-user-engine') . '</p>';
+            echo '</div>';
+            return;
+        }
+
+        // Đã có bảng → lưu lại, khỏi check nữa
+        update_option($option_key, 1, false);
     }
     
     // Cache key for dashboard stats

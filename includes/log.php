@@ -37,6 +37,11 @@ function init_plugin_suite_user_engine_cache_ttl() {
 	return 10 * MINUTE_IN_SECONDS;
 }
 
+function init_plugin_suite_user_engine_get_meta_fallback( $user_id, $meta_key ) {
+    $meta = get_user_meta( $user_id, $meta_key, true );
+    return ( ! empty( $meta ) && is_array( $meta ) ) ? $meta : [];
+}
+
 /**
  * Cache key cho danh sách log (dùng trong get_transaction_log / get_exp_log).
  *
@@ -153,37 +158,38 @@ function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount
  * @return array  Mảng các entry theo thứ tự tăng dần (cũ → mới), tối đa 100 entry.
  */
 function init_plugin_suite_user_engine_get_transaction_log( $user_id ) {
-	$user_id   = (int) $user_id;
-	$cache_key = init_plugin_suite_user_engine_cache_key( 'txn', $user_id );
-	$group     = init_plugin_suite_user_engine_cache_group();
+    $user_id   = (int) $user_id;
+    $cache_key = init_plugin_suite_user_engine_cache_key( 'txn', $user_id );
+    $group     = init_plugin_suite_user_engine_cache_group();
 
-	$cached = wp_cache_get( $cache_key, $group );
-	if ( false !== $cached ) {
-		return $cached;
-	}
+    $cached = wp_cache_get( $cache_key, $group );
+    if ( false !== $cached ) {
+        return $cached;
+    }
 
-	global $wpdb;
-	$table = init_plugin_suite_user_engine_txn_table();
+    global $wpdb;
+    $table = init_plugin_suite_user_engine_txn_table();
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	$rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$user_id
-		),
-		ARRAY_A
-	);
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $rows = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $user_id
+        ),
+        ARRAY_A
+    );
 
-	if ( empty( $rows ) ) {
-		wp_cache_set( $cache_key, [], $group, init_plugin_suite_user_engine_cache_ttl() );
-		return [];
-	}
+    if ( ! empty( $rows ) ) {
+        $data = array_map( 'init_plugin_suite_user_engine_txn_row_to_legacy', $rows );
+        wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
+        return $data;
+    }
 
-	$data = array_map( 'init_plugin_suite_user_engine_txn_row_to_legacy', $rows );
+    // fallback meta
+    $meta = init_plugin_suite_user_engine_get_meta_fallback( $user_id, 'iue_coin_cash_log' );
 
-	wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
-
-	return $data;
+    wp_cache_set( $cache_key, $meta, $group, init_plugin_suite_user_engine_cache_ttl() );
+    return $meta;
 }
 
 /**
@@ -349,37 +355,38 @@ function init_plugin_suite_user_engine_log_exp( $user_id, $amount, $source = '',
  * @return array  Format legacy (tương thích ngược), tối đa 100 entry.
  */
 function init_plugin_suite_user_engine_get_exp_log( $user_id ) {
-	$user_id   = (int) $user_id;
-	$cache_key = init_plugin_suite_user_engine_cache_key( 'exp', $user_id );
-	$group     = init_plugin_suite_user_engine_cache_group();
+    $user_id   = (int) $user_id;
+    $cache_key = init_plugin_suite_user_engine_cache_key( 'exp', $user_id );
+    $group     = init_plugin_suite_user_engine_cache_group();
 
-	$cached = wp_cache_get( $cache_key, $group );
-	if ( false !== $cached ) {
-		return $cached;
-	}
+    $cached = wp_cache_get( $cache_key, $group );
+    if ( false !== $cached ) {
+        return $cached;
+    }
 
-	global $wpdb;
-	$table = init_plugin_suite_user_engine_exp_table();
+    global $wpdb;
+    $table = init_plugin_suite_user_engine_exp_table();
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	$rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$user_id
-		),
-		ARRAY_A
-	);
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $rows = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $user_id
+        ),
+        ARRAY_A
+    );
 
-	if ( empty( $rows ) ) {
-		wp_cache_set( $cache_key, [], $group, init_plugin_suite_user_engine_cache_ttl() );
-		return [];
-	}
+    if ( ! empty( $rows ) ) {
+        $data = array_map( 'init_plugin_suite_user_engine_exp_row_to_legacy', $rows );
+        wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
+        return $data;
+    }
 
-	$data = array_map( 'init_plugin_suite_user_engine_exp_row_to_legacy', $rows );
+    // fallback meta
+    $meta = init_plugin_suite_user_engine_get_meta_fallback( $user_id, 'iue_exp_log' );
 
-	wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
-
-	return $data;
+    wp_cache_set( $cache_key, $meta, $group, init_plugin_suite_user_engine_cache_ttl() );
+    return $meta;
 }
 
 /**
@@ -479,66 +486,98 @@ function init_plugin_suite_user_engine_format_exp_log( $entry ) {
  * @return WP_REST_Response|WP_Error
  */
 function init_plugin_suite_user_engine_api_get_transactions( WP_REST_Request $request ) {
-	$user_id = get_current_user_id();
-	if ( ! $user_id ) {
-		return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
-	}
+    $user_id = get_current_user_id();
+    if ( ! $user_id ) {
+        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
+    }
 
-	global $wpdb;
-	$table     = init_plugin_suite_user_engine_txn_table();
-	$group     = init_plugin_suite_user_engine_cache_group();
-	$count_key = init_plugin_suite_user_engine_count_cache_key( 'txn', $user_id );
-	$page      = max( 1, (int) $request->get_param( 'page' ) );
-	$per_page  = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
-	$offset    = ( $page - 1 ) * $per_page;
+    global $wpdb;
+    $table     = init_plugin_suite_user_engine_txn_table();
+    $group     = init_plugin_suite_user_engine_cache_group();
+    $count_key = init_plugin_suite_user_engine_count_cache_key( 'txn', $user_id );
 
-	// Cache COUNT(*) — query này chạy mỗi lần chuyển trang nên cần cache
-	$total = wp_cache_get( $count_key, $group );
-	if ( false === $total ) {
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM $table WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$user_id
-			)
-		);
-		wp_cache_set( $count_key, $total, $group, init_plugin_suite_user_engine_cache_ttl() );
-	}
+    $page     = max( 1, (int) $request->get_param( 'page' ) );
+    $per_page = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
+    $offset   = ( $page - 1 ) * $per_page;
 
-	$total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
+    // ===== COUNT DB =====
+    $total = wp_cache_get( $count_key, $group );
+    if ( false === $total ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $total = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM $table WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $user_id
+            )
+        );
+        wp_cache_set( $count_key, $total, $group, init_plugin_suite_user_engine_cache_ttl() );
+    }
 
-	// Page result không cache — offset thay đổi liên tục, index đã đủ nhanh
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	$rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$user_id, $per_page, $offset
-		),
-		ARRAY_A
-	);
+    // ===== Nếu DB có data → dùng DB =====
+    if ( $total > 0 ) {
+        $total_pages = (int) ceil( $total / $per_page );
 
-	$data = [];
-	foreach ( (array) $rows as $row ) {
-		if ( ! is_array( $row ) ) continue;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $user_id, $per_page, $offset
+            ),
+            ARRAY_A
+        );
 
-		$entry  = init_plugin_suite_user_engine_txn_row_to_legacy( $row );
-		$data[] = [
-			'type'    => strtoupper( $row['type'] ?? 'UNKNOWN' ),
-			'amount'  => (int) ( $row['amount'] ?? 0 ),
-			'change'  => ( $row['change_type'] === 'deduct' ) ? '-' : '+',
-			'source'  => $row['source'] ?? 'unknown',
-			'message' => init_plugin_suite_user_engine_format_log_message( $entry ),
-			'time'    => $row['logged_at'] ?? current_time( 'Y-m-d H:i:s' ),
-		];
-	}
+        $data = [];
+        foreach ( (array) $rows as $row ) {
+            if ( ! is_array( $row ) ) continue;
 
-	return rest_ensure_response( [
-		'page'        => $page,
-		'per_page'    => $per_page,
-		'total'       => $total,
-		'total_pages' => $total_pages,
-		'data'        => $data,
-	] );
+            $entry  = init_plugin_suite_user_engine_txn_row_to_legacy( $row );
+            $data[] = [
+                'type'    => strtoupper( $row['type'] ?? 'UNKNOWN' ),
+                'amount'  => (int) ( $row['amount'] ?? 0 ),
+                'change'  => ( $row['change_type'] === 'deduct' ) ? '-' : '+',
+                'source'  => $row['source'] ?? 'unknown',
+                'message' => init_plugin_suite_user_engine_format_log_message( $entry ),
+                'time'    => $row['logged_at'] ?? current_time( 'Y-m-d H:i:s' ),
+            ];
+        }
+
+        return rest_ensure_response( [
+            'page'        => $page,
+            'per_page'    => $per_page,
+            'total'       => $total,
+            'total_pages' => $total_pages,
+            'data'        => $data,
+        ] );
+    }
+
+    // ===== FALLBACK META (chỉ khi DB chưa có gì) =====
+    $log_all = init_plugin_suite_user_engine_get_meta_fallback( $user_id, 'iue_coin_cash_log' );
+
+    $total       = count( $log_all );
+    $total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
+
+    $log_page = array_slice( array_reverse( $log_all ), $offset, $per_page );
+
+    $data = array_values( array_map( function( $entry ) {
+        if ( ! is_array( $entry ) ) return null;
+
+        return [
+            'type'    => strtoupper( $entry['type'] ?? 'UNKNOWN' ),
+            'amount'  => (int) ( $entry['amount'] ?? 0 ),
+            'change'  => ( $entry['change'] === 'deduct' ) ? '-' : '+',
+            'source'  => $entry['source'] ?? 'unknown',
+            'message' => init_plugin_suite_user_engine_format_log_message( $entry ),
+            'time'    => $entry['time'] ?? current_time( 'Y-m-d H:i:s' ),
+        ];
+    }, array_filter( $log_page, 'is_array' ) ) );
+
+    return rest_ensure_response( [
+        'page'        => $page,
+        'per_page'    => $per_page,
+        'total'       => $total,
+        'total_pages' => $total_pages,
+        'data'        => $data,
+    ] );
 }
 
 // ==========================
@@ -554,64 +593,94 @@ function init_plugin_suite_user_engine_api_get_transactions( WP_REST_Request $re
  * @return WP_REST_Response|WP_Error
  */
 function init_plugin_suite_user_engine_api_get_exp_log( WP_REST_Request $request ) {
-	$user_id = get_current_user_id();
-	if ( ! $user_id ) {
-		return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
-	}
+    $user_id = get_current_user_id();
+    if ( ! $user_id ) {
+        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
+    }
 
-	global $wpdb;
-	$table     = init_plugin_suite_user_engine_exp_table();
-	$group     = init_plugin_suite_user_engine_cache_group();
-	$count_key = init_plugin_suite_user_engine_count_cache_key( 'exp', $user_id );
-	$page      = max( 1, (int) $request->get_param( 'page' ) );
-	$per_page  = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
-	$offset    = ( $page - 1 ) * $per_page;
+    global $wpdb;
+    $table     = init_plugin_suite_user_engine_exp_table();
+    $group     = init_plugin_suite_user_engine_cache_group();
+    $count_key = init_plugin_suite_user_engine_count_cache_key( 'exp', $user_id );
 
-	// Cache COUNT(*) — tương tự transaction endpoint
-	$total = wp_cache_get( $count_key, $group );
-	if ( false === $total ) {
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM $table WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$user_id
-			)
-		);
-		wp_cache_set( $count_key, $total, $group, init_plugin_suite_user_engine_cache_ttl() );
-	}
+    $page     = max( 1, (int) $request->get_param( 'page' ) );
+    $per_page = max( 1, min( 50, (int) $request->get_param( 'per_page' ) ) );
+    $offset   = ( $page - 1 ) * $per_page;
 
-	$total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
+    $total = wp_cache_get( $count_key, $group );
+    if ( false === $total ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $total = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM $table WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $user_id
+            )
+        );
+        wp_cache_set( $count_key, $total, $group, init_plugin_suite_user_engine_cache_ttl() );
+    }
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	$rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$user_id, $per_page, $offset
-		),
-		ARRAY_A
-	);
+    if ( $total > 0 ) {
+        $total_pages = (int) ceil( $total / $per_page );
 
-	$data = [];
-	foreach ( (array) $rows as $row ) {
-		if ( ! is_array( $row ) ) continue;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $user_id, $per_page, $offset
+            ),
+            ARRAY_A
+        );
 
-		$entry  = init_plugin_suite_user_engine_exp_row_to_legacy( $row );
-		$data[] = [
-			'amount'  => absint( $row['amount'] ?? 0 ),
-			'change'  => ( $row['change_type'] === 'deduct' ) ? '-' : '+',
-			'source'  => $row['source'] ?? 'unknown',
-			'message' => init_plugin_suite_user_engine_format_exp_log( $entry ),
-			'time'    => $row['logged_at'] ?? current_time( 'Y-m-d H:i:s' ),
-		];
-	}
+        $data = [];
+        foreach ( (array) $rows as $row ) {
+            if ( ! is_array( $row ) ) continue;
 
-	return rest_ensure_response( [
-		'page'        => $page,
-		'per_page'    => $per_page,
-		'total'       => $total,
-		'total_pages' => $total_pages,
-		'data'        => $data,
-	] );
+            $entry  = init_plugin_suite_user_engine_exp_row_to_legacy( $row );
+            $data[] = [
+                'amount'  => absint( $row['amount'] ?? 0 ),
+                'change'  => ( $row['change_type'] === 'deduct' ) ? '-' : '+',
+                'source'  => $row['source'] ?? 'unknown',
+                'message' => init_plugin_suite_user_engine_format_exp_log( $entry ),
+                'time'    => $row['logged_at'] ?? current_time( 'Y-m-d H:i:s' ),
+            ];
+        }
+
+        return rest_ensure_response( [
+            'page'        => $page,
+            'per_page'    => $per_page,
+            'total'       => $total,
+            'total_pages' => $total_pages,
+            'data'        => $data,
+        ] );
+    }
+
+    // fallback meta
+    $log_all = init_plugin_suite_user_engine_get_meta_fallback( $user_id, 'iue_exp_log' );
+
+    $total       = count( $log_all );
+    $total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
+
+    $log_page = array_slice( array_reverse( $log_all ), $offset, $per_page );
+
+    $data = array_values( array_map( function( $entry ) {
+        if ( ! is_array( $entry ) ) return null;
+
+        return [
+            'amount'  => absint( $entry['amount'] ?? 0 ),
+            'change'  => ( $entry['change'] === 'deduct' ) ? '-' : '+',
+            'source'  => $entry['source'] ?? 'unknown',
+            'message' => init_plugin_suite_user_engine_format_exp_log( $entry ),
+            'time'    => $entry['time'] ?? current_time( 'Y-m-d H:i:s' ),
+        ];
+    }, array_filter( $log_page, 'is_array' ) ) );
+
+    return rest_ensure_response( [
+        'page'        => $page,
+        'per_page'    => $per_page,
+        'total'       => $total,
+        'total_pages' => $total_pages,
+        'data'        => $data,
+    ] );
 }
 
 // ==========================

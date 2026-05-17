@@ -9,17 +9,10 @@ add_action( 'wpmu_new_blog', 'init_plugin_suite_user_engine_on_new_blog', 10, 6 
 
 // Chỉ chạy check_table khi version trong DB khác với version hiện tại của code
 add_action( 'admin_init', function() {
-    // 1. Tạo/cập nhật bảng nếu DB version lỗi thời
+    // Tạo/cập nhật bảng nếu DB version lỗi thời
     $current_db_version = get_option( 'iue_plugin_db_version', '0.0.0' );
     if ( version_compare( $current_db_version, INIT_PLUGIN_SUITE_IUE_VERSION, '<' ) ) {
         init_plugin_suite_user_engine_check_table();
-    }
-
-    // 2. Migration chạy độc lập — tiếp tục mỗi page load cho đến khi xong,
-    //    không phụ thuộc vào version check ở trên.
-    $done_version = (int) get_option( 'iue_log_migration_done', 0 );
-    if ( $done_version < INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
-        init_plugin_suite_user_engine_maybe_migrate_logs();
     }
 } );
 
@@ -96,6 +89,15 @@ function init_plugin_suite_user_engine_check_table() {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$exp_table'" ) !== $exp_table ) {
         init_plugin_suite_user_engine_create_exp_log_table();
+    }
+
+    // Schedule migration nếu chưa chạy xong
+    if ( ! wp_next_scheduled( 'init_plugin_suite_iue_migration_event' ) ) {
+        $done_version = (int) get_option( 'iue_log_migration_done', 0 );
+
+        if ( $done_version < INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
+            wp_schedule_single_event( time() + 30, 'init_plugin_suite_iue_migration_event' );
+        }
     }
 
     update_option( 'iue_plugin_db_version', INIT_PLUGIN_SUITE_IUE_VERSION );
@@ -244,17 +246,13 @@ function init_plugin_suite_user_engine_create_exp_log_table() {
 /**
  * Migration version key.
  */
-define( 'INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION', 2 );
+define( 'INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION', 3 );
 
 /**
  * Chạy migration một lần duy nhất (idempotent).
  * Batch 200 users mỗi lần. Không sử dụng OFFSET vì meta bị xóa sau mỗi lượt xử lý.
  */
 function init_plugin_suite_user_engine_maybe_migrate_logs() {
-    if ( ! current_user_can( 'administrator' ) ) {
-        return;
-    }
-
     $done_version = (int) get_option( 'iue_log_migration_done', 0 );
     if ( $done_version >= INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
         return; 
@@ -428,6 +426,15 @@ function init_plugin_suite_user_engine_on_update( $upgrader_object, $options ) {
             foreach ( $options['plugins'] as $plugin_path ) {
                 if ( strpos( $plugin_path, INIT_PLUGIN_SUITE_IUE_SLUG ) !== false ) {
                     init_plugin_suite_user_engine_check_table();
+
+                    // reset + schedule lại migration
+                    wp_clear_scheduled_hook( 'init_plugin_suite_iue_migration_event' );
+
+                    $done_version = (int) get_option( 'iue_log_migration_done', 0 );
+                    if ( $done_version < INIT_PLUGIN_SUITE_IUE_LOG_MIGRATION_VERSION ) {
+                        wp_schedule_single_event( time() + 30, 'init_plugin_suite_iue_migration_event' );
+                    }
+
                     break;
                 }
             }

@@ -3,13 +3,13 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.5.0.3
+ * Version: 1.5.2
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
  * Domain Path: /languages
  * Requires at least: 5.5
- * Tested up to: 6.9
+ * Tested up to: 7.0
  * Requires PHP: 7.4
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -21,10 +21,11 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.0.3' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.2' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
+define( 'INIT_PLUGIN_SUITE_IUE_FILE',           __FILE__ );
 define( 'INIT_PLUGIN_SUITE_IUE_URL',            plugin_dir_url( __FILE__ ) );
 define( 'INIT_PLUGIN_SUITE_IUE_PATH',           plugin_dir_path( __FILE__ ) );
 define( 'INIT_PLUGIN_SUITE_IUE_ASSETS_URL',     INIT_PLUGIN_SUITE_IUE_URL . 'assets/' );
@@ -38,6 +39,7 @@ define( 'INIT_PLUGIN_SUITE_IUE_REF_SALT',       987586218 );
 // =======================
 
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'init.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'cron.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'core.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'exp.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'coin.php';

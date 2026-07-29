@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.5.2
+ * Version: 1.5.3
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.2' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.3' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -229,6 +229,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
 
     $online_minutes = apply_filters( 'init_plugin_suite_user_engine_online_minutes', $online_minutes, $user_id, $is_vip );
     $cash_to_coin_rate = isset( $settings['rate_coin_per_cash'] ) ? (float) $settings['rate_coin_per_cash'] : 0;
+    $coin_to_cash_rate = isset( $settings['rate_cash_per_coin'] ) ? (float) $settings['rate_cash_per_coin'] : 0;
 
     $avatar_max_upload_mb = 10;
     if ( isset( $settings['avatar_max_upload_mb'] ) && is_numeric( $settings['avatar_max_upload_mb'] ) ) {
@@ -244,6 +245,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         'label_coin'           => $label_coin,
         'label_cash'           => $label_cash,
         'rate_coin_per_cash'   => $cash_to_coin_rate,
+        'rate_cash_per_coin'   => $coin_to_cash_rate,
         'user_cash'            => init_plugin_suite_user_engine_get_cash( $user_id ),
         'can_upload_avatar'    => init_plugin_suite_user_engine_can_upload_avatar( $user_id ),
         'avatar_max_upload_mb' => $avatar_max_upload_mb,
@@ -257,6 +259,16 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'vip_price_4' => absint( $settings['vip_price_4'] ?? 180000 ),
             'vip_price_5' => absint( $settings['vip_price_5'] ?? 360000 ),
             'vip_price_6' => absint( $settings['vip_price_6'] ?? 999999 ),
+        ] ),
+
+        'vip_payment_currency' => $settings['vip_payment_currency'] ?? 'coin',
+        'vip_cash_prices'      => apply_filters( 'init_plugin_suite_user_engine_vip_cash_prices', [
+            'vip_cash_price_1' => absint( $settings['vip_cash_price_1'] ?? 0 ),
+            'vip_cash_price_2' => absint( $settings['vip_cash_price_2'] ?? 0 ),
+            'vip_cash_price_3' => absint( $settings['vip_cash_price_3'] ?? 0 ),
+            'vip_cash_price_4' => absint( $settings['vip_cash_price_4'] ?? 0 ),
+            'vip_cash_price_5' => absint( $settings['vip_cash_price_5'] ?? 0 ),
+            'vip_cash_price_6' => absint( $settings['vip_cash_price_6'] ?? 0 ),
         ] ),
 
         'referral_code'    => init_plugin_suite_user_engine_encode_user_id( $user_id ),
@@ -324,6 +336,10 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'vip_error_generic'        => __( 'An error occurred during VIP purchase.', 'init-user-engine' ),
             'vip_unavailable'          => __( 'Unavailable', 'init-user-engine' ),
 
+            'vip_pay_with_coin'        => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Pay with %s', 'init-user-engine' ), $label_coin ),
+            'vip_pay_with_cash'        => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Pay with %s', 'init-user-engine' ), $label_cash ),
+            'not_enough_cash'          => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Not enough %s.', 'init-user-engine' ), $label_cash ),
+
             'referral_title'           => __( 'Invite Friends', 'init-user-engine' ),
             'referral_heading'         => __( 'Invite your friends and earn rewards', 'init-user-engine' ),
             'referral_code_label'      => __( 'Your Referral Code', 'init-user-engine' ),
@@ -357,6 +373,10 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'exchange_success'         => __( 'Exchanged successfully!', 'init-user-engine' ),
             'exchange_error'           => __( 'Exchange failed.', 'init-user-engine' ),
             'exchange_note'            => __( 'Conversion is irreversible. Please review before confirming.', 'init-user-engine' ),
+
+            'exchange_direction_cash_to_coin' => /* translators: %1$s = source currency label, %2$s = target currency label */ sprintf( __( '%1$s to %2$s', 'init-user-engine' ), $label_cash, $label_coin ),
+            'exchange_direction_coin_to_cash' => /* translators: %1$s = source currency label, %2$s = target currency label */ sprintf( __( '%1$s to %2$s', 'init-user-engine' ), $label_coin, $label_cash ),
+            'exchange_insufficient'           => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Not enough %s.', 'init-user-engine' ), $label_cash ),
 
             'upload_avatar'            => __( 'Upload Avatar', 'init-user-engine' ),
             'avatar_drop_text'         => __( 'Drop image here or click to upload', 'init-user-engine' ),

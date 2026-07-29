@@ -26,11 +26,12 @@ function init_plugin_suite_user_engine_set_coin( $user_id, $value ) {
 }
 
 // Add coin to user and return new total
-function init_plugin_suite_user_engine_add_coin( $user_id, $amount ) {
+function init_plugin_suite_user_engine_add_coin( $user_id, $amount, $apply_vip_bonus = true ) {
 	$amount = (int) $amount;
 
-	// Chỉ cộng bonus nếu là VIP và amount > 0
-	if ( $amount > 0 && init_plugin_suite_user_engine_is_vip( $user_id ) ) {
+	// Chỉ cộng bonus nếu là VIP, amount > 0, và cho phép áp dụng bonus
+	// (Đổi tiền Coin <-> Cash không được cộng thêm % thưởng VIP)
+	if ( $apply_vip_bonus && $amount > 0 && init_plugin_suite_user_engine_is_vip( $user_id ) ) {
 		$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
 		$bonus   = absint( $options['vip_bonus_coin'] ?? 0 );
 

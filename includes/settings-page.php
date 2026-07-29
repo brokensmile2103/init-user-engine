@@ -151,6 +151,20 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$rate_val = is_numeric( $rate_raw ) ? (float) $rate_raw : 0;
 	$output['rate_coin_per_cash'] = max( 0, $rate_val );
 
+	$vip_currency = sanitize_text_field( $input['vip_payment_currency'] ?? 'coin' );
+	$output['vip_payment_currency'] = in_array( $vip_currency, [ 'coin', 'cash', 'both' ], true ) ? $vip_currency : 'coin';
+
+	for ( $i = 1; $i <= 6; $i++ ) {
+		$key = 'vip_cash_price_' . $i;
+		$output[ $key ] = absint( $input[ $key ] ?? 0 );
+	}
+
+	$output['vip_bonus_cash'] = absint( $input['vip_bonus_cash'] ?? 0 );
+
+	$rate_cash_raw = $input['rate_cash_per_coin'] ?? 0;
+	$rate_cash_val = is_numeric( $rate_cash_raw ) ? (float) $rate_cash_raw : 0;
+	$output['rate_cash_per_coin'] = max( 0, $rate_cash_val );
+
 	return $output;
 }
 
@@ -202,6 +216,36 @@ function init_plugin_suite_user_engine_render_settings_page() {
 							value="<?php echo esc_attr( $options['rate_coin_per_cash'] ?? 0 ); ?>" />
 						<p class="description">
 							<?php esc_html_e( 'Coin received for 1 Cash. Set to 0 to disable conversion.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Exchange Rate: Coin → Cash', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0" step="0.0001"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[rate_cash_per_coin]"
+							value="<?php echo esc_attr( $options['rate_cash_per_coin'] ?? 0 ); ?>" />
+						<p class="description">
+							<?php esc_html_e( 'Cash received for 1 Coin. Set to 0 to disable conversion.', 'init-user-engine' ); ?>
+						</p>
+
+						<p class="description" role="alert" style="margin-top:8px;">
+							<span style="display:inline-block; padding:8px 10px; border-radius:6px; background:#fff3f3; border:1px solid #f5c2c2;">
+								<strong style="color:#c00; font-weight:700;">
+									<?php esc_html_e( 'DANGER — Exchange Misconfiguration Risk', 'init-user-engine' ); ?>
+								</strong>
+								<br>
+								<small style="color:#7a0000; display:block; margin-top:2px;">
+									<?php esc_html_e( 'If both exchange directions are enabled simultaneously, users may exploit rate differences to generate infinite Coin/Cash.', 'init-user-engine' ); ?>
+								</small>
+								<small style="color:#7a0000; display:block; margin-top:2px;">
+									<?php esc_html_e( 'VIP bonus percentages are excluded from exchange transactions. However, enabling both directions simultaneously may still allow users to exploit rate differences.', 'init-user-engine' ); ?>
+								</small>
+								<small style="color:#7a0000; display:block; margin-top:2px;">
+									<?php esc_html_e( 'Recommendation: enable only one direction, or ensure the product of both rates is strictly less than 1.', 'init-user-engine' ); ?>
+								</small>
+							</span>
 						</p>
 					</td>
 				</tr>
@@ -536,6 +580,38 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				</tr>
 
 				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'VIP', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'VIP Payment Currency', 'init-user-engine' ); ?></th>
+					<td>
+						<?php
+						$current_currency = $options['vip_payment_currency'] ?? 'coin';
+						$currencies       = [
+							'coin' => __( 'Coin', 'init-user-engine' ),
+							'cash' => __( 'Cash', 'init-user-engine' ),
+							'both' => __( 'Both (allow user to choose)', 'init-user-engine' ),
+						];
+						foreach ( $currencies as $val => $label ) :
+							?>
+							<label style="display:block;margin-bottom:6px;">
+								<input type="radio"
+									name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[vip_payment_currency]"
+									value="<?php echo esc_attr( $val ); ?>"
+									<?php checked( $current_currency, $val ); ?> />
+								<?php echo esc_html( $label ); ?>
+							</label>
+							<?php
+						endforeach;
+						?>
+						<p class="description">
+							<?php esc_html_e( 'Select which currency users can use to purchase VIP packages.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'VIP Pricing (by Coin)', 'init-user-engine' ); ?></h2></th>
 				</tr>
 
@@ -574,6 +650,47 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<?php endforeach; ?>
 
 				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'VIP Pricing (by Cash)', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
+				<?php
+				$vip_cash_labels = [
+					1 => '7 days',
+					2 => '30 days',
+					3 => '90 days',
+					4 => '180 days',
+					5 => '360 days',
+					6 => 'Lifetime',
+				];
+
+				$default_cash_prices = [
+					1 => 0,
+					2 => 0,
+					3 => 0,
+					4 => 0,
+					5 => 0,
+					6 => 0,
+				];
+
+				foreach ( $vip_cash_labels as $i => $label ) :
+					$field_name  = sprintf( '%s[vip_cash_price_%d]', INIT_PLUGIN_SUITE_IUE_OPTION, $i );
+					$price_value = $options[ 'vip_cash_price_' . $i ] ?? $default_cash_prices[ $i ];
+					?>
+					<tr>
+						<th scope="row"><?php echo esc_html( $label ); ?></th>
+						<td>
+							<input type="number" min="0" name="<?php echo esc_attr( $field_name ); ?>"
+								value="<?php echo esc_attr( $price_value ); ?>" />
+							<p class="description">
+								<?php esc_html_e( 'Set to 0 to disable this VIP package for Cash.', 'init-user-engine' ); ?>
+							</p>
+						</td>
+					</tr>
+					<?php
+				endforeach;
+				?>
+
+				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'VIP Bonus', 'init-user-engine' ); ?></h2></th>
 				</tr>
 
@@ -583,6 +700,22 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<input type="number" min="0" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[vip_bonus_coin]"
 						       value="<?php echo esc_attr( $options['vip_bonus_coin'] ?? 0 ); ?>" />
 						<p class="description"><?php esc_html_e( 'Extra Coin gained when VIP, in percent.', 'init-user-engine' ); ?></p>
+						<p class="description"><?php esc_html_e( 'This bonus does not apply to Cash/Coin exchange.', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Bonus Cash (%)', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[vip_bonus_cash]"
+							value="<?php echo esc_attr( $options['vip_bonus_cash'] ?? 0 ); ?>" />
+						<p class="description">
+							<?php esc_html_e( 'Extra Cash gained when VIP, in percent.', 'init-user-engine' ); ?>
+						</p>
+						<p class="description">
+							<?php esc_html_e( 'This bonus does not apply to Cash/Coin exchange.', 'init-user-engine' ); ?>
+						</p>
 					</td>
 				</tr>
 

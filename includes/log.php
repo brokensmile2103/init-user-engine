@@ -82,7 +82,7 @@ function init_plugin_suite_user_engine_count_cache_key( $type, $user_id ) {
  * @param string $change  'add' | 'deduct'
  * @return bool
  */
-function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount, $source, $change = 'add' ) {
+function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount, $source, $change = 'add', $apply_vip_bonus = true ) {
 	if ( ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
 		return false;
 	}
@@ -96,8 +96,9 @@ function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount
 	$final_amount    = $original_amount;
 	$bonus_percent   = 0;
 
-	// Apply VIP bonus (chỉ áp dụng cho coin và change = add)
-	if ( $type === 'coin' && $change === 'add' && $is_vip ) {
+	// Apply VIP bonus (chỉ áp dụng cho coin, change = add, và khi được phép cộng bonus)
+	// (Đổi tiền Cash <-> Coin KHÔNG được cộng thêm % thưởng VIP, kể cả trong log)
+	if ( $apply_vip_bonus && $type === 'coin' && $change === 'add' && $is_vip ) {
 		$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
 		$bonus   = absint( $options['vip_bonus_coin'] ?? 0 );
 
@@ -271,6 +272,12 @@ function init_plugin_suite_user_engine_format_log_message( $entry ) {
 			break;
 		case 'redeem_code':
 			$message = __( 'Redeem code reward', 'init-user-engine' );
+			break;
+		case 'exchange':
+			$message = __( 'Currency exchange', 'init-user-engine' );
+			break;
+		case 'exchange_reverse':
+			$message = __( 'Currency exchange', 'init-user-engine' );
 			break;
 		default:
 			$message = ucfirst( str_replace( '_', ' ', $source ) );

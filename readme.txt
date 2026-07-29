@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,22 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.3 – July 29, 2026 =
+- Added **two-way currency exchange** between Cash and Coin
+  - New REST endpoint `POST /exchange-reverse` to convert Coin → Cash
+  - Exchange modal now supports toggling between Cash → Coin and Coin → Cash
+  - Added independent exchange rate settings for both directions
+  - Rate limiting, idempotency, and mutex locks applied to both endpoints
+- Added **VIP bonus for Cash**
+  - VIP users now receive configurable bonus Cash (%) on all Cash additions
+  - Aligns with existing VIP bonus behavior for Coin and EXP
+- Added **VIP purchase by Cash**
+  - VIP packages can now be priced and purchased using Cash instead of Coin
+  - New setting to choose payment currency: Coin only, Cash only, or Both
+  - When set to Both, users can toggle between Coin and Cash in the purchase modal
+  - VIP purchase log now records the currency used for each transaction
+- Added new i18n strings for exchange direction, VIP currency selection, and Cash-related notifications
 
 = 1.5.2 – May 17, 2026 =
 - Updated custom dashicon CSS to use `currentColor` for full compatibility with WordPress Administration Color Schemes

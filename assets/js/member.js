@@ -1705,16 +1705,20 @@ function renderTransactionItem(entry) {
 // VIP
 function loadVipModal() {
     const t = InitUserEngineData.i18n || {};
-    const coinLabel = InitUserEngineData.label_coin || 'Coin';
+    const labelCoin = InitUserEngineData.label_coin || 'Coin';
+    const labelCash = InitUserEngineData.label_cash || 'Cash';
     const userIsVip = InitUserEngineData.is_vip || false;
     const vipExpiry = InitUserEngineData.vip_expiry || 0;
     const userCoin = InitUserEngineData.user_coin || 0;
+    const userCash = InitUserEngineData.user_cash || 0;
+    const paymentCurrency = InitUserEngineData.vip_payment_currency || 'coin';
 
     const statusText = userIsVip
         ? (t.vip_until || 'VIP until') + ' ' + new Date(vipExpiry * 1000).toLocaleDateString()
         : (t.vip_not || 'Not a VIP');
 
-    const prices = InitUserEngineData.vip_prices || {};
+    const coinPrices = InitUserEngineData.vip_prices || {};
+    const cashPrices = InitUserEngineData.vip_cash_prices || {};
 
     const packageInfo = {
         1: { days: 7, label: t.vip_7d || 'VIP 7 days' },
@@ -1725,12 +1729,27 @@ function loadVipModal() {
         6: { days: 9999, label: t.vip_lifetime || 'VIP Lifetime' }
     };
 
+    let currencySelector = '';
+    if (paymentCurrency === 'both') {
+        currencySelector = `
+            <div class="iue-vip-currency-selector">
+                <button type="button" class="iue-vip-currency-btn active" data-currency="coin">
+                    ${t.vip_pay_with_coin || 'Pay with Coin'}
+                </button>
+                <button type="button" class="iue-vip-currency-btn" data-currency="cash">
+                    ${t.vip_pay_with_cash || 'Pay with Cash'}
+                </button>
+            </div>
+        `;
+    }
+
     showUserEngineModal(t.vip_title || 'VIP Membership', `
         <div class="iue-vip-container">
             <div class="iue-vip-current">
                 <strong>${t.vip_status_prefix || 'Current status:'}</strong>
                 <span class="iue-vip-status">${statusText}</span>
             </div>
+            ${currencySelector}
             <div class="iue-vip-grid"></div>
             <div class="iue-vip-note">
                 <p><strong>${t.vip_note_title || 'Note:'}</strong> ${t.vip_note_extend || 'VIP will be extended if purchased again before expiration.'}</p>
@@ -1741,111 +1760,143 @@ function loadVipModal() {
     const grid = document.querySelector('#iue-modal .iue-vip-grid');
     if (!grid) return;
 
-    for (let i = 1; i <= 6; i++) {
-        const rawPrice = prices['vip_price_' + i];
-        const price = parseInt(rawPrice || 0, 10);
-        const isInactive = price <= 0;
-        const unaffordable = price > userCoin;
-        const info = packageInfo[i];
+    let activeCurrency = paymentCurrency === 'both' ? 'coin' : paymentCurrency;
 
-        const displayPrice = isInactive
-            ? `<span class="iue-vip-disabled-text">${t.vip_unavailable || 'Unavailable'}</span>`
-            : `${price.toLocaleString()} <span>${coinLabel}</span>`;
+    function renderGrid() {
+        grid.innerHTML = '';
+        for (let i = 1; i <= 6; i++) {
+            const info = packageInfo[i];
 
-        const buttonClass = ['iue-vip-buy-btn'];
-        if (unaffordable) buttonClass.push('disabled');
+            let rawPrice, priceLabel, userBalance;
+            if (activeCurrency === 'cash') {
+                rawPrice = cashPrices['vip_cash_price_' + i];
+                priceLabel = labelCash;
+                userBalance = userCash;
+            } else {
+                rawPrice = coinPrices['vip_price_' + i];
+                priceLabel = labelCoin;
+                userBalance = userCoin;
+            }
 
-        const card = document.createElement('div');
-        card.className = 'iue-vip-card' + (isInactive ? ' iue-vip-card--disabled' : '');
-        card.dataset.package = i;
-        card.innerHTML = `
-            <div class="iue-vip-title">${info.label}</div>
-            <div class="iue-vip-price">${displayPrice}</div>
-            <button class="${buttonClass.join(' ')}" ${isInactive ? 'disabled' : ''}>
-                ${isInactive ? (t.vip_unavailable || 'Unavailable') : (t.vip_buy_btn || 'Buy Now')}
-            </button>
-        `;
-        grid.appendChild(card);
+            const price = parseInt(rawPrice || 0, 10);
+            const isInactive = price <= 0;
+            const unaffordable = price > userBalance;
+
+            const displayPrice = isInactive
+                ? `<span class="iue-vip-disabled-text">${t.vip_unavailable || 'Unavailable'}</span>`
+                : `${price.toLocaleString()} <span>${priceLabel}</span>`;
+
+            const buttonClass = ['iue-vip-buy-btn'];
+            if (unaffordable) buttonClass.push('disabled');
+
+            const card = document.createElement('div');
+            card.className = 'iue-vip-card' + (isInactive ? ' iue-vip-card--disabled' : '');
+            card.dataset.package = i;
+            card.innerHTML = `
+                <div class="iue-vip-title">${info.label}</div>
+                <div class="iue-vip-price">${displayPrice}</div>
+                <button class="${buttonClass.join(' ')}" ${isInactive ? 'disabled' : ''}>
+                    ${isInactive ? (t.vip_unavailable || 'Unavailable') : (t.vip_buy_btn || 'Buy Now')}
+                </button>
+            `;
+            grid.appendChild(card);
+        }
+
+        grid.querySelectorAll('.iue-vip-buy-btn').forEach(btn => {
+            btn.addEventListener('click', handlePurchase);
+        });
     }
 
-    grid.querySelectorAll('.iue-vip-buy-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-            const card = e.target.closest('.iue-vip-card');
-            const packageId = parseInt(card.dataset.package, 10);
+    function handlePurchase(e) {
+        const btn = e.target;
+        const card = btn.closest('.iue-vip-card');
+        const packageId = parseInt(card.dataset.package, 10);
+        if (!packageId || isNaN(packageId)) return;
 
-            if (!packageId || isNaN(packageId)) return;
+        btn.disabled = true;
 
-            btn.disabled = true;
-
-            fetch(`${InitUserEngineData.rest_url}/vip/purchase`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': InitUserEngineData.nonce
-                },
-                body: JSON.stringify({ package_id: packageId })
+        fetch(`${InitUserEngineData.rest_url}/vip/purchase`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': InitUserEngineData.nonce
+            },
+            body: JSON.stringify({
+                package_id: packageId,
+                currency: activeCurrency
             })
-            .then(res => res.json())
-            .then(res => {
-                if (res && res.success) {
-                    // Cập nhật data
-                    InitUserEngineData.is_vip = true;
-                    InitUserEngineData.vip_expiry = res.new_expiry;
-                    const packagePrice = parseInt(prices['vip_price_' + packageId] || 0, 10);
-                    InitUserEngineData.user_coin = Math.max(0, InitUserEngineData.user_coin - packagePrice);
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res && res.success) {
+                InitUserEngineData.is_vip = true;
+                InitUserEngineData.vip_expiry = res.new_expiry;
 
-                    // Cập nhật UI: trạng thái VIP
-                    const vipStatus = document.querySelector('.iue-vip-status');
-                    if (vipStatus) {
-                        const expiry = new Date(res.new_expiry * 1000).toLocaleDateString();
-                        vipStatus.textContent = (t.vip_until || 'VIP until') + ' ' + expiry;
-                    }
+                const priceKey = activeCurrency === 'cash'
+                    ? ('vip_cash_price_' + packageId)
+                    : ('vip_price_' + packageId);
+                const price = parseInt(
+                    (activeCurrency === 'cash' ? cashPrices : coinPrices)[priceKey] || 0,
+                    10
+                );
 
-                    // Cập nhật lại toàn bộ nút (ẩn hoặc disable nếu không đủ tiền)
-                    document.querySelectorAll('.iue-vip-card').forEach(card => {
-                        const btn = card.querySelector('.iue-vip-buy-btn');
-                        if (!btn) return;
-
-                        const packageId = parseInt(card.dataset.package || 0, 10);
-                        const p = prices['vip_price_' + packageId];
-
-                        if (InitUserEngineData.user_coin < p) {
-                            btn.classList.add('disabled');
-                        } else {
-                            btn.classList.remove('disabled');
-                            btn.disabled = false; // optional: enable lại nếu cần
-                        }
-                    });
-
-                    // Toast báo thành công
-                    InitUserEngineToast.show(t.vip_purchase_success || 'VIP purchased successfully!', 'success');
+                if (activeCurrency === 'cash') {
+                    InitUserEngineData.user_cash = Math.max(0, InitUserEngineData.user_cash - price);
                 } else {
-                    const msg = (res && res.message) || (t.vip_purchase_fail || 'Could not purchase VIP package.');
-                    InitUserEngineToast.show(msg, 'error');
-                    btn.disabled = false;
-                    btn.textContent = t.vip_buy_btn || 'Buy Now';
+                    InitUserEngineData.user_coin = Math.max(0, InitUserEngineData.user_coin - price);
                 }
-            })
-            .catch(err => {
-                console.error('[Init User Engine] VIP purchase error:', err);
-                InitUserEngineToast.show(t.vip_error_generic || 'An error occurred during VIP purchase.', 'error');
+
+                const vipStatus = document.querySelector('.iue-vip-status');
+                if (vipStatus) {
+                    const expiry = new Date(res.new_expiry * 1000).toLocaleDateString();
+                    vipStatus.textContent = (t.vip_until || 'VIP until') + ' ' + expiry;
+                }
+
+                renderGrid();
+
+                InitUserEngineToast.show(t.vip_purchase_success || 'VIP purchased successfully!', 'success');
+            } else {
+                const msg = (res && res.message) || (t.vip_purchase_fail || 'Could not purchase VIP package.');
+                InitUserEngineToast.show(msg, 'error');
                 btn.disabled = false;
                 btn.textContent = t.vip_buy_btn || 'Buy Now';
+            }
+        })
+        .catch(err => {
+            console.error('[Init User Engine] VIP purchase error:', err);
+            InitUserEngineToast.show(t.vip_error_generic || 'An error occurred during VIP purchase.', 'error');
+            btn.disabled = false;
+            btn.textContent = t.vip_buy_btn || 'Buy Now';
+        });
+    }
+
+    if (paymentCurrency === 'both') {
+        document.querySelectorAll('.iue-vip-currency-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.iue-vip-currency-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeCurrency = btn.dataset.currency;
+                renderGrid();
             });
         });
-    });
+    }
+
+    renderGrid();
 }
 
-// EXCHANGE: Cash -> Coin
+// EXCHANGE: Cash <-> Coin
 function loadExchangeModal() {
     const t = InitUserEngineData.i18n || {};
-    const rate = parseFloat(InitUserEngineData.rate_coin_per_cash || 0);
+    const rateCashToCoin = parseFloat(InitUserEngineData.rate_coin_per_cash || 0);
+    const rateCoinToCash = parseFloat(InitUserEngineData.rate_cash_per_coin || 0);
     const labelCoin = InitUserEngineData.label_coin || 'Coin';
     const labelCash = InitUserEngineData.label_cash || 'Cash';
 
-    // Nếu tắt quy đổi
-    if (!rate || rate <= 0) {
+    const hasCashToCoin = rateCashToCoin > 0;
+    const hasCoinToCash = rateCoinToCash > 0;
+
+    if (!hasCashToCoin && !hasCoinToCash) {
         showUserEngineModal(t.exchange_title || 'Exchange', `
             <div class="iue-exchange-disabled">
                 <p>${t.exchange_disabled || 'Exchange is currently disabled.'}</p>
@@ -1864,12 +1915,22 @@ function loadExchangeModal() {
         return el ? iueParse(el.textContent) : 0;
     })();
 
-    showUserEngineModal(t.exchange_title || 'Exchange', `
+    let direction = hasCashToCoin ? 'cash_to_coin' : 'coin_to_cash';
+
+    const html = `
         <div class="iue-exchange-box">
-            <div class="iue-exchange-rate">
-                <strong>${t.exchange_rate || 'Rate'}:</strong>
-                1 ${labelCash} → ${rate} ${labelCoin}
+            <div class="iue-exchange-toggle">
+                <button type="button" class="iue-exchange-tab ${direction === 'cash_to_coin' ? 'active' : ''}" 
+                    data-dir="cash_to_coin" ${!hasCashToCoin ? 'disabled' : ''}>
+                    ${labelCash} → ${labelCoin}
+                </button>
+                <button type="button" class="iue-exchange-tab ${direction === 'coin_to_cash' ? 'active' : ''}" 
+                    data-dir="coin_to_cash" ${!hasCoinToCash ? 'disabled' : ''}>
+                    ${labelCoin} → ${labelCash}
+                </button>
             </div>
+
+            <div class="iue-exchange-rate" id="iue-exchange-rate-display"></div>
 
             <div class="iue-exchange-balance">
                 <div>${labelCash}: <strong class="iue-ex-balance-cash">${currentCash.toLocaleString()}</strong></div>
@@ -1877,14 +1938,16 @@ function loadExchangeModal() {
             </div>
 
             <div class="iue-form-group">
-                <label for="iue-exchange-cash">${t.exchange_amount || 'Amount'} (${labelCash})</label>
-                <input type="number" id="iue-exchange-cash" min="1" step="1" placeholder="0" />
-                <button type="button" class="iue-btn iue-btn-mini" id="iue-exchange-max">${t.exchange_max || 'Max'}</button>
+                <label for="iue-exchange-amount" id="iue-exchange-label"></label>
+                <div class="iue-exchange-input-row">
+                    <input type="number" id="iue-exchange-amount" min="1" step="1" placeholder="0" />
+                    <button type="button" class="iue-btn iue-btn-mini" id="iue-exchange-max">${t.exchange_max || 'Max'}</button>
+                </div>
             </div>
 
             <div class="iue-exchange-preview">
                 <span>${t.exchange_receive || 'You will receive'}:</span>
-                <strong><span id="iue-exchange-coin">0</span> ${labelCoin}</strong>
+                <strong><span id="iue-exchange-result">0</span> <span id="iue-exchange-result-label"></span></strong>
             </div>
 
             <div class="iue-form-actions">
@@ -1895,52 +1958,98 @@ function loadExchangeModal() {
                 ${t.exchange_note || 'Conversion is irreversible. Please review before confirming.'}
             </p>
         </div>
-    `, 'small');
+    `;
 
-    const input = document.getElementById('iue-exchange-cash');
-    const receiveEl = document.getElementById('iue-exchange-coin');
+    showUserEngineModal(t.exchange_title || 'Exchange', html, 'small');
+
+    const tabs = document.querySelectorAll('.iue-exchange-tab');
+    const rateDisplay = document.getElementById('iue-exchange-rate-display');
+    const labelEl = document.getElementById('iue-exchange-label');
+    const resultLabel = document.getElementById('iue-exchange-result-label');
+    const input = document.getElementById('iue-exchange-amount');
+    const receiveEl = document.getElementById('iue-exchange-result');
     const btnMax = document.getElementById('iue-exchange-max');
     const btnSubmit = document.getElementById('iue-exchange-submit');
 
+    function updateUI() {
+        const isCashToCoin = direction === 'cash_to_coin';
+        const rate = isCashToCoin ? rateCashToCoin : rateCoinToCash;
+        const fromLabel = isCashToCoin ? labelCash : labelCoin;
+        const toLabel = isCashToCoin ? labelCoin : labelCash;
+
+        rateDisplay.innerHTML = `<strong>${t.exchange_rate || 'Rate'}:</strong> 1 ${fromLabel} → ${rate} ${toLabel}`;
+        labelEl.textContent = `${t.exchange_amount || 'Amount'} (${fromLabel})`;
+        resultLabel.textContent = toLabel;
+        receiveEl.textContent = '0';
+        input.value = '';
+
+        tabs.forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.dir === direction);
+        });
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.disabled) return;
+            direction = tab.dataset.dir;
+            updateUI();
+        });
+    });
+
     function recompute() {
         const val = Math.max(0, parseInt(input.value || '0', 10));
-        const coins = Math.floor(val * rate);
-        receiveEl.textContent = coins.toLocaleString('vi-VN'); // ví dụ: 1.000.000
+        const isCashToCoin = direction === 'cash_to_coin';
+        const rate = isCashToCoin ? rateCashToCoin : rateCoinToCash;
+        const result = Math.floor(val * rate);
+        receiveEl.textContent = result.toLocaleString('vi-VN');
     }
 
     input?.addEventListener('input', recompute);
+
     btnMax?.addEventListener('click', () => {
-        input.value = String(currentCash);
+        const isCashToCoin = direction === 'cash_to_coin';
+        const max = isCashToCoin ? currentCash : currentCoin;
+        input.value = String(max);
         recompute();
     });
 
     btnSubmit?.addEventListener('click', () => {
-        const cashAmount = parseInt(input.value || '0', 10);
-        if (!cashAmount || cashAmount <= 0) {
+        const amount = parseInt(input.value || '0', 10);
+        const isCashToCoin = direction === 'cash_to_coin';
+        const rate = isCashToCoin ? rateCashToCoin : rateCoinToCash;
+
+        if (!amount || amount <= 0) {
             InitUserEngineToast.show(t.exchange_invalid || 'Enter a valid amount.', 'warning');
             return;
         }
-        if (cashAmount > currentCash) {
-            InitUserEngineToast.show(t.exchange_insufficient || 'Not enough Cash.', 'error');
+
+        const maxBalance = isCashToCoin ? currentCash : currentCoin;
+        if (amount > maxBalance) {
+            const msg = isCashToCoin 
+                ? (t.exchange_insufficient || 'Not enough Cash.') 
+                : (t.exchange_insufficient_coin || 'Not enough Coin.');
+            InitUserEngineToast.show(msg, 'error');
             return;
         }
 
         btnSubmit.disabled = true;
         btnSubmit.textContent = t.exchange_processing || 'Processing...';
 
-        fetch(`${InitUserEngineData.rest_url}/exchange`, {
+        const endpoint = isCashToCoin ? '/exchange' : '/exchange-reverse';
+        const bodyKey = isCashToCoin ? 'cash' : 'coin';
+
+        fetch(`${InitUserEngineData.rest_url}${endpoint}`, {
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 'X-WP-Nonce': InitUserEngineData.nonce
             },
-            body: JSON.stringify({ cash: cashAmount })
+            body: JSON.stringify({ [bodyKey]: amount })
         })
         .then(res => res.json())
         .then(res => {
-            if (res && (res.status === 'exchanged')) {
-                // cập nhật số dư trong dashboard
+            if (res && res.status === 'exchanged') {
                 const coinEl = document.querySelector('.iue-value-coin');
                 const cashEl = document.querySelector('.iue-value-cash');
                 if (coinEl && typeof res.balances?.coin !== 'undefined') {
@@ -1967,7 +2076,7 @@ function loadExchangeModal() {
         });
     });
 
-    // init icons in modal if any
+    updateUI();
     initUserEngineIcons(document.getElementById('iue-modal'));
 }
 

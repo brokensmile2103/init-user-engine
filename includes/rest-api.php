@@ -174,6 +174,15 @@ function init_plugin_suite_user_engine_register_rest_routes() {
         },
     ] );
 
+    // POST /exchange-reverse – Convert Coin to Cash
+    register_rest_route( $namespace, '/exchange-reverse', [
+        'methods'             => 'POST',
+        'callback'            => 'init_plugin_suite_user_engine_api_exchange_coin_to_cash',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
+    ] );
+
     // POST /redeem-code – Áp dụng mã redeem
     register_rest_route( $namespace, '/redeem-code', [
         'methods'             => 'POST',

@@ -171,16 +171,19 @@ function init_plugin_suite_user_engine_get_transaction_log( $user_id ) {
     global $wpdb;
     $table = init_plugin_suite_user_engine_txn_table();
 
+    // Lấy 100 giao dịch MỚI NHẤT (DESC), sau đó đảo lại thành thứ tự cũ → mới
+    // để giữ đúng format trả về cũ (tương thích ngược với các nơi đang dùng mảng này).
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $rows = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $user_id
         ),
         ARRAY_A
     );
 
     if ( ! empty( $rows ) ) {
+        $rows = array_reverse( $rows );
         $data = array_map( 'init_plugin_suite_user_engine_txn_row_to_legacy', $rows );
         wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
         return $data;
@@ -374,16 +377,19 @@ function init_plugin_suite_user_engine_get_exp_log( $user_id ) {
     global $wpdb;
     $table = init_plugin_suite_user_engine_exp_table();
 
+    // Lấy 100 EXP log MỚI NHẤT (DESC), sau đó đảo lại thành thứ tự cũ → mới
+    // để giữ đúng format trả về cũ (tương thích ngược với các nơi đang dùng mảng này).
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $rows = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at ASC, id ASC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            "SELECT * FROM $table WHERE user_id = %d ORDER BY logged_at DESC, id DESC LIMIT 100", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $user_id
         ),
         ARRAY_A
     );
 
     if ( ! empty( $rows ) ) {
+        $rows = array_reverse( $rows );
         $data = array_map( 'init_plugin_suite_user_engine_exp_row_to_legacy', $rows );
         wp_cache_set( $cache_key, $data, $group, init_plugin_suite_user_engine_cache_ttl() );
         return $data;

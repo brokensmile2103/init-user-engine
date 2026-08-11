@@ -27,7 +27,7 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 		.iue-kpi { background:#f6f7f7; border:1px solid #dcdcdc; padding:10px 12px; border-radius:6px; min-width:140px; }
 		.iue-kpi b { font-size:15px; }
 		.iue-progress { background:#eef1f3; border-radius:999px; height:10px; overflow:hidden; }
-		.iue-progress > span { display:block; height:10px; background:#2271b1; width:0; }
+		.iue-progress > span { display:block; height:10px; background:var(--wp-admin-theme-color); width:0; }
 		.iue-meta { color:#555; }
 		.iue-flex { display:flex; gap:18px; align-items:center; }
 		.iue-flex .iue-badge { background:#e7f5ff; color:#0a66c2; border:1px solid #b5dcff; padding:2px 8px; border-radius:999px; font-weight:600; }
@@ -279,9 +279,9 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				// ==================== NEW: Recent Transactions (up to 100) ====================
 				$__tx_log = [];
 				if ( function_exists( 'init_plugin_suite_user_engine_get_transaction_log' ) ) {
-					$__tx_all = (array) init_plugin_suite_user_engine_get_transaction_log( $user_id );
-					// latest first
-					$__tx_log = array_slice( array_reverse( array_values( $__tx_all ) ), 0, 100 );
+					// init_plugin_suite_user_engine_get_transaction_log() đã giới hạn sẵn tối đa
+					// 100 dòng (cũ → mới), chỉ cần đảo lại thành mới → cũ để hiển thị.
+					$__tx_log = array_reverse( (array) init_plugin_suite_user_engine_get_transaction_log( $user_id ) );
 				}
 				?>
 				<h4 style="margin-top:20px;"><?php esc_html_e( 'Recent Transactions', 'init-user-engine' ); ?></h4>
@@ -460,35 +460,38 @@ function init_plugin_suite_user_engine_get_inbox_quick_stats( $user_id ) {
 	$now = current_time( 'timestamp' );
 	$seven_days_ago = $now - ( 7 * DAY_IN_SECONDS );
 
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	$stats['total']  = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*) FROM {$table} WHERE user_id = %d",
-		$user_id
-	) );
+	// Gộp total + last7 + last_time vào 1 query aggregate duy nhất thay vì 3 query
+	// COUNT(*) riêng lẻ (giảm round-trip DB mỗi lần load trang hồ sơ user).
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	$row = $wpdb->get_row(
+		$wpdb->prepare(
+			"SELECT COUNT(*) AS total,
+			        COALESCE(SUM(CASE WHEN created_at >= %d THEN 1 ELSE 0 END), 0) AS last7,
+			        MAX(created_at) AS last_time
+			 FROM {$table} WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$seven_days_ago,
+			$user_id
+		),
+		ARRAY_A
+	);
 
-	// Use helper for unread if available to keep logic consistent
+	if ( $row ) {
+		$stats['total']     = (int) $row['total'];
+		$stats['last7']     = (int) $row['last7'];
+		$stats['last_time'] = $row['last_time'] ? (int) $row['last_time'] : null;
+	}
+
+	// Unread dùng riêng helper có cache (dùng chung cache với badge unread front-end),
+	// tránh query trùng và giữ đồng bộ với cơ chế invalidate cache đã có sẵn.
 	if ( function_exists( 'init_plugin_suite_user_engine_get_unread_inbox_count' ) ) {
 		$stats['unread'] = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $user_id );
 	} else {
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$stats['unread'] = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM {$table} WHERE user_id = %d AND status = 'unread'",
 			$user_id
 		) );
-	}
-
-	$stats['last7'] = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*) FROM {$table} WHERE user_id = %d AND created_at >= %d",
-		$user_id, $seven_days_ago
-	) );
-
-	$stats['last_time'] = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT MAX(created_at) FROM {$table} WHERE user_id = %d",
-		$user_id
-	) );
-	// phpcs:enable
-
-	if ( ! $stats['last_time'] ) {
-		$stats['last_time'] = null;
+		// phpcs:enable
 	}
 
 	return $stats;

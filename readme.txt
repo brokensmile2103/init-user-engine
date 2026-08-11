@@ -2,9 +2,9 @@
 Contributors: brokensmile.2103
 Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,7 +53,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 2. Custom Links section for setting Register and Lost Password URLs.
 3. Check-in Reward configuration, including Coin, EXP, and Cash per check-in.
 4. Online Reward configuration based on active time with reward values.
-5. VIP Pricing (by Coin) options for various durations, including lifetime.
+5. VIP Pricing options for various durations, including lifetime.
 6. VIP Bonus settings to configure extra Coin/EXP for VIP users.
 7. Referral Reward settings for both referrer and new user.
 8. Admin panel to send notifications with content, targeting, priority, and expiration.
@@ -159,6 +159,12 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.4 – August 11, 2026 =
+- Fixed: Admin User Overview metabox (Recent Transactions / Recent EXP-related data) stopped showing new activity after the meta → custom table migration (v1.5.x). Root cause: the transaction/EXP log reader queried the **oldest** 100 entries (`ORDER BY logged_at ASC LIMIT 100`) instead of the most recent ones, so entries logged after a user passed 100 total transactions never appeared. Now correctly fetches and displays the latest 100 entries
+- Improved: Admin User Overview metabox now performs a single aggregate query for inbox stats (total / last 7 days / last message time) instead of 3 separate `COUNT`/`MAX` queries, reducing database round-trips on profile page loads
+- Improved: Minor cleanup of redundant array processing when rendering the Recent Transactions list
+- `Tested up to: 7.1`
 
 = 1.5.3 – July 29, 2026 =
 - Added **two-way currency exchange** between Cash and Coin

@@ -241,6 +241,15 @@
 .iue-register-message.success { background: #e0f7ea; color: #007e5a; }
 .iue-register-message.error   { background: #ffe0e0; color: #b30000; }
 
+/* ==== Turnstile widget: đảm bảo không tràn khỏi khung modal ==== */
+.iue-register-captcha .cf-turnstile,
+.iue-register-captcha iframe,
+.iue-wp-form-captcha .cf-turnstile,
+.iue-wp-form-captcha iframe {
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
 /* ==== Password Toggle ==== */
 .iue-password-wrapper {
 	position: relative;

@@ -152,3 +152,62 @@ jQuery(function ($) {
 
     updateRows(); // init on load
 })();
+
+// === Cloudflare Turnstile: Test API ===
+(function () {
+	const $btn = jQuery('#iue-turnstile-test-btn');
+	if (!$btn.length) return;
+
+	const $result    = jQuery('#iue-turnstile-test-result');
+	const $siteKey   = jQuery('#iue-turnstile-site-key');
+	const $secretKey = jQuery('#iue-turnstile-secret-key');
+
+	// Chỉ cho phép bấm khi cả 2 ô đã có giá trị (không cần lưu trước, chỉ cần đã gõ)
+	function keysArePresent() {
+		return $siteKey.val().trim() !== '' && $secretKey.val().trim() !== '';
+	}
+
+	function updateBtnAvailability() {
+		const ready = keysArePresent();
+		$btn.prop('disabled', !ready);
+		$btn.attr('title', ready ? '' : $btn.data('msg-missing-keys'));
+	}
+
+	$siteKey.on('input', updateBtnAvailability);
+	$secretKey.on('input', updateBtnAvailability);
+	updateBtnAvailability(); // đồng bộ lại trạng thái ngay khi trang load (phòng trường hợp trình duyệt autofill)
+
+	$btn.on('click', function (e) {
+		e.preventDefault();
+
+		if (!keysArePresent()) {
+			// Phòng hờ: nút đang bị disable nên nhánh này gần như không bao giờ chạy tới
+			$result.removeClass('success').addClass('error').text($btn.data('msg-missing-keys'));
+			return;
+		}
+
+		const siteKey   = $siteKey.val().trim();
+		const secretKey = $secretKey.val().trim();
+
+		$result.removeClass('success error').text('');
+		$btn.prop('disabled', true).text($btn.data('label-testing'));
+
+		jQuery.post(ajaxurl, {
+			action: 'iue_test_turnstile',
+			site_key: siteKey,
+			secret_key: secretKey,
+			_ajax_nonce: InitPluginSuiteUserEngineAdminNoticeData.testTurnstileNonce
+		}).done(function (res) {
+			if (res && res.success) {
+				$result.removeClass('error').addClass('success').text(res.data.message);
+			} else {
+				$result.removeClass('success').addClass('error').text((res && res.data && res.data.message) || $btn.data('msg-request-failed'));
+			}
+		}).fail(function () {
+			$result.removeClass('success').addClass('error').text($btn.data('msg-request-failed'));
+		}).always(function () {
+			$btn.text($btn.data('label-default'));
+			updateBtnAvailability(); // trả lại trạng thái enable/disable đúng theo nội dung ô hiện tại
+		});
+	});
+})();

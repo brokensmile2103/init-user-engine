@@ -269,6 +269,7 @@ function init_plugin_suite_user_engine_verify_turnstile( $token, $remote_ip = ''
 		],
 	];
 
+	// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Đây là lệnh gọi API xác thực server-to-server tới Cloudflare Turnstile (không phải tải asset JS/CSS), bắt buộc phải gọi đúng endpoint chính thức này để xác minh token.
 	$response = wp_remote_post( 'https://challenges.cloudflare.com/turnstile/v0/siteverify', $args );
 	if ( is_wp_error( $response ) ) {
 		return new WP_Error( 'turnstile_http_error', __( 'Captcha verification failed due to a network error. Please try again.', 'init-user-engine' ), [ 'status' => 502 ] );

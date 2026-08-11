@@ -106,6 +106,10 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$turnstile_theme 					 = $input['turnstile_theme'] ?? 'auto';
 	$output['turnstile_theme'] 			 = in_array( $turnstile_theme, [ 'auto', 'light', 'dark' ], true ) ? $turnstile_theme : 'auto';
 
+	$output['protect_wp_login_form']        = ! empty( $input['protect_wp_login_form'] ) ? 1 : 0;
+	$output['protect_wp_register_form']     = ! empty( $input['protect_wp_register_form'] ) ? 1 : 0;
+	$output['protect_wp_lostpassword_form'] = ! empty( $input['protect_wp_lostpassword_form'] ) ? 1 : 0;
+
 	$output['checkin_coin']         	 = absint( $input['checkin_coin'] ?? 10 );
 	$output['checkin_exp']          	 = absint( $input['checkin_exp'] ?? 50 );
 	$output['checkin_cash']         	 = absint( $input['checkin_cash'] ?? 0 );
@@ -403,7 +407,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Site Key', 'init-user-engine' ); ?></th>
 					<td>
-						<input type="text" class="regular-text"
+						<input type="text" class="regular-text" id="iue-turnstile-site-key"
 							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_site_key]"
 							value="<?php echo esc_attr( $options['turnstile_site_key'] ?? '' ); ?>"
 							autocomplete="off" />
@@ -416,12 +420,37 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Secret Key', 'init-user-engine' ); ?></th>
 					<td>
-						<input type="password" class="regular-text"
+						<input type="password" class="regular-text" id="iue-turnstile-secret-key"
 							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[turnstile_secret_key]"
 							value="<?php echo esc_attr( $options['turnstile_secret_key'] ?? '' ); ?>"
 							autocomplete="new-password" />
 						<p class="description">
 							<?php esc_html_e( 'Private secret key used for server-side verification of Turnstile responses.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Test API', 'init-user-engine' ); ?></th>
+					<td>
+						<?php
+						$turnstile_site_key_val   = $options['turnstile_site_key'] ?? '';
+						$turnstile_secret_key_val = $options['turnstile_secret_key'] ?? '';
+						$turnstile_test_btn_ready = ( '' !== trim( $turnstile_site_key_val ) ) && ( '' !== trim( $turnstile_secret_key_val ) );
+						?>
+						<button type="button" class="button" id="iue-turnstile-test-btn"
+							<?php disabled( $turnstile_test_btn_ready, false ); ?>
+							title="<?php echo esc_attr__( 'Please enter both Site Key and Secret Key before testing.', 'init-user-engine' ); ?>"
+							data-label-default="<?php echo esc_attr__( 'Test API', 'init-user-engine' ); ?>"
+							data-label-testing="<?php echo esc_attr__( 'Testing…', 'init-user-engine' ); ?>"
+							data-msg-missing-keys="<?php echo esc_attr__( 'Please enter both Site Key and Secret Key before testing.', 'init-user-engine' ); ?>"
+							data-msg-request-failed="<?php echo esc_attr__( 'Request failed. Please try again.', 'init-user-engine' ); ?>">
+							<?php esc_html_e( 'Test API', 'init-user-engine' ); ?>
+						</button>
+						<span id="iue-turnstile-test-result" class="iue-turnstile-test-result"></span>
+						<p class="description">
+							<?php esc_html_e( 'Sends a request to Cloudflare to verify the Secret Key above, using the values currently in these fields (no need to save first). This only confirms the Secret Key — the Site Key is confirmed once the widget actually renders in the browser.', 'init-user-engine' ); ?>
+							<?php esc_html_e( 'The button is enabled once both fields above have a value.', 'init-user-engine' ); ?>
 						</p>
 					</td>
 				</tr>
@@ -450,6 +479,60 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description">
 							<?php esc_html_e( 'Choose the visual style of the captcha widget (auto, light, or dark).', 'init-user-engine' ); ?>
 						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th colspan="2">
+						<h2><?php esc_html_e( 'Protect Default WordPress Forms', 'init-user-engine' ); ?></h2>
+						<p class="description" style="margin-top:4px;">
+							<?php esc_html_e( 'Extend the Cloudflare Turnstile widget configured above to the native WordPress login, registration, and lost password forms (e.g. wp-login.php). Requires both Site Key and Secret Key to be set, and Disable Captcha to be off.', 'init-user-engine' ); ?>
+						</p>
+					</th>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Login Form', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[protect_wp_login_form]"
+								value="1"
+								<?php checked( $options['protect_wp_login_form'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Protect the default WordPress login form (wp-login.php and the login modal).', 'init-user-engine' ); ?>
+						</label>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Registration Form', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[protect_wp_register_form]"
+								value="1"
+								<?php checked( $options['protect_wp_register_form'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( "Protect WordPress's native registration form (wp-login.php?action=register).", 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'Only relevant if "Anyone can register" is enabled under Settings → General. Separate from this plugin\'s own registration form and endpoint.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Lost Password Form', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[protect_wp_lostpassword_form]"
+								value="1"
+								<?php checked( $options['protect_wp_lostpassword_form'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Protect the "Lost your password?" form.', 'init-user-engine' ); ?>
+						</label>
 					</td>
 				</tr>
 

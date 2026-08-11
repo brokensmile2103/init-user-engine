@@ -34,10 +34,10 @@
 	<?php if ( ! $disable_captcha ) : ?>
 		<?php if ( ! empty( $turnstile_key ) && ! empty( $options['turnstile_secret_key'] ) ) : ?>
 			<p class="iue-form-group iue-register-captcha">
-				<label><?php esc_html_e( 'Human Verification', 'init-user-engine' ); ?></label><br>
 				<div id="iue-turnstile"
 					data-sitekey="<?php echo esc_attr( $turnstile_key ); ?>"
-					data-theme="<?php echo esc_attr( in_array( $turnstile_theme, ['auto','light','dark'], true ) ? $turnstile_theme : 'auto' ); ?>">
+					data-theme="<?php echo esc_attr( in_array( $turnstile_theme, ['auto','light','dark'], true ) ? $turnstile_theme : 'auto' ); ?>"
+					data-size="flexible">
 				</div>
 			</p>
 		<?php else : ?>

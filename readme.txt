@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,19 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.5 – August 11, 2026 =
+- Added **Cloudflare Turnstile protection for WordPress's default forms**
+  - Extends the same Turnstile widget to WordPress's native Login, Registration, and Lost Password forms (`wp-login.php`), not just this plugin's own registration endpoint
+  - Three new toggles under Cloudflare Turnstile → Protect Default WordPress Forms: Login Form, Registration Form, Lost Password Form
+  - Login protection covers both the native `wp-login.php` page and the plugin's own login modal, since both submit through the same WordPress login flow
+  - Registration protection applies to WordPress's native `wp-login.php?action=register` page (only relevant when "Anyone can register" is enabled), independent from this plugin's own registration form/endpoint
+  - All three require both Turnstile keys to be set and only take effect when "Disable Captcha" is off, same as the existing registration captcha
+  - Turnstile script for the login modal only loads once the modal is actually opened, matching the existing lazy-load behavior of the registration widget
+- Added **Test API button** for Cloudflare Turnstile
+  - Verifies the Secret Key against Cloudflare directly from the Settings page, before saving
+  - Site Key can only be fully confirmed once the widget actually renders in the browser (e.g. on the registration form)
+- Added new i18n strings for the Turnstile form protection settings and the Test API button
 
 = 1.5.4 – August 11, 2026 =
 - Fixed: Admin User Overview metabox (Recent Transactions / Recent EXP-related data) stopped showing new activity after the meta → custom table migration (v1.5.x). Root cause: the transaction/EXP log reader queried the **oldest** 100 entries (`ORDER BY logged_at ASC LIMIT 100`) instead of the most recent ones, so entries logged after a user passed 100 total transactions never appeared. Now correctly fetches and displays the latest 100 entries

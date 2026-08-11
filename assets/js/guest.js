@@ -25,12 +25,15 @@
 		};
 	};
 })();
-window.iueRenderTurnstile = function () {
-	const el = document.getElementById('iue-turnstile'); // placeholder trong template
+// elId / widgetVarName có default để KHÔNG phá vỡ các lời gọi cũ (register vẫn dùng 'iue-turnstile' / '_iueWidgetId')
+window.iueRenderTurnstile = function (elId, widgetVarName) {
+	elId = elId || 'iue-turnstile';
+	widgetVarName = widgetVarName || '_iueWidgetId';
+	const el = document.getElementById(elId); // placeholder trong template
 	if (!el || typeof turnstile === 'undefined' || el.dataset.rendered === '1') return;
 	const sitekey = el.dataset.sitekey;
 	const theme   = el.dataset.theme || 'auto';
-	window._iueWidgetId = turnstile.render(el, { sitekey, theme });
+	window[widgetVarName] = turnstile.render(el, { sitekey, theme });
 	el.dataset.rendered = '1';
 };
 
@@ -57,6 +60,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 		if (pass) {
 			pass.placeholder = i18n.placeholder_password || 'Password';
+		}
+
+		// LAZY init Turnstile cho form Login — chỉ tải khi modal thực sự mở
+		const loginTurnstileEl = document.getElementById('iue-turnstile-login');
+		if (loginTurnstileEl) {
+			iueLoadTurnstile(() => iueRenderTurnstile('iue-turnstile-login', '_iueWidgetIdLogin'));
 		}
 	}
 	function closeModal() {
@@ -386,6 +395,36 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (type === 'success') setTimeout(() => { box.style.opacity = '0.7'; }, 3000);
 		}
 	}
+
+	// === LOGIN TURNSTILE: chặn submit sớm nếu widget chưa hoàn thành ===
+	// (form đăng nhập là <form> thật của wp_login_form(), submit thẳng tới wp-login.php,
+	// server vẫn luôn xác thực lại — đây chỉ là UX tốt hơn, tránh reload trang khi rõ ràng thiếu captcha)
+	(function () {
+		const loginForm = document.getElementById('loginform');
+		if (!loginForm) return;
+
+		loginForm.addEventListener('submit', function (e) {
+			const el = document.getElementById('iue-turnstile-login');
+			if (!el) return; // Turnstile không bật cho login, bỏ qua
+
+			if (typeof turnstile === 'undefined' || !turnstile.getResponse) return; // chưa kịp load, để server xử lý
+
+			const token = turnstile.getResponse(window._iueWidgetIdLogin);
+			if (token) return;
+
+			e.preventDefault();
+
+			let notice = document.getElementById('iue-login-turnstile-notice');
+			if (!notice) {
+				notice = document.createElement('div');
+				notice.id = 'iue-login-turnstile-notice';
+				notice.className = 'iue-register-message error';
+				loginForm.prepend(notice);
+			}
+			const i18n = window.InitUserEngineData?.i18n || {};
+			notice.textContent = i18n.captcha_required || 'Please complete the captcha.';
+		});
+	})();
 
 	// Theme apply cho modal
 	(function applyLoginModalTheme() {

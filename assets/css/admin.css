@@ -669,3 +669,18 @@
         page-break-inside: avoid;
     }
 }
+
+/* Cloudflare Turnstile: Test API */
+.iue-turnstile-test-result {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: 600;
+}
+
+.iue-turnstile-test-result.success {
+    color: #007e5a;
+}
+
+.iue-turnstile-test-result.error {
+    color: #b30000;
+}

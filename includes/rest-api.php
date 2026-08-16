@@ -1000,6 +1000,7 @@ function init_plugin_suite_user_engine_api_get_profile( WP_REST_Request $request
         'discord'      => get_user_meta( $user_id, 'iue_discord', true ),
         'website'      => get_user_meta( $user_id, 'iue_website', true ),
         'gender'       => get_user_meta( $user_id, 'iue_gender', true ),
+        'dob'          => get_user_meta( $user_id, 'iue_dob', true ),
     ];
 
     return rest_ensure_response( $profile );
@@ -1017,6 +1018,32 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
     $honeypot = sanitize_text_field( $data['iue_hp'] ?? '' );
     if ( ! empty( $honeypot ) ) {
         return new WP_Error( 'spam_detected', __( 'Spam detected.', 'init-user-engine' ), [ 'status' => 400 ] );
+    }
+
+    // Validate ngày sinh trước, để nếu lỗi thì không lưu dở dang các field khác.
+    $dob_raw = sanitize_text_field( $data['dob'] ?? '' );
+    $dob     = '';
+
+    if ( $dob_raw !== '' ) {
+        $dob_date = DateTime::createFromFormat( 'Y-m-d', $dob_raw );
+
+        // createFromFormat có thể tự "sửa" ngày không hợp lệ (VD: 2025-02-30 → 2025-03-02), nên phải so khớp lại chuỗi gốc.
+        if ( ! $dob_date || $dob_date->format( 'Y-m-d' ) !== $dob_raw ) {
+            return new WP_Error( 'invalid_dob', __( 'Please enter a valid date of birth.', 'init-user-engine' ), [ 'status' => 400 ] );
+        }
+
+        $today = new DateTime( 'today', wp_timezone() );
+        if ( $dob_date > $today ) {
+            return new WP_Error( 'dob_in_future', __( 'Date of birth cannot be in the future.', 'init-user-engine' ), [ 'status' => 400 ] );
+        }
+
+        // Chặn ngày sinh quá xa do nhập nhầm, giới hạn hợp lý trong vòng 120 năm đổ lại.
+        $min_dob_date = ( clone $today )->modify( '-120 years' );
+        if ( $dob_date < $min_dob_date ) {
+            return new WP_Error( 'dob_too_old', __( 'Please enter a valid date of birth.', 'init-user-engine' ), [ 'status' => 400 ] );
+        }
+
+        $dob = $dob_date->format( 'Y-m-d' );
     }
 
     $user_info = get_userdata( $user_id );
@@ -1058,6 +1085,7 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
     update_user_meta( $user_id, 'iue_discord', $discord );
     update_user_meta( $user_id, 'iue_website', $website );
     update_user_meta( $user_id, 'iue_gender', $gender );
+    update_user_meta( $user_id, 'iue_dob', $dob );
 
     do_action( 'init_plugin_suite_user_engine_after_update_profile', $user_id, $data );
 

@@ -299,6 +299,44 @@ function init_plugin_suite_user_engine_verify_turnstile( $token, $remote_ip = ''
 }
 
 /**
+ * Get a user's current age, computed from their stored date of birth.
+ *
+ * Ngày sinh được lưu ở user meta 'iue_dob' theo định dạng Y-m-d.
+ * Tuổi được tính lại mỗi lần gọi (dựa trên timezone của site) nên luôn chính xác,
+ * không bị lệch dần theo thời gian như khi lưu sẵn 1 con số tuổi cố định.
+ *
+ * @param int $user_id
+ * @return int Tuổi hiện tại, hoặc 0 nếu user chưa nhập ngày sinh / dữ liệu không hợp lệ.
+ */
+function init_plugin_suite_user_engine_get_age( $user_id = 0 ) {
+	$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
+	if ( ! $user_id ) {
+		return 0;
+	}
+
+	$dob_raw = trim( (string) get_user_meta( $user_id, 'iue_dob', true ) );
+	if ( $dob_raw === '' ) {
+		return 0;
+	}
+
+	$dob = DateTime::createFromFormat( 'Y-m-d', $dob_raw );
+
+	// Dữ liệu hỏng/sai định dạng (VD: bị chỉnh trực tiếp trong DB) → coi như chưa có.
+	if ( ! $dob || $dob->format( 'Y-m-d' ) !== $dob_raw ) {
+		return 0;
+	}
+
+	$today = new DateTime( 'today', wp_timezone() );
+	if ( $dob > $today ) {
+		return 0;
+	}
+
+	$age = $today->diff( $dob )->y;
+
+	return (int) $age;
+}
+
+/**
  * Check if a user can upload an avatar.
  *
  * Logic:

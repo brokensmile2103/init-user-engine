@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.5.6\n"
+"Project-Id-Version: Init User Engine 1.5.7\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
-"POT-Creation-Date: 2026-08-16 00:00+0000\n"
+"POT-Creation-Date: 2026-08-16 01:00+0000\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2603,6 +2603,18 @@ msgstr "Hoạt động"
 #: init-user-engine.php:315 init-user-engine.php:422
 msgid "Other"
 msgstr "Khác"
+
+#: init-user-engine.php:424
+msgid "Date of Birth"
+msgstr "Ngày sinh"
+
+#: init-user-engine.php:425 init-user-engine.php:427
+msgid "Please enter a valid date of birth."
+msgstr "Vui lòng nhập ngày sinh hợp lệ."
+
+#: init-user-engine.php:426
+msgid "Date of birth cannot be in the future."
+msgstr "Ngày sinh không được ở trong tương lai."
 
 #: init-user-engine.php:316
 msgid "Mark All as Read"

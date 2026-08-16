@@ -1380,6 +1380,10 @@ function renderEditProfileModal(user, t) {
                    <option value="other" ${user.gender === 'other' ? 'selected' : ''}>${t.gender_other || 'Other'}</option>
                </select>
            </div>
+           <div class="iue-form-group">
+               <label for="iue-dob">${t.dob || 'Date of Birth'}</label>
+               <input type="date" id="iue-dob" value="${user.dob || ''}" max="${iueTodayISO()}" />
+           </div>
            <div class="iue-form-actions">
                <button id="iue-save-profile" class="iue-btn">${t.save || 'Save'}</button>
            </div>
@@ -1390,6 +1394,14 @@ function renderEditProfileModal(user, t) {
     if (!saveBtn) return;
 
     saveBtn.addEventListener('click', () => {
+        const dobValue = document.querySelector('#iue-dob').value;
+
+        // Validate nhẹ phía client để phản hồi ngay, server vẫn là nơi validate chuẩn (authoritative).
+        if (dobValue && dobValue > iueTodayISO()) {
+            InitUserEngineToast.show(t.dob_future || 'Date of birth cannot be in the future.', 'error');
+            return;
+        }
+
         const data = {
             display_name: document.querySelector('#iue-display-name').value.trim(),
             bio: document.querySelector('#iue-bio').value.trim(),
@@ -1398,7 +1410,8 @@ function renderEditProfileModal(user, t) {
             twitter: document.querySelector('#iue-twitter').value.trim(),
             discord: document.querySelector('#iue-discord').value.trim(),
             website: document.querySelector('#iue-website').value.trim(),
-            gender: document.querySelector('#iue-gender').value
+            gender: document.querySelector('#iue-gender').value,
+            dob: dobValue
         };
 
         saveBtn.disabled = true;
@@ -2467,6 +2480,15 @@ const iueFmt = (n) => {
   return Number.isFinite(v) ? v.toLocaleString('vi-VN') : '0';
 };
 const iueParse = (text) => parseInt(String(text || '0').replace(/[^\d-]/g, ''), 10) || 0;
+
+// Ngày hôm nay theo local time, định dạng YYYY-MM-DD (dùng làm max cho input[type=date])
+const iueTodayISO = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+};
 
 // Init
 document.addEventListener('DOMContentLoaded', function () {

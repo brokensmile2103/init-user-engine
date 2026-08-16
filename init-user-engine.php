@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.5.6
+ * Version: 1.5.7
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.6' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.7' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -420,6 +420,11 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'gender_male'              => __( 'Male', 'init-user-engine' ),
             'gender_female'            => __( 'Female', 'init-user-engine' ),
             'gender_other'             => __( 'Other', 'init-user-engine' ),
+
+            'dob'                      => __( 'Date of Birth', 'init-user-engine' ),
+            'dob_invalid'              => __( 'Please enter a valid date of birth.', 'init-user-engine' ),
+            'dob_future'               => __( 'Date of birth cannot be in the future.', 'init-user-engine' ),
+            'dob_too_old'              => __( 'Please enter a valid date of birth.', 'init-user-engine' ),
 
             'save'                     => __( 'Save', 'init-user-engine' ),
             'update_success'           => __( 'Profile updated successfully!', 'init-user-engine' ),

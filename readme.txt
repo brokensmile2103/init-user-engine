@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.6
+Stable tag: 1.5.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,13 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.7 – August 16, 2026 =
+- Added **Date of Birth** field to the frontend Edit Profile modal, stored per-user instead of a raw age number so it stays accurate over time without users needing to re-enter it
+  - New REST field `dob` on both `GET /profile/me` and `POST /profile/update`
+  - Server-side validation rejects malformed dates, future dates, and dates older than 120 years; invalid input is rejected before any other profile field is saved
+- Added `init_plugin_suite_user_engine_get_age( $user_id )` helper — computes a user's current age from their stored date of birth, returns `0` if not set
+- Added new i18n strings for the Date of Birth field and its validation messages
 
 = 1.5.6 – August 16, 2026 =
 - Added **VIP Codes** — a dedicated code system for granting VIP membership days, alongside the existing Coin/Cash Redeem Codes

@@ -37,7 +37,7 @@
 				<div id="iue-turnstile"
 					data-sitekey="<?php echo esc_attr( $turnstile_key ); ?>"
 					data-theme="<?php echo esc_attr( in_array( $turnstile_theme, ['auto','light','dark'], true ) ? $turnstile_theme : 'auto' ); ?>"
-					data-size="flexible">
+					data-size="normal">
 				</div>
 			</p>
 		<?php else : ?>

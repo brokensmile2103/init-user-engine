@@ -24,6 +24,7 @@ $unread_count = (int) init_plugin_suite_user_engine_get_unread_inbox_count( $use
 
 $options     = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
 $rate_enable = (float) ( $options['rate_coin_per_cash'] ?? 0 );
+$vip_purchase_disabled = ! empty( $options['vip_disable_purchase'] );
 ?>
 
 <div class="iue-dashboard">
@@ -124,6 +125,14 @@ $rate_enable = (float) ( $options['rate_coin_per_cash'] ?? 0 );
 				<span><?php esc_html_e( 'Redeem Code', 'init-user-engine' ); ?></span>
 			</a>
 		</li>
+		<?php if ( ! $vip_purchase_disabled ) : ?>
+		<li>
+			<a href="#" role="button" class="iue-menu-link" data-action="redeem-vip-code">
+				<span class="iue-icon" data-iue-icon="crown"></span>
+				<span><?php esc_html_e( 'Redeem VIP Code', 'init-user-engine' ); ?></span>
+			</a>
+		</li>
+		<?php endif; ?>
 		<li>
 			<a href="#" role="button" class="iue-menu-link" data-action="edit-profile">
 				<span class="iue-icon" data-iue-icon="user"></span>

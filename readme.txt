@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.5
+Stable tag: 1.5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,20 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.6 – August 16, 2026 =
+- Added **VIP Codes** — a dedicated code system for granting VIP membership days, alongside the existing Coin/Cash Redeem Codes
+  - New admin page (User Engine → VIP Codes) with the same workflow as Redeem Codes: single/batch, multi-use, and user-locked codes, usage history, disable/delete
+  - New REST endpoint `POST /redeem-vip-code`, using the same transaction-locked, race-condition-safe redemption flow as Redeem Codes
+  - New "Redeem VIP Code" option in the frontend user dashboard, with its own modal
+- Added **Disable VIP Stacking** setting
+  - When enabled, a user with an active VIP can't purchase or redeem another VIP package/code until the current one expires, instead of extending it
+  - Enforced consistently across both Coin/Cash purchase and VIP Code redemption, with a row-level DB lock on redemption to prevent two simultaneous requests from both stacking VIP before either write completes
+- Added **Disable VIP Purchase** setting
+  - Completely turns off VIP purchasing/activation for all users; hides the purchase UI and the "Redeem VIP Code" menu item, and blocks both the purchase and VIP Code redeem endpoints
+  - Existing active VIP members are unaffected — only new activations are blocked
+- Changed: VIP Lifetime package now stores 99999 days instead of 9999 (previously only ~27 years, which confused users); all existing lifetime-detection logic remains compatible with old data
+- Added new i18n strings for VIP Codes, VIP stacking, and VIP purchase-disabled notices
 
 = 1.5.5 – August 11, 2026 =
 - Added **Cloudflare Turnstile protection for WordPress's default forms**

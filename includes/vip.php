@@ -24,6 +24,58 @@ function init_plugin_suite_user_engine_add_vip_days( $user_id, $days ) {
 	return $new_expiry;
 }
 
+/**
+ * Whether new VIP purchases/activations are globally disabled by admin.
+ *
+ * @return bool
+ */
+function init_plugin_suite_user_engine_is_vip_purchase_disabled() {
+	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	return ! empty( $options['vip_disable_purchase'] );
+}
+
+/**
+ * Whether VIP stacking (extending an already-active VIP) is disabled by admin.
+ * When enabled, a user must wait until their current VIP expires before
+ * they can purchase/activate VIP again.
+ *
+ * @return bool
+ */
+function init_plugin_suite_user_engine_is_vip_stacking_disabled() {
+	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	return ! empty( $options['vip_disable_stacking'] );
+}
+
+/**
+ * Central guard to call before granting/extending VIP via ANY entry point
+ * (coin/cash purchase, VIP code redemption, manual admin grant, etc.).
+ *
+ * @param int $user_id
+ * @return true|WP_Error
+ */
+function init_plugin_suite_user_engine_check_vip_activation_allowed( $user_id ) {
+	if ( init_plugin_suite_user_engine_is_vip_purchase_disabled() ) {
+		return new WP_Error(
+			'vip_purchase_disabled',
+			__( 'VIP activation is currently disabled.', 'init-user-engine' ),
+			[ 'status' => 403 ]
+		);
+	}
+
+	if (
+		init_plugin_suite_user_engine_is_vip_stacking_disabled()
+		&& init_plugin_suite_user_engine_is_vip( $user_id )
+	) {
+		return new WP_Error(
+			'vip_stacking_disabled',
+			__( 'You already have an active VIP membership. Please wait until it expires before activating again.', 'init-user-engine' ),
+			[ 'status' => 400 ]
+		);
+	}
+
+	return true;
+}
+
 // Purchase a VIP package (supports coin / cash / both)
 function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $currency = 'coin' ) {
 	$vip_days = [
@@ -32,11 +84,16 @@ function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $cur
 		3 => 90,
 		4 => 180,
 		5 => 360,
-		6 => 9999, // Lifetime
+		6 => 99999, // Lifetime
 	];
 
 	if ( ! isset( $vip_days[ $package_id ] ) ) {
 		return new WP_Error( 'invalid_package', __( 'Invalid VIP package.', 'init-user-engine' ) );
+	}
+
+	$activation_check = init_plugin_suite_user_engine_check_vip_activation_allowed( $user_id );
+	if ( is_wp_error( $activation_check ) ) {
+		return $activation_check;
 	}
 
 	$options          = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );

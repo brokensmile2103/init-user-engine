@@ -26,6 +26,7 @@ function init_plugin_suite_user_engine_on_activation() {
             switch_to_blog( $site->blog_id );
             init_plugin_suite_user_engine_create_inbox_table();
             init_plugin_suite_user_engine_create_redeem_code_table();
+            init_plugin_suite_user_engine_create_vip_code_table();
             init_plugin_suite_user_engine_create_transaction_log_table();
             init_plugin_suite_user_engine_create_exp_log_table();
             restore_current_blog();
@@ -33,6 +34,7 @@ function init_plugin_suite_user_engine_on_activation() {
     } else {
         init_plugin_suite_user_engine_create_inbox_table();
         init_plugin_suite_user_engine_create_redeem_code_table();
+        init_plugin_suite_user_engine_create_vip_code_table();
         init_plugin_suite_user_engine_create_transaction_log_table();
         init_plugin_suite_user_engine_create_exp_log_table();
     }
@@ -47,6 +49,7 @@ function init_plugin_suite_user_engine_on_new_blog( $blog_id, $user_id, $domain,
     switch_to_blog( $blog_id );
     init_plugin_suite_user_engine_create_inbox_table();
     init_plugin_suite_user_engine_create_redeem_code_table();
+    init_plugin_suite_user_engine_create_vip_code_table();
     init_plugin_suite_user_engine_create_transaction_log_table();
     init_plugin_suite_user_engine_create_exp_log_table();
     restore_current_blog();
@@ -75,6 +78,13 @@ function init_plugin_suite_user_engine_check_table() {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$redeem_table'" ) !== $redeem_table ) {
         init_plugin_suite_user_engine_create_redeem_code_table();
+    }
+
+    // VIP CODE
+    $vip_code_table = $wpdb->prefix . 'init_user_engine_vip_codes';
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '$vip_code_table'" ) !== $vip_code_table ) {
+        init_plugin_suite_user_engine_create_vip_code_table();
     }
 
     // TRANSACTION LOG
@@ -157,6 +167,48 @@ function init_plugin_suite_user_engine_create_redeem_code_table() {
         user_lock BIGINT UNSIGNED DEFAULT NULL,
         coin_amount BIGINT SIGNED NOT NULL DEFAULT 0,
         cash_amount BIGINT SIGNED NOT NULL DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
+        valid_from BIGINT UNSIGNED DEFAULT NULL,
+        valid_to BIGINT UNSIGNED DEFAULT NULL,
+        created_by BIGINT UNSIGNED DEFAULT NULL,
+        metadata LONGTEXT DEFAULT NULL,
+        created_at BIGINT UNSIGNED NOT NULL,
+        updated_at BIGINT UNSIGNED NOT NULL,
+        PRIMARY KEY (id),
+        UNIQUE KEY code (code),
+        KEY type (type),
+        KEY status (status),
+        KEY user_lock (user_lock),
+        KEY valid_to (valid_to),
+        KEY created_at (created_at),
+        KEY created_by (created_by),
+        KEY status_valid_to (status, valid_to),
+        KEY type_status (type, status)
+    ) $charset_collate;";
+
+    dbDelta( $sql );
+}
+
+/**
+ * Hàm tạo bảng VIP Code (tương tự Redeem Code, nhưng cấp VIP days thay vì coin/cash)
+ */
+function init_plugin_suite_user_engine_create_vip_code_table() {
+    global $wpdb;
+    $table_name      = $wpdb->prefix . 'init_user_engine_vip_codes';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $code_collation = 'utf8mb4_bin';
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $sql = "CREATE TABLE $table_name (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        code VARCHAR(64) COLLATE $code_collation NOT NULL,
+        type VARCHAR(20) NOT NULL DEFAULT 'single',
+        vip_days INT UNSIGNED NOT NULL DEFAULT 0,
+        max_uses INT UNSIGNED DEFAULT NULL,
+        used_count INT UNSIGNED NOT NULL DEFAULT 0,
+        user_lock BIGINT UNSIGNED DEFAULT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'active',
         valid_from BIGINT UNSIGNED DEFAULT NULL,
         valid_to BIGINT UNSIGNED DEFAULT NULL,

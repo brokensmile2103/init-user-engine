@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.5.5
+ * Version: 1.5.6
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.5' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.6' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -52,6 +52,7 @@ require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'hooks.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'vip.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'referral.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'redeem-codes-handler.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'vip-codes-handler.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'utils.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'turnstile-forms.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'user-metabox.php';
@@ -253,6 +254,12 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
 
         'is_vip'         => $is_vip, // bool
         'vip_expiry'     => init_plugin_suite_user_engine_get_vip_expiry(),
+        'vip_purchase_disabled' => function_exists( 'init_plugin_suite_user_engine_is_vip_purchase_disabled' )
+            ? init_plugin_suite_user_engine_is_vip_purchase_disabled()
+            : false,
+        'vip_stacking_disabled' => function_exists( 'init_plugin_suite_user_engine_is_vip_stacking_disabled' )
+            ? init_plugin_suite_user_engine_is_vip_stacking_disabled()
+            : false,
         'vip_prices'     => apply_filters( 'init_plugin_suite_user_engine_vip_prices', [
             'vip_price_1' => absint( $settings['vip_price_1'] ?? 7000 ),
             'vip_price_2' => absint( $settings['vip_price_2'] ?? 30000 ),
@@ -340,6 +347,10 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'vip_pay_with_coin'        => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Pay with %s', 'init-user-engine' ), $label_coin ),
             'vip_pay_with_cash'        => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Pay with %s', 'init-user-engine' ), $label_cash ),
             'not_enough_cash'          => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Not enough %s.', 'init-user-engine' ), $label_cash ),
+
+            'vip_active_already'          => __( 'Already VIP', 'init-user-engine' ),
+            'vip_purchase_disabled_note'  => __( 'VIP activation is currently disabled by the site admin.', 'init-user-engine' ),
+            'vip_stacking_disabled_note'  => __( 'You already have an active VIP. Please wait until it expires before activating it again.', 'init-user-engine' ),
 
             'referral_title'           => __( 'Invite Friends', 'init-user-engine' ),
             'referral_heading'         => __( 'Invite your friends and earn rewards', 'init-user-engine' ),
@@ -434,6 +445,11 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'redeem_empty'              => __( 'Please enter a redeem code.', 'init-user-engine' ),
 
             'redeem_error'              => __( 'Failed to redeem code.', 'init-user-engine' ),
+
+            'redeem_vip_title'              => __( 'Redeem VIP Code', 'init-user-engine' ),
+            'redeem_vip_placeholder'        => __( 'Enter VIP code...', 'init-user-engine' ),
+            'redeem_vip_you_will_receive'   => __( 'You will receive VIP membership days.', 'init-user-engine' ),
+            'redeem_vip_success'            => __( 'VIP code redeemed successfully!', 'init-user-engine' ),
         ],
     ];
 

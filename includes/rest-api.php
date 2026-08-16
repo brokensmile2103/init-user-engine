@@ -191,6 +191,15 @@ function init_plugin_suite_user_engine_register_rest_routes() {
             return is_user_logged_in();
         },
     ] );
+
+    // POST /redeem-vip-code – Áp dụng mã VIP code
+    register_rest_route( $namespace, '/redeem-vip-code', [
+        'methods'             => 'POST',
+        'callback'            => 'init_plugin_suite_user_engine_api_redeem_vip_code',
+        'permission_callback' => function () {
+            return is_user_logged_in();
+        },
+    ] );
 }
 
 // Enhanced Captcha với better validation

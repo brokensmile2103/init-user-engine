@@ -65,6 +65,17 @@ add_action( 'admin_menu', function () {
 	);
 
 	require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'tools/redeem-codes.php';
+
+	add_submenu_page(
+	    INIT_PLUGIN_SUITE_IUE_SLUG,
+	    __( 'VIP Codes', 'init-user-engine' ),
+	    __( 'VIP Codes', 'init-user-engine' ),
+	    'manage_options',
+	    'init-user-engine-vip-codes',
+	    'init_plugin_suite_user_engine_render_vip_codes_page'
+	);
+
+	require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'tools/vip-codes.php';
 } );
 
 // Register settings
@@ -157,6 +168,9 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 
 	$vip_currency = sanitize_text_field( $input['vip_payment_currency'] ?? 'coin' );
 	$output['vip_payment_currency'] = in_array( $vip_currency, [ 'coin', 'cash', 'both' ], true ) ? $vip_currency : 'coin';
+
+	$output['vip_disable_stacking'] = ! empty( $input['vip_disable_stacking'] ) ? 1 : 0;
+	$output['vip_disable_purchase'] = ! empty( $input['vip_disable_purchase'] ) ? 1 : 0;
 
 	for ( $i = 1; $i <= 6; $i++ ) {
 		$key = 'vip_cash_price_' . $i;
@@ -690,6 +704,38 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						?>
 						<p class="description">
 							<?php esc_html_e( 'Select which currency users can use to purchase VIP packages.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Disable VIP Stacking', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[vip_disable_stacking]"
+								value="1"
+								<?php checked( ! empty( $options['vip_disable_stacking'] ) ); ?> />
+							<?php esc_html_e( 'Prevent users from purchasing/activating VIP again while their current VIP is still active.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'When enabled, a user must wait until their current VIP expires before they can buy or redeem another VIP package/code. When disabled (default), new VIP time is added on top of the remaining time.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Disable VIP Purchase', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[vip_disable_purchase]"
+								value="1"
+								<?php checked( ! empty( $options['vip_disable_purchase'] ) ); ?> />
+							<?php esc_html_e( 'Completely turn off VIP purchasing/activation for all users.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'When enabled, the VIP purchase UI is hidden and the purchase/redeem endpoints are blocked. Existing active VIP members are not affected.', 'init-user-engine' ); ?>
 						</p>
 					</td>
 				</tr>

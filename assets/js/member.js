@@ -91,6 +91,11 @@ function initMenuClick() {
             return;
         }
 
+        if (action === 'redeem-vip-code') {
+            loadRedeemVipModal();
+            return;
+        }
+
         if (action === 'edit-profile') {
             loadEditProfileModal();
             return;
@@ -356,6 +361,7 @@ const IUE_Icons = {
     // Common actions
     copy: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><rect width="12" height="16" fill="none" stroke="currentColor" x="3.5" y="2.5"></rect><polyline fill="none" stroke="currentColor" points="5 0.5 17.5 0.5 17.5 17"></polyline></svg>`,
     gift: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 485 485" xml:space="preserve"><path d="M0 69.9V415h485V70zm455 30v93.3h-35.5a46.3 46.3 0 0 0-74.5-50.3l-47.5 44.7-47.4-44.6-.2-.1a46.3 46.3 0 0 0-74.4 50.3H30V99.9zm-79.2 93.3-8-.2v.2h-32.4l30-28.2q4.6-4.1 10.8-4.2a16.2 16.2 0 0 1 .8 32.4zm-148.6-.2-8 .2H218a16.2 16.2 0 1 1 11.7-28.2l30 28.2h-32.4zM30 385.1v-162h222.5v67.7h30v-67.6h30v107.6h30V223.2H455v162z"></path></svg>`,
+    crown: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 15.29V5.71c0-1.33.77-1.65 1.71-.71L6.3 7.59a1 1 0 0 0 1.41 0L11.29 4a1 1 0 0 1 1.41 0l3.59 3.59a1 1 0 0 0 1.41 0L20.29 5c.94-.94 1.71-.62 1.71.71v9.59c0 3-2 5-5 5H7a5 5 0 0 1-5-5.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     check: `<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.1" points="4,10 8,15 17,4"></polyline></svg>`,
 };
 
@@ -1712,6 +1718,9 @@ function loadVipModal() {
     const userCoin = InitUserEngineData.user_coin || 0;
     const userCash = InitUserEngineData.user_cash || 0;
     const paymentCurrency = InitUserEngineData.vip_payment_currency || 'coin';
+    const purchaseDisabled = !!InitUserEngineData.vip_purchase_disabled;
+    const stackingDisabled = !!InitUserEngineData.vip_stacking_disabled;
+    const blockedByStacking = stackingDisabled && userIsVip;
 
     const statusText = userIsVip
         ? (t.vip_until || 'VIP until') + ' ' + new Date(vipExpiry * 1000).toLocaleDateString()
@@ -1726,7 +1735,7 @@ function loadVipModal() {
         3: { days: 90, label: t.vip_90d || 'VIP 90 days' },
         4: { days: 180, label: t.vip_180d || 'VIP 180 days' },
         5: { days: 360, label: t.vip_360d || 'VIP 360 days' },
-        6: { days: 9999, label: t.vip_lifetime || 'VIP Lifetime' }
+        6: { days: 99999, label: t.vip_lifetime || 'VIP Lifetime' }
     };
 
     let currencySelector = '';
@@ -1743,16 +1752,23 @@ function loadVipModal() {
         `;
     }
 
+    let noteHtml = `<p><strong>${t.vip_note_title || 'Note:'}</strong> ${t.vip_note_extend || 'VIP will be extended if purchased again before expiration.'}</p>`;
+    if (purchaseDisabled) {
+        noteHtml = `<p class="iue-vip-note--warning">${t.vip_purchase_disabled_note || 'VIP activation is currently disabled by the site admin.'}</p>`;
+    } else if (blockedByStacking) {
+        noteHtml = `<p class="iue-vip-note--warning">${t.vip_stacking_disabled_note || 'You already have an active VIP. Please wait until it expires before activating it again.'}</p>`;
+    }
+
     showUserEngineModal(t.vip_title || 'VIP Membership', `
         <div class="iue-vip-container">
             <div class="iue-vip-current">
                 <strong>${t.vip_status_prefix || 'Current status:'}</strong>
                 <span class="iue-vip-status">${statusText}</span>
             </div>
-            ${currencySelector}
+            ${purchaseDisabled ? '' : currencySelector}
             <div class="iue-vip-grid"></div>
             <div class="iue-vip-note">
-                <p><strong>${t.vip_note_title || 'Note:'}</strong> ${t.vip_note_extend || 'VIP will be extended if purchased again before expiration.'}</p>
+                ${noteHtml}
             </div>
         </div>
     `);
@@ -1764,6 +1780,12 @@ function loadVipModal() {
 
     function renderGrid() {
         grid.innerHTML = '';
+
+        if (purchaseDisabled) {
+            grid.innerHTML = `<p class="iue-vip-disabled-text">${t.vip_purchase_disabled_note || 'VIP activation is currently disabled by the site admin.'}</p>`;
+            return;
+        }
+
         for (let i = 1; i <= 6; i++) {
             const info = packageInfo[i];
 
@@ -1779,15 +1801,19 @@ function loadVipModal() {
             }
 
             const price = parseInt(rawPrice || 0, 10);
-            const isInactive = price <= 0;
+            const isInactive = price <= 0 || blockedByStacking;
             const unaffordable = price > userBalance;
 
-            const displayPrice = isInactive
+            const displayPrice = (price <= 0)
                 ? `<span class="iue-vip-disabled-text">${t.vip_unavailable || 'Unavailable'}</span>`
                 : `${price.toLocaleString()} <span>${priceLabel}</span>`;
 
             const buttonClass = ['iue-vip-buy-btn'];
-            if (unaffordable) buttonClass.push('disabled');
+            if (unaffordable || blockedByStacking) buttonClass.push('disabled');
+
+            let buttonLabel = t.vip_buy_btn || 'Buy Now';
+            if (price <= 0) buttonLabel = t.vip_unavailable || 'Unavailable';
+            else if (blockedByStacking) buttonLabel = t.vip_active_already || 'Already VIP';
 
             const card = document.createElement('div');
             card.className = 'iue-vip-card' + (isInactive ? ' iue-vip-card--disabled' : '');
@@ -1796,7 +1822,7 @@ function loadVipModal() {
                 <div class="iue-vip-title">${info.label}</div>
                 <div class="iue-vip-price">${displayPrice}</div>
                 <button class="${buttonClass.join(' ')}" ${isInactive ? 'disabled' : ''}>
-                    ${isInactive ? (t.vip_unavailable || 'Unavailable') : (t.vip_buy_btn || 'Buy Now')}
+                    ${buttonLabel}
                 </button>
             `;
             grid.appendChild(card);
@@ -2192,6 +2218,113 @@ function loadRedeemModal() {
         if (e.key === 'Enter') {
             e.preventDefault();
             doRedeem();
+        }
+    });
+
+    // auto focus
+    setTimeout(() => input?.focus(), 50);
+}
+
+function loadRedeemVipModal() {
+    const t = InitUserEngineData.i18n || {};
+
+    // UI modal
+    showUserEngineModal(
+        t.redeem_vip_title || 'Redeem VIP Code',
+        `
+        <div class="iue-redeem-box">
+            <div class="iue-form-group">
+                <input type="text" id="iue-redeem-vip-input" class="iue-input"
+                       placeholder="${t.redeem_vip_placeholder || 'Enter VIP code...'}" />
+            </div>
+
+            <div class="iue-form-actions">
+                <button id="iue-redeem-vip-submit" class="iue-btn">
+                    ${t.redeem_submit || 'Redeem'}
+                </button>
+            </div>
+
+            <p class="iue-redeem-note">
+                ${t.redeem_vip_you_will_receive || 'You will receive VIP membership days.'}
+            </p>
+        </div>
+        `,
+        'small'
+    );
+
+    initUserEngineIcons(document.getElementById('iue-modal'));
+
+    const input  = document.getElementById('iue-redeem-vip-input');
+    const submit = document.getElementById('iue-redeem-vip-submit');
+
+    function doRedeemVip() {
+        const code = (input.value || '').trim();
+        if (!code) {
+            InitUserEngineToast.show(t.redeem_empty || 'Please enter a redeem code.', 'warning');
+            input.focus();
+            return;
+        }
+
+        submit.disabled = true;
+        const originalText = submit.textContent;
+        submit.textContent = t.redeem_processing || 'Processing...';
+
+        fetch(`${InitUserEngineData.rest_url}/redeem-vip-code`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': InitUserEngineData.nonce
+            },
+            body: JSON.stringify({ code })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res && res.success) {
+                InitUserEngineData.is_vip = true;
+                if (typeof res.new_expiry !== 'undefined') {
+                    InitUserEngineData.vip_expiry = res.new_expiry;
+                }
+
+                InitUserEngineToast.show(t.redeem_vip_success || 'VIP code redeemed successfully!', 'success');
+
+                document.dispatchEvent(new CustomEvent('iue:redeem-vip:success', { detail: res }));
+
+                closeModal();
+            } else {
+                const msg = (res && res.message) || t.redeem_error || 'Failed to redeem code.';
+                let uiMsg = msg;
+                if (/Invalid VIP code/i.test(msg)) uiMsg = t.redeem_invalid || msg;
+                else if (/expired/i.test(msg))      uiMsg = t.redeem_expired || msg;
+                else if (/not active yet/i.test(msg)) uiMsg = t.redeem_not_started || msg;
+                else if (/used up/i.test(msg))      uiMsg = t.redeem_used_up || msg;
+                else if (/already been used/i.test(msg)) uiMsg = t.redeem_used || msg;
+                else if (/assigned to another user/i.test(msg)) uiMsg = t.redeem_assigned_other || msg;
+                else if (/currently disabled/i.test(msg)) uiMsg = t.vip_purchase_disabled_note || msg;
+                else if (/already have an active VIP/i.test(msg)) uiMsg = t.vip_stacking_disabled_note || msg;
+
+                InitUserEngineToast.show(uiMsg, 'error');
+                submit.disabled = false;
+                submit.textContent = originalText;
+                input.focus();
+            }
+        })
+        .catch(err => {
+            console.error('[Init User Engine] Redeem VIP error:', err);
+            InitUserEngineToast.show(t.redeem_error || 'Failed to redeem code.', 'error');
+            submit.disabled = false;
+            submit.textContent = originalText;
+        });
+    }
+
+    // click nút
+    submit?.addEventListener('click', doRedeemVip);
+
+    // enter để submit
+    input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            doRedeemVip();
         }
     });
 

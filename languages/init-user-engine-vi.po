@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.5.7\n"
+"Project-Id-Version: Init User Engine 1.5.8\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "POT-Creation-Date: 2026-08-16 01:00+0000\n"
 "Language: vi\n"
@@ -26,7 +26,7 @@ msgid ""
 "Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, "
 "and referral – powered by REST API and Vanilla JS."
 msgstr ""
-"Hệ thống người dùng nhẹ, sinh động với EXP, ví xu, điểm danh, VIP, hộp thư "
+"Hệ thống người dùng nhẹ, sinh động với EXP, ví Coin, điểm danh, VIP, hộp thư "
 "và giới thiệu – vận hành bằng REST API và JavaScript thuần."
 
 #. Author of the plugin
@@ -66,21 +66,23 @@ msgstr "Chưa xác thực"
 msgid "Exchange is currently disabled."
 msgstr "Tính năng đổi tiền hiện đang tắt."
 
-#: includes/cash.php:93
-msgid "Please provide a valid Cash amount greater than 0."
-msgstr "Vui lòng nhập số Cash lớn hơn 0."
-
-#. translators: %d is number
-#: includes/cash.php:97
+#: includes/cash.php:98 includes/cash.php:257
+#. translators: %s is the currency label (e.g., Coin, Cash).
 #, php-format
-msgid "Minimum per exchange is %d Cash."
-msgstr "Tối thiểu mỗi lượt đổi là %d Cash."
+msgid "Please provide a valid %s amount greater than 0."
+msgstr "Vui lòng nhập số %s hợp lệ lớn hơn 0."
 
-#. translators: %d is number
-#: includes/cash.php:101
+#: includes/cash.php:102 includes/cash.php:261
+#. translators: %1$d is number, %2$s is the currency label (e.g., Coin, Cash).
 #, php-format
-msgid "Maximum per exchange is %d Cash."
-msgstr "Tối đa mỗi lượt đổi là %d Cash."
+msgid "Minimum per exchange is %1$d %2$s."
+msgstr "Tối thiểu mỗi lượt đổi là %1$d %2$s."
+
+#: includes/cash.php:106 includes/cash.php:265
+#. translators: %1$d is number, %2$s is the currency label (e.g., Coin, Cash).
+#, php-format
+msgid "Maximum per exchange is %1$d %2$s."
+msgstr "Tối đa mỗi lượt đổi là %1$d %2$s."
 
 #: includes/cash.php:108 includes/cash.php:258
 msgid "Too many exchange attempts. Please try again later."
@@ -94,77 +96,53 @@ msgstr "Đã phát hiện yêu cầu đổi tiền trùng lặp."
 msgid "Another exchange is in progress. Please wait a moment."
 msgstr "Một lượt đổi tiền khác đang được xử lý. Vui lòng đợi trong giây lát."
 
-#: includes/cash.php:136
-msgid "Not enough Cash to exchange."
-msgstr "Không đủ Cash để đổi."
+#: includes/cash.php:142 includes/cash.php:299
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#, php-format
+msgid "Not enough %s to exchange."
+msgstr "Không đủ %s để đổi."
 
-#: includes/cash.php:142
-msgid "The exchange would result in 0 Coin. Increase the Cash amount."
-msgstr "Lượt đổi này sẽ cho ra 0 Coin. Hãy tăng số lượng Cash."
+#: includes/cash.php:149 includes/cash.php:306
+#. translators: %1$s is the currency label being credited, %2$s is the currency label being spent (e.g., Coin, Cash).
+#, php-format
+msgid "The exchange would result in 0 %1$s. Increase the %2$s amount."
+msgstr "Lượt đổi này sẽ cho ra 0 %1$s. Hãy tăng số lượng %2$s."
 
-#: includes/cash.php:152
-msgid "Could not deduct Cash."
-msgstr "Không thể trừ Cash."
+#: includes/cash.php:160 includes/cash.php:317
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#, php-format
+msgid "Could not deduct %s."
+msgstr "Không thể trừ %s."
 
 #: includes/cash.php:157 includes/cash.php:305
 msgid "Balance changed. Please try again."
 msgstr "Số dư đã thay đổi. Vui lòng thử lại."
 
-#: includes/cash.php:165
-msgid "Could not add Coin."
-msgstr "Không thể cộng Coin."
-
-#: includes/cash.php:243
-msgid "Please provide a valid Coin amount greater than 0."
-msgstr "Vui lòng nhập số Coin lớn hơn 0."
-
-#. translators: %d is number
-#: includes/cash.php:247
+#: includes/cash.php:174 includes/cash.php:331
+#. translators: %s is the currency label (e.g., Coin, Cash).
 #, php-format
-msgid "Minimum per exchange is %d Coin."
-msgstr "Tối thiểu mỗi lượt đổi là %d Coin."
+msgid "Could not add %s."
+msgstr "Không thể cộng %s."
 
-#. translators: %d is number
-#: includes/cash.php:251
-#, php-format
-msgid "Maximum per exchange is %d Coin."
-msgstr "Tối đa mỗi lượt đổi là %d Coin."
-
-#: includes/cash.php:284
-msgid "Not enough Coin to exchange."
-msgstr "Không đủ Coin để đổi."
-
-#: includes/cash.php:290
-msgid "The exchange would result in 0 Cash. Increase the Coin amount."
-msgstr "Lượt đổi này sẽ cho ra 0 Cash. Hãy tăng số lượng Coin."
-
-#: includes/cash.php:300
-msgid "Could not deduct Coin."
-msgstr "Không thể trừ Coin."
-
-#: includes/cash.php:313
-msgid "Could not add Cash."
-msgstr "Không thể cộng Cash."
-
-#. translators: %1$d is the level number, %2$d is the bonus coins.
+#. translators: %1$d is the level number, %2$d is the bonus amount, %3$s is the coin label (e.g., Coin, Xu).
 #: includes/exp.php:71
 #, php-format
 msgid ""
-"Congratulations! You reached level %1$d and received %2$d coins as a bonus."
-msgstr "Chúc mừng! Bạn đã lên cấp %1$d và nhận được %2$d xu thưởng."
+"Congratulations! You reached level %1$d and received %2$d %3$s as a bonus."
+msgstr "Chúc mừng! Bạn đã lên cấp %1$d và nhận được %2$d %3$s thưởng."
 
 #: includes/exp.php:78
 msgid "Level Up!"
 msgstr "Lên cấp!"
 
-#. translators: %1$d is EXP amount, %2$d is coin amount
+#. translators: %1$d is EXP amount, %2$d is coin amount, %3$s is the coin label (e.g., Coin, Xu).
 #: includes/hooks.php:106
 #, php-format
 msgid ""
-"You received +%1$d EXP and +%2$d coins for signing up. Let the journey "
+"You received +%1$d EXP and +%2$d %3$s for signing up. Let the journey "
 "begin!"
 msgstr ""
-"Bạn nhận được +%1$d EXP và +%2$d xu khi đăng ký tài khoản. Cùng khám phá "
+"Bạn nhận được +%1$d EXP và +%2$d %3$s khi đăng ký tài khoản. Cùng khám phá "
 "ngay nhé!"
 
 #: includes/hooks.php:113
@@ -175,12 +153,12 @@ msgstr "Chào mừng bạn đến với cộng đồng!"
 msgid "Thanks for your purchase!"
 msgstr "Cảm ơn bạn đã mua hàng!"
 
-#. translators: %1$d = EXP, %2$d = coin
-#: includes/hooks.php:223
+#. translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
+#: includes/hooks.php:224
 #, php-format
-msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
+msgid "You received +%1$d EXP and +%2$d %3$s for your order. Keep growing!"
 msgstr ""
-"Bạn nhận được +%1$d EXP và +%2$d xu từ đơn hàng. Tiếp tục phát triển nhé!"
+"Bạn nhận được +%1$d EXP và +%2$d %3$s từ đơn hàng. Tiếp tục phát triển nhé!"
 
 #: includes/hooks.php:255
 msgid "You have a new reply to your comment"
@@ -196,13 +174,13 @@ msgstr "<strong>%1$s</strong> đã phản hồi bình luận của bạn: <em>%2
 msgid "Thanks for your review!"
 msgstr "Cảm ơn bạn đã đánh giá!"
 
-#. translators: %1$d = EXP, %2$d = coin
-#: includes/hooks.php:373
+#. translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
+#: includes/hooks.php:375
 #, php-format
 msgid ""
-"You earned +%1$d EXP and +%2$d coins for submitting a review. Keep it up!"
+"You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!"
 msgstr ""
-"Bạn nhận được +%1$d EXP và +%2$d xu khi đánh giá. Tiếp tục phát huy nhé!"
+"Bạn nhận được +%1$d EXP và +%2$d %3$s khi đánh giá. Tiếp tục phát huy nhé!"
 
 #: includes/hooks.php:393
 msgid "Your VIP status has been removed"
@@ -847,7 +825,7 @@ msgstr "Dùng làm màu nổi bật trong giao diện người dùng."
 
 #: includes/settings-page.php:212
 msgid "Coin Label"
-msgstr "Tên gọi đồng xu"
+msgstr "Tên gọi Coin"
 
 #: includes/settings-page.php:216
 msgid ""
@@ -1216,11 +1194,11 @@ msgstr "Thưởng điểm danh"
 
 #: includes/settings-page.php:580 includes/settings-page.php:654
 msgid "Coin Reward"
-msgstr "Thưởng xu"
+msgstr "Thưởng Coin"
 
 #: includes/settings-page.php:584
 msgid "Coin awarded each time the user checks in daily."
-msgstr "Tặng xu mỗi lần người dùng điểm danh hằng ngày."
+msgstr "Tặng Coin mỗi lần người dùng điểm danh hằng ngày."
 
 #: includes/settings-page.php:589 includes/settings-page.php:663
 msgid "EXP Reward"
@@ -1284,7 +1262,7 @@ msgstr "Số phút người dùng cần online để nhận thưởng."
 
 #: includes/settings-page.php:658
 msgid "Coin rewarded when online duration is met."
-msgstr "Tặng xu khi online đủ thời gian."
+msgstr "Tặng Coin khi online đủ thời gian."
 
 #: includes/settings-page.php:667
 msgid "EXP rewarded after being online for required time."
@@ -1380,11 +1358,11 @@ msgstr "Thưởng VIP"
 
 #: includes/settings-page.php:827
 msgid "Bonus Coin (%)"
-msgstr "Tăng xu (%)"
+msgstr "Tăng Coin (%)"
 
 #: includes/settings-page.php:831
 msgid "Extra Coin gained when VIP, in percent."
-msgstr "Tăng xu khi là VIP (tính theo %)."
+msgstr "Tăng Coin khi là VIP (tính theo %)."
 
 #: includes/settings-page.php:832 includes/settings-page.php:846
 msgid "This bonus does not apply to Cash/Coin exchange."
@@ -1412,11 +1390,11 @@ msgstr "Thưởng giới thiệu"
 
 #: includes/settings-page.php:865
 msgid "Coin for Referrer"
-msgstr "Xu cho người mời"
+msgstr "Coin cho người mời"
 
 #: includes/settings-page.php:868
 msgid "Coin reward given to the person who shared their referral link."
-msgstr "Xu thưởng cho người đã chia sẻ liên kết giới thiệu."
+msgstr "Coin thưởng cho người đã chia sẻ liên kết giới thiệu."
 
 #: includes/settings-page.php:873
 msgid "EXP for Referrer"
@@ -1436,11 +1414,11 @@ msgstr "Cash tặng cho người mời."
 
 #: includes/settings-page.php:889
 msgid "Coin for New User"
-msgstr "Xu cho người mới"
+msgstr "Coin cho người mới"
 
 #: includes/settings-page.php:892
 msgid "Coin bonus for new user who signs up via referral."
-msgstr "Xu tặng cho người mới khi đăng ký qua giới thiệu."
+msgstr "Coin tặng cho người mới khi đăng ký qua giới thiệu."
 
 #: includes/settings-page.php:897
 msgid "EXP for New User"
@@ -2420,13 +2398,11 @@ msgstr "Bạn đang có VIP còn hạn. Vui lòng đợi hết hạn để kích
 msgid "Invalid VIP package."
 msgstr "Gói VIP không hợp lệ."
 
-#: includes/vip.php:104
-msgid "VIP can only be purchased with Coin."
-msgstr "VIP chỉ có thể mua bằng Coin."
-
-#: includes/vip.php:107
-msgid "VIP can only be purchased with Cash."
-msgstr "VIP chỉ có thể mua bằng Cash."
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#: includes/vip.php:105 includes/vip.php:109
+#, php-format
+msgid "VIP can only be purchased with %s."
+msgstr "VIP chỉ có thể mua bằng %s."
 
 #: includes/vip.php:110
 msgid "Invalid currency selected."
@@ -2435,14 +2411,6 @@ msgstr "Loại tiền đã chọn không hợp lệ."
 #: includes/vip.php:122
 msgid "This VIP package is disabled."
 msgstr "Gói VIP này đã bị tắt."
-
-#: includes/vip.php:129 init-user-engine.php:384
-msgid "Not enough Cash."
-msgstr "Không đủ Cash."
-
-#: includes/vip.php:136
-msgid "Not enough Coin."
-msgstr "Không đủ Coin."
 
 #. translators: %1$s = days/lifetime, %2$s = formatted price, %3$s = currency
 #. label.
@@ -2715,7 +2683,7 @@ msgid "Pay with %s"
 msgstr "Mua bằng %s"
 
 #. translators: %s = currency label (e.g. Coin, Cash)
-#: init-user-engine.php:349 init-user-engine.php:391
+#: init-user-engine.php:349 init-user-engine.php:390 init-user-engine.php:391 includes/vip.php:132 includes/vip.php:140
 #, php-format
 msgid "Not enough %s."
 msgstr "Không đủ %s."

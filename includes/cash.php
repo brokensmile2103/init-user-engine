@@ -60,6 +60,10 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
         return new WP_Error( 'unauthorized', __( 'Unauthorized', 'init-user-engine' ), [ 'status' => 401 ] );
     }
 
+    // Admin-configured currency labels, used in all user-facing messages below.
+    $coin_label = init_plugin_suite_user_engine_get_coin_label();
+    $cash_label = init_plugin_suite_user_engine_get_cash_label();
+
     // --- Read settings ---
     $settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
     $rate     = isset( $settings['rate_coin_per_cash'] ) ? (float) $settings['rate_coin_per_cash'] : 0;
@@ -90,15 +94,16 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
     }
 
     if ( $cash_amount <= 0 ) {
-        return new WP_Error( 'invalid_amount', __( 'Please provide a valid Cash amount greater than 0.', 'init-user-engine' ), [ 'status' => 400 ] );
+        // translators: %s is the cash label (e.g., Cash, Kim cương).
+        return new WP_Error( 'invalid_amount', sprintf( __( 'Please provide a valid %s amount greater than 0.', 'init-user-engine' ), $cash_label ), [ 'status' => 400 ] );
     }
     if ( $cash_amount < $min_cash ) {
-        // translators: %d is number
-        return new WP_Error( 'below_min', sprintf( __( 'Minimum per exchange is %d Cash.', 'init-user-engine' ), $min_cash ), [ 'status' => 400 ] );
+        // translators: %1$d is number, %2$s is the cash label (e.g., Cash, Kim cương).
+        return new WP_Error( 'below_min', sprintf( __( 'Minimum per exchange is %1$d %2$s.', 'init-user-engine' ), $min_cash, $cash_label ), [ 'status' => 400 ] );
     }
     if ( $max_cash > 0 && $cash_amount > $max_cash ) {
-        // translators: %d is number
-        return new WP_Error( 'above_max', sprintf( __( 'Maximum per exchange is %d Cash.', 'init-user-engine' ), $max_cash ), [ 'status' => 400 ] );
+        // translators: %1$d is number, %2$s is the cash label (e.g., Cash, Kim cương).
+        return new WP_Error( 'above_max', sprintf( __( 'Maximum per exchange is %1$d %2$s.', 'init-user-engine' ), $max_cash, $cash_label ), [ 'status' => 400 ] );
     }
 
     // --- Rate limit per user (5 requests / minute) ---
@@ -133,13 +138,15 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
         $current_coin = (int) init_plugin_suite_user_engine_get_coin( $user_id );
 
         if ( $cash_amount > $current_cash ) {
-            return new WP_Error( 'insufficient_funds', __( 'Not enough Cash to exchange.', 'init-user-engine' ), [ 'status' => 400 ] );
+            // translators: %s is the cash label (e.g., Cash, Kim cương).
+            return new WP_Error( 'insufficient_funds', sprintf( __( 'Not enough %s to exchange.', 'init-user-engine' ), $cash_label ), [ 'status' => 400 ] );
         }
 
         // Calculate coins (avoid FP edge by epsilon)
         $coins_to_add = (int) floor( ($cash_amount * $rate) + 1e-6 );
         if ( $coins_to_add <= 0 ) {
-            return new WP_Error( 'zero_result', __( 'The exchange would result in 0 Coin. Increase the Cash amount.', 'init-user-engine' ), [ 'status' => 400 ] );
+            // translators: %1$s is the coin label, %2$s is the cash label (e.g., Coin, Cash).
+            return new WP_Error( 'zero_result', sprintf( __( 'The exchange would result in 0 %1$s. Increase the %2$s amount.', 'init-user-engine' ), $coin_label, $cash_label ), [ 'status' => 400 ] );
         }
 
         // --- Apply updates (best-effort atomic) ---
@@ -149,7 +156,8 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
         // 1) Deduct cash
         $new_cash = init_plugin_suite_user_engine_add_cash( $user_id, -$cash_amount, false );
         if ( $new_cash === null || $new_cash === false ) {
-            return new WP_Error( 'update_failed', __( 'Could not deduct Cash.', 'init-user-engine' ), [ 'status' => 500 ] );
+            // translators: %s is the cash label (e.g., Cash, Kim cương).
+            return new WP_Error( 'update_failed', sprintf( __( 'Could not deduct %s.', 'init-user-engine' ), $cash_label ), [ 'status' => 500 ] );
         }
         if ( (int) $new_cash < 0 ) {
             // Rollback & abort if somehow negative
@@ -162,7 +170,8 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
         if ( $new_coin === null || $new_coin === false ) {
             // Rollback Cash if coin failed
             init_plugin_suite_user_engine_add_cash( $user_id, $cash_amount, false );
-            return new WP_Error( 'update_failed', __( 'Could not add Coin.', 'init-user-engine' ), [ 'status' => 500 ] );
+            // translators: %s is the coin label (e.g., Coin, Xu).
+            return new WP_Error( 'update_failed', sprintf( __( 'Could not add %s.', 'init-user-engine' ), $coin_label ), [ 'status' => 500 ] );
         }
 
         // Logs (không cộng bonus VIP cho log của giao dịch đổi tiền)
@@ -210,6 +219,10 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
         return new WP_Error( 'unauthorized', __( 'Unauthorized', 'init-user-engine' ), [ 'status' => 401 ] );
     }
 
+    // Admin-configured currency labels, used in all user-facing messages below.
+    $coin_label = init_plugin_suite_user_engine_get_coin_label();
+    $cash_label = init_plugin_suite_user_engine_get_cash_label();
+
     // --- Read settings ---
     $settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
     $rate     = isset( $settings['rate_cash_per_coin'] ) ? (float) $settings['rate_cash_per_coin'] : 0;
@@ -240,15 +253,16 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
     }
 
     if ( $coin_amount <= 0 ) {
-        return new WP_Error( 'invalid_amount', __( 'Please provide a valid Coin amount greater than 0.', 'init-user-engine' ), [ 'status' => 400 ] );
+        // translators: %s is the coin label (e.g., Coin, Xu).
+        return new WP_Error( 'invalid_amount', sprintf( __( 'Please provide a valid %s amount greater than 0.', 'init-user-engine' ), $coin_label ), [ 'status' => 400 ] );
     }
     if ( $coin_amount < $min_coin ) {
-        // translators: %d is number
-        return new WP_Error( 'below_min', sprintf( __( 'Minimum per exchange is %d Coin.', 'init-user-engine' ), $min_coin ), [ 'status' => 400 ] );
+        // translators: %1$d is number, %2$s is the coin label (e.g., Coin, Xu).
+        return new WP_Error( 'below_min', sprintf( __( 'Minimum per exchange is %1$d %2$s.', 'init-user-engine' ), $min_coin, $coin_label ), [ 'status' => 400 ] );
     }
     if ( $max_coin > 0 && $coin_amount > $max_coin ) {
-        // translators: %d is number
-        return new WP_Error( 'above_max', sprintf( __( 'Maximum per exchange is %d Coin.', 'init-user-engine' ), $max_coin ), [ 'status' => 400 ] );
+        // translators: %1$d is number, %2$s is the coin label (e.g., Coin, Xu).
+        return new WP_Error( 'above_max', sprintf( __( 'Maximum per exchange is %1$d %2$s.', 'init-user-engine' ), $max_coin, $coin_label ), [ 'status' => 400 ] );
     }
 
     // --- Rate limit per user (5 requests / minute) ---
@@ -281,13 +295,15 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
         $current_cash = (int) init_plugin_suite_user_engine_get_cash( $user_id );
 
         if ( $coin_amount > $current_coin ) {
-            return new WP_Error( 'insufficient_funds', __( 'Not enough Coin to exchange.', 'init-user-engine' ), [ 'status' => 400 ] );
+            // translators: %s is the coin label (e.g., Coin, Xu).
+            return new WP_Error( 'insufficient_funds', sprintf( __( 'Not enough %s to exchange.', 'init-user-engine' ), $coin_label ), [ 'status' => 400 ] );
         }
 
         // Calculate cash (avoid FP edge by epsilon)
         $cash_to_add = (int) floor( ( $coin_amount * $rate ) + 1e-6 );
         if ( $cash_to_add <= 0 ) {
-            return new WP_Error( 'zero_result', __( 'The exchange would result in 0 Cash. Increase the Coin amount.', 'init-user-engine' ), [ 'status' => 400 ] );
+            // translators: %1$s is the cash label, %2$s is the coin label (e.g., Cash, Coin).
+            return new WP_Error( 'zero_result', sprintf( __( 'The exchange would result in 0 %1$s. Increase the %2$s amount.', 'init-user-engine' ), $cash_label, $coin_label ), [ 'status' => 400 ] );
         }
 
         // --- Apply updates (best-effort atomic) ---
@@ -297,7 +313,8 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
         // 1) Deduct coin
         $new_coin = init_plugin_suite_user_engine_add_coin( $user_id, -$coin_amount, false );
         if ( $new_coin === null || $new_coin === false ) {
-            return new WP_Error( 'update_failed', __( 'Could not deduct Coin.', 'init-user-engine' ), [ 'status' => 500 ] );
+            // translators: %s is the coin label (e.g., Coin, Xu).
+            return new WP_Error( 'update_failed', sprintf( __( 'Could not deduct %s.', 'init-user-engine' ), $coin_label ), [ 'status' => 500 ] );
         }
         if ( (int) $new_coin < 0 ) {
             // Rollback & abort if somehow negative
@@ -310,7 +327,8 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
         if ( $new_cash === null || $new_cash === false ) {
             // Rollback Coin if cash failed
             init_plugin_suite_user_engine_add_coin( $user_id, $coin_amount, false );
-            return new WP_Error( 'update_failed', __( 'Could not add Cash.', 'init-user-engine' ), [ 'status' => 500 ] );
+            // translators: %s is the cash label (e.g., Cash, Kim cương).
+            return new WP_Error( 'update_failed', sprintf( __( 'Could not add %s.', 'init-user-engine' ), $cash_label ), [ 'status' => 500 ] );
         }
 
         // Logs (không cộng bonus VIP cho log của giao dịch đổi tiền)

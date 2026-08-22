@@ -101,10 +101,12 @@ function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $cur
 
 	// Validate currency against global setting.
 	if ( $allowed_currency === 'coin' && $currency !== 'coin' ) {
-		return new WP_Error( 'invalid_currency', __( 'VIP can only be purchased with Coin.', 'init-user-engine' ), [ 'status' => 400 ] );
+		// translators: %s is the coin label (e.g., Coin, Xu).
+		return new WP_Error( 'invalid_currency', sprintf( __( 'VIP can only be purchased with %s.', 'init-user-engine' ), init_plugin_suite_user_engine_get_coin_label() ), [ 'status' => 400 ] );
 	}
 	if ( $allowed_currency === 'cash' && $currency !== 'cash' ) {
-		return new WP_Error( 'invalid_currency', __( 'VIP can only be purchased with Cash.', 'init-user-engine' ), [ 'status' => 400 ] );
+		// translators: %s is the cash label (e.g., Cash, Kim cương).
+		return new WP_Error( 'invalid_currency', sprintf( __( 'VIP can only be purchased with %s.', 'init-user-engine' ), init_plugin_suite_user_engine_get_cash_label() ), [ 'status' => 400 ] );
 	}
 	if ( $allowed_currency === 'both' && ! in_array( $currency, [ 'coin', 'cash' ], true ) ) {
 		return new WP_Error( 'invalid_currency', __( 'Invalid currency selected.', 'init-user-engine' ), [ 'status' => 400 ] );
@@ -126,14 +128,16 @@ function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $cur
 	if ( $currency === 'cash' ) {
 		$current_cash = init_plugin_suite_user_engine_get_cash( $user_id );
 		if ( $current_cash < $price ) {
-			return new WP_Error( 'not_enough_cash', __( 'Not enough Cash.', 'init-user-engine' ) );
+			// translators: %s is the cash label (e.g., Cash, Kim cương).
+			return new WP_Error( 'not_enough_cash', sprintf( __( 'Not enough %s.', 'init-user-engine' ), init_plugin_suite_user_engine_get_cash_label() ) );
 		}
 		init_plugin_suite_user_engine_set_cash( $user_id, $current_cash - $price );
 		init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $price, 'vip_package_' . $package_id, 'deduct' );
 	} else {
 		$current_coin = init_plugin_suite_user_engine_get_coin( $user_id );
 		if ( $current_coin < $price ) {
-			return new WP_Error( 'not_enough_coin', __( 'Not enough Coin.', 'init-user-engine' ) );
+			// translators: %s is the coin label (e.g., Coin, Xu).
+			return new WP_Error( 'not_enough_coin', sprintf( __( 'Not enough %s.', 'init-user-engine' ), init_plugin_suite_user_engine_get_coin_label() ) );
 		}
 		init_plugin_suite_user_engine_set_coin( $user_id, $current_coin - $price );
 		init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $price, 'vip_package_' . $package_id, 'deduct' );

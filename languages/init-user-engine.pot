@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.5.7\n"
+"Project-Id-Version: Init User Engine 1.5.8\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "POT-Creation-Date: 2026-08-16 01:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -61,20 +61,25 @@ msgstr ""
 msgid "Exchange is currently disabled."
 msgstr ""
 
-#: includes/cash.php:93
-msgid "Please provide a valid Cash amount greater than 0."
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#: includes/cash.php:98
+#: includes/cash.php:257
+#, php-format
+msgid "Please provide a valid %s amount greater than 0."
 msgstr ""
 
-#. translators: %d is number
-#: includes/cash.php:97
+#. translators: %1$d is number, %2$s is the currency label (e.g., Coin, Cash).
+#: includes/cash.php:102
+#: includes/cash.php:261
 #, php-format
-msgid "Minimum per exchange is %d Cash."
+msgid "Minimum per exchange is %1$d %2$s."
 msgstr ""
 
-#. translators: %d is number
-#: includes/cash.php:101
+#. translators: %1$d is number, %2$s is the currency label (e.g., Coin, Cash).
+#: includes/cash.php:106
+#: includes/cash.php:265
 #, php-format
-msgid "Maximum per exchange is %d Cash."
+msgid "Maximum per exchange is %1$d %2$s."
 msgstr ""
 
 #: includes/cash.php:108
@@ -92,16 +97,25 @@ msgstr ""
 msgid "Another exchange is in progress. Please wait a moment."
 msgstr ""
 
-#: includes/cash.php:136
-msgid "Not enough Cash to exchange."
-msgstr ""
-
+#. translators: %s is the currency label (e.g., Coin, Cash).
 #: includes/cash.php:142
-msgid "The exchange would result in 0 Coin. Increase the Cash amount."
+#: includes/cash.php:299
+#, php-format
+msgid "Not enough %s to exchange."
 msgstr ""
 
-#: includes/cash.php:152
-msgid "Could not deduct Cash."
+#. translators: %1$s is the currency label being credited, %2$s is the currency label being spent (e.g., Coin, Cash).
+#: includes/cash.php:149
+#: includes/cash.php:306
+#, php-format
+msgid "The exchange would result in 0 %1$s. Increase the %2$s amount."
+msgstr ""
+
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#: includes/cash.php:160
+#: includes/cash.php:317
+#, php-format
+msgid "Could not deduct %s."
 msgstr ""
 
 #: includes/cash.php:157
@@ -109,56 +123,27 @@ msgstr ""
 msgid "Balance changed. Please try again."
 msgstr ""
 
-#: includes/cash.php:165
-msgid "Could not add Coin."
-msgstr ""
-
-#: includes/cash.php:243
-msgid "Please provide a valid Coin amount greater than 0."
-msgstr ""
-
-#. translators: %d is number
-#: includes/cash.php:247
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#: includes/cash.php:174
+#: includes/cash.php:331
 #, php-format
-msgid "Minimum per exchange is %d Coin."
+msgid "Could not add %s."
 msgstr ""
 
-#. translators: %d is number
-#: includes/cash.php:251
-#, php-format
-msgid "Maximum per exchange is %d Coin."
-msgstr ""
-
-#: includes/cash.php:284
-msgid "Not enough Coin to exchange."
-msgstr ""
-
-#: includes/cash.php:290
-msgid "The exchange would result in 0 Cash. Increase the Coin amount."
-msgstr ""
-
-#: includes/cash.php:300
-msgid "Could not deduct Coin."
-msgstr ""
-
-#: includes/cash.php:313
-msgid "Could not add Cash."
-msgstr ""
-
-#. translators: %1$d is the level number, %2$d is the bonus coins.
+#. translators: %1$d is the level number, %2$d is the bonus amount, %3$s is the coin label (e.g., Coin, Xu).
 #: includes/exp.php:71
 #, php-format
-msgid "Congratulations! You reached level %1$d and received %2$d coins as a bonus."
+msgid "Congratulations! You reached level %1$d and received %2$d %3$s as a bonus."
 msgstr ""
 
 #: includes/exp.php:78
 msgid "Level Up!"
 msgstr ""
 
-#. translators: %1$d is EXP amount, %2$d is coin amount
+#. translators: %1$d is EXP amount, %2$d is coin amount, %3$s is the coin label (e.g., Coin, Xu).
 #: includes/hooks.php:106
 #, php-format
-msgid "You received +%1$d EXP and +%2$d coins for signing up. Let the journey begin!"
+msgid "You received +%1$d EXP and +%2$d %3$s for signing up. Let the journey begin!"
 msgstr ""
 
 #: includes/hooks.php:113
@@ -169,10 +154,10 @@ msgstr ""
 msgid "Thanks for your purchase!"
 msgstr ""
 
-#. translators: %1$d = EXP, %2$d = coin
-#: includes/hooks.php:223
+#. translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
+#: includes/hooks.php:224
 #, php-format
-msgid "You received +%1$d EXP and +%2$d coins for your order. Keep growing!"
+msgid "You received +%1$d EXP and +%2$d %3$s for your order. Keep growing!"
 msgstr ""
 
 #: includes/hooks.php:255
@@ -189,10 +174,10 @@ msgstr ""
 msgid "Thanks for your review!"
 msgstr ""
 
-#. translators: %1$d = EXP, %2$d = coin
-#: includes/hooks.php:373
+#. translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
+#: includes/hooks.php:375
 #, php-format
-msgid "You earned +%1$d EXP and +%2$d coins for submitting a review. Keep it up!"
+msgid "You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!"
 msgstr ""
 
 #: includes/hooks.php:393
@@ -2366,12 +2351,11 @@ msgstr ""
 msgid "Invalid VIP package."
 msgstr ""
 
-#: includes/vip.php:104
-msgid "VIP can only be purchased with Coin."
-msgstr ""
-
-#: includes/vip.php:107
-msgid "VIP can only be purchased with Cash."
+#. translators: %s is the currency label (e.g., Coin, Cash).
+#: includes/vip.php:105
+#: includes/vip.php:109
+#, php-format
+msgid "VIP can only be purchased with %s."
 msgstr ""
 
 #: includes/vip.php:110
@@ -2380,15 +2364,6 @@ msgstr ""
 
 #: includes/vip.php:122
 msgid "This VIP package is disabled."
-msgstr ""
-
-#: includes/vip.php:129
-#: init-user-engine.php:384
-msgid "Not enough Cash."
-msgstr ""
-
-#: includes/vip.php:136
-msgid "Not enough Coin."
 msgstr ""
 
 #. translators: %1$s = days/lifetime, %2$s = formatted price, %3$s = currency label.
@@ -2671,7 +2646,10 @@ msgstr ""
 
 #. translators: %s = currency label (e.g. Coin, Cash)
 #: init-user-engine.php:349
+#: init-user-engine.php:390
 #: init-user-engine.php:391
+#: includes/vip.php:132
+#: includes/vip.php:140
 #, php-format
 msgid "Not enough %s."
 msgstr ""

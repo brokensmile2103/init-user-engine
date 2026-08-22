@@ -6,6 +6,20 @@ function init_plugin_suite_user_engine_today() {
 	return current_time( 'Y-m-d' );
 }
 
+// Get the admin-configured label for the Coin virtual currency (falls back to 'Coin').
+function init_plugin_suite_user_engine_get_coin_label() {
+	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	$label   = isset( $options['label_coin'] ) ? trim( wp_strip_all_tags( (string) $options['label_coin'] ) ) : '';
+	return '' !== $label ? $label : 'Coin';
+}
+
+// Get the admin-configured label for the Cash currency (falls back to 'Cash').
+function init_plugin_suite_user_engine_get_cash_label() {
+	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	$label   = isset( $options['label_cash'] ) ? trim( wp_strip_all_tags( (string) $options['label_cash'] ) ) : '';
+	return '' !== $label ? $label : 'Cash';
+}
+
 // Darken color
 function init_plugin_suite_user_engine_darken_color( $hex, $percent = 20 ) {
 	$hex = ltrim( $hex, '#' );

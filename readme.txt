@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.7
+Stable tag: 1.5.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,15 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.8 – August 22, 2026 =
+- Fixed: several user-facing notifications and REST API error messages ignored the admin-configured **Coin Label** / **Cash Label** and always displayed the hardcoded English words "Coin"/"Cash" regardless of the custom label set in Settings → Currency Labels
+  - Affected: level-up bonus notice, sign-up/order/review reward notices, all Coin ⇄ Cash exchange error messages (invalid amount, min/max limit, insufficient balance, zero-result, update failed), and VIP purchase error messages (wrong currency, insufficient balance)
+  - All of the above now consistently use the configured label, matching the behavior already used by Redeem Codes, Top-up, and the VIP purchase success message
+  - Added shared helpers `init_plugin_suite_user_engine_get_coin_label()` and `init_plugin_suite_user_engine_get_cash_label()` in `includes/utils.php`
+- Fixed: frontend JS (`member.js`) referenced an `exchange_insufficient_coin` translation string for the Coin→Cash exchange screen that was never localized from PHP, silently falling back to a hardcoded, non-translatable "Not enough Coin." string; now properly localized and label-aware
+- Removed a leftover duplicate/dead array key in the frontend localization data (`exchange_insufficient`) that was immediately overwritten and never actually used
+- Updated `.pot`/`.po` translation files to match: merged duplicate Coin/Cash message pairs into shared, label-aware strings; Vietnamese translation now consistently uses "Coin" instead of the previous literal "xu"/"đồng xu" wording throughout
 
 = 1.5.7 – August 16, 2026 =
 - Added **Date of Birth** field to the frontend Edit Profile modal, stored per-user instead of a raw age number so it stays accurate over time without users needing to re-enter it

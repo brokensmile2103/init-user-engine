@@ -102,10 +102,11 @@ add_action( 'user_register', function ( $user_id ) {
 	// Gửi inbox thông báo cho user
 	if ( $exp > 0 || $coin > 0 ) {
 		$content = sprintf(
-			// translators: %1$d is EXP amount, %2$d is coin amount
-			__( 'You received +%1$d EXP and +%2$d coins for signing up. Let the journey begin!', 'init-user-engine' ),
+			// translators: %1$d is EXP amount, %2$d is coin amount, %3$s is the coin label (e.g., Coin, Xu).
+			__( 'You received +%1$d EXP and +%2$d %3$s for signing up. Let the journey begin!', 'init-user-engine' ),
 			$exp,
-			$coin
+			$coin,
+			init_plugin_suite_user_engine_get_coin_label()
 		);
 
 		init_plugin_suite_user_engine_insert_inbox(
@@ -219,10 +220,11 @@ add_action( 'woocommerce_order_status_completed', function ( $order_id ) {
 	if ( $exp > 0 || $coin > 0 ) {
 		$title   = __( 'Thanks for your purchase!', 'init-user-engine' );
 		$content = sprintf(
-			// translators: %1$d = EXP, %2$d = coin
-			__( 'You received +%1$d EXP and +%2$d coins for your order. Keep growing!', 'init-user-engine' ),
+			// translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
+			__( 'You received +%1$d EXP and +%2$d %3$s for your order. Keep growing!', 'init-user-engine' ),
 			$exp,
-			$coin
+			$coin,
+			init_plugin_suite_user_engine_get_coin_label()
 		);
 
 		init_plugin_suite_user_engine_insert_inbox(
@@ -369,10 +371,11 @@ add_action( 'init_plugin_suite_review_system_after_criteria_review', function ( 
 	// Optional inbox notification
 	$title = __( 'Thanks for your review!', 'init-user-engine' );
 	$message = sprintf(
-		// translators: %1$d = EXP, %2$d = coin
-		__( 'You earned +%1$d EXP and +%2$d coins for submitting a review. Keep it up!', 'init-user-engine' ),
+		// translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
+		__( 'You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!', 'init-user-engine' ),
 		15,
-		5
+		5,
+		init_plugin_suite_user_engine_get_coin_label()
 	);
 
 	init_plugin_suite_user_engine_insert_inbox(

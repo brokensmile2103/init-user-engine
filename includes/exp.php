@@ -67,10 +67,11 @@ function init_plugin_suite_user_engine_add_exp( $user_id, $exp_added = 0 ) {
 
 		if ( $level_up_count === 1 ) {
 			$content = sprintf(
-				// translators: %1$d is the level number, %2$d is the bonus coins.
-			    __( 'Congratulations! You reached level %1$d and received %2$d coins as a bonus.', 'init-user-engine' ),
+				// translators: %1$d is the level number, %2$d is the bonus amount, %3$s is the coin label (e.g., Coin, Xu).
+			    __( 'Congratulations! You reached level %1$d and received %2$d %3$s as a bonus.', 'init-user-engine' ),
 			    $level,
-			    $reward_coin
+			    $reward_coin,
+			    init_plugin_suite_user_engine_get_coin_label()
 			);
 
 			init_plugin_suite_user_engine_send_inbox(

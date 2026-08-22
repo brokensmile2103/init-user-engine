@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.5.7
+ * Version: 1.5.8
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.7' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.5.8' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -381,7 +381,6 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'exchange_submit'          => __( 'Convert', 'init-user-engine' ),
             'exchange_processing'      => __( 'Processing...', 'init-user-engine' ),
             'exchange_invalid'         => __( 'Enter a valid amount.', 'init-user-engine' ),
-            'exchange_insufficient'    => __( 'Not enough Cash.', 'init-user-engine' ),
             'exchange_success'         => __( 'Exchanged successfully!', 'init-user-engine' ),
             'exchange_error'           => __( 'Exchange failed.', 'init-user-engine' ),
             'exchange_note'            => __( 'Conversion is irreversible. Please review before confirming.', 'init-user-engine' ),
@@ -389,6 +388,7 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'exchange_direction_cash_to_coin' => /* translators: %1$s = source currency label, %2$s = target currency label */ sprintf( __( '%1$s to %2$s', 'init-user-engine' ), $label_cash, $label_coin ),
             'exchange_direction_coin_to_cash' => /* translators: %1$s = source currency label, %2$s = target currency label */ sprintf( __( '%1$s to %2$s', 'init-user-engine' ), $label_coin, $label_cash ),
             'exchange_insufficient'           => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Not enough %s.', 'init-user-engine' ), $label_cash ),
+            'exchange_insufficient_coin'      => /* translators: %s = currency label (e.g. Coin, Cash) */ sprintf( __( 'Not enough %s.', 'init-user-engine' ), $label_coin ),
 
             'upload_avatar'            => __( 'Upload Avatar', 'init-user-engine' ),
             'avatar_drop_text'         => __( 'Drop image here or click to upload', 'init-user-engine' ),

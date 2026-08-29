@@ -15,7 +15,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 	) {
 		$title    = sanitize_text_field( wp_unslash( $_POST['iue_title'] ?? '' ) );
 		$content  = wp_kses_post( wp_unslash( $_POST['iue_content'] ?? '' ) );
-		$type     = sanitize_key( $_POST['iue_type'] ?? 'system' );
+		$type     = sanitize_key( $_POST['iue_type'] ?? 'admin' );
 		$priority = sanitize_key( $_POST['iue_priority'] ?? 'normal' );
 		$link     = esc_url_raw( wp_unslash( $_POST['iue_link'] ?? '' ) );
 		$pinned   = ! empty( $_POST['iue_pinned'] ) ? 1 : 0;
@@ -65,7 +65,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 			 * @param int[]  $user_ids Danh sách user nhận.
 			 * @param string $title    Tiêu đề.
 			 * @param string $content  Nội dung (đã qua wp_kses_post).
-			 * @param string $type     system|gift|event|warning|...
+			 * @param string $type     admin|gift|event|warning|...
 			 * @param string $priority normal|high
 			 * @param string $link     URL đính kèm (nếu có).
 			 * @param int    $pinned   1|0.
@@ -158,7 +158,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 					<th scope="row"><?php esc_html_e( 'Type', 'init-user-engine' ); ?></th>
 					<td>
 						<fieldset>
-							<label><input type="radio" name="iue_type" value="system" checked> <?php esc_html_e( 'system', 'init-user-engine' ); ?></label><br>
+							<label><input type="radio" name="iue_type" value="admin" checked> <?php esc_html_e( 'admin', 'init-user-engine' ); ?></label><br>
 							<label><input type="radio" name="iue_type" value="gift"> <?php esc_html_e( 'gift', 'init-user-engine' ); ?></label><br>
 							<label><input type="radio" name="iue_type" value="event"> <?php esc_html_e( 'event', 'init-user-engine' ); ?></label><br>
 							<label><input type="radio" name="iue_type" value="warning"> <?php esc_html_e( 'warning', 'init-user-engine' ); ?></label>
@@ -186,7 +186,10 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 
 				<tr>
 					<th scope="row">&nbsp;</th>
-					<td><label><input type="checkbox" name="iue_pinned" value="1"> <?php esc_html_e( 'Pin this message', 'init-user-engine' ); ?></label></td>
+					<td>
+						<label><input type="checkbox" name="iue_pinned" value="1"> <?php esc_html_e( 'Pin this message', 'init-user-engine' ); ?></label>
+						<p class="description"><?php esc_html_e( 'Pinned messages always appear at the top of the recipient\'s Inbox, above regular messages.', 'init-user-engine' ); ?></p>
+					</td>
 				</tr>
 
 				<tr>
@@ -194,6 +197,7 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 					<td>
 						<input name="iue_expire" type="datetime-local" id="iue_expire" class="regular-text"
 							placeholder="<?php esc_attr_e( 'Optional expiration time', 'init-user-engine' ); ?>">
+						<p class="description"><?php esc_html_e( 'Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 			</table>

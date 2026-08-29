@@ -67,11 +67,15 @@ function init_plugin_suite_user_engine_check_table() {
     global $wpdb;
 
     // INBOX
-    $inbox_table = $wpdb->prefix . 'init_user_engine_inbox';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$inbox_table'" ) !== $inbox_table ) {
-        init_plugin_suite_user_engine_create_inbox_table();
-    }
+    //
+    // Luôn gọi dbDelta() (bên trong create_inbox_table()) thay vì chỉ tạo
+    // bảng khi chưa tồn tại: dbDelta() được WordPress thiết kế để chạy an
+    // toàn nhiều lần — tự so sánh cấu trúc bảng hiện có với SQL khai báo
+    // rồi CHỈ thêm cột/index còn thiếu (ALTER TABLE ADD ...), không bao
+    // giờ xóa cột hay dữ liệu sẵn có. Nhờ vậy site đã cài plugin từ trước
+    // cũng tự nhận được index mới (vd created_at ở v1.5.9) mà không cần
+    // cài lại hay chạm tay vào DB.
+    init_plugin_suite_user_engine_create_inbox_table();
 
     // REDEEM CODE
     $redeem_table = $wpdb->prefix . 'init_user_engine_redeem_codes';
@@ -140,7 +144,8 @@ function init_plugin_suite_user_engine_create_inbox_table() {
         KEY user_id (user_id),
         KEY status (status),
         KEY priority (priority),
-        KEY pinned (pinned)
+        KEY pinned (pinned),
+        KEY created_at (created_at)
     ) $charset_collate;";
 
     dbDelta( $sql );

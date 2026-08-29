@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.8
+Stable tag: 1.5.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,23 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.5.9 – August 29, 2026 =
+- Changed: "Send Notification" (Init User Engine → Send Notification) now uses a dedicated **admin** message type instead of reusing **system**, which was also used internally by several unrelated automated notices (VIP removed, redeem code success, VIP code success). Admin-sent notices and automated system notices are now cleanly separated
+  - The "System" filter tab in the user-facing Inbox still includes admin-sent messages, same as before
+  - Previously sent messages (type `system`) are not migrated and keep displaying normally in the Inbox; only newly sent notifications use the new `admin` type
+- Fixed: **"Pin this message"** on the Send Notification screen had no visible effect beyond storing a flag — pinned messages now always float to the top of the Inbox list, ahead of unpinned messages, across every filter tab
+- Fixed: the **"Expire At"** field on Send Notification was saved to the database but never actually read back anywhere — it had no effect at all, on any message
+  - Clarified and scoped its behavior to work together with the pin fix above: **Expire At now only applies to pinned messages** — once the time passes, the message is automatically unpinned (it remains fully visible in the Inbox as a regular message, nothing is hidden or deleted). Unpinned messages ignore this field entirely and never expire
+  - Added an hourly cron job (`init_plugin_suite_user_engine_unpin_expired_inbox`) that clears the `pinned` flag on messages past their `expire_at`; it only ever updates that one column, never deletes or alters message content
+  - Added inline descriptions on the Send Notification screen clarifying this scope for both the "Pin this message" checkbox and the "Expire At" field
+- Fixed: the **Date Range** filter (Last 7/30/90 Days, All Time) on the Inbox Statistics page (Users → Init User Engine → Inbox Statistics) only affected the "Daily Activity" chart; every other number on the page (Total/Unread/Pinned Messages, Total Recipients, Message Types, Priority Levels, Top Recipients, Active Recipients, Peak Day) silently ignored it and always showed all-time (or hardcoded 30/90-day) figures
+  - All of the above now correctly scope to the selected range
+  - "Active Recipients" and "Peak Day" no longer use a hardcoded 30/90-day window — they follow the selected range like everything else; label updated from "Active Recipients (30d)" to "Active Recipients" to match
+  - "Sent Today", "This Week", and "This Month" remain fixed calendar anchors by design, independent of the Date Range selector
+- Added a short-lived (5 min) cache for the Inbox Statistics page, shared across all its stat sections, to avoid re-running its ~10 aggregate queries on every page load/range change
+- Added a database index on `created_at` for the inbox table to keep the now range-aware statistics queries fast on large tables. Applied automatically and safely via `dbDelta()` on next admin page load — existing data is untouched, no manual DB work or reinstall needed
+- Updated `.pot`/`.po` translation files for the above: added `admin` / `Active Recipients` / the two new Pin & Expire At description strings, removed the now-unused `system` (as a standalone label) / `Active Recipients (30d)` strings, and corrected stale source-line references throughout
 
 = 1.5.8 – August 22, 2026 =
 - Fixed: several user-facing notifications and REST API error messages ignored the admin-configured **Coin Label** / **Cash Label** and always displayed the hardcoded English words "Coin"/"Cash" regardless of the custom label set in Settings → Currency Labels

@@ -194,9 +194,12 @@ msgstr ""
 "Quản trị viên đã hủy tư cách thành viên VIP của bạn. Nếu bạn cho rằng đây là"
 " nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ."
 
-#: includes/inbox.php:553 includes/user-metabox.php:541
-#: includes/user-metabox.php:633 includes/vip-codes-handler.php:20
-#: includes/vip-codes-handler.php:179 includes/vip-codes-handler.php:208
+#: includes/inbox.php:555
+#: includes/user-metabox.php:541
+#: includes/user-metabox.php:633
+#: includes/vip-codes-handler.php:20
+#: includes/vip-codes-handler.php:179
+#: includes/vip-codes-handler.php:208
 msgid "You do not have permission to perform this action."
 msgstr "Bạn không có quyền thực hiện thao tác này."
 
@@ -784,16 +787,18 @@ msgstr "User Engine"
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: includes/settings-page.php:27 includes/settings-page.php:28
-#: includes/tools/inbox-statistics.php:626
+#: includes/settings-page.php:27
+#: includes/settings-page.php:28
+#: includes/tools/inbox-statistics.php:756
 #: includes/tools/send-notification.php:93
-#: includes/tools/send-notification.php:201
+#: includes/tools/send-notification.php:205
 msgid "Send Notification"
 msgstr "Gửi thông báo"
 
-#: includes/settings-page.php:38 includes/settings-page.php:39
-#: includes/tools/inbox-statistics.php:18
-#: includes/tools/inbox-statistics.php:63
+#: includes/settings-page.php:38
+#: includes/settings-page.php:39
+#: includes/tools/inbox-statistics.php:64
+#: includes/tools/inbox-statistics.php:131
 msgid "Inbox Statistics"
 msgstr "Thống kê hộp thư"
 
@@ -1436,8 +1441,10 @@ msgstr "Cash cho người mới"
 msgid "Cash given to new user (rarely used)."
 msgstr "Cash tặng cho người mới (hiếm dùng)."
 
-#: includes/tools/inbox-statistics.php:7 includes/tools/redeem-codes.php:6
-#: includes/tools/send-notification.php:6 includes/tools/topup.php:6
+#: includes/tools/inbox-statistics.php:53
+#: includes/tools/redeem-codes.php:6
+#: includes/tools/send-notification.php:6
+#: includes/tools/topup.php:6
 #: includes/tools/vip-codes.php:6
 msgid "You do not have permission to access this page."
 msgstr "Bạn không có quyền truy cập trang này."
@@ -1451,145 +1458,148 @@ msgstr ""
 " đặt đúng."
 
 #. translators: 1: message type, 2: deleted count
-#: includes/tools/inbox-statistics.php:41
+#: includes/tools/inbox-statistics.php:87
 #, php-format
 msgid "Cleanup completed for type \"%1$s\". Deleted %2$d messages."
 msgstr "Đã dọn xong loại “%1$s”. Đã xóa %2$d tin nhắn."
 
-#: includes/tools/inbox-statistics.php:48
+#: includes/tools/inbox-statistics.php:94
 msgid "Cleanup failed: invalid or missing type."
 msgstr "Dọn dẹp thất bại: loại không hợp lệ hoặc thiếu."
 
-#: includes/tools/inbox-statistics.php:69
+#: includes/tools/inbox-statistics.php:137
 msgid "Date Range:"
 msgstr "Khoảng thời gian:"
 
-#: includes/tools/inbox-statistics.php:71 includes/user-metabox.php:328
+#: includes/tools/inbox-statistics.php:139
+#: includes/user-metabox.php:328
 msgid "Last 7 Days"
 msgstr "7 ngày qua"
 
-#: includes/tools/inbox-statistics.php:72
+#: includes/tools/inbox-statistics.php:140
 msgid "Last 30 Days"
 msgstr "30 ngày qua"
 
-#: includes/tools/inbox-statistics.php:73
+#: includes/tools/inbox-statistics.php:141
 msgid "Last 90 Days"
 msgstr "90 ngày qua"
 
-#: includes/tools/inbox-statistics.php:74
+#: includes/tools/inbox-statistics.php:142
 msgid "All Time"
 msgstr "Toàn bộ thời gian"
 
-#: includes/tools/inbox-statistics.php:85
-#: includes/tools/inbox-statistics.php:594 includes/user-metabox.php:320
+#: includes/tools/inbox-statistics.php:153
+#: includes/tools/inbox-statistics.php:724
+#: includes/user-metabox.php:320
 msgid "Total Messages"
 msgstr "Tổng số tin nhắn"
 
-#: includes/tools/inbox-statistics.php:93
+#: includes/tools/inbox-statistics.php:161
 msgid "Unread Messages"
 msgstr "Tin nhắn chưa đọc"
 
-#: includes/tools/inbox-statistics.php:102
+#: includes/tools/inbox-statistics.php:170
 msgid "Sent Today"
 msgstr "Gửi hôm nay"
 
-#: includes/tools/inbox-statistics.php:110
+#: includes/tools/inbox-statistics.php:178
 msgid "Total Recipients"
 msgstr "Tổng số người nhận"
 
-#: includes/tools/inbox-statistics.php:121
+#: includes/tools/inbox-statistics.php:189
 msgid "📊 Message Types Distribution"
 msgstr "📊 Phân bổ loại tin nhắn"
 
-#: includes/tools/inbox-statistics.php:138
+#: includes/tools/inbox-statistics.php:206
 msgid "No message type data available."
 msgstr "Không có dữ liệu loại tin nhắn."
 
-#: includes/tools/inbox-statistics.php:144
+#: includes/tools/inbox-statistics.php:212
 msgid "🚨 Priority Levels"
 msgstr "🚨 Mức độ ưu tiên"
 
-#: includes/tools/inbox-statistics.php:155
+#: includes/tools/inbox-statistics.php:223
 msgid "No priority data available."
 msgstr "Không có dữ liệu ưu tiên."
 
-#: includes/tools/inbox-statistics.php:162
+#: includes/tools/inbox-statistics.php:230
 msgid "📈 Engagement Analytics"
 msgstr "📈 Phân tích tương tác"
 
-#: includes/tools/inbox-statistics.php:165
+#: includes/tools/inbox-statistics.php:233
 msgid "Overall Read Rate"
 msgstr "Tỷ lệ đọc tổng thể"
 
-#: includes/tools/inbox-statistics.php:173
+#: includes/tools/inbox-statistics.php:241
 msgid "Avg Messages per User"
 msgstr "Số tin nhắn trung bình mỗi người dùng"
 
-#: includes/tools/inbox-statistics.php:178
+#: includes/tools/inbox-statistics.php:246
 msgid "Pinned Messages"
 msgstr "Tin nhắn được ghim"
 
-#: includes/tools/inbox-statistics.php:183
-msgid "Active Recipients (30d)"
-msgstr "Người nhận hoạt động (30 ngày)"
+#: includes/tools/inbox-statistics.php:251
+msgid "Active Recipients"
+msgstr "Người nhận hoạt động"
 
-#: includes/tools/inbox-statistics.php:196
+#: includes/tools/inbox-statistics.php:264
 msgid "📊 Daily Activity"
 msgstr "📊 Hoạt động hàng ngày"
 
-#: includes/tools/inbox-statistics.php:217
+#: includes/tools/inbox-statistics.php:285
 msgid "No activity data for selected period."
 msgstr "Không có dữ liệu hoạt động cho khoảng thời gian đã chọn."
 
-#: includes/tools/inbox-statistics.php:224
+#: includes/tools/inbox-statistics.php:292
 msgid "🏆 Top Recipients"
 msgstr "🏆 Người nhận hàng đầu"
 
-#: includes/tools/inbox-statistics.php:233
+#: includes/tools/inbox-statistics.php:301
 msgid "total"
 msgstr "tổng"
 
-#: includes/tools/inbox-statistics.php:235
+#: includes/tools/inbox-statistics.php:303
 msgid "unread"
 msgstr "chưa đọc"
 
-#: includes/tools/inbox-statistics.php:243
+#: includes/tools/inbox-statistics.php:311
 msgid "No recipient data available."
 msgstr "Không có dữ liệu người nhận."
 
-#: includes/tools/inbox-statistics.php:249
+#: includes/tools/inbox-statistics.php:317
 msgid "📝 Recent Activity Summary"
 msgstr "📝 Tóm tắt hoạt động gần đây"
 
-#: includes/tools/inbox-statistics.php:252
+#: includes/tools/inbox-statistics.php:320
 msgid "This Week:"
 msgstr "Tuần này:"
 
-#: includes/tools/inbox-statistics.php:256
+#: includes/tools/inbox-statistics.php:324
 msgid "This Month:"
 msgstr "Tháng này:"
 
-#: includes/tools/inbox-statistics.php:260
+#: includes/tools/inbox-statistics.php:328
 msgid "Peak Day:"
 msgstr "Ngày cao điểm:"
 
-#: includes/tools/inbox-statistics.php:261
-#: includes/tools/inbox-statistics.php:493 includes/user-metabox.php:201
+#: includes/tools/inbox-statistics.php:329
+#: includes/tools/inbox-statistics.php:618
+#: includes/user-metabox.php:201
 #: includes/user-metabox.php:336
 msgid "N/A"
 msgstr "Không có"
 
-#: includes/tools/inbox-statistics.php:264
+#: includes/tools/inbox-statistics.php:332
 msgid "Avg Daily:"
 msgstr "Trung bình hàng ngày:"
 
-#: includes/tools/inbox-statistics.php:278
+#: includes/tools/inbox-statistics.php:346
 msgid "Refresh Data"
 msgstr "Làm mới dữ liệu"
 
 #. translators: %s is the formatted date and time when the data was last
 #. updated
-#: includes/tools/inbox-statistics.php:283
+#: includes/tools/inbox-statistics.php:351
 #, php-format
 msgid "Last updated: %s"
 msgstr "Cập nhật lần cuối: %s"
@@ -1602,15 +1612,15 @@ msgstr ""
 "Bạn có chắc muốn xóa vĩnh viễn tất cả tin nhắn của loại này không? Hành động"
 " này không thể hoàn tác."
 
-#: includes/tools/inbox-statistics.php:294
+#: includes/tools/inbox-statistics.php:362
 msgid "Cleanup Inbox by Type"
 msgstr "Dọn dẹp hộp thư theo loại"
 
-#: includes/tools/inbox-statistics.php:307
+#: includes/tools/inbox-statistics.php:375
 msgid "No types available"
 msgstr "Không có loại nào"
 
-#: includes/tools/inbox-statistics.php:313
+#: includes/tools/inbox-statistics.php:381
 msgid "Delete All of This Type"
 msgstr "Xóa toàn bộ loại này"
 
@@ -1622,45 +1632,47 @@ msgstr ""
 "Dùng công cụ này để quét sạch tin nhắn theo loại khi có đột biến hoặc dữ "
 "liệu lỗi."
 
-#: includes/tools/inbox-statistics.php:389
+#: includes/tools/inbox-statistics.php:516
 msgid "Unknown User"
 msgstr "Người dùng không xác định"
 
-#: includes/tools/inbox-statistics.php:519
+#: includes/tools/inbox-statistics.php:649
 msgid "Inbox Overview"
 msgstr "Tổng quan Hộp thư"
 
-#: includes/tools/inbox-statistics.php:538
+#: includes/tools/inbox-statistics.php:668
 msgid "📭 Inbox Table Not Found"
 msgstr "📭 Không tìm thấy bảng hộp thư"
 
-#: includes/tools/inbox-statistics.php:539
+#: includes/tools/inbox-statistics.php:669
 msgid "Please check your plugin installation."
 msgstr "Vui lòng kiểm tra cài đặt plugin của bạn."
 
-#: includes/tools/inbox-statistics.php:598 includes/user-metabox.php:324
+#: includes/tools/inbox-statistics.php:728
+#: includes/user-metabox.php:324
 #: init-user-engine.php:311
 msgid "Unread"
 msgstr "Chưa đọc"
 
-#: includes/tools/inbox-statistics.php:602
+#: includes/tools/inbox-statistics.php:732
 msgid "Today"
 msgstr "Hôm nay"
 
-#: includes/tools/inbox-statistics.php:606
-#: includes/tools/send-notification.php:124 includes/tools/topup.php:223
+#: includes/tools/inbox-statistics.php:736
+#: includes/tools/send-notification.php:124
+#: includes/tools/topup.php:223
 msgid "Recipients"
 msgstr "Người nhận"
 
-#: includes/tools/inbox-statistics.php:612
+#: includes/tools/inbox-statistics.php:742
 msgid "Read Rate:"
 msgstr "Tỷ lệ đọc:"
 
-#: includes/tools/inbox-statistics.php:616
+#: includes/tools/inbox-statistics.php:746
 msgid "Avg per User:"
 msgstr "Trung bình mỗi người dùng:"
 
-#: includes/tools/inbox-statistics.php:623
+#: includes/tools/inbox-statistics.php:753
 msgid "View Full Statistics"
 msgstr "Xem toàn bộ thống kê"
 
@@ -1746,7 +1758,8 @@ msgid "No redeem codes found."
 msgstr "Không tìm thấy mã quy đổi nào."
 
 #: includes/tools/redeem-codes.php:247
-#: includes/tools/send-notification.php:158 includes/tools/topup.php:272
+#: includes/tools/send-notification.php:158
+#: includes/tools/topup.php:272
 #: includes/tools/vip-codes.php:246
 msgid "Type"
 msgstr "Loại"
@@ -1887,15 +1900,18 @@ msgstr "Nội dung"
 msgid "Write your message content here..."
 msgstr "Nhập nội dung thông báo tại đây..."
 
-#: includes/tools/send-notification.php:129 includes/tools/topup.php:228
+#: includes/tools/send-notification.php:129
+#: includes/tools/topup.php:228
 msgid "Selected users"
 msgstr "Người dùng được chọn"
 
-#: includes/tools/send-notification.php:133 includes/tools/topup.php:232
+#: includes/tools/send-notification.php:133
+#: includes/tools/topup.php:232
 msgid "Apply to active VIPs"
 msgstr "Áp dụng cho VIP còn hạn"
 
-#: includes/tools/send-notification.php:137 includes/tools/topup.php:236
+#: includes/tools/send-notification.php:137
+#: includes/tools/topup.php:236
 msgid "Apply to all members"
 msgstr "Áp dụng cho toàn bộ thành viên"
 
@@ -1903,21 +1919,24 @@ msgstr "Áp dụng cho toàn bộ thành viên"
 msgid "Choose who will receive this notification."
 msgstr "Chọn nhóm người sẽ nhận thông báo này."
 
-#: includes/tools/send-notification.php:146 includes/tools/topup.php:244
+#: includes/tools/send-notification.php:146
+#: includes/tools/topup.php:244
 msgid "Select Users"
 msgstr "Chọn người dùng"
 
-#: includes/tools/send-notification.php:149 includes/tools/topup.php:247
+#: includes/tools/send-notification.php:149
+#: includes/tools/topup.php:247
 msgid "Search by username or display name..."
 msgstr "Tìm theo tên đăng nhập hoặc tên hiển thị..."
 
-#: includes/tools/send-notification.php:153 includes/tools/topup.php:251
+#: includes/tools/send-notification.php:153
+#: includes/tools/topup.php:251
 msgid "Selected user IDs will appear here."
 msgstr "ID người dùng đã chọn sẽ hiển thị tại đây."
 
 #: includes/tools/send-notification.php:161
-msgid "system"
-msgstr "hệ thống"
+msgid "admin"
+msgstr "quản trị viên"
 
 #: includes/tools/send-notification.php:162
 msgid "gift"
@@ -1951,17 +1970,25 @@ msgstr "Liên kết (tùy chọn)"
 msgid "https://example.com/optional-link"
 msgstr "https://example.com/duong-dan-tuy-chon"
 
-#: includes/tools/send-notification.php:189
+#: includes/tools/send-notification.php:190
 msgid "Pin this message"
 msgstr "Ghim thông báo này"
 
-#: includes/tools/send-notification.php:193
+#: includes/tools/send-notification.php:191
+msgid "Pinned messages always appear at the top of the recipient's Inbox, above regular messages."
+msgstr "Tin đã ghim luôn hiển thị ở đầu Inbox của người nhận, trên các tin thường."
+
+#: includes/tools/send-notification.php:196
 msgid "Expire At (optional)"
 msgstr "Hết hạn (tuỳ chọn)"
 
-#: includes/tools/send-notification.php:196
+#: includes/tools/send-notification.php:199
 msgid "Optional expiration time"
 msgstr "Thời gian hết hạn (nếu có)"
+
+#: includes/tools/send-notification.php:200
+msgid "Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages."
+msgstr "Chỉ áp dụng cho tin đã ghim: khi tới thời điểm này, tin sẽ tự động bỏ ghim (vẫn còn trong Inbox như tin thường). Không ảnh hưởng gì tới tin không ghim."
 
 #: includes/tools/topup.php:47
 msgid "Please fill in all required fields correctly."

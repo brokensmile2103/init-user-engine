@@ -164,12 +164,14 @@ function init_plugin_suite_user_engine_get_inbox( $user_id, $page = 1, $per_page
 
     $where_sql = implode( ' AND ', $where );
 
+    // Tin đã ghim (pinned = 1) luôn nổi lên đầu danh sách, bất kể thời
+    // gian gửi; trong cùng nhóm ghim/không ghim thì mới xếp mới → cũ.
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $results = $wpdb->get_results(
         // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
         $wpdb->prepare(
         	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+            "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY pinned DESC, created_at DESC LIMIT %d OFFSET %d",
             array_merge( $params, [ (int) $per_page, (int) $offset ] )
         ),
         ARRAY_A
@@ -533,6 +535,56 @@ function init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler() {
     // Không flush cache ở đây vì orphaned user đã không còn session để dùng cache.
 }
 
+// ─────────────────────────────────────────────
+// Expire At → tự bỏ ghim khi hết hạn
+// ─────────────────────────────────────────────
+
+/*
+ * Ý nghĩa của "Expire At": CHỈ áp dụng cho tin đã ghim (pinned = 1) —
+ * đến hạn thì tin tự động bỏ ghim (pinned → 0), quay về như tin thường,
+ * KHÔNG bị ẩn hay xóa khỏi Inbox. Tin không ghim bỏ qua field này hoàn
+ * toàn — không có khái niệm "hết hạn" cho tin thường.
+ *
+ * Lý do thiết kế: field "Expire At" trên "Gửi inbox" trước đây chỉ được
+ * lưu vào DB mà không có bất kỳ chỗ nào đọc lại — hoàn toàn không có
+ * tác dụng. Thay vì tự ý làm luôn tính năng "tự ẩn/xóa toàn bộ tin khi
+ * hết hạn" (rủi ro, thay đổi hành vi lớn với dữ liệu người dùng), chỉ
+ * gắn "Expire At" vào đúng phạm vi "ghim" — nơi nó thật sự có ý nghĩa
+ * (tin ghim là tạm thời, tin thường thì vốn không cần hết hạn).
+ */
+
+// Đăng ký cron job hourly để tự bỏ ghim các tin đã hết hạn
+function init_plugin_suite_user_engine_schedule_unpin_expired() {
+    if ( ! wp_next_scheduled( 'init_plugin_suite_user_engine_unpin_expired_inbox' ) ) {
+        wp_schedule_event( time(), 'hourly', 'init_plugin_suite_user_engine_unpin_expired_inbox' );
+    }
+}
+add_action( 'wp', 'init_plugin_suite_user_engine_schedule_unpin_expired' );
+
+// Hook để thực hiện việc bỏ ghim khi cron chạy
+add_action( 'init_plugin_suite_user_engine_unpin_expired_inbox', 'init_plugin_suite_user_engine_unpin_expired_inbox_handler' );
+
+/**
+ * Hàm xử lý tự bỏ ghim các tin đã ghim nhưng quá hạn `expire_at`.
+ *
+ * Chỉ UPDATE cột `pinned`, không đụng tới bất kỳ dữ liệu nào khác của
+ * tin (title/content/status/metadata...) — an toàn, không xóa gì cả.
+ */
+function init_plugin_suite_user_engine_unpin_expired_inbox_handler() {
+    global $wpdb;
+    $table = init_plugin_suite_user_engine_get_inbox_table();
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $wpdb->query( $wpdb->prepare(
+    	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        "UPDATE {$table} SET pinned = 0 WHERE pinned = 1 AND expire_at IS NOT NULL AND expire_at <= %d",
+        current_time( 'timestamp' )
+    ) );
+
+    // Không cần flush unread cache: bỏ ghim không làm thay đổi số lượng
+    // tin chưa đọc, cache unread count không phụ thuộc cột `pinned`.
+}
+
 // Lấy danh sách type hiện có trong inbox
 function init_plugin_suite_user_engine_get_inbox_types() {
     global $wpdb;
@@ -606,6 +658,10 @@ function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
  * @param string       $type
  * @param array        $metadata
  * @param int|string|null $expire_at  UNIX ts, string parse-able, hoặc null.
+ *                                    Chỉ có tác dụng khi $pinned = 1: tự
+ *                                    bỏ ghim khi tới hạn (xem cron
+ *                                    init_plugin_suite_user_engine_unpin_expired_inbox_handler()).
+ *                                    Vô nghĩa với tin không ghim.
  * @param string       $priority   normal|high|low...
  * @param string       $link
  * @param int|bool     $pinned
@@ -784,6 +840,11 @@ function init_plugin_suite_user_engine_get_inbox_group_map() {
     return [
         'system' => [
             'system',
+            // Tin admin gửi thủ công qua "Gửi inbox" (trước đây dùng
+            // chung type 'system', từ v1.5.9 tách riêng thành 'admin')
+            // — vẫn giữ trong nhóm "System" trên UI để không đổi vị trí
+            // tab hiển thị.
+            'admin',
             'welcome',
             'vip',
             'withdraw_request_result',

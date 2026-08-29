@@ -188,7 +188,7 @@ msgstr ""
 msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
 msgstr ""
 
-#: includes/inbox.php:553
+#: includes/inbox.php:555
 #: includes/user-metabox.php:541
 #: includes/user-metabox.php:633
 #: includes/vip-codes-handler.php:20
@@ -799,16 +799,16 @@ msgstr ""
 
 #: includes/settings-page.php:27
 #: includes/settings-page.php:28
-#: includes/tools/inbox-statistics.php:626
+#: includes/tools/inbox-statistics.php:756
 #: includes/tools/send-notification.php:93
-#: includes/tools/send-notification.php:201
+#: includes/tools/send-notification.php:205
 msgid "Send Notification"
 msgstr ""
 
 #: includes/settings-page.php:38
 #: includes/settings-page.php:39
-#: includes/tools/inbox-statistics.php:18
-#: includes/tools/inbox-statistics.php:63
+#: includes/tools/inbox-statistics.php:64
+#: includes/tools/inbox-statistics.php:131
 msgid "Inbox Statistics"
 msgstr ""
 
@@ -1353,7 +1353,7 @@ msgstr ""
 msgid "Cash given to new user (rarely used)."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:7
+#: includes/tools/inbox-statistics.php:53
 #: includes/tools/redeem-codes.php:6
 #: includes/tools/send-notification.php:6
 #: includes/tools/topup.php:6
@@ -1361,217 +1361,217 @@ msgstr ""
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:20
+#: includes/tools/inbox-statistics.php:66
 msgid "Inbox table not found. Please ensure the User Engine plugin is properly installed."
 msgstr ""
 
 #. translators: 1: message type, 2: deleted count
-#: includes/tools/inbox-statistics.php:41
+#: includes/tools/inbox-statistics.php:87
 #, php-format
 msgid "Cleanup completed for type \"%1$s\". Deleted %2$d messages."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:48
+#: includes/tools/inbox-statistics.php:94
 msgid "Cleanup failed: invalid or missing type."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:69
+#: includes/tools/inbox-statistics.php:137
 msgid "Date Range:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:71
+#: includes/tools/inbox-statistics.php:139
 #: includes/user-metabox.php:328
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:72
+#: includes/tools/inbox-statistics.php:140
 msgid "Last 30 Days"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:73
+#: includes/tools/inbox-statistics.php:141
 msgid "Last 90 Days"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:74
+#: includes/tools/inbox-statistics.php:142
 msgid "All Time"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:85
-#: includes/tools/inbox-statistics.php:594
+#: includes/tools/inbox-statistics.php:153
+#: includes/tools/inbox-statistics.php:724
 #: includes/user-metabox.php:320
 msgid "Total Messages"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:93
+#: includes/tools/inbox-statistics.php:161
 msgid "Unread Messages"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:102
+#: includes/tools/inbox-statistics.php:170
 msgid "Sent Today"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:110
+#: includes/tools/inbox-statistics.php:178
 msgid "Total Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:121
+#: includes/tools/inbox-statistics.php:189
 msgid "📊 Message Types Distribution"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:138
+#: includes/tools/inbox-statistics.php:206
 msgid "No message type data available."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:144
+#: includes/tools/inbox-statistics.php:212
 msgid "🚨 Priority Levels"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:155
+#: includes/tools/inbox-statistics.php:223
 msgid "No priority data available."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:162
+#: includes/tools/inbox-statistics.php:230
 msgid "📈 Engagement Analytics"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:165
+#: includes/tools/inbox-statistics.php:233
 msgid "Overall Read Rate"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:173
+#: includes/tools/inbox-statistics.php:241
 msgid "Avg Messages per User"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:178
+#: includes/tools/inbox-statistics.php:246
 msgid "Pinned Messages"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:183
-msgid "Active Recipients (30d)"
+#: includes/tools/inbox-statistics.php:251
+msgid "Active Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:196
+#: includes/tools/inbox-statistics.php:264
 msgid "📊 Daily Activity"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:217
+#: includes/tools/inbox-statistics.php:285
 msgid "No activity data for selected period."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:224
+#: includes/tools/inbox-statistics.php:292
 msgid "🏆 Top Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:233
+#: includes/tools/inbox-statistics.php:301
 msgid "total"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:235
+#: includes/tools/inbox-statistics.php:303
 msgid "unread"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:243
+#: includes/tools/inbox-statistics.php:311
 msgid "No recipient data available."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:249
+#: includes/tools/inbox-statistics.php:317
 msgid "📝 Recent Activity Summary"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:252
+#: includes/tools/inbox-statistics.php:320
 msgid "This Week:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:256
+#: includes/tools/inbox-statistics.php:324
 msgid "This Month:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:260
+#: includes/tools/inbox-statistics.php:328
 msgid "Peak Day:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:261
-#: includes/tools/inbox-statistics.php:493
+#: includes/tools/inbox-statistics.php:329
+#: includes/tools/inbox-statistics.php:618
 #: includes/user-metabox.php:201
 #: includes/user-metabox.php:336
 msgid "N/A"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:264
+#: includes/tools/inbox-statistics.php:332
 msgid "Avg Daily:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:278
+#: includes/tools/inbox-statistics.php:346
 msgid "Refresh Data"
 msgstr ""
 
 #. translators: %s is the formatted date and time when the data was last updated
-#: includes/tools/inbox-statistics.php:283
+#: includes/tools/inbox-statistics.php:351
 #, php-format
 msgid "Last updated: %s"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:290
+#: includes/tools/inbox-statistics.php:358
 msgid "Are you sure you want to permanently delete all messages of this type? This action cannot be undone."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:294
+#: includes/tools/inbox-statistics.php:362
 msgid "Cleanup Inbox by Type"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:307
+#: includes/tools/inbox-statistics.php:375
 msgid "No types available"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:313
+#: includes/tools/inbox-statistics.php:381
 msgid "Delete All of This Type"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:316
+#: includes/tools/inbox-statistics.php:384
 msgid "Use this tool to purge messages by type in case of spikes or malformed entries."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:389
+#: includes/tools/inbox-statistics.php:516
 msgid "Unknown User"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:519
+#: includes/tools/inbox-statistics.php:649
 msgid "Inbox Overview"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:538
+#: includes/tools/inbox-statistics.php:668
 msgid "📭 Inbox Table Not Found"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:539
+#: includes/tools/inbox-statistics.php:669
 msgid "Please check your plugin installation."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:598
+#: includes/tools/inbox-statistics.php:728
 #: includes/user-metabox.php:324
 #: init-user-engine.php:311
 msgid "Unread"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:602
+#: includes/tools/inbox-statistics.php:732
 msgid "Today"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:606
+#: includes/tools/inbox-statistics.php:736
 #: includes/tools/send-notification.php:124
 #: includes/tools/topup.php:223
 msgid "Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:612
+#: includes/tools/inbox-statistics.php:742
 msgid "Read Rate:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:616
+#: includes/tools/inbox-statistics.php:746
 msgid "Avg per User:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:623
+#: includes/tools/inbox-statistics.php:753
 msgid "View Full Statistics"
 msgstr ""
 
@@ -1876,7 +1876,7 @@ msgid "Selected user IDs will appear here."
 msgstr ""
 
 #: includes/tools/send-notification.php:161
-msgid "system"
+msgid "admin"
 msgstr ""
 
 #: includes/tools/send-notification.php:162
@@ -1911,15 +1911,23 @@ msgstr ""
 msgid "https://example.com/optional-link"
 msgstr ""
 
-#: includes/tools/send-notification.php:189
+#: includes/tools/send-notification.php:190
 msgid "Pin this message"
 msgstr ""
 
-#: includes/tools/send-notification.php:193
-msgid "Expire At (optional)"
+#: includes/tools/send-notification.php:191
+msgid "Pinned messages always appear at the top of the recipient's Inbox, above regular messages."
 msgstr ""
 
 #: includes/tools/send-notification.php:196
+msgid "Expire At (optional)"
+msgstr ""
+
+#: includes/tools/send-notification.php:200
+msgid "Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages."
+msgstr ""
+
+#: includes/tools/send-notification.php:199
 msgid "Optional expiration time"
 msgstr ""
 

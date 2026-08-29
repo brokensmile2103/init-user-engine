@@ -1,6 +1,52 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// ─────────────────────────────────────────────
+// Range helper (dùng chung cho mọi hàm thống kê bên dưới)
+// ─────────────────────────────────────────────
+
+/**
+ * Số ngày tương ứng với 1 lựa chọn range trên dropdown.
+ * Trả về null cho 'all' (không giới hạn thời gian).
+ */
+function init_plugin_suite_user_engine_inbox_stats_range_days( $range ) {
+    switch ( $range ) {
+        case '7days':
+            return 7;
+        case '30days':
+            return 30;
+        case '90days':
+            return 90;
+        case 'all':
+        default:
+            return null;
+    }
+}
+
+/**
+ * Mốc thời gian (unix timestamp) để lọc `created_at >= $cutoff`.
+ * Trả về null khi range = 'all' → không áp điều kiện thời gian,
+ * để các hàm gọi tự bỏ qua mệnh đề WHERE/AND tương ứng.
+ */
+function init_plugin_suite_user_engine_inbox_stats_cutoff( $range ) {
+    $days = init_plugin_suite_user_engine_inbox_stats_range_days( $range );
+
+    if ( null === $days ) {
+        return null;
+    }
+
+    return current_time( 'timestamp' ) - ( $days * DAY_IN_SECONDS );
+}
+
+/**
+ * Cache key theo range — dùng chung cho transient của toàn trang.
+ */
+function init_plugin_suite_user_engine_inbox_stats_cache_key( $range ) {
+    // $range luôn nằm trong whitelist cố định (xem sanitize ở render()),
+    // nhưng vẫn sanitize_key() lần nữa cho chắc khi ghép vào tên option.
+    return 'iue_inbox_stats_' . sanitize_key( $range );
+}
+
 // Render the inbox statistics page
 function init_plugin_suite_user_engine_render_inbox_stats_page() {
     if (!current_user_can('manage_options')) {
@@ -50,13 +96,35 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
         }
     }
 
-    // Get comprehensive statistics
-    $stats = init_plugin_suite_user_engine_get_comprehensive_inbox_stats();
-    $advanced_stats = init_plugin_suite_user_engine_get_advanced_inbox_analytics();
-    
-    // Handle date range filter
-    $date_range = isset($_GET['range']) ? sanitize_text_field(wp_unslash($_GET['range'])) : '7days'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-    $filtered_stats = init_plugin_suite_user_engine_get_filtered_inbox_stats($date_range);
+    // Handle date range filter — validate theo whitelist cố định, không
+    // tin thẳng giá trị từ query string (dù chỉ dùng để build cache key
+    // và truyền cho các hàm thống kê, vẫn nên chặn giá trị lạ ở nguồn).
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $date_range_raw = isset( $_GET['range'] ) ? sanitize_key( wp_unslash( $_GET['range'] ) ) : '7days';
+    $allowed_ranges = [ '7days', '30days', '90days', 'all' ];
+    $date_range     = in_array( $date_range_raw, $allowed_ranges, true ) ? $date_range_raw : '7days';
+
+    // Toàn bộ số liệu trên trang (trừ 3 card mốc lịch cố định: Sent Today/
+    // This Week/This Month) đều đi theo $date_range đang chọn — xem cache
+    // key theo range bên dưới. Cache 5 phút, cùng pattern với dashboard
+    // widget, để tránh chạy lại ~10 query tổng hợp mỗi lần đổi range/tải
+    // trang trong lúc admin đang thao tác.
+    $cache_key   = init_plugin_suite_user_engine_inbox_stats_cache_key( $date_range );
+    $page_stats  = get_transient( $cache_key );
+
+    if ( false === $page_stats ) {
+        $page_stats = [
+            'stats'          => init_plugin_suite_user_engine_get_comprehensive_inbox_stats( $date_range ),
+            'advanced_stats' => init_plugin_suite_user_engine_get_advanced_inbox_analytics( $date_range ),
+            'filtered_stats' => init_plugin_suite_user_engine_get_filtered_inbox_stats( $date_range ),
+        ];
+
+        set_transient( $cache_key, $page_stats, 5 * MINUTE_IN_SECONDS );
+    }
+
+    $stats          = $page_stats['stats'];
+    $advanced_stats = $page_stats['advanced_stats'];
+    $filtered_stats = $page_stats['filtered_stats'];
     
     ?>
     <div class="wrap iue-inbox-stats-page">
@@ -180,7 +248,7 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
                         </div>
                         
                         <div class="iue-engagement-item">
-                            <h4><?php esc_html_e('Active Recipients (30d)', 'init-user-engine'); ?></h4>
+                            <h4><?php esc_html_e('Active Recipients', 'init-user-engine'); ?></h4>
                             <div class="iue-engagement-value"><?php echo esc_html(number_format_i18n($advanced_stats['active_recipients'] ?? 0)); ?></div>
                         </div>
                     </div>
@@ -323,65 +391,124 @@ function init_plugin_suite_user_engine_render_inbox_stats_page() {
 }
 
 // Get comprehensive inbox statistics
-function init_plugin_suite_user_engine_get_comprehensive_inbox_stats() {
+//
+// $range: '7days'|'30days'|'90days'|'all' — áp dụng cho MỌI số liệu ở
+// đây, TRỪ today/week/month_messages (3 mốc lịch cố định, cố tình độc
+// lập với dropdown vì nhãn đã tự mô tả rõ khoảng thời gian riêng).
+function init_plugin_suite_user_engine_get_comprehensive_inbox_stats( $range = 'all' ) {
     global $wpdb;
     $table = init_plugin_suite_user_engine_get_inbox_table();
-    
+
+    $cutoff = init_plugin_suite_user_engine_inbox_stats_cutoff( $range );
+
     $stats = [];
-    
-    // Basic counts
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $stats['total_messages'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $stats['unread_messages'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'unread'");
+
+    // ── Basic counts (theo $range) ──────────────────────────────
+    if ( null === $cutoff ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $stats['total_messages'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $stats['unread_messages'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'unread'" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $stats['total_recipients'] = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$table}" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $stats['pinned_messages'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE pinned = 1" );
+    } else {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $stats['total_messages'] = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", $cutoff
+        ) );
+        $stats['unread_messages'] = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE status = 'unread' AND created_at >= %d", $cutoff
+        ) );
+        $stats['total_recipients'] = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(DISTINCT user_id) FROM {$table} WHERE created_at >= %d", $cutoff
+        ) );
+        $stats['pinned_messages'] = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE pinned = 1 AND created_at >= %d", $cutoff
+        ) );
+        // phpcs:enable
+    }
+
+    // ── 3 mốc lịch cố định — KHÔNG theo $range (cố ý, xem docblock) ──
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $stats['today_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('today', current_time('timestamp'))));
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $stats['week_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('monday this week', current_time('timestamp'))));
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $stats['month_messages'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('first day of this month', current_time('timestamp'))));
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $stats['total_recipients'] = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table}");
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $stats['pinned_messages'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE pinned = 1");
-    
-    // Percentages
+
+    // ── Percentages / derived ────────────────────────────────────
     $stats['unread_percentage'] = $stats['total_messages'] > 0 ? round(($stats['unread_messages'] / $stats['total_messages']) * 100, 1) : 0;
     $stats['read_percentage'] = 100 - $stats['unread_percentage'];
     $stats['avg_messages_per_user'] = $stats['total_recipients'] > 0 ? round($stats['total_messages'] / $stats['total_recipients'], 1) : 0;
-    
-    // Message types
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $message_types = $wpdb->get_results("SELECT type, COUNT(*) as count FROM {$table} GROUP BY type ORDER BY count DESC", ARRAY_A);
+
+    // ── Message types (theo $range) ──────────────────────────────
+    if ( null === $cutoff ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $message_types = $wpdb->get_results( "SELECT type, COUNT(*) as count FROM {$table} GROUP BY type ORDER BY count DESC", ARRAY_A );
+    } else {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $message_types = $wpdb->get_results( $wpdb->prepare(
+            "SELECT type, COUNT(*) as count FROM {$table} WHERE created_at >= %d GROUP BY type ORDER BY count DESC", $cutoff
+        ), ARRAY_A );
+        // phpcs:enable
+    }
     $stats['message_types'] = [];
     foreach ($message_types as $type) {
         $stats['message_types'][$type['type']] = (int) $type['count'];
     }
-    
-    // Priority levels
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $priority_levels = $wpdb->get_results("SELECT priority, COUNT(*) as count FROM {$table} GROUP BY priority ORDER BY count DESC", ARRAY_A);
+
+    // ── Priority levels (theo $range) ────────────────────────────
+    if ( null === $cutoff ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $priority_levels = $wpdb->get_results( "SELECT priority, COUNT(*) as count FROM {$table} GROUP BY priority ORDER BY count DESC", ARRAY_A );
+    } else {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $priority_levels = $wpdb->get_results( $wpdb->prepare(
+            "SELECT priority, COUNT(*) as count FROM {$table} WHERE created_at >= %d GROUP BY priority ORDER BY count DESC", $cutoff
+        ), ARRAY_A );
+        // phpcs:enable
+    }
     $stats['priority_levels'] = [];
     foreach ($priority_levels as $priority) {
         $stats['priority_levels'][$priority['priority']] = (int) $priority['count'];
     }
-    
-    // Top recipients
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $top_recipients = $wpdb->get_results("
-        SELECT 
-            i.user_id,
-            u.display_name,
-            COUNT(*) as total_messages,
-            SUM(CASE WHEN i.status = 'unread' THEN 1 ELSE 0 END) as unread_count
-        FROM {$table} i
-        LEFT JOIN {$wpdb->users} u ON i.user_id = u.ID
-        GROUP BY i.user_id
-        ORDER BY total_messages DESC
-        LIMIT 10
-    ", ARRAY_A);
-    // phpcs:enable
-    
+
+    // ── Top recipients (theo $range) ─────────────────────────────
+    if ( null === $cutoff ) {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $top_recipients = $wpdb->get_results( "
+            SELECT
+                i.user_id,
+                u.display_name,
+                COUNT(*) as total_messages,
+                SUM(CASE WHEN i.status = 'unread' THEN 1 ELSE 0 END) as unread_count
+            FROM {$table} i
+            LEFT JOIN {$wpdb->users} u ON i.user_id = u.ID
+            GROUP BY i.user_id
+            ORDER BY total_messages DESC
+            LIMIT 10
+        ", ARRAY_A );
+        // phpcs:enable
+    } else {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $top_recipients = $wpdb->get_results( $wpdb->prepare( "
+            SELECT
+                i.user_id,
+                u.display_name,
+                COUNT(*) as total_messages,
+                SUM(CASE WHEN i.status = 'unread' THEN 1 ELSE 0 END) as unread_count
+            FROM {$table} i
+            LEFT JOIN {$wpdb->users} u ON i.user_id = u.ID
+            WHERE i.created_at >= %d
+            GROUP BY i.user_id
+            ORDER BY total_messages DESC
+            LIMIT 10
+        ", $cutoff ), ARRAY_A );
+        // phpcs:enable
+    }
+
     $stats['top_recipients'] = [];
     foreach ($top_recipients as $recipient) {
         $stats['top_recipients'][] = [
@@ -391,109 +518,113 @@ function init_plugin_suite_user_engine_get_comprehensive_inbox_stats() {
             'unread_count' => (int) $recipient['unread_count']
         ];
     }
-    
+
     return $stats;
 }
 
-// Get filtered statistics based on date range
+// Get filtered statistics based on date range (nguồn dữ liệu cho biểu
+// đồ "Daily Activity"). 'all' vẫn dùng cửa sổ hiển thị 30 ngày gần nhất
+// (vẽ hết lịch sử nhiều năm lên 1 chart cột sẽ không đọc được) — cùng
+// quy ước với avg_daily ở get_advanced_inbox_analytics().
 function init_plugin_suite_user_engine_get_filtered_inbox_stats($range = '7days') {
     global $wpdb;
     $table = init_plugin_suite_user_engine_get_inbox_table();
-    
+
     $stats = [];
-    
-    // Determine date range
-    switch ($range) {
-        case '7days':
-            $days = 7;
-            break;
-        case '30days':
-            $days = 30;
-            break;
-        case '90days':
-            $days = 90;
-            break;
-        case 'all':
-        default:
-            $days = null;
-            break;
-    }
-    
+
+    $days = init_plugin_suite_user_engine_inbox_stats_range_days( $range ) ?? 30;
+
     // Daily activity
     $stats['daily_activity'] = [];
-    
-    if ($days) {
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $date = wp_date('Y-m-d', strtotime("-{$i} days"));
-            $day_start = strtotime($date, current_time('timestamp'));
-            $day_end = $day_start + DAY_IN_SECONDS - 1;
-            
-            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-            $count = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE created_at BETWEEN %d AND %d",
-                $day_start, $day_end
-            ));
-            // phpcs:enable
-            
-            $stats['daily_activity'][$date] = $count;
-        }
-    } else {
-        // For "all time", get last 30 days
-        for ($i = 29; $i >= 0; $i--) {
-            $date = wp_date('Y-m-d', strtotime("-{$i} days"));
-            $day_start = strtotime($date, current_time('timestamp'));
-            $day_end = $day_start + DAY_IN_SECONDS - 1;
-            
-            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-            $count = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE created_at BETWEEN %d AND %d",
-                $day_start, $day_end
-            ));
-            // phpcs:enable
-            
-            $stats['daily_activity'][$date] = $count;
-        }
+
+    for ($i = $days - 1; $i >= 0; $i--) {
+        $date = wp_date('Y-m-d', strtotime("-{$i} days"));
+        $day_start = strtotime($date, current_time('timestamp'));
+        $day_end = $day_start + DAY_IN_SECONDS - 1;
+
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $count = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE created_at BETWEEN %d AND %d",
+            $day_start, $day_end
+        ));
+        // phpcs:enable
+
+        $stats['daily_activity'][$date] = $count;
     }
-    
+
     return $stats;
 }
 
 // Get advanced analytics
-function init_plugin_suite_user_engine_get_advanced_inbox_analytics() {
+//
+// $range: '7days'|'30days'|'90days'|'all' — active_recipients và
+// peak_day giờ đi theo đúng range đang chọn (trước đây hardcode cố định
+// 30/90 ngày, không liên quan dropdown — đã bỏ để nhất quán toàn trang).
+// avg_daily là ngoại lệ CÓ CHỦ ĐÍCH: khi range = 'all', vẫn dùng cửa sổ
+// 30 ngày gần nhất làm mẫu số thay vì chia cho toàn bộ lịch sử (giống hệt
+// cách "Daily Activity" chart bên dưới xử lý 'all') — vì "trung bình/ngày
+// tính trên toàn bộ lịch sử nhiều năm" là 1 con số không phản ánh đúng
+// nhịp gửi tin hiện tại, trong khi 7/30/90 ngày thì dùng đúng số ngày đó.
+function init_plugin_suite_user_engine_get_advanced_inbox_analytics( $range = 'all' ) {
     global $wpdb;
     $table = init_plugin_suite_user_engine_get_inbox_table();
-    
+
+    $cutoff = init_plugin_suite_user_engine_inbox_stats_cutoff( $range );
+
     $analytics = [];
-    
-    // Active recipients in last 30 days
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $analytics['active_recipients'] = (int) $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(DISTINCT user_id) FROM {$table} WHERE created_at >= %d",
-        current_time('timestamp') - (30 * DAY_IN_SECONDS)
-    ));
-    // phpcs:enable
-    
-    // Peak day (day with most messages)
-    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $peak_day_data = $wpdb->get_row($wpdb->prepare("
-        SELECT 
-            DATE(FROM_UNIXTIME(created_at)) as date,
-            COUNT(*) as count
-        FROM {$table}
-        WHERE created_at >= %d
-        GROUP BY DATE(FROM_UNIXTIME(created_at))
-        ORDER BY count DESC
-        LIMIT 1
-    ", current_time('timestamp') - (90 * DAY_IN_SECONDS)), ARRAY_A);
-    // phpcs:enable
-    
+
+    // ── Active recipients (theo $range) ──────────────────────────
+    if ( null === $cutoff ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $analytics['active_recipients'] = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$table}" );
+    } else {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $analytics['active_recipients'] = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(DISTINCT user_id) FROM {$table} WHERE created_at >= %d", $cutoff
+        ) );
+        // phpcs:enable
+    }
+
+    // ── Peak day (theo $range) ────────────────────────────────────
+    if ( null === $cutoff ) {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $peak_day_data = $wpdb->get_row( "
+            SELECT
+                DATE(FROM_UNIXTIME(created_at)) as date,
+                COUNT(*) as count
+            FROM {$table}
+            GROUP BY DATE(FROM_UNIXTIME(created_at))
+            ORDER BY count DESC
+            LIMIT 1
+        ", ARRAY_A );
+        // phpcs:enable
+    } else {
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $peak_day_data = $wpdb->get_row( $wpdb->prepare( "
+            SELECT
+                DATE(FROM_UNIXTIME(created_at)) as date,
+                COUNT(*) as count
+            FROM {$table}
+            WHERE created_at >= %d
+            GROUP BY DATE(FROM_UNIXTIME(created_at))
+            ORDER BY count DESC
+            LIMIT 1
+        ", $cutoff ), ARRAY_A );
+        // phpcs:enable
+    }
+
     if ($peak_day_data) {
         $analytics['peak_day'] = wp_date('M j, Y', strtotime($peak_day_data['date'])) . ' (' . $peak_day_data['count'] . ')';
     } else {
         $analytics['peak_day'] = __('N/A', 'init-user-engine');
     }
-    
-    // Average daily messages (last 30 days)
+
+    // ── Average daily messages ────────────────────────────────────
+    // Mẫu số ngày: đúng số ngày của range đang chọn; riêng 'all' dùng
+    // 30 ngày gần nhất làm mặc định thực dụng (xem docblock ở trên).
+    $avg_days   = init_plugin_suite_user_engine_inbox_stats_range_days( $range ) ?? 30;
+    $avg_cutoff = current_time( 'timestamp' ) - ( $avg_days * DAY_IN_SECONDS );
+
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $avg_daily = $wpdb->get_var($wpdb->prepare("
         SELECT AVG(daily_count) FROM (
@@ -502,11 +633,11 @@ function init_plugin_suite_user_engine_get_advanced_inbox_analytics() {
             WHERE created_at >= %d
             GROUP BY DATE(FROM_UNIXTIME(created_at))
         ) daily_stats
-    ", current_time('timestamp') - (30 * DAY_IN_SECONDS)));
+    ", $avg_cutoff));
     // phpcs:enable
-    
+
     $analytics['avg_daily'] = $avg_daily ? round($avg_daily, 1) : 0;
-    
+
     return $analytics;
 }
 

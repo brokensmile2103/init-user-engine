@@ -42,7 +42,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	const modal   = document.getElementById('init-user-engine-login-modal');
 	const closeBtn= document.getElementById('init-user-engine-modal-close');
 
-	if (!avatar || !modal || !closeBtn) return;
+	// Modal và nút đóng luôn được render qua wp_footer nên bắt buộc phải có.
+	// Avatar là tùy chọn: một số trang (vd. trang yêu cầu đăng nhập) không có avatar để bấm.
+	if (!modal || !closeBtn) return;
 
 	// SVG (giữ nguyên nếu cần dùng chỗ khác)
 	const svgEye = `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle fill="none" stroke="currentColor" cx="10" cy="10" r="3.45"></circle><path fill="none" stroke="currentColor" d="m19.5,10c-2.4,3.66-5.26,7-9.5,7h0,0,0c-4.24,0-7.1-3.34-9.49-7C2.89,6.34,5.75,3,9.99,3h0,0,0c4.25,0,7.11,3.34,9.5,7Z"></path></svg>`;
@@ -73,17 +75,29 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.body.classList.remove('init-user-engine-modal-open');
 	}
 
-	avatar.addEventListener('click', function (e) { e.preventDefault(); openLoginModal(); });
-	closeBtn.addEventListener('click', closeModal);
+	// Trang "Yêu cầu đăng nhập" (Require Login Gate): không cho phép tắt modal
+	// bằng bất kỳ cách nào, để bắt buộc người dùng phải đăng nhập.
+	const isRequireLoginGate = document.body.classList.contains('iue-require-login');
+
+	if (avatar) {
+		avatar.addEventListener('click', function (e) { e.preventDefault(); openLoginModal(); });
+	}
+	if (!isRequireLoginGate) {
+		closeBtn.addEventListener('click', closeModal);
+	}
 
 	document.addEventListener('keydown', function (e) {
-		if (e.key === 'Escape') closeModal();
+		if (e.key === 'Escape') {
+			if (!isRequireLoginGate) closeModal();
+			return;
+		}
 		if (e.altKey && e.key.toLowerCase() === 'l') {
 			if (!modal.classList.contains('open')) openLoginModal();
 		}
 	});
 
 	modal.addEventListener('click', function (e) {
+		if (isRequireLoginGate) return;
 		const content = modal.querySelector('.iue-content');
 		if (content && !content.contains(e.target)) closeModal();
 	});

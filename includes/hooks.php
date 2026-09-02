@@ -390,6 +390,104 @@ add_action( 'init_plugin_suite_review_system_after_criteria_review', function ( 
 	);
 }, 10, 5 );
 
+/**
+ * Cổng "Yêu cầu đăng nhập" (Require Login Gate)
+ *
+ * Khi bật ở Settings, toàn bộ frontend (trừ các request hệ thống như REST,
+ * AJAX, cron, feed, robots.txt...) sẽ hiển thị một trang trống mang màu chủ đề
+ * của plugin thay vì nội dung thật của trang, và tự động mở modal đăng nhập
+ * có sẵn của Init User Engine. wp_head()/wp_footer() vẫn được gọi đầy đủ nên
+ * mọi hook khác của theme/plugin (bao gồm chính modal đăng nhập) vẫn hoạt động
+ * bình thường.
+ */
+add_action( 'template_redirect', 'init_plugin_suite_user_engine_maybe_require_login' );
+function init_plugin_suite_user_engine_maybe_require_login() {
+	if ( is_user_logged_in() ) {
+		return;
+	}
+
+	$settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	if ( empty( $settings['require_login'] ) ) {
+		return;
+	}
+
+	// Không chặn các request không phải là một trang xem thông thường.
+	if ( wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_feed() || is_robots() || is_trackback() ) {
+		return;
+	}
+
+	/**
+	 * Cho phép theme/plugin khác loại trừ một request cụ thể khỏi cổng đăng nhập
+	 * (ví dụ trang callback thanh toán, webhook, v.v.).
+	 *
+	 * @param bool $bypass Trả về true để bỏ qua cổng đăng nhập cho request hiện tại.
+	 */
+	if ( apply_filters( 'init_plugin_suite_user_engine_require_login_bypass', false ) ) {
+		return;
+	}
+
+	init_plugin_suite_user_engine_render_require_login_gate();
+	exit;
+}
+
+/**
+ * In ra trang trống của cổng đăng nhập và mở modal đăng nhập có sẵn.
+ * CSS/JS được tách sang 2 file riêng (assets/css/require-login.css và
+ * assets/js/require-login.js) thay vì in inline để tuân thủ WPCS.
+ */
+function init_plugin_suite_user_engine_render_require_login_gate() {
+	add_action( 'wp_enqueue_scripts', 'init_plugin_suite_user_engine_enqueue_require_login_assets', 20 );
+
+	nocache_headers();
+
+	$login_url = wp_login_url( home_url( add_query_arg( null, null ) ) );
+	?><!DOCTYPE html>
+	<html <?php language_attributes(); ?>>
+	<head>
+		<meta charset="<?php bloginfo( 'charset' ); ?>">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex, nofollow">
+		<title><?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
+		<?php wp_head(); ?>
+	</head>
+	<body <?php body_class( 'iue-require-login' ); ?>>
+		<div class="iue-require-login-gate">
+			<span class="iue-require-login-spinner" aria-hidden="true"></span>
+			<p><?php esc_html_e( 'This site is available to logged-in members only.', 'init-user-engine' ); ?></p>
+			<noscript>
+				<p>
+					<a href="<?php echo esc_url( $login_url ); ?>"><?php esc_html_e( 'Click here to log in', 'init-user-engine' ); ?></a>
+				</p>
+			</noscript>
+		</div>
+		<?php wp_footer(); ?>
+	</body>
+	</html>
+	<?php
+}
+
+/**
+ * Enqueue CSS/JS riêng cho trang cổng đăng nhập. Phụ thuộc vào script/style
+ * "guest" hiện có (đã tự động được enqueue vì is_user_logged_in() === false)
+ * để dùng chung biến CSS màu chủ đề và hàm window.openLoginModal.
+ */
+function init_plugin_suite_user_engine_enqueue_require_login_assets() {
+	wp_enqueue_style(
+		'init-user-engine-require-login',
+		INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/require-login.css',
+		[ 'init-user-engine-guest' ],
+		INIT_PLUGIN_SUITE_IUE_VERSION
+	);
+
+	wp_enqueue_script(
+		'init-user-engine-require-login',
+		INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'js/require-login.js',
+		[ 'init-user-engine-guest' ],
+		INIT_PLUGIN_SUITE_IUE_VERSION,
+		true
+	);
+}
+
 // Hook vào action khi VIP bị gỡ
 add_action( 'init_plugin_suite_user_engine_vip_removed', function( $user_id, $prev_expiry, $vip_log_after ) {
 	// Tiêu đề và nội dung inbox message

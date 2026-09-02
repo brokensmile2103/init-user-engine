@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.9
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,7 @@ What you get:
 - Built-in inbox for notifications (uses custom DB table)
 - Custom avatar support with upload & preview modal
 - Send custom notifications to selected users or all members from wp-admin
+- Optional "Require Login to Access Site" mode that gates the entire frontend behind the built-in login modal
 
 This plugin is the core user system behind the [Init Plugin Suite](https://en.inithtml.com/init-plugin-suite-minimalist-powerful-and-free-wordpress-plugins/) – optimized for frontend-first interaction, extensibility, and real-time gamification.
 
@@ -159,6 +160,16 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.0 – September 2, 2026 =
+- Added a new **"Require Login to Access Site"** option (Init User Engine → Settings → General). When enabled, visitors who are not logged in no longer see the site's actual content on any page
+  - Instead, they see a blank page in the plugin's theme color with the built-in login modal opened automatically, so they can sign in without leaving the page
+  - Implemented via `template_redirect`, so `wp_head()`/`wp_footer()` still run in full — the plugin's own login modal, and every other theme/plugin hook attached to those actions, keeps working normally
+  - REST API, AJAX, cron, feed, and robots.txt requests are always excluded and are never blocked by this option
+  - Added filter `init_plugin_suite_user_engine_require_login_bypass` so other plugins/themes can exclude specific requests (e.g. a payment callback URL) from the gate
+  - New dedicated `assets/css/require-login.css` and `assets/js/require-login.js` files render the gate's background and auto-open the login modal, kept separate from PHP output for coding-standards compliance
+- Fixed: the frontend guest script (`guest.js`) only exposed `window.openLoginModal` (and wired up Escape-to-close, Alt+L, and hash-triggered opening) when an avatar element was present on the page. Pages without the avatar shortcode/widget — including the new Require Login gate — could not open the login modal at all. The avatar element is now optional; the modal and its triggers work on any page as long as the modal itself is rendered (always the case via `wp_footer`)
+- Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included); `.mo` not rebuilt as part of this change
 
 = 1.5.9 – August 29, 2026 =
 - Changed: "Send Notification" (Init User Engine → Send Notification) now uses a dedicated **admin** message type instead of reusing **system**, which was also used internally by several unrelated automated notices (VIP removed, redeem code success, VIP code success). Admin-sent notices and automated system notices are now cleanly separated

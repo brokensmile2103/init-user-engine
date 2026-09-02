@@ -1,0 +1,56 @@
+/* ==== Require Login Gate ==== */
+body.iue-require-login {
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	background: linear-gradient(160deg, var(--iue-theme-color, #0073aa) 0%, var(--iue-theme-active-color, #005177) 100%);
+	font-family: system-ui, sans-serif;
+}
+
+.iue-require-login-gate {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	color: #fff;
+	text-align: center;
+	padding: 24px;
+}
+
+.iue-require-login-gate p {
+	margin: 0;
+	font-size: 15px;
+	opacity: 0.9;
+}
+
+.iue-require-login-gate a {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.iue-require-login-spinner {
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	border: 3px solid rgba(255, 255, 255, 0.35);
+	border-top-color: #fff;
+	animation: iueRequireLoginSpin 0.8s linear infinite;
+}
+
+@keyframes iueRequireLoginSpin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Đảm bảo modal đăng nhập luôn nổi trên nền chờ của trang gate */
+#init-user-engine-login-modal {
+	z-index: 100000;
+}
+
+/* Không cho phép tắt modal khi đang ở chế độ bắt buộc đăng nhập: ẩn nút X */
+.iue-require-login #init-user-engine-modal-close {
+	display: none !important;
+}

@@ -106,6 +106,8 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$max_mb_val	 						 = is_numeric( $max_mb_raw ) ? (float) $max_mb_raw : 0;
 	$output['avatar_max_upload_mb'] 	 = max( 0, $max_mb_val );
 
+	$output['require_login'] 			 = ! empty( $input['require_login'] ) ? 1 : 0;
+
 	$output['hide_admin_bar_subscriber'] = ! empty( $input['hide_admin_bar_subscriber'] ) ? 1 : 0;
 	$output['disable_gravatar'] 		 = ! empty( $input['disable_gravatar'] ) ? 1 : 0;
 	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
@@ -262,6 +264,34 @@ function init_plugin_suite_user_engine_render_settings_page() {
 								</small>
 								<small style="color:#7a0000; display:block; margin-top:2px;">
 									<?php esc_html_e( 'Recommendation: enable only one direction, or ensure the product of both rates is strictly less than 1.', 'init-user-engine' ); ?>
+								</small>
+							</span>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Require Login to Access Site', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[require_login]"
+								value="1"
+								<?php checked( $options['require_login'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Require users to log in before viewing any page on the site.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description" role="alert" style="margin-top:8px;">
+							<span style="display:inline-block; padding:8px 10px; border-radius:6px; background:#f0f6fc; border:1px solid #c5d9ed;">
+								<strong style="color:#0a4b78; font-weight:700;">
+									<?php esc_html_e( 'Note — the entire site becomes private.', 'init-user-engine' ); ?>
+								</strong>
+								<br>
+								<small style="color:#0a4b78; display:block; margin-top:2px;">
+									<?php esc_html_e( 'When enabled, this site is accessible to logged-in users only. Visitors who are not logged in will see a blank, theme-colored page with the login form instead of any page content, until they sign in.', 'init-user-engine' ); ?>
+								</small>
+								<small style="color:#0a4b78; display:block; margin-top:2px;">
+									<?php esc_html_e( 'REST API, AJAX, cron, and feed requests are not affected and continue to work normally.', 'init-user-engine' ); ?>
 								</small>
 							</span>
 						</p>

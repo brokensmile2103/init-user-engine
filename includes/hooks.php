@@ -446,7 +446,6 @@ function init_plugin_suite_user_engine_render_require_login_gate() {
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="robots" content="noindex, nofollow">
 		<title><?php echo esc_html( get_bloginfo( 'name' ) ); ?></title>
 		<?php wp_head(); ?>
 	</head>

@@ -7,6 +7,25 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action( 'admin_init', function () {
 
     // =============================
+    // EXPORT CSV (toàn bộ danh sách, không phụ thuộc phân trang)
+    // =============================
+    if ( isset( $_GET['iue_export_redeem_codes'], $_GET['_wpnonce'] ) ) {
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+        }
+
+        $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        if ( ! wp_verify_nonce( $nonce, 'iue_redeem_code_export_csv' ) ) {
+            wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'init-user-engine' ) );
+        }
+
+        init_plugin_suite_user_engine_export_redeem_codes_csv();
+        exit;
+    }
+
+    // =============================
     // CREATE CODE
     // =============================
     if (
@@ -454,4 +473,99 @@ function init_plugin_suite_user_engine_api_redeem_code( WP_REST_Request $request
         'coin'    => (int) $coin_added,
         'cash'    => (int) $cash_added,
     ];
+}
+
+/**
+ * Xuất toàn bộ Redeem Codes ra file CSV và gửi trực tiếp về trình duyệt.
+ * Chạy trên hook admin_init (trước mọi output) nên có thể gửi header an toàn.
+ * Đọc dữ liệu theo từng batch để tránh chiếm quá nhiều bộ nhớ trên site có nhiều mã.
+ */
+function init_plugin_suite_user_engine_export_redeem_codes_csv() {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'init_user_engine_redeem_codes';
+
+    nocache_headers();
+    header( 'Content-Type: text/csv; charset=utf-8' );
+    header( 'Content-Disposition: attachment; filename=redeem-codes-' . gmdate( 'Y-m-d' ) . '.csv' );
+    header( 'Pragma: no-cache' );
+    header( 'Expires: 0' );
+
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output là stream gửi thẳng về trình duyệt, không phải file trên đĩa, không dùng được WP_Filesystem.
+    $output = fopen( 'php://output', 'w' );
+
+    // BOM để Excel nhận diện đúng UTF-8.
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+    fwrite( $output, "\xEF\xBB\xBF" );
+
+    fputcsv( $output, [
+        __( 'ID', 'init-user-engine' ),
+        __( 'Code', 'init-user-engine' ),
+        __( 'Type', 'init-user-engine' ),
+        __( 'Locked User ID', 'init-user-engine' ),
+        __( 'Locked Username', 'init-user-engine' ),
+        __( 'Coin Amount', 'init-user-engine' ),
+        __( 'Cash Amount', 'init-user-engine' ),
+        __( 'Max Uses', 'init-user-engine' ),
+        __( 'Used Count', 'init-user-engine' ),
+        __( 'Status', 'init-user-engine' ),
+        __( 'Valid From', 'init-user-engine' ),
+        __( 'Valid To', 'init-user-engine' ),
+        __( 'Created By', 'init-user-engine' ),
+        __( 'Created At', 'init-user-engine' ),
+        __( 'Updated At', 'init-user-engine' ),
+    ], ',', '"', '\\' );
+
+    $date_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+    $batch_size  = 500;
+    $offset      = 0;
+
+    do {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- export luôn cần dữ liệu mới nhất, không cache
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- dynamic table name từ $wpdb->prefix an toàn
+                "SELECT * FROM {$table} ORDER BY id ASC LIMIT %d OFFSET %d",
+                $batch_size,
+                $offset
+            )
+        );
+
+        foreach ( $rows as $c ) {
+            $locked_username = '';
+            if ( (int) $c->user_lock > 0 ) {
+                $locked_user      = get_userdata( (int) $c->user_lock );
+                $locked_username  = $locked_user ? $locked_user->user_login : '';
+            }
+
+            $created_username = '';
+            if ( (int) $c->created_by > 0 ) {
+                $created_user      = get_userdata( (int) $c->created_by );
+                $created_username  = $created_user ? $created_user->user_login : '';
+            }
+
+            fputcsv( $output, [
+                (int) $c->id,
+                init_plugin_suite_user_engine_csv_safe_cell( $c->code ),
+                init_plugin_suite_user_engine_csv_safe_cell( $c->type ),
+                (int) $c->user_lock > 0 ? (int) $c->user_lock : '',
+                init_plugin_suite_user_engine_csv_safe_cell( $locked_username ),
+                (int) $c->coin_amount,
+                (int) $c->cash_amount,
+                $c->max_uses ? (int) $c->max_uses : '',
+                (int) $c->used_count,
+                init_plugin_suite_user_engine_csv_safe_cell( $c->status ),
+                ! empty( $c->valid_from ) ? date_i18n( $date_format, (int) $c->valid_from ) : '',
+                ! empty( $c->valid_to )   ? date_i18n( $date_format, (int) $c->valid_to )   : '',
+                init_plugin_suite_user_engine_csv_safe_cell( $created_username ),
+                ! empty( $c->created_at ) ? date_i18n( $date_format, (int) $c->created_at ) : '',
+                ! empty( $c->updated_at ) ? date_i18n( $date_format, (int) $c->updated_at ) : '',
+            ], ',', '"', '\\' );
+        }
+
+        $offset += $batch_size;
+    } while ( count( $rows ) === $batch_size );
+
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+    fclose( $output );
 }

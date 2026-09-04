@@ -232,7 +232,23 @@ function init_plugin_suite_user_engine_render_redeem_codes_page() {
         <!-- ============================ -->
         <!-- LIST CODE ĐÃ TẠO -->
         <!-- ============================ -->
-        <h2 style="margin-top: 30px;"><?php esc_html_e( 'Existing Redeem Codes', 'init-user-engine' ); ?></h2>
+        <?php
+        $export_url = wp_nonce_url(
+            admin_url( 'admin.php?page=init-user-engine-redeem-codes&iue_export_redeem_codes=1' ),
+            'iue_redeem_code_export_csv'
+        );
+        ?>
+        <h2 style="margin-top: 30px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <?php esc_html_e( 'Existing Redeem Codes', 'init-user-engine' ); ?>
+        </h2>
+        <p style="margin-bottom: 5px;">
+            <a href="<?php echo esc_url( $export_url ); ?>" class="button" style="font-weight: normal;">
+                <?php esc_html_e( 'Export CSV', 'init-user-engine' ); ?>
+            </a>
+        </p>
+        <p class="description" style="margin-bottom: 15px;">
+            <?php esc_html_e( 'Exports the full list of redeem codes (all pages) as a CSV file.', 'init-user-engine' ); ?>
+        </p>
 
         <?php if ( empty( $codes ) ) : ?>
 

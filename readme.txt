@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,16 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.1 – September 4, 2026 =
+- Added **Export CSV** for both code list screens (User Engine → Redeem Codes / VIP Codes)
+  - New "Export CSV" button next to the "Existing Redeem Codes" / "Existing VIP Codes" heading, exporting the **entire list** (every page, not just the current one) as a downloadable `.csv` file
+  - Redeem Codes CSV columns: ID, Code, Type, Locked User ID, Locked Username, Coin Amount, Cash Amount, Max Uses, Used Count, Status, Valid From, Valid To, Created By, Created At, Updated At
+  - VIP Codes CSV columns: same as above, with VIP Days in place of Coin/Cash Amount
+  - Data is streamed straight to the browser in batches of 500 rows so memory usage stays low even on sites with a large number of codes
+  - File is written with a UTF-8 BOM so it opens correctly in Excel, and every cell is sanitized against CSV/formula injection (values starting with `=`, `+`, `-`, `@`, or a tab are safely prefixed)
+  - Gated behind the `manage_options` capability plus a dedicated nonce per screen (`iue_redeem_code_export_csv` / `iue_vip_code_export_csv`)
+- Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included); `.mo` not rebuilt as part of this change
 
 = 1.6.0 – September 2, 2026 =
 - Added a new **"Require Login to Access Site"** option (Init User Engine → Settings → General). When enabled, visitors who are not logged in no longer see the site's actual content on any page

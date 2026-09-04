@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.6.0\n"
+"Project-Id-Version: Init User Engine 1.6.1\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
-"POT-Creation-Date: 2026-09-02 00:00+0000\n"
+"POT-Creation-Date: 2026-09-04 00:00+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -39,8 +39,8 @@ msgid "You are not allowed to do this."
 msgstr ""
 
 #: includes/ajax.php:43
-#: includes/settings-page.php:457
-#: includes/settings-page.php:460
+#: includes/settings-page.php:487
+#: includes/settings-page.php:490
 #: includes/turnstile-forms.php:151
 msgid "Please enter both Site Key and Secret Key before testing."
 msgstr ""
@@ -50,80 +50,87 @@ msgid "Secret Key is valid — Cloudflare accepted the request. Site Key can onl
 msgstr ""
 
 #: includes/cash.php:60
-#: includes/cash.php:210
+#: includes/cash.php:219
 #: includes/referral.php:108
 msgid "Unauthorized"
 msgstr ""
 
-#: includes/cash.php:68
-#: includes/cash.php:218
+#: includes/cash.php:72
+#: includes/cash.php:231
 #: init-user-engine.php:376
 msgid "Exchange is currently disabled."
 msgstr ""
 
-#. translators: %s is the currency label (e.g., Coin, Cash).
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
+#. translators: %s is the coin label (e.g., Coin, Xu).
 #: includes/cash.php:98
 #: includes/cash.php:257
 #, php-format
 msgid "Please provide a valid %s amount greater than 0."
 msgstr ""
 
-#. translators: %1$d is number, %2$s is the currency label (e.g., Coin, Cash).
+#. translators: %1$d is number, %2$s is the cash label (e.g., Cash, Kim cương).
+#. translators: %1$d is number, %2$s is the coin label (e.g., Coin, Xu).
 #: includes/cash.php:102
 #: includes/cash.php:261
 #, php-format
 msgid "Minimum per exchange is %1$d %2$s."
 msgstr ""
 
-#. translators: %1$d is number, %2$s is the currency label (e.g., Coin, Cash).
+#. translators: %1$d is number, %2$s is the cash label (e.g., Cash, Kim cương).
+#. translators: %1$d is number, %2$s is the coin label (e.g., Coin, Xu).
 #: includes/cash.php:106
 #: includes/cash.php:265
 #, php-format
 msgid "Maximum per exchange is %1$d %2$s."
 msgstr ""
 
-#: includes/cash.php:108
-#: includes/cash.php:258
+#: includes/cash.php:113
+#: includes/cash.php:272
 msgid "Too many exchange attempts. Please try again later."
 msgstr ""
 
-#: includes/cash.php:116
-#: includes/cash.php:266
+#: includes/cash.php:121
+#: includes/cash.php:280
 msgid "Duplicate exchange request detected."
 msgstr ""
 
-#: includes/cash.php:125
-#: includes/cash.php:274
+#: includes/cash.php:130
+#: includes/cash.php:288
 msgid "Another exchange is in progress. Please wait a moment."
 msgstr ""
 
-#. translators: %s is the currency label (e.g., Coin, Cash).
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
+#. translators: %s is the coin label (e.g., Coin, Xu).
 #: includes/cash.php:142
 #: includes/cash.php:299
 #, php-format
 msgid "Not enough %s to exchange."
 msgstr ""
 
-#. translators: %1$s is the currency label being credited, %2$s is the currency label being spent (e.g., Coin, Cash).
+#. translators: %1$s is the coin label, %2$s is the cash label (e.g., Coin, Cash).
+#. translators: %1$s is the cash label, %2$s is the coin label (e.g., Cash, Coin).
 #: includes/cash.php:149
 #: includes/cash.php:306
 #, php-format
 msgid "The exchange would result in 0 %1$s. Increase the %2$s amount."
 msgstr ""
 
-#. translators: %s is the currency label (e.g., Coin, Cash).
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
+#. translators: %s is the coin label (e.g., Coin, Xu).
 #: includes/cash.php:160
 #: includes/cash.php:317
 #, php-format
 msgid "Could not deduct %s."
 msgstr ""
 
-#: includes/cash.php:157
-#: includes/cash.php:305
+#: includes/cash.php:165
+#: includes/cash.php:322
 msgid "Balance changed. Please try again."
 msgstr ""
 
-#. translators: %s is the currency label (e.g., Coin, Cash).
+#. translators: %s is the coin label (e.g., Coin, Xu).
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
 #: includes/cash.php:174
 #: includes/cash.php:331
 #, php-format
@@ -136,7 +143,7 @@ msgstr ""
 msgid "Congratulations! You reached level %1$d and received %2$d %3$s as a bonus."
 msgstr ""
 
-#: includes/exp.php:78
+#: includes/exp.php:79
 msgid "Level Up!"
 msgstr ""
 
@@ -146,11 +153,11 @@ msgstr ""
 msgid "You received +%1$d EXP and +%2$d %3$s for signing up. Let the journey begin!"
 msgstr ""
 
-#: includes/hooks.php:113
+#: includes/hooks.php:114
 msgid "Welcome to the community!"
 msgstr ""
 
-#: includes/hooks.php:220
+#: includes/hooks.php:221
 msgid "Thanks for your purchase!"
 msgstr ""
 
@@ -160,17 +167,17 @@ msgstr ""
 msgid "You received +%1$d EXP and +%2$d %3$s for your order. Keep growing!"
 msgstr ""
 
-#: includes/hooks.php:255
+#: includes/hooks.php:257
 msgid "You have a new reply to your comment"
 msgstr ""
 
 #. translators: 1 = comment author's name, 2 = reply content
-#: includes/hooks.php:258
+#: includes/hooks.php:260
 #, php-format
 msgid "<strong>%1$s</strong> replied to your comment: <em>%2$s</em>"
 msgstr ""
 
-#: includes/hooks.php:370
+#: includes/hooks.php:372
 msgid "Thanks for your review!"
 msgstr ""
 
@@ -180,20 +187,30 @@ msgstr ""
 msgid "You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!"
 msgstr ""
 
-#: includes/hooks.php:393
+#: includes/hooks.php:455
+msgid "This site is available to logged-in members only."
+msgstr ""
+
+#: includes/hooks.php:458
+msgid "Click here to log in"
+msgstr ""
+
+#: includes/hooks.php:493
 msgid "Your VIP status has been removed"
 msgstr ""
 
-#: includes/hooks.php:394
+#: includes/hooks.php:494
 msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
 msgstr ""
 
-#: includes/inbox.php:555
+#: includes/inbox.php:605
+#: includes/redeem-codes-handler.php:15
 #: includes/user-metabox.php:541
 #: includes/user-metabox.php:633
-#: includes/vip-codes-handler.php:20
-#: includes/vip-codes-handler.php:179
-#: includes/vip-codes-handler.php:208
+#: includes/vip-codes-handler.php:15
+#: includes/vip-codes-handler.php:39
+#: includes/vip-codes-handler.php:198
+#: includes/vip-codes-handler.php:227
 msgid "You do not have permission to perform this action."
 msgstr ""
 
@@ -362,84 +379,176 @@ msgstr ""
 msgid "User ID #%d (not found)"
 msgstr ""
 
-#: includes/redeem-codes-handler.php:142
+#: includes/redeem-codes-handler.php:21
+#: includes/vip-codes-handler.php:21
+msgid "Security check failed. Please refresh the page and try again."
+msgstr ""
+
+#: includes/redeem-codes-handler.php:161
 msgid "You received a redeem code!"
 msgstr ""
 
 #. translators: %s: redeem code string assigned to the user
-#: includes/redeem-codes-handler.php:146
+#: includes/redeem-codes-handler.php:165
 #, php-format
 msgid "You have been assigned a redeem code: %s. You can use it in the Redeem section."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:252
-#: init-user-engine.php:445
+#: includes/redeem-codes-handler.php:271
+#: init-user-engine.php:450
 msgid "Please enter a redeem code."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:279
-#: init-user-engine.php:439
+#: includes/redeem-codes-handler.php:298
+#: init-user-engine.php:444
 msgid "Invalid redeem code."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:289
-#: includes/vip-codes-handler.php:299
-#: init-user-engine.php:441
+#: includes/redeem-codes-handler.php:308
+#: includes/vip-codes-handler.php:318
+#: init-user-engine.php:446
 msgid "This code is not active yet."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:297
-#: includes/vip-codes-handler.php:307
-#: init-user-engine.php:440
+#: includes/redeem-codes-handler.php:316
+#: includes/vip-codes-handler.php:326
+#: init-user-engine.php:445
 msgid "This code has expired."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:307
-#: includes/vip-codes-handler.php:317
-#: init-user-engine.php:444
+#: includes/redeem-codes-handler.php:326
+#: includes/vip-codes-handler.php:336
+#: init-user-engine.php:449
 msgid "This code is assigned to another user."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:325
-#: includes/vip-codes-handler.php:335
+#: includes/redeem-codes-handler.php:344
+#: includes/vip-codes-handler.php:386
 msgid "You have already used this code."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:338
-#: includes/vip-codes-handler.php:348
-#: init-user-engine.php:443
+#: includes/redeem-codes-handler.php:357
+#: includes/vip-codes-handler.php:399
+#: init-user-engine.php:448
 msgid "This code has already been used up."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:359
-#: includes/vip-codes-handler.php:369
-#: init-user-engine.php:442
+#: includes/redeem-codes-handler.php:378
+#: includes/vip-codes-handler.php:420
+#: init-user-engine.php:447
 msgid "This code has already been used."
 msgstr ""
 
 #. translators: 1: amount, 2: coin label
 #. translators: 1: amount, 2: cash label
-#: includes/redeem-codes-handler.php:424
-#: includes/redeem-codes-handler.php:428
+#: includes/redeem-codes-handler.php:443
+#: includes/redeem-codes-handler.php:447
 #, php-format
 msgid "%1$d %2$s"
 msgstr ""
 
-#: includes/redeem-codes-handler.php:431
+#: includes/redeem-codes-handler.php:450
 msgid "Redeem Code Success"
 msgstr ""
 
 #. translators: %s: amount
-#: includes/redeem-codes-handler.php:435
+#: includes/redeem-codes-handler.php:454
 #, php-format
 msgid "You received: %s."
 msgstr ""
 
-#: includes/redeem-codes-handler.php:436
-#: includes/redeem-codes-handler.php:453
-#: includes/vip-codes-handler.php:445
-#: init-user-engine.php:436
+#: includes/redeem-codes-handler.php:455
+#: includes/redeem-codes-handler.php:472
+#: includes/vip-codes-handler.php:496
+#: init-user-engine.php:441
 msgid "Redeem successful!"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:502
+#: includes/vip-codes-handler.php:544
+msgid "ID"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:503
+#: includes/tools/redeem-codes.php:169
+#: includes/tools/redeem-codes.php:260
+#: includes/tools/redeem-codes.php:420
+#: includes/tools/vip-codes.php:168
+#: includes/tools/vip-codes.php:259
+#: includes/tools/vip-codes.php:414
+#: includes/vip-codes-handler.php:545
+msgid "Code"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:504
+#: includes/tools/redeem-codes.php:261
+#: includes/tools/send-notification.php:158
+#: includes/tools/topup.php:272
+#: includes/tools/vip-codes.php:260
+#: includes/vip-codes-handler.php:546
+msgid "Type"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:505
+#: includes/vip-codes-handler.php:547
+msgid "Locked User ID"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:506
+#: includes/vip-codes-handler.php:548
+msgid "Locked Username"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:507
+#: includes/tools/redeem-codes.php:217
+msgid "Coin Amount"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:508
+#: includes/tools/redeem-codes.php:222
+msgid "Cash Amount"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:509
+#: includes/vip-codes-handler.php:550
+msgid "Max Uses"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:510
+#: includes/vip-codes-handler.php:551
+msgid "Used Count"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:511
+#: includes/tools/redeem-codes.php:266
+#: includes/tools/vip-codes.php:264
+#: includes/vip-codes-handler.php:552
+msgid "Status"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:512
+#: includes/vip-codes-handler.php:553
+msgid "Valid From"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:513
+#: includes/vip-codes-handler.php:554
+msgid "Valid To"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:514
+#: includes/vip-codes-handler.php:555
+msgid "Created By"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:515
+#: includes/vip-codes-handler.php:556
+msgid "Created At"
+msgstr ""
+
+#: includes/redeem-codes-handler.php:516
+#: includes/vip-codes-handler.php:557
+msgid "Updated At"
 msgstr ""
 
 #. translators: %d is the number of invited friends.
@@ -783,8 +892,20 @@ msgstr ""
 msgid "You are not allowed to remove the avatar."
 msgstr ""
 
-#: includes/rest-api.php:1019
+#: includes/rest-api.php:1020
 msgid "Spam detected."
+msgstr ""
+
+#: includes/rest-api.php:1032
+#: includes/rest-api.php:1043
+#: init-user-engine.php:425
+#: init-user-engine.php:427
+msgid "Please enter a valid date of birth."
+msgstr ""
+
+#: includes/rest-api.php:1037
+#: init-user-engine.php:426
+msgid "Date of birth cannot be in the future."
 msgstr ""
 
 #: includes/settings-page.php:8
@@ -793,13 +914,13 @@ msgstr ""
 
 #: includes/settings-page.php:18
 #: includes/settings-page.php:19
-#: init-user-engine.php:467
+#: init-user-engine.php:472
 msgid "Settings"
 msgstr ""
 
 #: includes/settings-page.php:27
 #: includes/settings-page.php:28
-#: includes/tools/inbox-statistics.php:756
+#: includes/tools/inbox-statistics.php:757
 #: includes/tools/send-notification.php:93
 #: includes/tools/send-notification.php:205
 msgid "Send Notification"
@@ -829,63 +950,63 @@ msgstr ""
 msgid "VIP Codes"
 msgstr ""
 
-#: includes/settings-page.php:194
+#: includes/settings-page.php:196
 msgid "Init User Engine Settings"
 msgstr ""
 
-#: includes/settings-page.php:203
+#: includes/settings-page.php:205
 msgid "Theme Color"
 msgstr ""
 
-#: includes/settings-page.php:207
+#: includes/settings-page.php:209
 msgid "Used as the main highlight color in user modals."
 msgstr ""
 
-#: includes/settings-page.php:212
+#: includes/settings-page.php:214
 msgid "Coin Label"
 msgstr ""
 
-#: includes/settings-page.php:216
+#: includes/settings-page.php:218
 msgid "Singular label used to represent the virtual currency (e.g., Xu, Coin)."
 msgstr ""
 
-#: includes/settings-page.php:221
+#: includes/settings-page.php:223
 msgid "Cash Label"
 msgstr ""
 
-#: includes/settings-page.php:225
+#: includes/settings-page.php:227
 msgid "Label for premium currency or real-money equivalent (e.g., Cash, Kim cương)."
 msgstr ""
 
-#: includes/settings-page.php:230
+#: includes/settings-page.php:232
 msgid "Exchange Rate: Cash → Coin"
 msgstr ""
 
-#: includes/settings-page.php:236
+#: includes/settings-page.php:238
 msgid "Coin received for 1 Cash. Set to 0 to disable conversion."
 msgstr ""
 
-#: includes/settings-page.php:242
+#: includes/settings-page.php:244
 msgid "Exchange Rate: Coin → Cash"
 msgstr ""
 
-#: includes/settings-page.php:248
+#: includes/settings-page.php:250
 msgid "Cash received for 1 Coin. Set to 0 to disable conversion."
 msgstr ""
 
-#: includes/settings-page.php:254
+#: includes/settings-page.php:256
 msgid "DANGER — Exchange Misconfiguration Risk"
 msgstr ""
 
-#: includes/settings-page.php:258
+#: includes/settings-page.php:260
 msgid "If both exchange directions are enabled simultaneously, users may exploit rate differences to generate infinite Coin/Cash."
 msgstr ""
 
-#: includes/settings-page.php:261
+#: includes/settings-page.php:263
 msgid "VIP bonus percentages are excluded from exchange transactions. However, enabling both directions simultaneously may still allow users to exploit rate differences."
 msgstr ""
 
-#: includes/settings-page.php:264
+#: includes/settings-page.php:266
 msgid "Recommendation: enable only one direction, or ensure the product of both rates is strictly less than 1."
 msgstr ""
 
@@ -909,475 +1030,467 @@ msgstr ""
 msgid "REST API, AJAX, cron, and feed requests are not affected and continue to work normally."
 msgstr ""
 
-#: includes/hooks.php:456
-msgid "This site is available to logged-in members only."
-msgstr ""
-
-#: includes/hooks.php:459
-msgid "Click here to log in"
-msgstr ""
-
-#: includes/settings-page.php:272
+#: includes/settings-page.php:302
 msgid "Hide Admin Bar (Subscriber)"
 msgstr ""
 
-#: includes/settings-page.php:280
+#: includes/settings-page.php:310
 msgid "Hide admin bar on frontend for users with Subscriber role."
 msgstr ""
 
-#: includes/settings-page.php:286
+#: includes/settings-page.php:316
 msgid "Disable Captcha"
 msgstr ""
 
-#: includes/settings-page.php:294
+#: includes/settings-page.php:324
 msgid "Turn off captcha validation during registration."
 msgstr ""
 
-#: includes/settings-page.php:299
+#: includes/settings-page.php:329
 msgid "DANGER — Captcha will be COMPLETELY DISABLED."
 msgstr ""
 
-#: includes/settings-page.php:303
+#: includes/settings-page.php:333
 msgid "This removes all captcha protections including Cloudflare Turnstile. FOR TESTING ONLY — NEVER enable on production sites."
 msgstr ""
 
-#: includes/settings-page.php:308
+#: includes/settings-page.php:338
 msgid "Use only if you fully trust your traffic or have strong external protection services (e.g., Cloudflare WAF or Rate Limit)."
 msgstr ""
 
-#: includes/settings-page.php:314
+#: includes/settings-page.php:344
 msgid "Disable New Registrations"
 msgstr ""
 
-#: includes/settings-page.php:322
+#: includes/settings-page.php:352
 msgid "Temporarily close all new user registrations."
 msgstr ""
 
-#: includes/settings-page.php:325
+#: includes/settings-page.php:355
 msgid "When enabled, the Init User Engine will stop accepting new sign-ups through its system. This does not affect other plugins or WordPress default registration."
 msgstr ""
 
-#: includes/settings-page.php:326
+#: includes/settings-page.php:356
 msgid "Perfect for maintenance periods or when you want to keep the community invite-only."
 msgstr ""
 
-#: includes/settings-page.php:332
+#: includes/settings-page.php:362
 msgid "Avatar"
 msgstr ""
 
-#: includes/settings-page.php:336
+#: includes/settings-page.php:366
 msgid "Avatar Upload Policy"
 msgstr ""
 
-#: includes/settings-page.php:343
+#: includes/settings-page.php:373
 msgid "Default (do not disable)"
 msgstr ""
 
-#: includes/settings-page.php:349
+#: includes/settings-page.php:379
 msgid "Disable avatar upload (everyone)"
 msgstr ""
 
-#: includes/settings-page.php:355
+#: includes/settings-page.php:385
 msgid "Allow only VIPs to upload avatar"
 msgstr ""
 
-#: includes/settings-page.php:358
+#: includes/settings-page.php:388
 msgid "Control site-wide avatar upload permission."
 msgstr ""
 
-#: includes/settings-page.php:364
+#: includes/settings-page.php:394
 msgid "Keep Original Avatar (GIF) for VIPs"
 msgstr ""
 
-#: includes/settings-page.php:372
+#: includes/settings-page.php:402
 msgid "Allow VIP users to keep the original uploaded GIF avatar (no cropping)."
 msgstr ""
 
-#: includes/settings-page.php:376
+#: includes/settings-page.php:406
 msgid "Only applies to GIF files. Other image formats (PNG/JPG/WebP) will still be cropped and resized."
 msgstr ""
 
-#: includes/settings-page.php:380
+#: includes/settings-page.php:410
 msgid "Warning: GIF avatars can be large and may affect performance. Enable only if you understand the risks."
 msgstr ""
 
-#: includes/settings-page.php:386
+#: includes/settings-page.php:416
 msgid "Max Avatar Upload Size (MB)"
 msgstr ""
 
-#: includes/settings-page.php:392
+#: includes/settings-page.php:422
 msgid "Limit for avatar file size in megabytes. Set to 0 to disable the limit."
 msgstr ""
 
-#: includes/settings-page.php:398
+#: includes/settings-page.php:428
 msgid "Disable Gravatar Completely"
 msgstr ""
 
-#: includes/settings-page.php:406
+#: includes/settings-page.php:436
 msgid "Disable all Gravatar calls and use a local default SVG instead."
 msgstr ""
 
-#: includes/settings-page.php:408
+#: includes/settings-page.php:438
 msgid "Improves performance by preventing external requests to gravatar.com."
 msgstr ""
 
-#: includes/settings-page.php:414
+#: includes/settings-page.php:444
 msgid "Cloudflare Turnstile"
 msgstr ""
 
-#: includes/settings-page.php:416
+#: includes/settings-page.php:446
 msgid "When both keys are provided, Cloudflare Turnstile will automatically replace the default captcha system on the registration form."
 msgstr ""
 
-#: includes/settings-page.php:422
+#: includes/settings-page.php:452
 msgid "Site Key"
 msgstr ""
 
-#: includes/settings-page.php:429
+#: includes/settings-page.php:459
 msgid "Public site key from your Cloudflare Turnstile dashboard. Required to render the widget on the frontend."
 msgstr ""
 
-#: includes/settings-page.php:435
+#: includes/settings-page.php:465
 msgid "Secret Key"
 msgstr ""
 
-#: includes/settings-page.php:442
+#: includes/settings-page.php:472
 msgid "Private secret key used for server-side verification of Turnstile responses."
 msgstr ""
 
-#: includes/settings-page.php:448
-#: includes/settings-page.php:458
-#: includes/settings-page.php:462
+#: includes/settings-page.php:478
+#: includes/settings-page.php:488
+#: includes/settings-page.php:492
 msgid "Test API"
 msgstr ""
 
-#: includes/settings-page.php:459
+#: includes/settings-page.php:489
 msgid "Testing…"
 msgstr ""
 
-#: includes/settings-page.php:461
+#: includes/settings-page.php:491
 msgid "Request failed. Please try again."
 msgstr ""
 
-#: includes/settings-page.php:466
+#: includes/settings-page.php:496
 msgid "Sends a request to Cloudflare to verify the Secret Key above, using the values currently in these fields (no need to save first). This only confirms the Secret Key — the Site Key is confirmed once the widget actually renders in the browser."
 msgstr ""
 
-#: includes/settings-page.php:467
+#: includes/settings-page.php:497
 msgid "The button is enabled once both fields above have a value."
 msgstr ""
 
-#: includes/settings-page.php:473
+#: includes/settings-page.php:503
 msgid "Theme"
 msgstr ""
 
-#: includes/settings-page.php:479
+#: includes/settings-page.php:509
 msgid "Auto (match system/OS preference)"
 msgstr ""
 
-#: includes/settings-page.php:480
+#: includes/settings-page.php:510
 msgid "Light mode"
 msgstr ""
 
-#: includes/settings-page.php:481
+#: includes/settings-page.php:511
 msgid "Dark mode"
 msgstr ""
 
-#: includes/settings-page.php:494
+#: includes/settings-page.php:524
 msgid "Choose the visual style of the captcha widget (auto, light, or dark)."
 msgstr ""
 
-#: includes/settings-page.php:501
+#: includes/settings-page.php:531
 msgid "Protect Default WordPress Forms"
 msgstr ""
 
-#: includes/settings-page.php:503
+#: includes/settings-page.php:533
 msgid "Extend the Cloudflare Turnstile widget configured above to the native WordPress login, registration, and lost password forms (e.g. wp-login.php). Requires both Site Key and Secret Key to be set, and Disable Captcha to be off."
 msgstr ""
 
-#: includes/settings-page.php:509
+#: includes/settings-page.php:539
 msgid "Login Form"
 msgstr ""
 
-#: includes/settings-page.php:517
+#: includes/settings-page.php:547
 msgid "Protect the default WordPress login form (wp-login.php and the login modal)."
 msgstr ""
 
-#: includes/settings-page.php:523
+#: includes/settings-page.php:553
 msgid "Registration Form"
 msgstr ""
 
-#: includes/settings-page.php:531
+#: includes/settings-page.php:561
 msgid "Protect WordPress's native registration form (wp-login.php?action=register)."
 msgstr ""
 
-#: includes/settings-page.php:534
+#: includes/settings-page.php:564
 msgid "Only relevant if \"Anyone can register\" is enabled under Settings → General. Separate from this plugin's own registration form and endpoint."
 msgstr ""
 
-#: includes/settings-page.php:540
+#: includes/settings-page.php:570
 msgid "Lost Password Form"
 msgstr ""
 
-#: includes/settings-page.php:548
+#: includes/settings-page.php:578
 msgid "Protect the \"Lost your password?\" form."
 msgstr ""
 
-#: includes/settings-page.php:554
+#: includes/settings-page.php:584
 msgid "Custom Links"
 msgstr ""
 
-#: includes/settings-page.php:558
+#: includes/settings-page.php:588
 msgid "Custom Register URL"
 msgstr ""
 
-#: includes/settings-page.php:562
+#: includes/settings-page.php:592
 msgid "Redirect here when user clicks \"Register\". Leave blank to use default wp-login.php?action=register."
 msgstr ""
 
-#: includes/settings-page.php:567
+#: includes/settings-page.php:597
 msgid "Custom Lost Password URL"
 msgstr ""
 
-#: includes/settings-page.php:571
+#: includes/settings-page.php:601
 msgid "Redirect here when user clicks \"Lost password\". Leave blank to use default wp-login.php?action=lostpassword."
 msgstr ""
 
-#: includes/settings-page.php:576
+#: includes/settings-page.php:606
 msgid "Check-in Reward"
 msgstr ""
 
-#: includes/settings-page.php:580
-#: includes/settings-page.php:654
+#: includes/settings-page.php:610
+#: includes/settings-page.php:684
 msgid "Coin Reward"
 msgstr ""
 
-#: includes/settings-page.php:584
+#: includes/settings-page.php:614
 msgid "Coin awarded each time the user checks in daily."
 msgstr ""
 
-#: includes/settings-page.php:589
-#: includes/settings-page.php:663
+#: includes/settings-page.php:619
+#: includes/settings-page.php:693
 msgid "EXP Reward"
 msgstr ""
 
-#: includes/settings-page.php:593
+#: includes/settings-page.php:623
 msgid "EXP gained from daily check-in."
 msgstr ""
 
-#: includes/settings-page.php:598
-#: includes/settings-page.php:671
+#: includes/settings-page.php:628
+#: includes/settings-page.php:701
 msgid "Cash Reward"
 msgstr ""
 
-#: includes/settings-page.php:602
+#: includes/settings-page.php:632
 msgid "Cash rewarded upon check-in (rarely used, mostly 0)."
 msgstr ""
 
-#: includes/settings-page.php:607
+#: includes/settings-page.php:637
 msgid "Comment Reward"
 msgstr ""
 
-#: includes/settings-page.php:611
+#: includes/settings-page.php:641
 msgid "EXP per Comment"
 msgstr ""
 
-#: includes/settings-page.php:616
+#: includes/settings-page.php:646
 msgid "EXP awarded for each valid comment."
 msgstr ""
 
-#: includes/settings-page.php:621
+#: includes/settings-page.php:651
 msgid "Coin per Comment"
 msgstr ""
 
-#: includes/settings-page.php:626
+#: includes/settings-page.php:656
 msgid "Coin awarded for each valid comment."
 msgstr ""
 
-#: includes/settings-page.php:631
+#: includes/settings-page.php:661
 msgid "Daily Comment Cap"
 msgstr ""
 
-#: includes/settings-page.php:636
+#: includes/settings-page.php:666
 msgid "Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor."
 msgstr ""
 
-#: includes/settings-page.php:641
+#: includes/settings-page.php:671
 msgid "Online Reward"
 msgstr ""
 
-#: includes/settings-page.php:645
+#: includes/settings-page.php:675
 msgid "Minutes Required"
 msgstr ""
 
-#: includes/settings-page.php:649
+#: includes/settings-page.php:679
 msgid "Minimum minutes user must stay online to receive reward."
 msgstr ""
 
-#: includes/settings-page.php:658
+#: includes/settings-page.php:688
 msgid "Coin rewarded when online duration is met."
 msgstr ""
 
-#: includes/settings-page.php:667
+#: includes/settings-page.php:697
 msgid "EXP rewarded after being online for required time."
 msgstr ""
 
-#: includes/settings-page.php:675
+#: includes/settings-page.php:705
 msgid "Cash rewarded for being active online."
 msgstr ""
 
-#: includes/settings-page.php:680
+#: includes/settings-page.php:710
 msgid "VIP"
 msgstr ""
 
-#: includes/settings-page.php:684
+#: includes/settings-page.php:714
 msgid "VIP Payment Currency"
 msgstr ""
 
-#: includes/settings-page.php:689
-#: includes/tools/redeem-codes.php:249
+#: includes/settings-page.php:719
+#: includes/tools/redeem-codes.php:263
 #: includes/tools/topup.php:212
 #: includes/user-metabox.php:134
 msgid "Coin"
 msgstr ""
 
-#: includes/settings-page.php:690
-#: includes/tools/redeem-codes.php:250
+#: includes/settings-page.php:720
+#: includes/tools/redeem-codes.php:264
 #: includes/tools/topup.php:216
 #: includes/user-metabox.php:138
 msgid "Cash"
 msgstr ""
 
-#: includes/settings-page.php:691
+#: includes/settings-page.php:721
 msgid "Both (allow user to choose)"
 msgstr ""
 
-#: includes/settings-page.php:706
+#: includes/settings-page.php:736
 msgid "Select which currency users can use to purchase VIP packages."
 msgstr ""
 
-#: includes/settings-page.php:712
+#: includes/settings-page.php:742
 msgid "Disable VIP Stacking"
 msgstr ""
 
-#: includes/settings-page.php:719
+#: includes/settings-page.php:749
 msgid "Prevent users from purchasing/activating VIP again while their current VIP is still active."
 msgstr ""
 
-#: includes/settings-page.php:722
+#: includes/settings-page.php:752
 msgid "When enabled, a user must wait until their current VIP expires before they can buy or redeem another VIP package/code. When disabled (default), new VIP time is added on top of the remaining time."
 msgstr ""
 
-#: includes/settings-page.php:728
+#: includes/settings-page.php:758
 msgid "Disable VIP Purchase"
 msgstr ""
 
-#: includes/settings-page.php:735
+#: includes/settings-page.php:765
 msgid "Completely turn off VIP purchasing/activation for all users."
 msgstr ""
 
-#: includes/settings-page.php:738
+#: includes/settings-page.php:768
 msgid "When enabled, the VIP purchase UI is hidden and the purchase/redeem endpoints are blocked. Existing active VIP members are not affected."
 msgstr ""
 
-#: includes/settings-page.php:744
+#: includes/settings-page.php:774
 msgid "VIP Pricing (by Coin)"
 msgstr ""
 
-#: includes/settings-page.php:776
+#: includes/settings-page.php:806
 msgid "Set to 0 to disable this VIP package."
 msgstr ""
 
-#: includes/settings-page.php:782
+#: includes/settings-page.php:812
 msgid "VIP Pricing (by Cash)"
 msgstr ""
 
-#: includes/settings-page.php:814
+#: includes/settings-page.php:844
 msgid "Set to 0 to disable this VIP package for Cash."
 msgstr ""
 
-#: includes/settings-page.php:823
+#: includes/settings-page.php:853
 msgid "VIP Bonus"
 msgstr ""
 
-#: includes/settings-page.php:827
+#: includes/settings-page.php:857
 msgid "Bonus Coin (%)"
 msgstr ""
 
-#: includes/settings-page.php:831
+#: includes/settings-page.php:861
 msgid "Extra Coin gained when VIP, in percent."
 msgstr ""
 
-#: includes/settings-page.php:832
-#: includes/settings-page.php:846
+#: includes/settings-page.php:862
+#: includes/settings-page.php:876
 msgid "This bonus does not apply to Cash/Coin exchange."
 msgstr ""
 
-#: includes/settings-page.php:837
+#: includes/settings-page.php:867
 msgid "Bonus Cash (%)"
 msgstr ""
 
-#: includes/settings-page.php:843
+#: includes/settings-page.php:873
 msgid "Extra Cash gained when VIP, in percent."
 msgstr ""
 
-#: includes/settings-page.php:852
+#: includes/settings-page.php:882
 msgid "Bonus EXP (%)"
 msgstr ""
 
-#: includes/settings-page.php:856
+#: includes/settings-page.php:886
 msgid "Extra EXP gained when VIP, in percent."
 msgstr ""
 
-#: includes/settings-page.php:861
+#: includes/settings-page.php:891
 msgid "Referral Reward"
 msgstr ""
 
-#: includes/settings-page.php:865
+#: includes/settings-page.php:895
 msgid "Coin for Referrer"
 msgstr ""
 
-#: includes/settings-page.php:868
+#: includes/settings-page.php:898
 msgid "Coin reward given to the person who shared their referral link."
 msgstr ""
 
-#: includes/settings-page.php:873
+#: includes/settings-page.php:903
 msgid "EXP for Referrer"
 msgstr ""
 
-#: includes/settings-page.php:876
+#: includes/settings-page.php:906
 msgid "EXP granted to referrer when someone registers through their link."
 msgstr ""
 
-#: includes/settings-page.php:881
+#: includes/settings-page.php:911
 msgid "Cash for Referrer"
 msgstr ""
 
-#: includes/settings-page.php:884
+#: includes/settings-page.php:914
 msgid "Cash awarded to the referrer."
 msgstr ""
 
-#: includes/settings-page.php:889
+#: includes/settings-page.php:919
 msgid "Coin for New User"
 msgstr ""
 
-#: includes/settings-page.php:892
+#: includes/settings-page.php:922
 msgid "Coin bonus for new user who signs up via referral."
 msgstr ""
 
-#: includes/settings-page.php:897
+#: includes/settings-page.php:927
 msgid "EXP for New User"
 msgstr ""
 
-#: includes/settings-page.php:900
+#: includes/settings-page.php:930
 msgid "EXP bonus for the new referred user."
 msgstr ""
 
-#: includes/settings-page.php:905
+#: includes/settings-page.php:935
 msgid "Cash for New User"
 msgstr ""
 
-#: includes/settings-page.php:908
+#: includes/settings-page.php:938
 msgid "Cash given to new user (rarely used)."
 msgstr ""
 
@@ -1425,7 +1538,7 @@ msgid "All Time"
 msgstr ""
 
 #: includes/tools/inbox-statistics.php:153
-#: includes/tools/inbox-statistics.php:724
+#: includes/tools/inbox-statistics.php:725
 #: includes/user-metabox.php:320
 msgid "Total Messages"
 msgstr ""
@@ -1519,7 +1632,7 @@ msgid "Peak Day:"
 msgstr ""
 
 #: includes/tools/inbox-statistics.php:329
-#: includes/tools/inbox-statistics.php:618
+#: includes/tools/inbox-statistics.php:619
 #: includes/user-metabox.php:201
 #: includes/user-metabox.php:336
 msgid "N/A"
@@ -1563,57 +1676,48 @@ msgstr ""
 msgid "Unknown User"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:649
+#: includes/tools/inbox-statistics.php:650
 msgid "Inbox Overview"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:668
+#: includes/tools/inbox-statistics.php:669
 msgid "📭 Inbox Table Not Found"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:669
+#: includes/tools/inbox-statistics.php:670
 msgid "Please check your plugin installation."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:728
+#: includes/tools/inbox-statistics.php:729
 #: includes/user-metabox.php:324
 #: init-user-engine.php:311
 msgid "Unread"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:732
+#: includes/tools/inbox-statistics.php:733
 msgid "Today"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:736
+#: includes/tools/inbox-statistics.php:737
 #: includes/tools/send-notification.php:124
 #: includes/tools/topup.php:223
 msgid "Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:742
+#: includes/tools/inbox-statistics.php:743
 msgid "Read Rate:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:746
+#: includes/tools/inbox-statistics.php:747
 msgid "Avg per User:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:753
+#: includes/tools/inbox-statistics.php:754
 msgid "View Full Statistics"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:162
 msgid "Create a Redeem Code"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:169
-#: includes/tools/redeem-codes.php:246
-#: includes/tools/redeem-codes.php:406
-#: includes/tools/vip-codes.php:168
-#: includes/tools/vip-codes.php:245
-#: includes/tools/vip-codes.php:400
-msgid "Code"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:172
@@ -1677,171 +1781,160 @@ msgstr ""
 msgid "Only 1 user can be selected."
 msgstr ""
 
-#: includes/tools/redeem-codes.php:217
-msgid "Coin Amount"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:222
-msgid "Cash Amount"
-msgstr ""
-
 #: includes/tools/redeem-codes.php:227
 msgid "Create Redeem Code"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:235
+#: includes/tools/redeem-codes.php:242
 msgid "Existing Redeem Codes"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:239
-msgid "No redeem codes found."
-msgstr ""
-
-#: includes/tools/redeem-codes.php:247
-#: includes/tools/send-notification.php:158
-#: includes/tools/topup.php:272
-#: includes/tools/vip-codes.php:246
-msgid "Type"
+#: includes/tools/redeem-codes.php:244
+#: includes/tools/vip-codes.php:243
+msgid "Export CSV"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:248
-#: includes/tools/vip-codes.php:247
-msgid "Locked User"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:251
-#: includes/tools/redeem-codes.php:370
-#: includes/tools/vip-codes.php:249
-#: includes/tools/vip-codes.php:365
-msgid "Used"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:252
-#: includes/tools/vip-codes.php:250
-msgid "Status"
+msgid "Exports the full list of redeem codes (all pages) as a CSV file."
 msgstr ""
 
 #: includes/tools/redeem-codes.php:253
-#: includes/tools/vip-codes.php:251
+msgid "No redeem codes found."
+msgstr ""
+
+#: includes/tools/redeem-codes.php:262
+#: includes/tools/vip-codes.php:261
+msgid "Locked User"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:265
+#: includes/tools/redeem-codes.php:384
+#: includes/tools/vip-codes.php:263
+#: includes/tools/vip-codes.php:379
+msgid "Used"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:267
+#: includes/tools/vip-codes.php:265
 msgid "Actions"
 msgstr ""
 
 #. translators: 1: display name, 2: user_login, 3: user_id
-#: includes/tools/redeem-codes.php:302
-#: includes/tools/redeem-codes.php:434
-#: includes/tools/vip-codes.php:300
-#: includes/tools/vip-codes.php:428
+#: includes/tools/redeem-codes.php:316
+#: includes/tools/redeem-codes.php:448
+#: includes/tools/vip-codes.php:314
+#: includes/tools/vip-codes.php:442
 #, php-format
 msgid "%1$s (%2$s) — ID: %3$d"
 msgstr ""
 
 #. translators: %d: user ID
-#: includes/tools/redeem-codes.php:309
-#: includes/tools/vip-codes.php:307
+#: includes/tools/redeem-codes.php:323
+#: includes/tools/vip-codes.php:321
 #, php-format
 msgid "User ID: %d"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:312
-#: includes/tools/vip-codes.php:310
+#: includes/tools/redeem-codes.php:326
+#: includes/tools/vip-codes.php:324
 msgid "Not locked"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:332
-#: includes/tools/vip-codes.php:327
+#: includes/tools/redeem-codes.php:346
+#: includes/tools/vip-codes.php:341
 msgid "logged"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:341
-#: includes/tools/vip-codes.php:336
+#: includes/tools/redeem-codes.php:355
+#: includes/tools/vip-codes.php:350
 #: includes/user-metabox.php:190
 msgid "Active"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:343
-#: includes/tools/vip-codes.php:338
+#: includes/tools/redeem-codes.php:357
+#: includes/tools/vip-codes.php:352
 msgid "Disabled"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:349
-#: includes/tools/vip-codes.php:344
+#: includes/tools/redeem-codes.php:363
+#: includes/tools/vip-codes.php:358
 msgid "View Usage"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:353
-#: includes/tools/vip-codes.php:348
-msgid "Disable this code?"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:354
-#: includes/tools/vip-codes.php:349
-msgid "Disable"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:365
-#: includes/tools/vip-codes.php:360
-msgid "Delete this unused code permanently?"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:367
 #: includes/tools/vip-codes.php:362
+msgid "Disable this code?"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:368
+#: includes/tools/vip-codes.php:363
+msgid "Disable"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:379
+#: includes/tools/vip-codes.php:374
+msgid "Delete this unused code permanently?"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:381
+#: includes/tools/vip-codes.php:376
 #: init-user-engine.php:319
 msgid "Delete"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:390
-#: includes/tools/redeem-codes.php:492
-#: includes/tools/vip-codes.php:384
-#: includes/tools/vip-codes.php:486
+#: includes/tools/redeem-codes.php:404
+#: includes/tools/redeem-codes.php:506
+#: includes/tools/vip-codes.php:398
+#: includes/tools/vip-codes.php:500
 msgid "&laquo; Previous"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:391
-#: includes/tools/redeem-codes.php:493
-#: includes/tools/vip-codes.php:385
-#: includes/tools/vip-codes.php:487
+#: includes/tools/redeem-codes.php:405
+#: includes/tools/redeem-codes.php:507
+#: includes/tools/vip-codes.php:399
+#: includes/tools/vip-codes.php:501
 msgid "Next &raquo;"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:404
-#: includes/tools/vip-codes.php:398
+#: includes/tools/redeem-codes.php:418
+#: includes/tools/vip-codes.php:412
 msgid "Usage History"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:413
-#: includes/tools/vip-codes.php:407
+#: includes/tools/redeem-codes.php:427
+#: includes/tools/vip-codes.php:421
 msgid "No usage yet."
 msgstr ""
 
-#: includes/tools/redeem-codes.php:420
-#: includes/tools/vip-codes.php:414
+#: includes/tools/redeem-codes.php:434
+#: includes/tools/vip-codes.php:428
 msgid "User"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:421
+#: includes/tools/redeem-codes.php:435
 #: includes/tools/topup.php:274
-#: includes/tools/vip-codes.php:415
+#: includes/tools/vip-codes.php:429
 msgid "Time"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:422
-#: includes/tools/vip-codes.php:416
+#: includes/tools/redeem-codes.php:436
+#: includes/tools/vip-codes.php:430
 msgid "Meta"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:446
-#: includes/tools/vip-codes.php:440
+#: includes/tools/redeem-codes.php:460
+#: includes/tools/vip-codes.php:454
 #: init-user-engine.php:373
 msgid "Unknown"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:462
-#: includes/tools/vip-codes.php:456
+#: includes/tools/redeem-codes.php:476
+#: includes/tools/vip-codes.php:470
 msgid "None"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:504
-#: includes/tools/vip-codes.php:498
+#: includes/tools/redeem-codes.php:518
+#: includes/tools/vip-codes.php:512
 msgid "Close"
 msgstr ""
 
@@ -1951,12 +2044,12 @@ msgstr ""
 msgid "Expire At (optional)"
 msgstr ""
 
-#: includes/tools/send-notification.php:200
-msgid "Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages."
-msgstr ""
-
 #: includes/tools/send-notification.php:199
 msgid "Optional expiration time"
+msgstr ""
+
+#: includes/tools/send-notification.php:200
+msgid "Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages."
 msgstr ""
 
 #: includes/tools/topup.php:47
@@ -2041,7 +2134,8 @@ msgid "Create a VIP Code"
 msgstr ""
 
 #: includes/tools/vip-codes.php:216
-#: includes/tools/vip-codes.php:248
+#: includes/tools/vip-codes.php:262
+#: includes/vip-codes-handler.php:549
 msgid "VIP Days"
 msgstr ""
 
@@ -2053,11 +2147,15 @@ msgstr ""
 msgid "Create VIP Code"
 msgstr ""
 
-#: includes/tools/vip-codes.php:234
+#: includes/tools/vip-codes.php:241
 msgid "Existing VIP Codes"
 msgstr ""
 
-#: includes/tools/vip-codes.php:238
+#: includes/tools/vip-codes.php:247
+msgid "Exports the full list of VIP codes (all pages) as a CSV file."
+msgstr ""
+
+#: includes/tools/vip-codes.php:252
 msgid "No VIP codes found."
 msgstr ""
 
@@ -2256,18 +2354,18 @@ msgid "Failed to toggle avatar upload permission."
 msgstr ""
 
 #. translators: %d is the user's level.
-#: includes/utils.php:51
+#: includes/utils.php:82
 #, php-format
 msgid "Level %d"
 msgstr ""
 
-#: includes/utils.php:161
-#: includes/utils.php:199
+#: includes/utils.php:192
+#: includes/utils.php:230
 msgid "just now"
 msgstr ""
 
 #. translators: %d = number of years
-#: includes/utils.php:179
+#: includes/utils.php:210
 #, php-format
 msgid "%d year"
 msgid_plural "%d years"
@@ -2275,7 +2373,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d = number of months
-#: includes/utils.php:182
+#: includes/utils.php:213
 #, php-format
 msgid "%d month"
 msgid_plural "%d months"
@@ -2283,7 +2381,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d = number of weeks
-#: includes/utils.php:185
+#: includes/utils.php:216
 #, php-format
 msgid "%d week"
 msgid_plural "%d weeks"
@@ -2291,7 +2389,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d = number of days
-#: includes/utils.php:188
+#: includes/utils.php:219
 #, php-format
 msgid "%d day"
 msgid_plural "%d days"
@@ -2299,7 +2397,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d = number of hours
-#: includes/utils.php:191
+#: includes/utils.php:222
 #, php-format
 msgid "%d hour"
 msgid_plural "%d hours"
@@ -2307,120 +2405,135 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d = number of minutes
-#: includes/utils.php:194
+#: includes/utils.php:225
 #, php-format
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/utils.php:255
+#: includes/utils.php:286
 msgid "Turnstile is not properly configured."
 msgstr ""
 
-#: includes/utils.php:260
+#: includes/utils.php:291
 msgid "Captcha verification is required."
 msgstr ""
 
-#: includes/utils.php:275
+#: includes/utils.php:306
 msgid "Captcha verification failed due to a network error. Please try again."
 msgstr ""
 
-#: includes/utils.php:280
+#: includes/utils.php:311
 msgid "Captcha verification service returned an unexpected response."
 msgstr ""
 
-#: includes/utils.php:285
+#: includes/utils.php:316
 msgid "Captcha verification response could not be parsed."
 msgstr ""
 
-#: includes/utils.php:295
+#: includes/utils.php:326
 msgid "Captcha expired or already used. Please refresh and try again."
 msgstr ""
 
-#: includes/utils.php:298
+#: includes/utils.php:329
 msgid "Captcha verification failed. Please try again."
 msgstr ""
 
-#: includes/vip-codes-handler.php:142
+#: includes/vip-codes-handler.php:161
 msgid "You received a VIP code!"
 msgstr ""
 
 #. translators: %s: VIP code string assigned to the user
-#: includes/vip-codes-handler.php:146
+#: includes/vip-codes-handler.php:165
 #, php-format
 msgid "You have been assigned a VIP code: %s. You can use it in the Redeem VIP section."
 msgstr ""
 
-#: includes/vip-codes-handler.php:252
+#: includes/vip-codes-handler.php:271
 msgid "Please enter a VIP code."
 msgstr ""
 
-#: includes/vip-codes-handler.php:289
+#: includes/vip-codes-handler.php:308
 msgid "Invalid VIP code."
 msgstr ""
 
-#: includes/vip-codes-handler.php:440
-msgid "VIP Code Redeemed"
+#: includes/vip-codes-handler.php:359
+#: includes/vip.php:71
+msgid "You already have an active VIP membership. Please wait until it expires before activating again."
 msgstr ""
 
-#. translators: %d: number of VIP days added
-#: includes/vip-codes-handler.php:444
-#, php-format
-msgid "You received %d day(s) of VIP membership."
-msgstr ""
-
-#: includes/vip-codes-handler.php:462
-#: init-user-engine.php:452
-msgid "VIP code redeemed successfully!"
-msgstr ""
-
+#: includes/vip-codes-handler.php:368
 #: includes/vip.php:60
 msgid "VIP activation is currently disabled."
 msgstr ""
 
-#: includes/vip.php:71
-msgid "You already have an active VIP membership. Please wait until it expires before activating again."
+#: includes/vip-codes-handler.php:491
+msgid "VIP Code Redeemed"
+msgstr ""
+
+#. translators: %d: number of VIP days added
+#: includes/vip-codes-handler.php:495
+#, php-format
+msgid "You received %d day(s) of VIP membership."
+msgstr ""
+
+#: includes/vip-codes-handler.php:513
+#: init-user-engine.php:457
+msgid "VIP code redeemed successfully!"
 msgstr ""
 
 #: includes/vip.php:91
 msgid "Invalid VIP package."
 msgstr ""
 
-#. translators: %s is the currency label (e.g., Coin, Cash).
+#. translators: %s is the coin label (e.g., Coin, Xu).
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
 #: includes/vip.php:105
 #: includes/vip.php:109
 #, php-format
 msgid "VIP can only be purchased with %s."
 msgstr ""
 
-#: includes/vip.php:110
+#: includes/vip.php:112
 msgid "Invalid currency selected."
 msgstr ""
 
-#: includes/vip.php:122
+#: includes/vip.php:124
 msgid "This VIP package is disabled."
 msgstr ""
 
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
+#. translators: %s is the coin label (e.g., Coin, Xu).
+#. translators: %s = currency label (e.g. Coin, Cash)
+#: includes/vip.php:132
+#: includes/vip.php:140
+#: init-user-engine.php:349
+#: init-user-engine.php:390
+#: init-user-engine.php:391
+#, php-format
+msgid "Not enough %s."
+msgstr ""
+
 #. translators: %1$s = days/lifetime, %2$s = formatted price, %3$s = currency label.
-#: includes/vip.php:167
+#: includes/vip.php:171
 #, php-format
 msgid "You have successfully purchased VIP for %1$s days using %2$s %3$s. Enjoy your exclusive benefits!"
 msgstr ""
 
-#: includes/vip.php:168
+#: includes/vip.php:172
 msgid "lifetime"
 msgstr ""
 
-#: includes/vip.php:175
+#: includes/vip.php:179
 msgid "VIP Purchase Successful"
 msgstr ""
 
-#: includes/vip.php:208
+#: includes/vip.php:212
 msgid "You must be logged in to purchase VIP."
 msgstr ""
 
-#: includes/vip.php:212
+#: includes/vip.php:216
 msgid "Invalid VIP package selected."
 msgstr ""
 
@@ -2512,12 +2625,12 @@ msgid "Error!"
 msgstr ""
 
 #: init-user-engine.php:302
-#: templates/dashboard.php:104
+#: templates/dashboard.php:105
 msgid "Transaction History"
 msgstr ""
 
 #: init-user-engine.php:303
-#: templates/dashboard.php:98
+#: templates/dashboard.php:99
 msgid "Daily Tasks"
 msgstr ""
 
@@ -2530,7 +2643,7 @@ msgid "Failed to load daily tasks."
 msgstr ""
 
 #: init-user-engine.php:306
-#: templates/dashboard.php:88
+#: templates/dashboard.php:89
 msgid "Inbox"
 msgstr ""
 
@@ -2567,19 +2680,6 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: init-user-engine.php:424
-msgid "Date of Birth"
-msgstr ""
-
-#: init-user-engine.php:425
-#: init-user-engine.php:427
-msgid "Please enter a valid date of birth."
-msgstr ""
-
-#: init-user-engine.php:426
-msgid "Date of birth cannot be in the future."
-msgstr ""
-
 #: init-user-engine.php:316
 msgid "Mark All as Read"
 msgstr ""
@@ -2605,7 +2705,7 @@ msgid "Click again to confirm"
 msgstr ""
 
 #: init-user-engine.php:326
-#: templates/dashboard.php:81
+#: templates/dashboard.php:82
 msgid "VIP Membership"
 msgstr ""
 
@@ -2678,16 +2778,6 @@ msgstr ""
 #: init-user-engine.php:348
 #, php-format
 msgid "Pay with %s"
-msgstr ""
-
-#. translators: %s = currency label (e.g. Coin, Cash)
-#: init-user-engine.php:349
-#: init-user-engine.php:390
-#: init-user-engine.php:391
-#: includes/vip.php:132
-#: includes/vip.php:140
-#, php-format
-msgid "Not enough %s."
 msgstr ""
 
 #: init-user-engine.php:351
@@ -2767,7 +2857,7 @@ msgid "Failed to load experience log."
 msgstr ""
 
 #: init-user-engine.php:375
-#: templates/dashboard.php:111
+#: templates/dashboard.php:112
 msgid "Exchange"
 msgstr ""
 
@@ -2788,7 +2878,7 @@ msgid "Convert"
 msgstr ""
 
 #: init-user-engine.php:382
-#: init-user-engine.php:434
+#: init-user-engine.php:439
 msgid "Processing..."
 msgstr ""
 
@@ -2796,21 +2886,21 @@ msgstr ""
 msgid "Enter a valid amount."
 msgstr ""
 
-#: init-user-engine.php:385
+#: init-user-engine.php:384
 msgid "Exchanged successfully!"
 msgstr ""
 
-#: init-user-engine.php:386
+#: init-user-engine.php:385
 msgid "Exchange failed."
 msgstr ""
 
-#: init-user-engine.php:387
+#: init-user-engine.php:386
 msgid "Conversion is irreversible. Please review before confirming."
 msgstr ""
 
 #. translators: %1$s = source currency label, %2$s = target currency label
+#: init-user-engine.php:388
 #: init-user-engine.php:389
-#: init-user-engine.php:390
 #, php-format
 msgid "%1$s to %2$s"
 msgstr ""
@@ -2857,7 +2947,7 @@ msgid "Failed to remove avatar. Please try again."
 msgstr ""
 
 #: init-user-engine.php:405
-#: templates/dashboard.php:136
+#: templates/dashboard.php:139
 msgid "Edit Profile"
 msgstr ""
 
@@ -2918,72 +3008,76 @@ msgid "Female"
 msgstr ""
 
 #: init-user-engine.php:424
+msgid "Date of Birth"
+msgstr ""
+
+#: init-user-engine.php:429
 msgid "Save"
 msgstr ""
 
-#: init-user-engine.php:425
+#: init-user-engine.php:430
 msgid "Profile updated successfully!"
 msgstr ""
 
-#: init-user-engine.php:426
+#: init-user-engine.php:431
 msgid "Could not update profile."
 msgstr ""
 
-#: init-user-engine.php:427
+#: init-user-engine.php:432
 msgid "Could not load profile data."
 msgstr ""
 
-#: init-user-engine.php:428
+#: init-user-engine.php:433
 msgid "An error occurred while updating."
 msgstr ""
 
-#: init-user-engine.php:430
+#: init-user-engine.php:435
 msgid "Redeem now"
 msgstr ""
 
-#: init-user-engine.php:431
-#: templates/dashboard.php:124
+#: init-user-engine.php:436
+#: templates/dashboard.php:125
 msgid "Redeem Code"
 msgstr ""
 
-#: init-user-engine.php:432
+#: init-user-engine.php:437
 msgid "Enter redeem code..."
 msgstr ""
 
-#: init-user-engine.php:433
+#: init-user-engine.php:438
 msgid "Redeem"
 msgstr ""
 
-#: init-user-engine.php:437
+#: init-user-engine.php:442
 msgid "You will receive:"
 msgstr ""
 
-#: init-user-engine.php:447
+#: init-user-engine.php:452
 msgid "Failed to redeem code."
 msgstr ""
 
-#: init-user-engine.php:449
-#: templates/dashboard.php:130
+#: init-user-engine.php:454
+#: templates/dashboard.php:132
 msgid "Redeem VIP Code"
 msgstr ""
 
-#: init-user-engine.php:450
+#: init-user-engine.php:455
 msgid "Enter VIP code..."
 msgstr ""
 
-#: init-user-engine.php:451
+#: init-user-engine.php:456
 msgid "You will receive VIP membership days."
 msgstr ""
 
-#: templates/dashboard.php:68
+#: templates/dashboard.php:69
 msgid "Check In"
 msgstr ""
 
-#: templates/dashboard.php:118
+#: templates/dashboard.php:119
 msgid "Referral"
 msgstr ""
 
-#: templates/dashboard.php:143
+#: templates/dashboard.php:146
 msgid "Logout"
 msgstr ""
 

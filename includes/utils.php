@@ -20,6 +20,23 @@ function init_plugin_suite_user_engine_get_cash_label() {
 	return '' !== $label ? $label : 'Cash';
 }
 
+/**
+ * Làm an toàn 1 ô dữ liệu trước khi ghi vào CSV, chống CSV/Formula Injection
+ * (khi giá trị bắt đầu bằng =, +, -, @ hoặc tab và bị mở bằng Excel/Sheets).
+ *
+ * @param mixed $value Giá trị gốc.
+ * @return string Giá trị an toàn để ghi vào CSV.
+ */
+function init_plugin_suite_user_engine_csv_safe_cell( $value ) {
+	$value = (string) $value;
+
+	if ( '' !== $value && false !== strpos( "=+-@\t\r", $value[0] ) ) {
+		$value = "'" . $value;
+	}
+
+	return $value;
+}
+
 // Darken color
 function init_plugin_suite_user_engine_darken_color( $hex, $percent = 20 ) {
 	$hex = ltrim( $hex, '#' );

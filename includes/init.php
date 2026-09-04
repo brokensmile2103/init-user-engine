@@ -77,6 +77,15 @@ function init_plugin_suite_user_engine_check_table() {
     // cài lại hay chạm tay vào DB.
     init_plugin_suite_user_engine_create_inbox_table();
 
+    // Backfill 1 lần: bỏ ghim các tin ĐÃ ĐỌC từ trước khi có UX "tự bỏ ghim
+    // khi đọc" (v1.6.2). Hàm này chỉ thực sự chạy 1 lần mỗi khi version DB
+    // cũ hơn version code (xem update_option() cuối hàm), nên không cần
+    // thêm cờ/migration riêng. Dùng luôn index `pinned` sẵn có (WHERE
+    // pinned = 1 lọc trước — thường là tập rất nhỏ), không cần thêm index.
+    $inbox_table = $wpdb->prefix . 'init_user_engine_inbox';
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $wpdb->query( "UPDATE {$inbox_table} SET pinned = 0 WHERE pinned = 1 AND status = 'read'" );
+
     // REDEEM CODE
     $redeem_table = $wpdb->prefix . 'init_user_engine_redeem_codes';
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter

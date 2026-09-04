@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.6.1\n"
+"Project-Id-Version: Init User Engine 1.6.2\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "POT-Creation-Date: 2026-09-04 00:00+0000\n"
 "Language: vi\n"
@@ -197,7 +197,7 @@ msgstr "Trạng thái VIP của bạn đã bị gỡ bỏ"
 msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
 msgstr "Quản trị viên đã hủy tư cách thành viên VIP của bạn. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ."
 
-#: includes/inbox.php:605
+#: includes/inbox.php:610
 #: includes/redeem-codes-handler.php:15
 #: includes/user-metabox.php:541
 #: includes/user-metabox.php:633
@@ -1245,14 +1245,14 @@ msgid "VIP Payment Currency"
 msgstr "Loại tiền thanh toán VIP"
 
 #: includes/settings-page.php:719
-#: includes/tools/redeem-codes.php:263
+#: includes/tools/redeem-codes.php:265
 #: includes/tools/topup.php:212
 #: includes/user-metabox.php:134
 msgid "Coin"
 msgstr "Coin"
 
 #: includes/settings-page.php:720
-#: includes/tools/redeem-codes.php:264
+#: includes/tools/redeem-codes.php:266
 #: includes/tools/topup.php:216
 #: includes/user-metabox.php:138
 msgid "Cash"
@@ -1619,11 +1619,11 @@ msgstr "Tạo mã quy đổi"
 
 #: includes/redeem-codes-handler.php:503
 #: includes/tools/redeem-codes.php:169
-#: includes/tools/redeem-codes.php:260
-#: includes/tools/redeem-codes.php:420
+#: includes/tools/redeem-codes.php:262
+#: includes/tools/redeem-codes.php:422
 #: includes/tools/vip-codes.php:168
-#: includes/tools/vip-codes.php:259
-#: includes/tools/vip-codes.php:414
+#: includes/tools/vip-codes.php:261
+#: includes/tools/vip-codes.php:416
 #: includes/vip-codes-handler.php:545
 msgid "Code"
 msgstr "Mã"
@@ -1707,159 +1707,159 @@ msgstr "Tạo mã quy đổi"
 msgid "Existing Redeem Codes"
 msgstr "Danh sách mã quy đổi"
 
-#: includes/tools/redeem-codes.php:253
+#: includes/tools/redeem-codes.php:255
 msgid "No redeem codes found."
 msgstr "Không tìm thấy mã quy đổi nào."
 
 #: includes/redeem-codes-handler.php:504
-#: includes/tools/redeem-codes.php:261
+#: includes/tools/redeem-codes.php:263
 #: includes/tools/send-notification.php:158
 #: includes/tools/topup.php:272
-#: includes/tools/vip-codes.php:260
+#: includes/tools/vip-codes.php:262
 #: includes/vip-codes-handler.php:546
 msgid "Type"
 msgstr "Loại"
 
-#: includes/tools/redeem-codes.php:262
-#: includes/tools/vip-codes.php:261
+#: includes/tools/redeem-codes.php:264
+#: includes/tools/vip-codes.php:263
 msgid "Locked User"
 msgstr "Người dùng được khóa"
 
-#: includes/tools/redeem-codes.php:265
-#: includes/tools/redeem-codes.php:384
-#: includes/tools/vip-codes.php:263
-#: includes/tools/vip-codes.php:379
+#: includes/tools/redeem-codes.php:267
+#: includes/tools/redeem-codes.php:386
+#: includes/tools/vip-codes.php:265
+#: includes/tools/vip-codes.php:381
 msgid "Used"
 msgstr "Đã sử dụng"
 
 #: includes/redeem-codes-handler.php:511
-#: includes/tools/redeem-codes.php:266
-#: includes/tools/vip-codes.php:264
+#: includes/tools/redeem-codes.php:268
+#: includes/tools/vip-codes.php:266
 #: includes/vip-codes-handler.php:552
 msgid "Status"
 msgstr "Trạng thái"
 
-#: includes/tools/redeem-codes.php:267
-#: includes/tools/vip-codes.php:265
+#: includes/tools/redeem-codes.php:269
+#: includes/tools/vip-codes.php:267
 msgid "Actions"
 msgstr "Thao tác"
 
 #. translators: 1: display name, 2: user_login, 3: user_id
-#: includes/tools/redeem-codes.php:316
-#: includes/tools/redeem-codes.php:448
-#: includes/tools/vip-codes.php:314
-#: includes/tools/vip-codes.php:442
+#: includes/tools/redeem-codes.php:318
+#: includes/tools/redeem-codes.php:450
+#: includes/tools/vip-codes.php:316
+#: includes/tools/vip-codes.php:444
 #, php-format
 msgid "%1$s (%2$s) — ID: %3$d"
 msgstr "%1$s (%2$s) — ID: %3$d"
 
 #. translators: %d: user ID
-#: includes/tools/redeem-codes.php:323
-#: includes/tools/vip-codes.php:321
+#: includes/tools/redeem-codes.php:325
+#: includes/tools/vip-codes.php:323
 #, php-format
 msgid "User ID: %d"
 msgstr "ID người dùng: %d"
 
-#: includes/tools/redeem-codes.php:326
-#: includes/tools/vip-codes.php:324
+#: includes/tools/redeem-codes.php:328
+#: includes/tools/vip-codes.php:326
 msgid "Not locked"
 msgstr "Không khóa"
 
-#: includes/tools/redeem-codes.php:346
-#: includes/tools/vip-codes.php:341
+#: includes/tools/redeem-codes.php:348
+#: includes/tools/vip-codes.php:343
 msgid "logged"
 msgstr "ghi nhận"
 
-#: includes/tools/redeem-codes.php:355
-#: includes/tools/vip-codes.php:350
+#: includes/tools/redeem-codes.php:357
+#: includes/tools/vip-codes.php:352
 #: includes/user-metabox.php:190
 msgid "Active"
 msgstr "Đang hoạt động"
 
-#: includes/tools/redeem-codes.php:357
-#: includes/tools/vip-codes.php:352
+#: includes/tools/redeem-codes.php:359
+#: includes/tools/vip-codes.php:354
 msgid "Disabled"
 msgstr "Đã vô hiệu"
 
-#: includes/tools/redeem-codes.php:363
-#: includes/tools/vip-codes.php:358
+#: includes/tools/redeem-codes.php:365
+#: includes/tools/vip-codes.php:360
 msgid "View Usage"
 msgstr "Xem sử dụng"
 
-#: includes/tools/redeem-codes.php:367
-#: includes/tools/vip-codes.php:362
+#: includes/tools/redeem-codes.php:369
+#: includes/tools/vip-codes.php:364
 msgid "Disable this code?"
 msgstr "Vô hiệu mã này?"
 
-#: includes/tools/redeem-codes.php:368
-#: includes/tools/vip-codes.php:363
+#: includes/tools/redeem-codes.php:370
+#: includes/tools/vip-codes.php:365
 msgid "Disable"
 msgstr "Vô hiệu"
 
-#: includes/tools/redeem-codes.php:379
-#: includes/tools/vip-codes.php:374
+#: includes/tools/redeem-codes.php:381
+#: includes/tools/vip-codes.php:376
 msgid "Delete this unused code permanently?"
 msgstr "Xoá vĩnh viễn mã chưa sử dụng này?"
 
-#: includes/tools/redeem-codes.php:381
-#: includes/tools/vip-codes.php:376
+#: includes/tools/redeem-codes.php:383
+#: includes/tools/vip-codes.php:378
 #: init-user-engine.php:319
 msgid "Delete"
 msgstr "Xoá"
 
-#: includes/tools/redeem-codes.php:404
-#: includes/tools/redeem-codes.php:506
-#: includes/tools/vip-codes.php:398
-#: includes/tools/vip-codes.php:500
+#: includes/tools/redeem-codes.php:406
+#: includes/tools/redeem-codes.php:508
+#: includes/tools/vip-codes.php:400
+#: includes/tools/vip-codes.php:502
 msgid "&laquo; Previous"
 msgstr "« Trước"
 
-#: includes/tools/redeem-codes.php:405
-#: includes/tools/redeem-codes.php:507
-#: includes/tools/vip-codes.php:399
-#: includes/tools/vip-codes.php:501
+#: includes/tools/redeem-codes.php:407
+#: includes/tools/redeem-codes.php:509
+#: includes/tools/vip-codes.php:401
+#: includes/tools/vip-codes.php:503
 msgid "Next &raquo;"
 msgstr "Tiếp »"
 
-#: includes/tools/redeem-codes.php:418
-#: includes/tools/vip-codes.php:412
+#: includes/tools/redeem-codes.php:420
+#: includes/tools/vip-codes.php:414
 msgid "Usage History"
 msgstr "Lịch sử sử dụng"
 
-#: includes/tools/redeem-codes.php:427
-#: includes/tools/vip-codes.php:421
+#: includes/tools/redeem-codes.php:429
+#: includes/tools/vip-codes.php:423
 msgid "No usage yet."
 msgstr "Chưa có lượt sử dụng."
 
-#: includes/tools/redeem-codes.php:434
-#: includes/tools/vip-codes.php:428
+#: includes/tools/redeem-codes.php:436
+#: includes/tools/vip-codes.php:430
 msgid "User"
 msgstr "Người dùng"
 
-#: includes/tools/redeem-codes.php:435
+#: includes/tools/redeem-codes.php:437
 #: includes/tools/topup.php:274
-#: includes/tools/vip-codes.php:429
+#: includes/tools/vip-codes.php:431
 msgid "Time"
 msgstr "Thời gian"
 
-#: includes/tools/redeem-codes.php:436
-#: includes/tools/vip-codes.php:430
+#: includes/tools/redeem-codes.php:438
+#: includes/tools/vip-codes.php:432
 msgid "Meta"
 msgstr "Meta"
 
-#: includes/tools/redeem-codes.php:460
-#: includes/tools/vip-codes.php:454
+#: includes/tools/redeem-codes.php:462
+#: includes/tools/vip-codes.php:456
 #: init-user-engine.php:373
 msgid "Unknown"
 msgstr "Không rõ"
 
-#: includes/tools/redeem-codes.php:476
-#: includes/tools/vip-codes.php:470
+#: includes/tools/redeem-codes.php:478
+#: includes/tools/vip-codes.php:472
 msgid "None"
 msgstr "Không có"
 
-#: includes/tools/redeem-codes.php:518
-#: includes/tools/vip-codes.php:512
+#: includes/tools/redeem-codes.php:520
+#: includes/tools/vip-codes.php:514
 msgid "Close"
 msgstr "Đóng"
 
@@ -2059,7 +2059,7 @@ msgid "Create a VIP Code"
 msgstr "Tạo Mã VIP"
 
 #: includes/tools/vip-codes.php:216
-#: includes/tools/vip-codes.php:262
+#: includes/tools/vip-codes.php:264
 #: includes/vip-codes-handler.php:549
 msgid "VIP Days"
 msgstr "Số ngày VIP"
@@ -2076,7 +2076,7 @@ msgstr "Tạo Mã VIP"
 msgid "Existing VIP Codes"
 msgstr "Danh sách Mã VIP"
 
-#: includes/tools/vip-codes.php:252
+#: includes/tools/vip-codes.php:254
 msgid "No VIP codes found."
 msgstr "Chưa có mã VIP nào."
 
@@ -3099,15 +3099,15 @@ msgstr "Ngày tạo"
 msgid "Updated At"
 msgstr "Ngày cập nhật"
 
-#: includes/tools/redeem-codes.php:244
-#: includes/tools/vip-codes.php:243
+#: includes/tools/redeem-codes.php:246
+#: includes/tools/vip-codes.php:245
 msgid "Export CSV"
 msgstr "Xuất CSV"
 
-#: includes/tools/redeem-codes.php:248
+#: includes/tools/redeem-codes.php:250
 msgid "Exports the full list of redeem codes (all pages) as a CSV file."
 msgstr "Xuất toàn bộ danh sách mã redeem (tất cả các trang) ra file CSV."
 
-#: includes/tools/vip-codes.php:247
+#: includes/tools/vip-codes.php:249
 msgid "Exports the full list of VIP codes (all pages) as a CSV file."
 msgstr "Xuất toàn bộ danh sách mã VIP (tất cả các trang) ra file CSV."

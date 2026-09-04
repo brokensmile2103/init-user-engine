@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,13 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.2 – September 4, 2026 =
+- Changed: a pinned Inbox message now only stays pinned to the top while it is **unread**. As soon as it's marked as read (single message or "mark all as read"), it automatically unpins and behaves like any other message, so read messages no longer take up space at the top of the Inbox modal
+  - Implemented by clearing `pinned` back to `0` in the exact same `UPDATE` query that already sets a message to `read` (`init_plugin_suite_user_engine_mark_inbox_read()` and the "mark all as read" REST endpoint) — no extra query, no change to the Inbox `SELECT`/`ORDER BY`, and no new database index needed
+  - Added a one-time backfill (runs once on upgrade, same mechanism already used for schema updates) that clears `pinned` for any pre-existing message that was already pinned **and** read before this update
+  - Added a client-side safety net in the Inbox renderer so the pin icon never shows on a read message, even for the brief moment before the backfill above has run
+- Updated `.pot`/`.po` translation files (no new strings were needed for this change; existing ones were already sufficient)
 
 = 1.6.1 – September 4, 2026 =
 - Added **Export CSV** for both code list screens (User Engine → Redeem Codes / VIP Codes)

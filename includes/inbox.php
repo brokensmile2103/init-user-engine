@@ -284,7 +284,10 @@ function init_plugin_suite_user_engine_mark_inbox_read( $message_id, $user_id ) 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$result = $wpdb->update(
 		$table,
-		[ 'status' => 'read' ],
+		// 'pinned' => 0: 1 tin đã đọc thì không còn lý do gì để ghim lên đầu
+		// Inbox nữa (xem UX v1.6.2) — set kèm trong cùng 1 UPDATE, không tốn
+		// thêm query, cũng không cần sửa gì ở câu SELECT/ORDER BY hay index.
+		[ 'status' => 'read', 'pinned' => 0 ],
 		[ 'id' => $message_id, 'user_id' => $user_id ]
 	);
 
@@ -434,8 +437,10 @@ function init_plugin_suite_user_engine_api_mark_inbox_all_read( WP_REST_Request 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$updated = $wpdb->query(
 		$wpdb->prepare(
+			// 'pinned = 0' kèm trong cùng UPDATE: tin đã đọc thì không còn
+			// ghim lên đầu Inbox nữa (xem UX v1.6.2), không tốn thêm query.
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"UPDATE {$table} SET status = 'read' WHERE user_id = %d AND status = 'unread'",
+			"UPDATE {$table} SET status = 'read', pinned = 0 WHERE user_id = %d AND status = 'unread'",
 			$user_id
 		)
 	);

@@ -934,7 +934,11 @@ function renderInboxItem(entry) {
     const isRead = entry.status === 'read';
     const link = entry.link || null;
     const priorityClass = entry.priority === 'high' ? ' iue-high-priority' : '';
-    const pinnedClass = entry.pinned ? ' iue-pinned' : '';
+    // Chỉ hiện icon/kiểu ghim khi tin CHƯA đọc (xem UX v1.6.2) — tin đã đọc
+    // coi như tin thường, tránh chiếm chỗ ở đầu modal Inbox. Backend đã tự
+    // set pinned = 0 khi tin chuyển sang đã đọc; check thêm !isRead ở đây
+    // chỉ để phòng hờ dữ liệu cũ (tin ghim + đã đọc từ trước bản v1.6.2).
+    const pinnedClass = (entry.pinned && !isRead) ? ' iue-pinned' : '';
     const redeemCode = entry.metadata?.redeem_code ? String(entry.metadata.redeem_code) : '';
 
     // --- helpers ---

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.6.1\n"
+"Project-Id-Version: Init User Engine 1.6.2\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "POT-Creation-Date: 2026-09-04 00:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -203,7 +203,7 @@ msgstr ""
 msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
 msgstr ""
 
-#: includes/inbox.php:605
+#: includes/inbox.php:610
 #: includes/redeem-codes-handler.php:15
 #: includes/user-metabox.php:541
 #: includes/user-metabox.php:633
@@ -471,20 +471,20 @@ msgstr ""
 
 #: includes/redeem-codes-handler.php:503
 #: includes/tools/redeem-codes.php:169
-#: includes/tools/redeem-codes.php:260
-#: includes/tools/redeem-codes.php:420
+#: includes/tools/redeem-codes.php:262
+#: includes/tools/redeem-codes.php:422
 #: includes/tools/vip-codes.php:168
-#: includes/tools/vip-codes.php:259
-#: includes/tools/vip-codes.php:414
+#: includes/tools/vip-codes.php:261
+#: includes/tools/vip-codes.php:416
 #: includes/vip-codes-handler.php:545
 msgid "Code"
 msgstr ""
 
 #: includes/redeem-codes-handler.php:504
-#: includes/tools/redeem-codes.php:261
+#: includes/tools/redeem-codes.php:263
 #: includes/tools/send-notification.php:158
 #: includes/tools/topup.php:272
-#: includes/tools/vip-codes.php:260
+#: includes/tools/vip-codes.php:262
 #: includes/vip-codes-handler.php:546
 msgid "Type"
 msgstr ""
@@ -520,8 +520,8 @@ msgid "Used Count"
 msgstr ""
 
 #: includes/redeem-codes-handler.php:511
-#: includes/tools/redeem-codes.php:266
-#: includes/tools/vip-codes.php:264
+#: includes/tools/redeem-codes.php:268
+#: includes/tools/vip-codes.php:266
 #: includes/vip-codes-handler.php:552
 msgid "Status"
 msgstr ""
@@ -1348,14 +1348,14 @@ msgid "VIP Payment Currency"
 msgstr ""
 
 #: includes/settings-page.php:719
-#: includes/tools/redeem-codes.php:263
+#: includes/tools/redeem-codes.php:265
 #: includes/tools/topup.php:212
 #: includes/user-metabox.php:134
 msgid "Coin"
 msgstr ""
 
 #: includes/settings-page.php:720
-#: includes/tools/redeem-codes.php:264
+#: includes/tools/redeem-codes.php:266
 #: includes/tools/topup.php:216
 #: includes/user-metabox.php:138
 msgid "Cash"
@@ -1789,152 +1789,152 @@ msgstr ""
 msgid "Existing Redeem Codes"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:244
-#: includes/tools/vip-codes.php:243
+#: includes/tools/redeem-codes.php:246
+#: includes/tools/vip-codes.php:245
 msgid "Export CSV"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:248
+#: includes/tools/redeem-codes.php:250
 msgid "Exports the full list of redeem codes (all pages) as a CSV file."
 msgstr ""
 
-#: includes/tools/redeem-codes.php:253
+#: includes/tools/redeem-codes.php:255
 msgid "No redeem codes found."
 msgstr ""
 
-#: includes/tools/redeem-codes.php:262
-#: includes/tools/vip-codes.php:261
+#: includes/tools/redeem-codes.php:264
+#: includes/tools/vip-codes.php:263
 msgid "Locked User"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:265
-#: includes/tools/redeem-codes.php:384
-#: includes/tools/vip-codes.php:263
-#: includes/tools/vip-codes.php:379
+#: includes/tools/redeem-codes.php:267
+#: includes/tools/redeem-codes.php:386
+#: includes/tools/vip-codes.php:265
+#: includes/tools/vip-codes.php:381
 msgid "Used"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:267
-#: includes/tools/vip-codes.php:265
+#: includes/tools/redeem-codes.php:269
+#: includes/tools/vip-codes.php:267
 msgid "Actions"
 msgstr ""
 
 #. translators: 1: display name, 2: user_login, 3: user_id
-#: includes/tools/redeem-codes.php:316
-#: includes/tools/redeem-codes.php:448
-#: includes/tools/vip-codes.php:314
-#: includes/tools/vip-codes.php:442
+#: includes/tools/redeem-codes.php:318
+#: includes/tools/redeem-codes.php:450
+#: includes/tools/vip-codes.php:316
+#: includes/tools/vip-codes.php:444
 #, php-format
 msgid "%1$s (%2$s) — ID: %3$d"
 msgstr ""
 
 #. translators: %d: user ID
-#: includes/tools/redeem-codes.php:323
-#: includes/tools/vip-codes.php:321
+#: includes/tools/redeem-codes.php:325
+#: includes/tools/vip-codes.php:323
 #, php-format
 msgid "User ID: %d"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:326
-#: includes/tools/vip-codes.php:324
+#: includes/tools/redeem-codes.php:328
+#: includes/tools/vip-codes.php:326
 msgid "Not locked"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:346
-#: includes/tools/vip-codes.php:341
+#: includes/tools/redeem-codes.php:348
+#: includes/tools/vip-codes.php:343
 msgid "logged"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:355
-#: includes/tools/vip-codes.php:350
-#: includes/user-metabox.php:190
-msgid "Active"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:357
 #: includes/tools/vip-codes.php:352
+#: includes/user-metabox.php:190
+msgid "Active"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:359
+#: includes/tools/vip-codes.php:354
 msgid "Disabled"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:363
-#: includes/tools/vip-codes.php:358
+#: includes/tools/redeem-codes.php:365
+#: includes/tools/vip-codes.php:360
 msgid "View Usage"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:367
-#: includes/tools/vip-codes.php:362
+#: includes/tools/redeem-codes.php:369
+#: includes/tools/vip-codes.php:364
 msgid "Disable this code?"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:368
-#: includes/tools/vip-codes.php:363
+#: includes/tools/redeem-codes.php:370
+#: includes/tools/vip-codes.php:365
 msgid "Disable"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:379
-#: includes/tools/vip-codes.php:374
-msgid "Delete this unused code permanently?"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:381
 #: includes/tools/vip-codes.php:376
+msgid "Delete this unused code permanently?"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:383
+#: includes/tools/vip-codes.php:378
 #: init-user-engine.php:319
 msgid "Delete"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:404
-#: includes/tools/redeem-codes.php:506
-#: includes/tools/vip-codes.php:398
-#: includes/tools/vip-codes.php:500
+#: includes/tools/redeem-codes.php:406
+#: includes/tools/redeem-codes.php:508
+#: includes/tools/vip-codes.php:400
+#: includes/tools/vip-codes.php:502
 msgid "&laquo; Previous"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:405
-#: includes/tools/redeem-codes.php:507
-#: includes/tools/vip-codes.php:399
-#: includes/tools/vip-codes.php:501
+#: includes/tools/redeem-codes.php:407
+#: includes/tools/redeem-codes.php:509
+#: includes/tools/vip-codes.php:401
+#: includes/tools/vip-codes.php:503
 msgid "Next &raquo;"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:418
-#: includes/tools/vip-codes.php:412
+#: includes/tools/redeem-codes.php:420
+#: includes/tools/vip-codes.php:414
 msgid "Usage History"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:427
-#: includes/tools/vip-codes.php:421
+#: includes/tools/redeem-codes.php:429
+#: includes/tools/vip-codes.php:423
 msgid "No usage yet."
-msgstr ""
-
-#: includes/tools/redeem-codes.php:434
-#: includes/tools/vip-codes.php:428
-msgid "User"
-msgstr ""
-
-#: includes/tools/redeem-codes.php:435
-#: includes/tools/topup.php:274
-#: includes/tools/vip-codes.php:429
-msgid "Time"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:436
 #: includes/tools/vip-codes.php:430
+msgid "User"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:437
+#: includes/tools/topup.php:274
+#: includes/tools/vip-codes.php:431
+msgid "Time"
+msgstr ""
+
+#: includes/tools/redeem-codes.php:438
+#: includes/tools/vip-codes.php:432
 msgid "Meta"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:460
-#: includes/tools/vip-codes.php:454
+#: includes/tools/redeem-codes.php:462
+#: includes/tools/vip-codes.php:456
 #: init-user-engine.php:373
 msgid "Unknown"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:476
-#: includes/tools/vip-codes.php:470
+#: includes/tools/redeem-codes.php:478
+#: includes/tools/vip-codes.php:472
 msgid "None"
 msgstr ""
 
-#: includes/tools/redeem-codes.php:518
-#: includes/tools/vip-codes.php:512
+#: includes/tools/redeem-codes.php:520
+#: includes/tools/vip-codes.php:514
 msgid "Close"
 msgstr ""
 
@@ -2134,7 +2134,7 @@ msgid "Create a VIP Code"
 msgstr ""
 
 #: includes/tools/vip-codes.php:216
-#: includes/tools/vip-codes.php:262
+#: includes/tools/vip-codes.php:264
 #: includes/vip-codes-handler.php:549
 msgid "VIP Days"
 msgstr ""
@@ -2151,11 +2151,11 @@ msgstr ""
 msgid "Existing VIP Codes"
 msgstr ""
 
-#: includes/tools/vip-codes.php:247
+#: includes/tools/vip-codes.php:249
 msgid "Exports the full list of VIP codes (all pages) as a CSV file."
 msgstr ""
 
-#: includes/tools/vip-codes.php:252
+#: includes/tools/vip-codes.php:254
 msgid "No VIP codes found."
 msgstr ""
 

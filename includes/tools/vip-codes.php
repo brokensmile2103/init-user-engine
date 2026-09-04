@@ -237,7 +237,7 @@ function init_plugin_suite_user_engine_render_vip_codes_page() {
             'iue_vip_code_export_csv'
         );
         ?>
-        <h2 style="margin-top: 30px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <h2 style="margin-top: 30px;">
             <?php esc_html_e( 'Existing VIP Codes', 'init-user-engine' ); ?>
         </h2>
         <p style="margin-bottom: 5px;">

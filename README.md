@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.2-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.6.3-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -17,15 +17,20 @@ You get full control over user interactions: check-in, VIP purchase, Coin/EXP re
 ## Features
 
 - Shortcode `[init_user_engine]` to display avatar + modal dashboard
+- Frontend login & registration modal with Cloudflare Turnstile (or built-in math captcha) protection
+- Optional "Login After Register" to sign users in automatically right after they create an account (disabled by default)
+- Failed logins reopen the login modal on the current page with an inline error message, instead of redirecting to `wp-login.php`
+- Optional protection of the native WordPress login/register/lost-password forms using the same Turnstile setup
+- Optional "Require Login to Access Site" mode that gates the entire frontend behind the login modal
 - EXP & level system with streaks, milestones, and bonuses
-- Coin & Cash wallet with transaction history
+- Coin & Cash dual-wallet system with transaction history and configurable exchange rate between the two currencies
 - Daily check-in + online time reward
-- VIP membership system with coin-based purchases
-- Referral system with cookie-based tracking
-- Built-in inbox system (custom DB table)
-- Custom avatar upload & preview
-- Admin panel to send targeted notifications
-- Redeem Code / Gift Code system with auto rewards (Coin/Cash)
+- VIP membership system with Coin-based, Cash-based, or combined purchases, multiple duration tiers, and a lifetime option
+- Referral system with cookie-based tracking and separate rewards for referrer and new user
+- Redeem Code / Gift Code system with auto rewards (Coin/Cash), plus a dedicated VIP Codes module — both exportable to CSV from wp-admin
+- Built-in inbox system (custom DB table) with pinned/expiring messages and an Inbox Statistics dashboard
+- Custom avatar upload & preview, with configurable upload policy (everyone / VIP only / disabled) and max file size
+- Admin panel to send targeted notifications, plus a per-user overview metabox on the profile screen
 - REST API for all user actions – no reloads, no delays
 - Fully i18n-ready with JS-based validation & messages
 - Lightweight, modern UI – no jQuery, no dependencies
@@ -41,22 +46,27 @@ Outputs the avatar button and attaches the full modal dashboard.
 Base: `/wp-json/inituser/v1/`
 
 - `POST /register` – Create new user account  
+- `GET  /captcha` – Get a fallback math captcha (used when Turnstile is not configured)  
 - `POST /checkin` – Daily check-in  
 - `POST /claim-reward` – Claim online reward  
 - `GET  /transactions` – View wallet logs  
 - `GET  /exp-log` – View EXP history  
+- `GET  /daily-tasks` – Get list of completed daily tasks and rewards  
 - `GET  /inbox` – Fetch inbox messages  
 - `POST /inbox/mark-read` – Mark a message as read  
+- `POST /inbox/mark-all-read` – Mark all messages as read  
 - `POST /inbox/delete` – Delete a message  
+- `POST /inbox/delete-all` – Delete all messages  
 - `POST /vip/purchase` – Buy VIP membership  
 - `POST /exchange` – Convert Cash to Coin  
+- `POST /exchange-reverse` – Convert Coin to Cash  
 - `GET  /referral-log` – Get referral history  
 - `POST /avatar` – Upload avatar  
 - `POST /avatar/remove` – Revert to default avatar  
 - `GET  /profile/me` – Get current user profile  
 - `POST /profile/update` – Update profile information  
-- `GET  /daily-tasks` – Get list of completed daily tasks and rewards
-- `POST /redeem-code` – Redeem gift code → returns `{ success, message, Coin, Cash }`
+- `POST /redeem-code` – Redeem gift code → returns `{ success, message, Coin, Cash }`  
+- `POST /redeem-vip-code` – Redeem a VIP code → grants VIP duration
 
 ## Developer Hooks
 
@@ -70,25 +80,33 @@ Base: `/wp-json/inituser/v1/`
 - `init_plugin_suite_user_engine_calculated_exp_amount` – Modify EXP reward before apply  
 - `init_plugin_suite_user_engine_format_inbox` – Modify formatted inbox data  
 - `init_plugin_suite_user_engine_render_level_badge` – Customize level badge HTML  
+- `init_plugin_suite_user_engine_inbox_insert_data` – Modify inbox data before inserting into database  
 - `init_plugin_suite_user_engine_validate_register_fields` – Validate or modify registration fields before account creation  
 - `init_plugin_suite_user_engine_daily_tasks` – Add or modify daily task list and logic  
 - `init_plugin_suite_user_engine_captcha_bank` – Extend the captcha question bank with custom items  
-- `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount
-- `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)
+- `init_plugin_suite_user_engine_format_log_message` – Customize transaction log message display with access to entry data, source, type, and amount  
+- `init_plugin_suite_user_engine_should_keep_original` – Override decision to keep original uploaded avatar (GIF or other formats)  
 - `init_plugin_suite_user_engine_vip_expire_soon_threshold` – Modify the threshold (in seconds) used to determine when VIP is considered close to expiration  
-- `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element
-- `init_plugin_suite_user_engine_theme_colors` – Modify theme color system (primary and active colors)
+- `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element  
+- `init_plugin_suite_user_engine_theme_colors` – Modify theme color system (primary and active colors)  
+- `init_plugin_suite_user_engine_require_login_bypass` – Exclude a specific request from the "Require Login to Access Site" gate
 
 ### Actions
 
 - `init_plugin_suite_user_engine_level_up` – When user levels up  
 - `init_plugin_suite_user_engine_exp_added` – After EXP is added  
 - `init_plugin_suite_user_engine_transaction_logged` – After Coin/Cash is logged  
+- `init_plugin_suite_user_engine_exp_logged` – After EXP log is recorded  
 - `init_plugin_suite_user_engine_inbox_inserted` – After new inbox message is created  
+- `init_plugin_suite_user_engine_referral_completed` – When referral is completed  
+- `init_plugin_suite_user_engine_after_checkin` – After user check-in  
+- `init_plugin_suite_user_engine_after_claim_reward` – After user claims reward  
 - `init_plugin_suite_user_engine_vip_purchased` – After VIP is purchased  
 - `init_plugin_suite_user_engine_after_register` – After successful user registration  
+- `init_plugin_suite_user_engine_add_exp` – Triggered when adding EXP via hook  
+- `init_plugin_suite_user_engine_add_coin` – Triggered when adding Coin via hook  
 - `init_plugin_suite_user_engine_coin_changed` – After user's Coin balance changes  
-- `init_plugin_suite_user_engine_cash_changed` – After user's Cash balance changes  
+- `init_plugin_suite_user_engine_cash_changed` – After user's Cash balance changes
 
 ## Installation
 

@@ -487,6 +487,61 @@ function init_plugin_suite_user_engine_enqueue_require_login_assets() {
 	);
 }
 
+/**
+ * Xử lý đăng nhập sai (sai tài khoản/mật khẩu) khi form được submit từ modal
+ * đăng nhập của plugin (wp_login_form(), render trong templates/login-form.php).
+ *
+ * Mặc định, WordPress sẽ chuyển hướng lỗi này về wp-login.php — trải nghiệm
+ * không phù hợp với các site chỉ dùng modal đăng nhập trên frontend. Thay vào
+ * đó, hàm này đưa người dùng quay lại đúng trang họ vừa đứng, kèm 2 tham số
+ * tạm thời trên URL để assets/js/guest.js tự mở lại modal và hiển thị thông
+ * báo lỗi phù hợp:
+ * - iue_login_failed=1     : cờ báo có lỗi đăng nhập cần xử lý
+ * - iue_login_code=<code>  : mã lỗi (một trong các giá trị $allowed_codes bên dưới)
+ *
+ * Chỉ can thiệp khi request đến từ một trang frontend thông thường. Nếu người
+ * dùng đăng nhập trực tiếp tại wp-login.php hoặc trong khu vực quản trị, hành
+ * vi mặc định của WordPress được giữ nguyên.
+ */
+add_action( 'wp_login_failed', 'init_plugin_suite_user_engine_redirect_failed_login', 10, 2 );
+function init_plugin_suite_user_engine_redirect_failed_login( $username, $error = null ) {
+	unset( $username ); // Không cần dùng, tránh lộ username ra URL/log.
+
+	$referer = wp_get_referer();
+
+	if ( empty( $referer )
+		|| false !== strpos( $referer, 'wp-login.php' )
+		|| false !== strpos( $referer, 'wp-admin' )
+	) {
+		return;
+	}
+
+	$error_code = '';
+	if ( $error instanceof WP_Error ) {
+		$codes      = $error->get_error_codes();
+		$error_code = ! empty( $codes ) ? sanitize_key( $codes[0] ) : '';
+	}
+
+	// Whitelist mã lỗi: chỉ cho phép các mã đăng nhập tiêu chuẩn của WordPress
+	// (đây cũng là các mã mà form đăng nhập mặc định của WordPress vẫn tự hiển thị,
+	// nên không phát sinh rủi ro dò tài khoản mới so với hành vi gốc).
+	$allowed_codes = [ 'invalid_username', 'invalid_email', 'incorrect_password', 'empty_username', 'empty_password' ];
+	if ( ! in_array( $error_code, $allowed_codes, true ) ) {
+		$error_code = 'invalid_login';
+	}
+
+	$redirect_url = add_query_arg(
+		[
+			'iue_login_failed' => '1',
+			'iue_login_code'   => $error_code,
+		],
+		$referer
+	);
+
+	wp_safe_redirect( $redirect_url );
+	exit;
+}
+
 // Hook vào action khi VIP bị gỡ
 add_action( 'init_plugin_suite_user_engine_vip_removed', function( $user_id, $prev_expiry, $vip_log_after ) {
 	// Tiêu đề và nội dung inbox message

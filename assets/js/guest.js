@@ -105,6 +105,49 @@ document.addEventListener('DOMContentLoaded', function () {
 	// Trigger qua hash
 	if (window.location.hash === '#init-user-engine') openLoginModal();
 
+	// Tự mở modal + hiển thị thông báo khi đăng nhập sai mật khẩu/tài khoản.
+	// Server (includes/hooks.php) đã chuyển hướng về đúng trang này kèm 2 tham số
+	// tạm thời bên dưới thay vì văng sang wp-login.php như mặc định của WordPress.
+	(function handleFailedLoginRedirect() {
+		const params = new URLSearchParams(window.location.search);
+		if (params.get('iue_login_failed') !== '1') return;
+
+		const i18n = window.InitUserEngineData?.i18n || {};
+		const messagesByCode = {
+			invalid_username:   i18n.login_error_invalid_username,
+			invalid_email:      i18n.login_error_invalid_email,
+			incorrect_password: i18n.login_error_incorrect_password,
+			empty_username:     i18n.login_error_empty_username,
+			empty_password:     i18n.login_error_empty_password,
+		};
+
+		const code = params.get('iue_login_code') || '';
+		const message = (Object.prototype.hasOwnProperty.call(messagesByCode, code) && messagesByCode[code])
+			? messagesByCode[code]
+			: (i18n.login_error_generic || 'Incorrect username or password. Please try again.');
+
+		openLoginModal();
+
+		const loginForm = document.getElementById('loginform');
+		if (loginForm) {
+			let notice = document.getElementById('iue-login-notice');
+			if (!notice) {
+				notice = document.createElement('div');
+				notice.id = 'iue-login-notice';
+				loginForm.prepend(notice);
+			}
+			notice.className = 'iue-register-message error';
+			notice.textContent = message;
+		}
+
+		// Dọn query string để tránh hiện lại thông báo khi tải lại trang hoặc chia sẻ URL.
+		params.delete('iue_login_failed');
+		params.delete('iue_login_code');
+		const cleanQuery = params.toString();
+		const cleanUrl = window.location.pathname + (cleanQuery ? `?${cleanQuery}` : '') + window.location.hash;
+		window.history.replaceState({}, document.title, cleanUrl);
+	})();
+
 	// Trigger qua data-iue="login"
 	document.querySelectorAll('[data-iue="login"]').forEach(el => {
 		el.addEventListener('click', function (e) { e.preventDefault(); openLoginModal(); });
@@ -336,15 +379,26 @@ document.addEventListener('DOMContentLoaded', function () {
 					throw new Error(result.message || 'Registration failed');
 				}
 
-				showRegisterMessage(window.InitUserEngineData?.i18n?.register_success || 'Welcome! You can now log in.', 'success');
+				const i18nSuccess = window.InitUserEngineData?.i18n || {};
+				const successMessage = result.auto_login
+					? (i18nSuccess.register_success_auto_login || 'Welcome! Logging you in…')
+					: (i18nSuccess.register_success || 'Welcome! You can now log in.');
+
+				showRegisterMessage(successMessage, 'success');
 				form.reset();
 				captchaAttempts = 0;
 				resetTurnstile();
 
-				setTimeout(() => {
-					const registerLink = document.getElementById('iue-register-link');
-					if (registerLink) registerLink.click();
-				}, 2000);
+				if (result.auto_login) {
+					// Đã đăng nhập sẵn ở server (wp_set_auth_cookie) — reload để lấy đúng
+					// trạng thái UI đã login (avatar, nonce...) thay vì chuyển sang form Login.
+					setTimeout(() => { window.location.reload(); }, 1200);
+				} else {
+					setTimeout(() => {
+						const registerLink = document.getElementById('iue-register-link');
+						if (registerLink) registerLink.click();
+					}, 2000);
+				}
 
 			} catch (err) {
 				showRegisterMessage(err.message, 'error');

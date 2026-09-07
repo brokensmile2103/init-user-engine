@@ -488,9 +488,30 @@ function init_plugin_suite_user_engine_api_register_user( WP_REST_Request $reque
 
     do_action( 'init_plugin_suite_user_engine_after_register', $user_id );
 
+    // ---- Optional: auto-login right after registration (opt-in, default off) ----
+    $auto_login = ! empty( $settings['login_after_register'] );
+
+    if ( $auto_login ) {
+        $new_user = get_userdata( $user_id );
+
+        if ( $new_user ) {
+            wp_clear_auth_cookie();
+            wp_set_current_user( $user_id );
+            wp_set_auth_cookie( $user_id, true );
+
+            /** This action is documented in wp-includes/user.php */
+            do_action( 'wp_login', $new_user->user_login, $new_user );
+        } else {
+            $auto_login = false;
+        }
+    }
+
     return new WP_REST_Response( [
-        'status'  => 'registered',
-        'message' => __( 'Registration successful. You can now log in.', 'init-user-engine' ),
+        'status'      => 'registered',
+        'message'     => $auto_login
+            ? __( 'Welcome! Logging you in…', 'init-user-engine' )
+            : __( 'Registration successful. You can now log in.', 'init-user-engine' ),
+        'auto_login'  => $auto_login,
     ], 200 );
 }
 

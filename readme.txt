@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,13 +20,16 @@ What you get:
 
 - Display user avatar and dashboard via shortcode
 - Show level, EXP, Coin/Cash, and full user wallet
+- Frontend login & registration modal with Cloudflare Turnstile (or built-in math captcha) protection
 - Let users check-in daily and receive timed rewards
 - Auto-track referral registrations with reward system
-- Allow users to buy VIP status using in-site currency
-- Built-in inbox for notifications (uses custom DB table)
+- Let users buy VIP status using Coin, Cash, or both
+- Redeem Code / Gift Code and dedicated VIP Code system, with CSV export from wp-admin
+- Built-in inbox for notifications (uses custom DB table), with pinned/expiring messages and a stats dashboard
 - Custom avatar support with upload & preview modal
 - Send custom notifications to selected users or all members from wp-admin
 - Optional "Require Login to Access Site" mode that gates the entire frontend behind the built-in login modal
+- Optional one-step "Login After Register" so new users land on the site already signed in
 
 This plugin is the core user system behind the [Init Plugin Suite](https://en.inithtml.com/init-plugin-suite-minimalist-powerful-and-free-wordpress-plugins/) – optimized for frontend-first interaction, extensibility, and real-time gamification.
 
@@ -34,19 +37,67 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 
 == Features ==
 
-- Avatar shortcode `[init_user_engine]` + modal dashboard  
-- Avatar system with upload, preview, and revert support  
+**Profile & Avatar**
+
+- Avatar shortcode `[init_user_engine]` – renders the guest login button or the logged-in avatar with dropdown dashboard automatically  
+- Modal dashboard showing level, EXP progress, Coin/Cash wallet, and quick links  
+- Custom avatar upload with live preview, crop-free flow, and one-click revert to the default/Gravatar image  
+- Configurable upload policy (allow everyone, VIP only, or disable uploads entirely) with a configurable max file size  
+- Theme override support: any template file can be overridden by copying it to `your-theme/init-user-engine/`
+
+**Accounts, Login & Registration**
+
+- Frontend login & registration modal – no theme editing or template overrides required  
+- "Login After Register" option to automatically sign users in right after they create an account (disabled by default)  
+- Failed logins reopen the login modal on the current page with an inline error message, instead of redirecting to `wp-login.php`  
+- Cloudflare Turnstile captcha on registration, with a built-in math-question captcha as automatic fallback when no Turnstile keys are set  
+- Optional protection of the native WordPress login, registration, and lost-password forms (`wp-login.php`) using the same Turnstile setup  
+- Custom redirect URLs for "Register" and "Lost password" links  
+- Optional "Require Login to Access Site" mode that gates the entire frontend behind the built-in login modal  
+- Ability to temporarily disable new registrations without affecting other plugins or WordPress core
+
+**Gamification**
+
 - EXP & Level system with hookable progression logic  
-- Coin & Cash wallet system with transaction logs  
-- Daily check-in with streak milestones & online bonus timer  
-- Inbox system with pagination, read/claim/delete  
-- VIP membership system with Coin-based purchase & expiry  
+- Coin & Cash dual-wallet system with transaction logs and a configurable exchange rate between the two currencies  
+- Daily check-in with streak milestones and an online-time bonus timer  
+- Built-in reward hooks for registration, daily login, comments, published posts, and completed WooCommerce orders (when WooCommerce is active)
+
+**VIP Membership**
+
+- VIP membership system with Coin-based, Cash-based, or combined purchase options  
+- Multiple configurable pricing tiers per duration, including a lifetime option  
+- VIP bonus multipliers for Coin/EXP earning  
+- Optional VIP purchase lock (globally disable new purchases) and stacking restriction
+
+**Referral**
+
 - Referral module with cookie-based signup tracking  
-- Redeem Code / Gift Code module – code in, rewards out
+- Separate, configurable rewards for both the referrer and the newly referred user
+
+**Redeem & VIP Codes**
+
+- Redeem Code / Gift Code module – code in, rewards out  
+- Dedicated VIP Codes module to grant VIP duration through a code  
+- One-click CSV export for both code lists (full list, streamed in batches, UTF-8 BOM, and sanitized against CSV/formula injection)
+
+**Inbox & Notifications**
+
+- Built-in inbox system with pagination and read/claim/delete actions  
+- Pinned messages that automatically unpin once read, or once their optional expiration time passes  
+- Admin panel to send custom notifications to selected users or all members, with priority and expiration  
+- Inbox Statistics dashboard (Users → Init User Engine → Inbox Statistics) with date-range filtering
+
+**Admin Tools**
+
+- Manual Top-up tool for Coin/Cash (Users → Init User Engine → Top-up Coin/Cash)  
+- Per-user overview metabox on the WordPress profile/edit-user screen (level, wallet, VIP status, recent activity)
+
+**Developer-Friendly**
+
 - REST API for all features (read/write/modify)  
 - Action/filter hooks for full customization  
-- Pure Vanilla JS frontend – no jQuery, no server bloat  
-- Admin notification panel to send messages to selected users or all members  
+- Pure Vanilla JS frontend – no jQuery, no server bloat
 
 == Screenshots ==
 
@@ -160,6 +211,16 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.3 – September 7, 2026 =
+- Added a new **"Login After Register"** option (Init User Engine → Settings → General, disabled by default). When enabled, a successful registration through the plugin's REST endpoint (`/register`) immediately signs the new user in (`wp_set_auth_cookie()` + `wp_set_current_user()`, followed by the standard `wp_login` action for compatibility with other plugins/themes) instead of leaving them on the Login form
+  - The frontend register form now reloads the page after a successful auto-login (instead of switching to the Login form) so the UI, nonces, and avatar immediately reflect the signed-in state
+  - Left disabled by default so registration and login remain two explicit, separate steps unless a site owner opts in
+- Fixed: a failed login attempt from the plugin's login modal (via `wp_login_form()`) used to fall back to WordPress's default behavior and redirect the visitor to `wp-login.php`, which felt out of place on sites that never expose that page. Failed logins now redirect back to the exact page the visitor was on, with the login modal automatically reopened and an inline error message (wrong username, wrong password, or missing fields)
+  - Implemented via the `wp_login_failed` action combined with `wp_get_referer()`; only intervenes when the login attempt came from a normal frontend page, so logins made directly on `wp-login.php` or inside `wp-admin` keep WordPress's native behavior untouched
+  - The redirect uses two short-lived query arguments (`iue_login_failed`, `iue_login_code`) that `assets/js/guest.js` reads once to open the modal and show the right message, then immediately strips from the URL via `history.replaceState()` so refreshing or sharing the link never re-shows the notice
+- Refreshed `readme.txt` — the **Features** section was rewritten from scratch to match the plugin's actual current feature set (Turnstile/captcha, Require Login gate, Redeem/VIP Codes with CSV export, Inbox Statistics, admin user metabox, and more), several of which had been implemented in past releases but never documented here
+- Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included)
 
 = 1.6.2 – September 4, 2026 =
 - Changed: a pinned Inbox message now only stays pinned to the top while it is **unread**. As soon as it's marked as read (single message or "mark all as read"), it automatically unpins and behaves like any other message, so read messages no longer take up space at the top of the Inbox modal

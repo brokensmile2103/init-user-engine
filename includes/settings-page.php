@@ -112,6 +112,7 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['disable_gravatar'] 		 = ! empty( $input['disable_gravatar'] ) ? 1 : 0;
 	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
 	$output['disable_registration'] 	 = ! empty( $input['disable_registration'] ) ? 1 : 0;
+	$output['login_after_register'] 	 = ! empty( $input['login_after_register'] ) ? 1 : 0;
 
 	$output['turnstile_site_key']   	 = sanitize_text_field( $input['turnstile_site_key'] ?? '' );
 	$output['turnstile_secret_key'] 	 = sanitize_text_field( $input['turnstile_secret_key'] ?? '' );
@@ -354,6 +355,24 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description">
 							<?php esc_html_e( 'When enabled, the Init User Engine will stop accepting new sign-ups through its system. This does not affect other plugins or WordPress default registration.', 'init-user-engine' ); ?><br>
 							<?php esc_html_e( 'Perfect for maintenance periods or when you want to keep the community invite-only.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Login After Register', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[login_after_register]"
+								value="1"
+								<?php checked( $options['login_after_register'] ?? 0, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Automatically log new users in right after they successfully register.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'When enabled, users skip the login step entirely and land on the site already signed in after creating their account.', 'init-user-engine' ); ?><br>
+							<?php esc_html_e( 'Disabled by default, so registration and login remain two separate, explicit steps.', 'init-user-engine' ); ?>
 						</p>
 					</td>
 				</tr>

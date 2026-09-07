@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.6.2\n"
+"Project-Id-Version: Init User Engine 1.6.3\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
-"POT-Creation-Date: 2026-09-04 00:00+0000\n"
+"POT-Creation-Date: 2026-09-07 00:00+0000\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,8 +11,7 @@ msgstr ""
 "X-Domain: init-user-engine\n"
 
 #. Plugin Name of the plugin
-#: init-user-engine.php
-#: includes/settings-page.php:7
+#: init-user-engine.php includes/settings-page.php:7
 msgid "Init User Engine"
 msgstr "Init User Engine"
 
@@ -23,8 +22,12 @@ msgstr ""
 
 #. Description of the plugin
 #: init-user-engine.php
-msgid "Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS."
-msgstr "Hệ thống người dùng nhẹ, sinh động với EXP, ví Coin, điểm danh, VIP, hộp thư và giới thiệu – vận hành bằng REST API và JavaScript thuần."
+msgid ""
+"Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, "
+"and referral – powered by REST API and Vanilla JS."
+msgstr ""
+"Hệ thống người dùng nhẹ, sinh động với EXP, ví Coin, điểm danh, VIP, hộp thư "
+"và giới thiệu – vận hành bằng REST API và JavaScript thuần."
 
 #. Author of the plugin
 #: init-user-engine.php
@@ -40,101 +43,90 @@ msgstr ""
 msgid "You are not allowed to do this."
 msgstr "Bạn không có quyền thực hiện thao tác này."
 
-#: includes/ajax.php:43
-#: includes/settings-page.php:487
-#: includes/settings-page.php:490
-#: includes/turnstile-forms.php:151
+#: includes/ajax.php:43 includes/settings-page.php:506
+#: includes/settings-page.php:509 includes/turnstile-forms.php:151
 msgid "Please enter both Site Key and Secret Key before testing."
 msgstr "Vui lòng nhập cả Site Key và Secret Key trước khi kiểm tra."
 
 #: includes/ajax.php:53
-msgid "Secret Key is valid — Cloudflare accepted the request. Site Key can only be fully confirmed once the widget actually renders in the browser (e.g. on the registration form)."
-msgstr "Secret Key hợp lệ — Cloudflare đã chấp nhận yêu cầu. Site Key chỉ có thể được xác nhận đầy đủ khi widget thực sự hiển thị trên trình duyệt (ví dụ ở biểu mẫu đăng ký)."
+msgid ""
+"Secret Key is valid — Cloudflare accepted the request. Site Key can only be "
+"fully confirmed once the widget actually renders in the browser (e.g. on the "
+"registration form)."
+msgstr ""
+"Secret Key hợp lệ — Cloudflare đã chấp nhận yêu cầu. Site Key chỉ có thể "
+"được xác nhận đầy đủ khi widget thực sự hiển thị trên trình duyệt (ví dụ ở "
+"biểu mẫu đăng ký)."
 
-#: includes/cash.php:60
-#: includes/cash.php:219
-#: includes/referral.php:108
+#: includes/cash.php:60 includes/cash.php:219 includes/referral.php:108
 msgid "Unauthorized"
 msgstr "Chưa xác thực"
 
-#: includes/cash.php:72
-#: includes/cash.php:231
-#: init-user-engine.php:376
+#: includes/cash.php:72 includes/cash.php:231 init-user-engine.php:383
 msgid "Exchange is currently disabled."
 msgstr "Tính năng đổi tiền hiện đang tắt."
 
 #. translators: %s is the cash label (e.g., Cash, Kim cương).
 #. translators: %s is the coin label (e.g., Coin, Xu).
-#: includes/cash.php:98
-#: includes/cash.php:257
+#: includes/cash.php:98 includes/cash.php:257
 #, php-format
 msgid "Please provide a valid %s amount greater than 0."
 msgstr "Vui lòng nhập số %s hợp lệ lớn hơn 0."
 
 #. translators: %1$d is number, %2$s is the cash label (e.g., Cash, Kim cương).
 #. translators: %1$d is number, %2$s is the coin label (e.g., Coin, Xu).
-#: includes/cash.php:102
-#: includes/cash.php:261
+#: includes/cash.php:102 includes/cash.php:261
 #, php-format
 msgid "Minimum per exchange is %1$d %2$s."
 msgstr "Tối thiểu mỗi lượt đổi là %1$d %2$s."
 
 #. translators: %1$d is number, %2$s is the cash label (e.g., Cash, Kim cương).
 #. translators: %1$d is number, %2$s is the coin label (e.g., Coin, Xu).
-#: includes/cash.php:106
-#: includes/cash.php:265
+#: includes/cash.php:106 includes/cash.php:265
 #, php-format
 msgid "Maximum per exchange is %1$d %2$s."
 msgstr "Tối đa mỗi lượt đổi là %1$d %2$s."
 
-#: includes/cash.php:113
-#: includes/cash.php:272
+#: includes/cash.php:113 includes/cash.php:272
 msgid "Too many exchange attempts. Please try again later."
 msgstr "Bạn đã thử đổi tiền quá nhiều lần. Vui lòng thử lại sau."
 
-#: includes/cash.php:121
-#: includes/cash.php:280
+#: includes/cash.php:121 includes/cash.php:280
 msgid "Duplicate exchange request detected."
 msgstr "Đã phát hiện yêu cầu đổi tiền trùng lặp."
 
-#: includes/cash.php:130
-#: includes/cash.php:288
+#: includes/cash.php:130 includes/cash.php:288
 msgid "Another exchange is in progress. Please wait a moment."
 msgstr "Một lượt đổi tiền khác đang được xử lý. Vui lòng đợi trong giây lát."
 
 #. translators: %s is the cash label (e.g., Cash, Kim cương).
 #. translators: %s is the coin label (e.g., Coin, Xu).
-#: includes/cash.php:142
-#: includes/cash.php:299
+#: includes/cash.php:142 includes/cash.php:299
 #, php-format
 msgid "Not enough %s to exchange."
 msgstr "Không đủ %s để đổi."
 
 #. translators: %1$s is the coin label, %2$s is the cash label (e.g., Coin, Cash).
 #. translators: %1$s is the cash label, %2$s is the coin label (e.g., Cash, Coin).
-#: includes/cash.php:149
-#: includes/cash.php:306
+#: includes/cash.php:149 includes/cash.php:306
 #, php-format
 msgid "The exchange would result in 0 %1$s. Increase the %2$s amount."
 msgstr "Lượt đổi này sẽ cho ra 0 %1$s. Hãy tăng số lượng %2$s."
 
 #. translators: %s is the cash label (e.g., Cash, Kim cương).
 #. translators: %s is the coin label (e.g., Coin, Xu).
-#: includes/cash.php:160
-#: includes/cash.php:317
+#: includes/cash.php:160 includes/cash.php:317
 #, php-format
 msgid "Could not deduct %s."
 msgstr "Không thể trừ %s."
 
-#: includes/cash.php:165
-#: includes/cash.php:322
+#: includes/cash.php:165 includes/cash.php:322
 msgid "Balance changed. Please try again."
 msgstr "Số dư đã thay đổi. Vui lòng thử lại."
 
 #. translators: %s is the coin label (e.g., Coin, Xu).
 #. translators: %s is the cash label (e.g., Cash, Kim cương).
-#: includes/cash.php:174
-#: includes/cash.php:331
+#: includes/cash.php:174 includes/cash.php:331
 #, php-format
 msgid "Could not add %s."
 msgstr "Không thể cộng %s."
@@ -142,7 +134,8 @@ msgstr "Không thể cộng %s."
 #. translators: %1$d is the level number, %2$d is the bonus amount, %3$s is the coin label (e.g., Coin, Xu).
 #: includes/exp.php:71
 #, php-format
-msgid "Congratulations! You reached level %1$d and received %2$d %3$s as a bonus."
+msgid ""
+"Congratulations! You reached level %1$d and received %2$d %3$s as a bonus."
 msgstr "Chúc mừng! Bạn đã lên cấp %1$d và nhận được %2$d %3$s thưởng."
 
 #: includes/exp.php:79
@@ -152,8 +145,11 @@ msgstr "Lên cấp!"
 #. translators: %1$d is EXP amount, %2$d is coin amount, %3$s is the coin label (e.g., Coin, Xu).
 #: includes/hooks.php:106
 #, php-format
-msgid "You received +%1$d EXP and +%2$d %3$s for signing up. Let the journey begin!"
-msgstr "Bạn nhận được +%1$d EXP và +%2$d %3$s khi đăng ký tài khoản. Cùng khám phá ngay nhé!"
+msgid ""
+"You received +%1$d EXP and +%2$d %3$s for signing up. Let the journey begin!"
+msgstr ""
+"Bạn nhận được +%1$d EXP và +%2$d %3$s khi đăng ký tài khoản. Cùng khám phá "
+"ngay nhé!"
 
 #: includes/hooks.php:114
 msgid "Welcome to the community!"
@@ -167,7 +163,8 @@ msgstr "Cảm ơn bạn đã mua hàng!"
 #: includes/hooks.php:224
 #, php-format
 msgid "You received +%1$d EXP and +%2$d %3$s for your order. Keep growing!"
-msgstr "Bạn nhận được +%1$d EXP và +%2$d %3$s từ đơn hàng. Tiếp tục phát triển nhé!"
+msgstr ""
+"Bạn nhận được +%1$d EXP và +%2$d %3$s từ đơn hàng. Tiếp tục phát triển nhé!"
 
 #: includes/hooks.php:257
 msgid "You have a new reply to your comment"
@@ -186,25 +183,35 @@ msgstr "Cảm ơn bạn đã đánh giá!"
 #. translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
 #: includes/hooks.php:375
 #, php-format
-msgid "You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!"
-msgstr "Bạn nhận được +%1$d EXP và +%2$d %3$s khi đánh giá. Tiếp tục phát huy nhé!"
+msgid ""
+"You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!"
+msgstr ""
+"Bạn nhận được +%1$d EXP và +%2$d %3$s khi đánh giá. Tiếp tục phát huy nhé!"
 
-#: includes/hooks.php:493
+#: includes/hooks.php:455
+msgid "This site is available to logged-in members only."
+msgstr "Trang này chỉ dành cho thành viên đã đăng nhập."
+
+#: includes/hooks.php:458
+msgid "Click here to log in"
+msgstr "Bấm vào đây để đăng nhập"
+
+#: includes/hooks.php:548
 msgid "Your VIP status has been removed"
 msgstr "Trạng thái VIP của bạn đã bị gỡ bỏ"
 
-#: includes/hooks.php:494
-msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
-msgstr "Quản trị viên đã hủy tư cách thành viên VIP của bạn. Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ."
+#: includes/hooks.php:549
+msgid ""
+"An administrator has cancelled your VIP membership. If you think this is a "
+"mistake, please contact support."
+msgstr ""
+"Quản trị viên đã hủy tư cách thành viên VIP của bạn. Nếu bạn cho rằng đây là "
+"nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ."
 
-#: includes/inbox.php:610
-#: includes/redeem-codes-handler.php:15
-#: includes/user-metabox.php:541
-#: includes/user-metabox.php:633
-#: includes/vip-codes-handler.php:15
-#: includes/vip-codes-handler.php:39
-#: includes/vip-codes-handler.php:198
-#: includes/vip-codes-handler.php:227
+#: includes/inbox.php:610 includes/redeem-codes-handler.php:15
+#: includes/user-metabox.php:541 includes/user-metabox.php:633
+#: includes/vip-codes-handler.php:15 includes/vip-codes-handler.php:39
+#: includes/vip-codes-handler.php:198 includes/vip-codes-handler.php:227
 msgid "You do not have permission to perform this action."
 msgstr "Bạn không có quyền thực hiện thao tác này."
 
@@ -268,8 +275,7 @@ msgstr "Thưởng mở khoá chương"
 msgid "Redeem code reward"
 msgstr "Phần thưởng đổi mã"
 
-#: includes/log.php:280
-#: includes/log.php:283
+#: includes/log.php:280 includes/log.php:283
 msgid "Currency exchange"
 msgstr "Đổi tiền"
 
@@ -372,6 +378,10 @@ msgstr "Người dùng: %1$s (@%2$s, #%3$d)"
 msgid "User ID #%d (not found)"
 msgstr "Người dùng #%d (không tồn tại)"
 
+#: includes/redeem-codes-handler.php:21 includes/vip-codes-handler.php:21
+msgid "Security check failed. Please refresh the page and try again."
+msgstr "Kiểm tra bảo mật thất bại. Vui lòng tải lại trang và thử lại."
+
 #: includes/redeem-codes-handler.php:161
 msgid "You received a redeem code!"
 msgstr "Bạn đã nhận được một mã quy đổi!"
@@ -379,58 +389,52 @@ msgstr "Bạn đã nhận được một mã quy đổi!"
 #. translators: %s: redeem code string assigned to the user
 #: includes/redeem-codes-handler.php:165
 #, php-format
-msgid "You have been assigned a redeem code: %s. You can use it in the Redeem section."
-msgstr "Bạn đã được cấp một mã quy đổi: %s. Bạn có thể sử dụng tại phần Đổi mã."
+msgid ""
+"You have been assigned a redeem code: %s. You can use it in the Redeem "
+"section."
+msgstr ""
+"Bạn đã được cấp một mã quy đổi: %s. Bạn có thể sử dụng tại phần Đổi mã."
 
-#: includes/redeem-codes-handler.php:271
-#: init-user-engine.php:450
+#: includes/redeem-codes-handler.php:271 init-user-engine.php:457
 msgid "Please enter a redeem code."
 msgstr "Vui lòng nhập mã."
 
-#: includes/redeem-codes-handler.php:298
-#: init-user-engine.php:444
+#: includes/redeem-codes-handler.php:298 init-user-engine.php:451
 msgid "Invalid redeem code."
 msgstr "Mã không hợp lệ."
 
-#: includes/redeem-codes-handler.php:308
-#: includes/vip-codes-handler.php:318
-#: init-user-engine.php:446
+#: includes/redeem-codes-handler.php:308 includes/vip-codes-handler.php:318
+#: init-user-engine.php:453
 msgid "This code is not active yet."
 msgstr "Mã chưa đến thời gian sử dụng."
 
-#: includes/redeem-codes-handler.php:316
-#: includes/vip-codes-handler.php:326
-#: init-user-engine.php:445
+#: includes/redeem-codes-handler.php:316 includes/vip-codes-handler.php:326
+#: init-user-engine.php:452
 msgid "This code has expired."
 msgstr "Mã đã hết hạn."
 
-#: includes/redeem-codes-handler.php:326
-#: includes/vip-codes-handler.php:336
-#: init-user-engine.php:449
+#: includes/redeem-codes-handler.php:326 includes/vip-codes-handler.php:336
+#: init-user-engine.php:456
 msgid "This code is assigned to another user."
 msgstr "Mã này dành cho người dùng khác."
 
-#: includes/redeem-codes-handler.php:344
-#: includes/vip-codes-handler.php:386
+#: includes/redeem-codes-handler.php:344 includes/vip-codes-handler.php:386
 msgid "You have already used this code."
 msgstr "Bạn đã sử dụng mã này rồi."
 
-#: includes/redeem-codes-handler.php:357
-#: includes/vip-codes-handler.php:399
-#: init-user-engine.php:448
+#: includes/redeem-codes-handler.php:357 includes/vip-codes-handler.php:399
+#: init-user-engine.php:455
 msgid "This code has already been used up."
 msgstr "Mã này đã hết số lần sử dụng."
 
-#: includes/redeem-codes-handler.php:378
-#: includes/vip-codes-handler.php:420
-#: init-user-engine.php:447
+#: includes/redeem-codes-handler.php:378 includes/vip-codes-handler.php:420
+#: init-user-engine.php:454
 msgid "This code has already been used."
 msgstr "Mã này đã được sử dụng."
 
 #. translators: 1: amount, 2: coin label
 #. translators: 1: amount, 2: cash label
-#: includes/redeem-codes-handler.php:443
-#: includes/redeem-codes-handler.php:447
+#: includes/redeem-codes-handler.php:443 includes/redeem-codes-handler.php:447
 #, php-format
 msgid "%1$d %2$s"
 msgstr "%1$d %2$s"
@@ -445,12 +449,76 @@ msgstr "Đổi mã thành công"
 msgid "You received: %s."
 msgstr "Bạn đã nhận: %s."
 
-#: includes/redeem-codes-handler.php:455
-#: includes/redeem-codes-handler.php:472
-#: includes/vip-codes-handler.php:496
-#: init-user-engine.php:441
+#: includes/redeem-codes-handler.php:455 includes/redeem-codes-handler.php:472
+#: includes/vip-codes-handler.php:496 init-user-engine.php:448
 msgid "Redeem successful!"
 msgstr "Đổi mã thành công!"
+
+#: includes/redeem-codes-handler.php:502 includes/vip-codes-handler.php:544
+msgid "ID"
+msgstr "ID"
+
+#: includes/redeem-codes-handler.php:503 includes/tools/redeem-codes.php:169
+#: includes/tools/redeem-codes.php:262 includes/tools/redeem-codes.php:422
+#: includes/tools/vip-codes.php:168 includes/tools/vip-codes.php:261
+#: includes/tools/vip-codes.php:416 includes/vip-codes-handler.php:545
+msgid "Code"
+msgstr "Mã"
+
+#: includes/redeem-codes-handler.php:504 includes/tools/redeem-codes.php:263
+#: includes/tools/send-notification.php:158 includes/tools/topup.php:272
+#: includes/tools/vip-codes.php:262 includes/vip-codes-handler.php:546
+msgid "Type"
+msgstr "Loại"
+
+#: includes/redeem-codes-handler.php:505 includes/vip-codes-handler.php:547
+msgid "Locked User ID"
+msgstr "ID người dùng bị khóa"
+
+#: includes/redeem-codes-handler.php:506 includes/vip-codes-handler.php:548
+msgid "Locked Username"
+msgstr "Tên đăng nhập người dùng bị khóa"
+
+#: includes/redeem-codes-handler.php:507 includes/tools/redeem-codes.php:217
+msgid "Coin Amount"
+msgstr "Số lượng Coin"
+
+#: includes/redeem-codes-handler.php:508 includes/tools/redeem-codes.php:222
+msgid "Cash Amount"
+msgstr "Số lượng Cash"
+
+#: includes/redeem-codes-handler.php:509 includes/vip-codes-handler.php:550
+msgid "Max Uses"
+msgstr "Số lượt dùng tối đa"
+
+#: includes/redeem-codes-handler.php:510 includes/vip-codes-handler.php:551
+msgid "Used Count"
+msgstr "Số lượt đã dùng"
+
+#: includes/redeem-codes-handler.php:511 includes/tools/redeem-codes.php:268
+#: includes/tools/vip-codes.php:266 includes/vip-codes-handler.php:552
+msgid "Status"
+msgstr "Trạng thái"
+
+#: includes/redeem-codes-handler.php:512 includes/vip-codes-handler.php:553
+msgid "Valid From"
+msgstr "Hiệu lực từ"
+
+#: includes/redeem-codes-handler.php:513 includes/vip-codes-handler.php:554
+msgid "Valid To"
+msgstr "Hiệu lực đến"
+
+#: includes/redeem-codes-handler.php:514 includes/vip-codes-handler.php:555
+msgid "Created By"
+msgstr "Người tạo"
+
+#: includes/redeem-codes-handler.php:515 includes/vip-codes-handler.php:556
+msgid "Created At"
+msgstr "Ngày tạo"
+
+#: includes/redeem-codes-handler.php:516 includes/vip-codes-handler.php:557
+msgid "Updated At"
+msgstr "Ngày cập nhật"
 
 #. translators: %d is the number of invited friends.
 #: includes/referral.php:69
@@ -696,18 +764,15 @@ msgstr "Đã phát hiện gửi dữ liệu tự động (bot)."
 msgid "Too many registration attempts. Please try again later."
 msgstr "Bạn đã thử đăng ký quá nhiều lần. Vui lòng thử lại sau."
 
-#: includes/rest-api.php:440
-#: init-user-engine.php:131
+#: includes/rest-api.php:440 init-user-engine.php:132
 msgid "Username must be at least 3 characters."
 msgstr "Tên người dùng phải có ít nhất 3 ký tự."
 
-#: includes/rest-api.php:444
-#: init-user-engine.php:132
+#: includes/rest-api.php:444 init-user-engine.php:133
 msgid "Username can only contain letters, numbers and underscores."
 msgstr "Tên người dùng chỉ được chứa chữ cái, số và dấu gạch dưới."
 
-#: includes/rest-api.php:448
-#: init-user-engine.php:133
+#: includes/rest-api.php:448 init-user-engine.php:134
 msgid "Please enter a valid email address."
 msgstr "Vui lòng nhập địa chỉ email hợp lệ."
 
@@ -719,689 +784,818 @@ msgstr "Tên người dùng đã tồn tại."
 msgid "Email already registered."
 msgstr "Email này đã được đăng ký."
 
-#: includes/rest-api.php:460
-#: init-user-engine.php:134
+#: includes/rest-api.php:460 init-user-engine.php:135
 msgid "Password must be at least 6 characters."
 msgstr "Mật khẩu phải có ít nhất 6 ký tự."
 
-#: includes/rest-api.php:464
-#: init-user-engine.php:135
+#: includes/rest-api.php:464 init-user-engine.php:136
 msgid "Password must contain both letters and numbers."
 msgstr "Mật khẩu phải chứa cả chữ cái và số."
 
-#: includes/rest-api.php:493
+#: includes/rest-api.php:512 init-user-engine.php:131
+msgid "Welcome! Logging you in…"
+msgstr "Chào mừng! Đang đăng nhập cho bạn…"
+
+#: includes/rest-api.php:513
 msgid "Registration successful. You can now log in."
 msgstr "Đăng ký thành công. Bạn có thể đăng nhập ngay bây giờ."
 
-#: includes/rest-api.php:500
-#: init-user-engine.php:136
+#: includes/rest-api.php:521 init-user-engine.php:137
 msgid "Please complete the captcha."
 msgstr "Vui lòng hoàn tất captcha."
 
-#: includes/rest-api.php:506
+#: includes/rest-api.php:527
 msgid "Invalid captcha token."
 msgstr "Mã captcha không hợp lệ."
 
-#: includes/rest-api.php:513
+#: includes/rest-api.php:534
 msgid "Captcha has expired. Please try again."
 msgstr "Captcha đã hết hạn. Vui lòng thử lại."
 
-#: includes/rest-api.php:519
+#: includes/rest-api.php:540
 msgid "Too many captcha attempts. Please get a new one."
 msgstr "Bạn đã thử captcha quá nhiều lần. Vui lòng lấy captcha mới."
 
-#: includes/rest-api.php:528
+#: includes/rest-api.php:549
 msgid "Incorrect captcha answer. Please try again."
 msgstr "Câu trả lời captcha không đúng. Vui lòng thử lại."
 
-#: includes/rest-api.php:535
+#: includes/rest-api.php:556
 msgid "Captcha validation failed. Please try again."
 msgstr "Xác thực captcha thất bại. Vui lòng thử lại."
 
 #. translators: %d is streak days
-#: includes/rest-api.php:627
+#: includes/rest-api.php:648
 #, php-format
 msgid "You reached a %d-day check-in streak!"
 msgstr "Chuỗi điểm danh của bạn đã đạt %d ngày!"
 
-#: includes/rest-api.php:628
+#: includes/rest-api.php:649
 msgid "Your consistency is impressive! We just sent you a bonus reward."
-msgstr "Sự kiên trì của bạn thật ấn tượng! Chúng tôi vừa gửi phần thưởng thêm cho bạn."
+msgstr ""
+"Sự kiên trì của bạn thật ấn tượng! Chúng tôi vừa gửi phần thưởng thêm cho "
+"bạn."
 
-#: includes/rest-api.php:758
+#: includes/rest-api.php:779
 msgid "You are not allowed to upload an avatar."
 msgstr "Bạn không được phép tải lên ảnh đại diện."
 
 #. translators: %s = max size in MB
 #. translators: %s = max upload size in MB
-#: includes/rest-api.php:779
-#: includes/rest-api.php:812
-#: init-user-engine.php:398
+#: includes/rest-api.php:800 includes/rest-api.php:833 init-user-engine.php:405
 #, php-format
 msgid "Image too large (max %sMB)"
 msgstr "Ảnh quá lớn (tối đa %sMB)"
 
-#: includes/rest-api.php:872
+#: includes/rest-api.php:893
 msgid "Could not save original file."
 msgstr "Không thể lưu tệp gốc."
 
-#: includes/rest-api.php:932
+#: includes/rest-api.php:953
 msgid "Avatar removal is locked for review."
 msgstr "Việc xoá ảnh đại diện đang bị khoá để chờ xét duyệt."
 
-#: includes/rest-api.php:945
+#: includes/rest-api.php:966
 msgid "You are not allowed to remove the avatar."
 msgstr "Bạn không được phép xoá ảnh đại diện."
 
-#: includes/rest-api.php:1020
+#: includes/rest-api.php:1041
 msgid "Spam detected."
 msgstr "Đã phát hiện spam."
+
+#: includes/rest-api.php:1053 includes/rest-api.php:1064
+#: init-user-engine.php:432 init-user-engine.php:434
+msgid "Please enter a valid date of birth."
+msgstr "Vui lòng nhập ngày sinh hợp lệ."
+
+#: includes/rest-api.php:1058 init-user-engine.php:433
+msgid "Date of birth cannot be in the future."
+msgstr "Ngày sinh không được ở trong tương lai."
 
 #: includes/settings-page.php:8
 msgid "User Engine"
 msgstr "User Engine"
 
-#: includes/settings-page.php:18
-#: includes/settings-page.php:19
-#: init-user-engine.php:472
+#: includes/settings-page.php:18 includes/settings-page.php:19
+#: init-user-engine.php:479
 msgid "Settings"
 msgstr "Cài đặt"
 
-#: includes/settings-page.php:27
-#: includes/settings-page.php:28
+#: includes/settings-page.php:27 includes/settings-page.php:28
 #: includes/tools/inbox-statistics.php:757
 #: includes/tools/send-notification.php:93
 #: includes/tools/send-notification.php:205
 msgid "Send Notification"
 msgstr "Gửi thông báo"
 
-#: includes/settings-page.php:38
-#: includes/settings-page.php:39
+#: includes/settings-page.php:38 includes/settings-page.php:39
 #: includes/tools/inbox-statistics.php:64
 #: includes/tools/inbox-statistics.php:131
 msgid "Inbox Statistics"
 msgstr "Thống kê hộp thư"
 
-#: includes/settings-page.php:49
-#: includes/settings-page.php:50
+#: includes/settings-page.php:49 includes/settings-page.php:50
 msgid "Top-up Coin/Cash"
 msgstr "Nạp Coin/Cash"
 
-#: includes/settings-page.php:60
-#: includes/settings-page.php:61
+#: includes/settings-page.php:60 includes/settings-page.php:61
 #: includes/tools/redeem-codes.php:157
 msgid "Redeem Codes"
 msgstr "Mã quy đổi"
 
-#: includes/settings-page.php:71
-#: includes/settings-page.php:72
+#: includes/settings-page.php:71 includes/settings-page.php:72
 #: includes/tools/vip-codes.php:153
 msgid "VIP Codes"
 msgstr "Mã VIP"
 
-#: includes/settings-page.php:196
+#: includes/settings-page.php:197
 msgid "Init User Engine Settings"
 msgstr "Cài đặt Init User Engine"
 
-#: includes/settings-page.php:205
+#: includes/settings-page.php:206
 msgid "Theme Color"
 msgstr "Màu giao diện"
 
-#: includes/settings-page.php:209
+#: includes/settings-page.php:210
 msgid "Used as the main highlight color in user modals."
 msgstr "Dùng làm màu nổi bật trong giao diện người dùng."
 
-#: includes/settings-page.php:214
+#: includes/settings-page.php:215
 msgid "Coin Label"
 msgstr "Tên gọi Coin"
 
-#: includes/settings-page.php:218
+#: includes/settings-page.php:219
 msgid "Singular label used to represent the virtual currency (e.g., Xu, Coin)."
 msgstr "Tên đơn dùng để đại diện cho tiền ảo (ví dụ: Xu, Coin)."
 
-#: includes/settings-page.php:223
+#: includes/settings-page.php:224
 msgid "Cash Label"
 msgstr "Tên gọi Cash"
 
-#: includes/settings-page.php:227
-msgid "Label for premium currency or real-money equivalent (e.g., Cash, Kim cương)."
-msgstr "Tên gọi cho tiền cao cấp hoặc tương đương tiền thật (ví dụ: Cash, Kim cương)."
+#: includes/settings-page.php:228
+msgid ""
+"Label for premium currency or real-money equivalent (e.g., Cash, Kim cương)."
+msgstr ""
+"Tên gọi cho tiền cao cấp hoặc tương đương tiền thật (ví dụ: Cash, Kim cương)."
 
-#: includes/settings-page.php:232
+#: includes/settings-page.php:233
 msgid "Exchange Rate: Cash → Coin"
 msgstr "Tỉ giá: Cash → Coin"
 
-#: includes/settings-page.php:238
+#: includes/settings-page.php:239
 msgid "Coin received for 1 Cash. Set to 0 to disable conversion."
 msgstr "Số Coin nhận được khi đổi 1 Cash. Đặt 0 để tắt quy đổi."
 
-#: includes/settings-page.php:244
+#: includes/settings-page.php:245
 msgid "Exchange Rate: Coin → Cash"
 msgstr "Tỷ giá: Coin → Cash"
 
-#: includes/settings-page.php:250
+#: includes/settings-page.php:251
 msgid "Cash received for 1 Coin. Set to 0 to disable conversion."
 msgstr "Số Cash nhận được cho 1 Coin. Đặt 0 để tắt chức năng đổi."
 
-#: includes/settings-page.php:256
+#: includes/settings-page.php:257
 msgid "DANGER — Exchange Misconfiguration Risk"
 msgstr "CẢNH BÁO — Rủi ro cấu hình sai Đổi tiền"
 
-#: includes/settings-page.php:260
-msgid "If both exchange directions are enabled simultaneously, users may exploit rate differences to generate infinite Coin/Cash."
-msgstr "Nếu cả hai chiều đổi tiền đều được bật cùng lúc, người dùng có thể lợi dụng chênh lệch tỷ giá để tạo ra Coin/Cash vô hạn."
+#: includes/settings-page.php:261
+msgid ""
+"If both exchange directions are enabled simultaneously, users may exploit "
+"rate differences to generate infinite Coin/Cash."
+msgstr ""
+"Nếu cả hai chiều đổi tiền đều được bật cùng lúc, người dùng có thể lợi dụng "
+"chênh lệch tỷ giá để tạo ra Coin/Cash vô hạn."
 
-#: includes/settings-page.php:263
-msgid "VIP bonus percentages are excluded from exchange transactions. However, enabling both directions simultaneously may still allow users to exploit rate differences."
-msgstr "Thưởng VIP (%) không áp dụng cho giao dịch đổi tiền. Tuy nhiên, việc bật cả hai chiều đồng thời vẫn có thể bị lợi dụng chênh lệch tỷ giá."
+#: includes/settings-page.php:264
+msgid ""
+"VIP bonus percentages are excluded from exchange transactions. However, "
+"enabling both directions simultaneously may still allow users to exploit "
+"rate differences."
+msgstr ""
+"Thưởng VIP (%) không áp dụng cho giao dịch đổi tiền. Tuy nhiên, việc bật cả "
+"hai chiều đồng thời vẫn có thể bị lợi dụng chênh lệch tỷ giá."
 
-#: includes/settings-page.php:266
-msgid "Recommendation: enable only one direction, or ensure the product of both rates is strictly less than 1."
-msgstr "Khuyến nghị: chỉ bật một chiều, hoặc đảm bảo tích của hai tỷ giá nhỏ hơn 1."
+#: includes/settings-page.php:267
+msgid ""
+"Recommendation: enable only one direction, or ensure the product of both "
+"rates is strictly less than 1."
+msgstr ""
+"Khuyến nghị: chỉ bật một chiều, hoặc đảm bảo tích của hai tỷ giá nhỏ hơn 1."
 
-#: includes/settings-page.php:274
+#: includes/settings-page.php:275
 msgid "Require Login to Access Site"
 msgstr "Yêu cầu đăng nhập để truy cập trang"
 
-#: includes/settings-page.php:282
+#: includes/settings-page.php:283
 msgid "Require users to log in before viewing any page on the site."
 msgstr "Yêu cầu người dùng đăng nhập trước khi xem bất kỳ trang nào trên site."
 
-#: includes/settings-page.php:287
+#: includes/settings-page.php:288
 msgid "Note — the entire site becomes private."
 msgstr "Lưu ý — toàn bộ site sẽ trở thành riêng tư."
 
-#: includes/settings-page.php:291
-msgid "When enabled, this site is accessible to logged-in users only. Visitors who are not logged in will see a blank, theme-colored page with the login form instead of any page content, until they sign in."
-msgstr "Khi bật, trang sẽ chỉ dành cho người dùng đã đăng nhập. Khách truy cập chưa đăng nhập sẽ thấy một trang trống mang màu chủ đề của plugin kèm form đăng nhập, thay vì nội dung thật của trang, cho đến khi họ đăng nhập."
+#: includes/settings-page.php:292
+msgid ""
+"When enabled, this site is accessible to logged-in users only. Visitors who "
+"are not logged in will see a blank, theme-colored page with the login form "
+"instead of any page content, until they sign in."
+msgstr ""
+"Khi bật, trang sẽ chỉ dành cho người dùng đã đăng nhập. Khách truy cập chưa "
+"đăng nhập sẽ thấy một trang trống mang màu chủ đề của plugin kèm form đăng "
+"nhập, thay vì nội dung thật của trang, cho đến khi họ đăng nhập."
 
-#: includes/settings-page.php:294
-msgid "REST API, AJAX, cron, and feed requests are not affected and continue to work normally."
-msgstr "Các request REST API, AJAX, cron và feed không bị ảnh hưởng và vẫn hoạt động bình thường."
+#: includes/settings-page.php:295
+msgid ""
+"REST API, AJAX, cron, and feed requests are not affected and continue to "
+"work normally."
+msgstr ""
+"Các request REST API, AJAX, cron và feed không bị ảnh hưởng và vẫn hoạt động "
+"bình thường."
 
-#: includes/hooks.php:455
-msgid "This site is available to logged-in members only."
-msgstr "Trang này chỉ dành cho thành viên đã đăng nhập."
-
-#: includes/hooks.php:458
-msgid "Click here to log in"
-msgstr "Bấm vào đây để đăng nhập"
-
-#: includes/settings-page.php:302
+#: includes/settings-page.php:303
 msgid "Hide Admin Bar (Subscriber)"
 msgstr "Ẩn thanh quản trị (Subscriber)"
 
-#: includes/settings-page.php:310
+#: includes/settings-page.php:311
 msgid "Hide admin bar on frontend for users with Subscriber role."
-msgstr "Ẩn thanh quản trị ở giao diện ngoài với người dùng có vai trò Subscriber."
+msgstr ""
+"Ẩn thanh quản trị ở giao diện ngoài với người dùng có vai trò Subscriber."
 
-#: includes/settings-page.php:316
+#: includes/settings-page.php:317
 msgid "Disable Captcha"
 msgstr "Tắt Captcha"
 
-#: includes/settings-page.php:324
+#: includes/settings-page.php:325
 msgid "Turn off captcha validation during registration."
 msgstr "Tắt xác thực Captcha trong quá trình đăng ký."
 
-#: includes/settings-page.php:329
+#: includes/settings-page.php:330
 msgid "DANGER — Captcha will be COMPLETELY DISABLED."
 msgstr "CẢNH BÁO — Captcha sẽ bị TẮT HOÀN TOÀN."
 
-#: includes/settings-page.php:333
-msgid "This removes all captcha protections including Cloudflare Turnstile. FOR TESTING ONLY — NEVER enable on production sites."
-msgstr "Tùy chọn này sẽ tắt toàn bộ lớp bảo vệ Captcha, bao gồm cả Cloudflare Turnstile. CHỈ DÙNG để kiểm thử — TUYỆT ĐỐI không bật trên môi trường production."
+#: includes/settings-page.php:334
+msgid ""
+"This removes all captcha protections including Cloudflare Turnstile. FOR "
+"TESTING ONLY — NEVER enable on production sites."
+msgstr ""
+"Tùy chọn này sẽ tắt toàn bộ lớp bảo vệ Captcha, bao gồm cả Cloudflare "
+"Turnstile. CHỈ DÙNG để kiểm thử — TUYỆT ĐỐI không bật trên môi trường "
+"production."
 
-#: includes/settings-page.php:338
-msgid "Use only if you fully trust your traffic or have strong external protection services (e.g., Cloudflare WAF or Rate Limit)."
-msgstr "Chỉ nên bật nếu bạn hoàn toàn tin tưởng nguồn truy cập hoặc có lớp bảo vệ mạnh bên ngoài (ví dụ: Cloudflare WAF hoặc Rate Limit)."
+#: includes/settings-page.php:339
+msgid ""
+"Use only if you fully trust your traffic or have strong external protection "
+"services (e.g., Cloudflare WAF or Rate Limit)."
+msgstr ""
+"Chỉ nên bật nếu bạn hoàn toàn tin tưởng nguồn truy cập hoặc có lớp bảo vệ "
+"mạnh bên ngoài (ví dụ: Cloudflare WAF hoặc Rate Limit)."
 
-#: includes/settings-page.php:344
+#: includes/settings-page.php:345
 msgid "Disable New Registrations"
 msgstr "Tắt đăng ký mới"
 
-#: includes/settings-page.php:352
+#: includes/settings-page.php:353
 msgid "Temporarily close all new user registrations."
 msgstr "Tạm thời đóng toàn bộ đăng ký người dùng mới."
 
-#: includes/settings-page.php:355
-msgid "When enabled, the Init User Engine will stop accepting new sign-ups through its system. This does not affect other plugins or WordPress default registration."
-msgstr "Khi bật tùy chọn này, Init User Engine sẽ ngừng chấp nhận đăng ký tài khoản mới qua hệ thống của plugin. Thiết lập này không ảnh hưởng đến các plugin khác hoặc cơ chế đăng ký mặc định của WordPress."
-
 #: includes/settings-page.php:356
-msgid "Perfect for maintenance periods or when you want to keep the community invite-only."
-msgstr "Rất phù hợp khi bảo trì hệ thống hoặc khi bạn muốn giới hạn đăng ký chỉ qua lời mời."
+msgid ""
+"When enabled, the Init User Engine will stop accepting new sign-ups through "
+"its system. This does not affect other plugins or WordPress default "
+"registration."
+msgstr ""
+"Khi bật tùy chọn này, Init User Engine sẽ ngừng chấp nhận đăng ký tài khoản "
+"mới qua hệ thống của plugin. Thiết lập này không ảnh hưởng đến các plugin "
+"khác hoặc cơ chế đăng ký mặc định của WordPress."
 
-#: includes/settings-page.php:362
+#: includes/settings-page.php:357
+msgid ""
+"Perfect for maintenance periods or when you want to keep the community "
+"invite-only."
+msgstr ""
+"Rất phù hợp khi bảo trì hệ thống hoặc khi bạn muốn giới hạn đăng ký chỉ qua "
+"lời mời."
+
+#: includes/settings-page.php:363
+msgid "Login After Register"
+msgstr "Đăng nhập sau khi đăng ký"
+
+#: includes/settings-page.php:371
+msgid "Automatically log new users in right after they successfully register."
+msgstr "Tự động đăng nhập cho người dùng mới ngay sau khi họ đăng ký thành công."
+
+#: includes/settings-page.php:374
+msgid ""
+"When enabled, users skip the login step entirely and land on the site "
+"already signed in after creating their account."
+msgstr ""
+"Khi bật, người dùng sẽ bỏ qua hoàn toàn bước đăng nhập và vào thẳng trang "
+"web trong trạng thái đã đăng nhập ngay sau khi tạo tài khoản."
+
+#: includes/settings-page.php:375
+msgid ""
+"Disabled by default, so registration and login remain two separate, explicit "
+"steps."
+msgstr ""
+"Mặc định tắt, để việc đăng ký và đăng nhập vẫn là hai bước riêng biệt, rõ "
+"ràng."
+
+#: includes/settings-page.php:381
 msgid "Avatar"
 msgstr "Ảnh đại diện"
 
-#: includes/settings-page.php:366
+#: includes/settings-page.php:385
 msgid "Avatar Upload Policy"
 msgstr "Chính sách tải lên avatar"
 
-#: includes/settings-page.php:373
+#: includes/settings-page.php:392
 msgid "Default (do not disable)"
 msgstr "Mặc định (không tắt)"
 
-#: includes/settings-page.php:379
+#: includes/settings-page.php:398
 msgid "Disable avatar upload (everyone)"
 msgstr "Tắt tải lên avatar (mọi người)"
 
-#: includes/settings-page.php:385
+#: includes/settings-page.php:404
 msgid "Allow only VIPs to upload avatar"
 msgstr "Chỉ cho phép VIP tải lên avatar"
 
-#: includes/settings-page.php:388
+#: includes/settings-page.php:407
 msgid "Control site-wide avatar upload permission."
 msgstr "Kiểm soát quyền tải lên avatar trên toàn hệ thống."
 
-#: includes/settings-page.php:394
+#: includes/settings-page.php:413
 msgid "Keep Original Avatar (GIF) for VIPs"
 msgstr "Giữ ảnh đại diện gốc (GIF) cho VIP"
 
-#: includes/settings-page.php:402
+#: includes/settings-page.php:421
 msgid "Allow VIP users to keep the original uploaded GIF avatar (no cropping)."
 msgstr "Cho phép tài khoản VIP giữ ảnh GIF gốc khi tải lên (không crop)."
 
-#: includes/settings-page.php:406
-msgid "Only applies to GIF files. Other image formats (PNG/JPG/WebP) will still be cropped and resized."
-msgstr "Chỉ áp dụng cho ảnh GIF. Các định dạng khác (PNG/JPG/WebP) sẽ vẫn bị crop và resize như bình thường."
+#: includes/settings-page.php:425
+msgid ""
+"Only applies to GIF files. Other image formats (PNG/JPG/WebP) will still be "
+"cropped and resized."
+msgstr ""
+"Chỉ áp dụng cho ảnh GIF. Các định dạng khác (PNG/JPG/WebP) sẽ vẫn bị crop và "
+"resize như bình thường."
 
-#: includes/settings-page.php:410
-msgid "Warning: GIF avatars can be large and may affect performance. Enable only if you understand the risks."
-msgstr "Cảnh báo: Ảnh GIF có thể rất nặng và ảnh hưởng hiệu năng. Chỉ bật nếu bạn hiểu rõ rủi ro."
+#: includes/settings-page.php:429
+msgid ""
+"Warning: GIF avatars can be large and may affect performance. Enable only if "
+"you understand the risks."
+msgstr ""
+"Cảnh báo: Ảnh GIF có thể rất nặng và ảnh hưởng hiệu năng. Chỉ bật nếu bạn "
+"hiểu rõ rủi ro."
 
-#: includes/settings-page.php:416
+#: includes/settings-page.php:435
 msgid "Max Avatar Upload Size (MB)"
 msgstr "Giới hạn kích thước ảnh đại diện (MB)"
 
-#: includes/settings-page.php:422
+#: includes/settings-page.php:441
 msgid "Limit for avatar file size in megabytes. Set to 0 to disable the limit."
 msgstr "Giới hạn dung lượng ảnh đại diện theo MB. Đặt 0 để tắt giới hạn."
 
-#: includes/settings-page.php:428
+#: includes/settings-page.php:447
 msgid "Disable Gravatar Completely"
 msgstr "Tắt hoàn toàn Gravatar"
 
-#: includes/settings-page.php:436
+#: includes/settings-page.php:455
 msgid "Disable all Gravatar calls and use a local default SVG instead."
-msgstr "Vô hiệu hóa mọi kết nối tới Gravatar và dùng ảnh mặc định nội bộ (SVG)."
+msgstr ""
+"Vô hiệu hóa mọi kết nối tới Gravatar và dùng ảnh mặc định nội bộ (SVG)."
 
-#: includes/settings-page.php:438
+#: includes/settings-page.php:457
 msgid "Improves performance by preventing external requests to gravatar.com."
 msgstr "Tăng tốc website bằng cách chặn các yêu cầu tới gravatar.com."
 
-#: includes/settings-page.php:444
+#: includes/settings-page.php:463
 msgid "Cloudflare Turnstile"
 msgstr "Cloudflare Turnstile"
 
-#: includes/settings-page.php:446
-msgid "When both keys are provided, Cloudflare Turnstile will automatically replace the default captcha system on the registration form."
-msgstr "Khi điền đủ cả hai khóa, Cloudflare Turnstile sẽ tự động thay thế hệ thống Captcha mặc định trên biểu mẫu đăng ký."
+#: includes/settings-page.php:465
+msgid ""
+"When both keys are provided, Cloudflare Turnstile will automatically replace "
+"the default captcha system on the registration form."
+msgstr ""
+"Khi điền đủ cả hai khóa, Cloudflare Turnstile sẽ tự động thay thế hệ thống "
+"Captcha mặc định trên biểu mẫu đăng ký."
 
-#: includes/settings-page.php:452
+#: includes/settings-page.php:471
 msgid "Site Key"
 msgstr "Site Key"
 
-#: includes/settings-page.php:459
-msgid "Public site key from your Cloudflare Turnstile dashboard. Required to render the widget on the frontend."
-msgstr "Site key công khai từ bảng điều khiển Cloudflare Turnstile. Bắt buộc để hiển thị widget ở frontend."
+#: includes/settings-page.php:478
+msgid ""
+"Public site key from your Cloudflare Turnstile dashboard. Required to render "
+"the widget on the frontend."
+msgstr ""
+"Site key công khai từ bảng điều khiển Cloudflare Turnstile. Bắt buộc để hiển "
+"thị widget ở frontend."
 
-#: includes/settings-page.php:465
+#: includes/settings-page.php:484
 msgid "Secret Key"
 msgstr "Secret Key"
 
-#: includes/settings-page.php:472
-msgid "Private secret key used for server-side verification of Turnstile responses."
-msgstr "Secret key riêng tư dùng để xác minh phản hồi Turnstile ở phía máy chủ."
+#: includes/settings-page.php:491
+msgid ""
+"Private secret key used for server-side verification of Turnstile responses."
+msgstr ""
+"Secret key riêng tư dùng để xác minh phản hồi Turnstile ở phía máy chủ."
 
-#: includes/settings-page.php:478
-#: includes/settings-page.php:488
-#: includes/settings-page.php:492
+#: includes/settings-page.php:497 includes/settings-page.php:507
+#: includes/settings-page.php:511
 msgid "Test API"
 msgstr "Kiểm tra API"
 
-#: includes/settings-page.php:489
+#: includes/settings-page.php:508
 msgid "Testing…"
 msgstr "Đang kiểm tra…"
 
-#: includes/settings-page.php:491
+#: includes/settings-page.php:510
 msgid "Request failed. Please try again."
 msgstr "Yêu cầu thất bại. Vui lòng thử lại."
 
-#: includes/settings-page.php:496
-msgid "Sends a request to Cloudflare to verify the Secret Key above, using the values currently in these fields (no need to save first). This only confirms the Secret Key — the Site Key is confirmed once the widget actually renders in the browser."
-msgstr "Gửi một yêu cầu đến Cloudflare để xác minh Secret Key ở trên, sử dụng giá trị hiện có trong các ô này (không cần lưu trước). Thao tác này chỉ xác nhận Secret Key — Site Key sẽ được xác nhận khi widget thực sự hiển thị trên trình duyệt."
+#: includes/settings-page.php:515
+msgid ""
+"Sends a request to Cloudflare to verify the Secret Key above, using the "
+"values currently in these fields (no need to save first). This only confirms "
+"the Secret Key — the Site Key is confirmed once the widget actually renders "
+"in the browser."
+msgstr ""
+"Gửi một yêu cầu đến Cloudflare để xác minh Secret Key ở trên, sử dụng giá "
+"trị hiện có trong các ô này (không cần lưu trước). Thao tác này chỉ xác nhận "
+"Secret Key — Site Key sẽ được xác nhận khi widget thực sự hiển thị trên "
+"trình duyệt."
 
-#: includes/settings-page.php:497
+#: includes/settings-page.php:516
 msgid "The button is enabled once both fields above have a value."
 msgstr "Nút sẽ được bật khi cả hai ô ở trên đều có giá trị."
 
-#: includes/settings-page.php:503
+#: includes/settings-page.php:522
 msgid "Theme"
 msgstr "Giao diện"
 
-#: includes/settings-page.php:509
+#: includes/settings-page.php:528
 msgid "Auto (match system/OS preference)"
 msgstr "Tự động (theo giao diện hệ thống/OS)"
 
-#: includes/settings-page.php:510
+#: includes/settings-page.php:529
 msgid "Light mode"
 msgstr "Chế độ sáng"
 
-#: includes/settings-page.php:511
+#: includes/settings-page.php:530
 msgid "Dark mode"
 msgstr "Chế độ tối"
 
-#: includes/settings-page.php:524
+#: includes/settings-page.php:543
 msgid "Choose the visual style of the captcha widget (auto, light, or dark)."
 msgstr "Chọn kiểu hiển thị của widget captcha (tự động, sáng hoặc tối)."
 
-#: includes/settings-page.php:531
+#: includes/settings-page.php:550
 msgid "Protect Default WordPress Forms"
 msgstr "Bảo vệ các biểu mẫu mặc định của WordPress"
 
-#: includes/settings-page.php:533
-msgid "Extend the Cloudflare Turnstile widget configured above to the native WordPress login, registration, and lost password forms (e.g. wp-login.php). Requires both Site Key and Secret Key to be set, and Disable Captcha to be off."
-msgstr "Mở rộng widget Cloudflare Turnstile đã cấu hình ở trên sang các biểu mẫu đăng nhập, đăng ký và quên mật khẩu mặc định của WordPress (ví dụ wp-login.php). Yêu cầu đã nhập đủ Site Key và Secret Key, đồng thời \"Disable Captcha\" đang tắt."
+#: includes/settings-page.php:552
+msgid ""
+"Extend the Cloudflare Turnstile widget configured above to the native "
+"WordPress login, registration, and lost password forms (e.g. wp-login.php). "
+"Requires both Site Key and Secret Key to be set, and Disable Captcha to be "
+"off."
+msgstr ""
+"Mở rộng widget Cloudflare Turnstile đã cấu hình ở trên sang các biểu mẫu "
+"đăng nhập, đăng ký và quên mật khẩu mặc định của WordPress (ví dụ wp-login."
+"php). Yêu cầu đã nhập đủ Site Key và Secret Key, đồng thời \"Disable "
+"Captcha\" đang tắt."
 
-#: includes/settings-page.php:539
+#: includes/settings-page.php:558
 msgid "Login Form"
 msgstr "Biểu mẫu đăng nhập"
 
-#: includes/settings-page.php:547
-msgid "Protect the default WordPress login form (wp-login.php and the login modal)."
-msgstr "Bảo vệ biểu mẫu đăng nhập mặc định của WordPress (wp-login.php và modal đăng nhập)."
+#: includes/settings-page.php:566
+msgid ""
+"Protect the default WordPress login form (wp-login.php and the login modal)."
+msgstr ""
+"Bảo vệ biểu mẫu đăng nhập mặc định của WordPress (wp-login.php và modal đăng "
+"nhập)."
 
-#: includes/settings-page.php:553
+#: includes/settings-page.php:572
 msgid "Registration Form"
 msgstr "Biểu mẫu đăng ký"
 
-#: includes/settings-page.php:561
-msgid "Protect WordPress's native registration form (wp-login.php?action=register)."
-msgstr "Bảo vệ biểu mẫu đăng ký mặc định của WordPress (wp-login.php?action=register)."
+#: includes/settings-page.php:580
+msgid ""
+"Protect WordPress's native registration form (wp-login.php?action=register)."
+msgstr ""
+"Bảo vệ biểu mẫu đăng ký mặc định của WordPress (wp-login.php?"
+"action=register)."
 
-#: includes/settings-page.php:564
-msgid "Only relevant if \"Anyone can register\" is enabled under Settings → General. Separate from this plugin's own registration form and endpoint."
-msgstr "Chỉ có ý nghĩa khi \"Anyone can register\" (Ai cũng có thể đăng ký) đang bật ở Settings → General. Tách biệt hoàn toàn với biểu mẫu và endpoint đăng ký riêng của plugin này."
+#: includes/settings-page.php:583
+msgid ""
+"Only relevant if \"Anyone can register\" is enabled under Settings → "
+"General. Separate from this plugin's own registration form and endpoint."
+msgstr ""
+"Chỉ có ý nghĩa khi \"Anyone can register\" (Ai cũng có thể đăng ký) đang bật "
+"ở Settings → General. Tách biệt hoàn toàn với biểu mẫu và endpoint đăng ký "
+"riêng của plugin này."
 
-#: includes/settings-page.php:570
+#: includes/settings-page.php:589
 msgid "Lost Password Form"
 msgstr "Biểu mẫu quên mật khẩu"
 
-#: includes/settings-page.php:578
+#: includes/settings-page.php:597
 msgid "Protect the \"Lost your password?\" form."
 msgstr "Bảo vệ biểu mẫu \"Lost your password?\" (Quên mật khẩu)."
 
-#: includes/settings-page.php:584
+#: includes/settings-page.php:603
 msgid "Custom Links"
 msgstr "Liên kết tuỳ chỉnh"
 
-#: includes/settings-page.php:588
+#: includes/settings-page.php:607
 msgid "Custom Register URL"
 msgstr "Link đăng ký tuỳ chỉnh"
 
-#: includes/settings-page.php:592
-msgid "Redirect here when user clicks \"Register\". Leave blank to use default wp-login.php?action=register."
-msgstr "Chuyển hướng đến link này khi người dùng nhấn Đăng ký. Để trống để dùng mặc định wp-login.php?action=register."
+#: includes/settings-page.php:611
+msgid ""
+"Redirect here when user clicks \"Register\". Leave blank to use default wp-"
+"login.php?action=register."
+msgstr ""
+"Chuyển hướng đến link này khi người dùng nhấn Đăng ký. Để trống để dùng mặc "
+"định wp-login.php?action=register."
 
-#: includes/settings-page.php:597
+#: includes/settings-page.php:616
 msgid "Custom Lost Password URL"
 msgstr "Link quên mật khẩu tuỳ chỉnh"
 
-#: includes/settings-page.php:601
-msgid "Redirect here when user clicks \"Lost password\". Leave blank to use default wp-login.php?action=lostpassword."
-msgstr "Chuyển hướng đến link này khi người dùng nhấn Quên mật khẩu. Để trống để dùng mặc định wp-login.php?action=lostpassword."
+#: includes/settings-page.php:620
+msgid ""
+"Redirect here when user clicks \"Lost password\". Leave blank to use default "
+"wp-login.php?action=lostpassword."
+msgstr ""
+"Chuyển hướng đến link này khi người dùng nhấn Quên mật khẩu. Để trống để "
+"dùng mặc định wp-login.php?action=lostpassword."
 
-#: includes/settings-page.php:606
+#: includes/settings-page.php:625
 msgid "Check-in Reward"
 msgstr "Thưởng điểm danh"
 
-#: includes/settings-page.php:610
-#: includes/settings-page.php:684
+#: includes/settings-page.php:629 includes/settings-page.php:703
 msgid "Coin Reward"
 msgstr "Thưởng Coin"
 
-#: includes/settings-page.php:614
+#: includes/settings-page.php:633
 msgid "Coin awarded each time the user checks in daily."
 msgstr "Tặng Coin mỗi lần người dùng điểm danh hằng ngày."
 
-#: includes/settings-page.php:619
-#: includes/settings-page.php:693
+#: includes/settings-page.php:638 includes/settings-page.php:712
 msgid "EXP Reward"
 msgstr "Thưởng EXP"
 
-#: includes/settings-page.php:623
+#: includes/settings-page.php:642
 msgid "EXP gained from daily check-in."
 msgstr "EXP nhận được từ điểm danh hằng ngày."
 
-#: includes/settings-page.php:628
-#: includes/settings-page.php:701
+#: includes/settings-page.php:647 includes/settings-page.php:720
 msgid "Cash Reward"
 msgstr "Thưởng Cash"
 
-#: includes/settings-page.php:632
+#: includes/settings-page.php:651
 msgid "Cash rewarded upon check-in (rarely used, mostly 0)."
 msgstr "Tặng Cash khi điểm danh (hiếm dùng, thường để 0)."
 
-#: includes/settings-page.php:637
+#: includes/settings-page.php:656
 msgid "Comment Reward"
 msgstr "Thưởng Bình luận"
 
-#: includes/settings-page.php:641
+#: includes/settings-page.php:660
 msgid "EXP per Comment"
 msgstr "EXP mỗi Bình luận"
 
-#: includes/settings-page.php:646
+#: includes/settings-page.php:665
 msgid "EXP awarded for each valid comment."
 msgstr "EXP được thưởng cho mỗi bình luận hợp lệ."
 
-#: includes/settings-page.php:651
+#: includes/settings-page.php:670
 msgid "Coin per Comment"
 msgstr "Coin mỗi Bình luận"
 
-#: includes/settings-page.php:656
+#: includes/settings-page.php:675
 msgid "Coin awarded for each valid comment."
 msgstr "Coin được thưởng cho mỗi bình luận hợp lệ."
 
-#: includes/settings-page.php:661
+#: includes/settings-page.php:680
 msgid "Daily Comment Cap"
 msgstr "Giới hạn Bình luận mỗi ngày"
 
-#: includes/settings-page.php:666
-msgid "Maximum number of comments per day eligible for rewards. 0 = unlimited. System uses daily check-in as reset anchor."
-msgstr "Số bình luận tối đa mỗi ngày được nhận thưởng. 0 = không giới hạn. Hệ thống sẽ dùng điểm danh hằng ngày để reset."
+#: includes/settings-page.php:685
+msgid ""
+"Maximum number of comments per day eligible for rewards. 0 = unlimited. "
+"System uses daily check-in as reset anchor."
+msgstr ""
+"Số bình luận tối đa mỗi ngày được nhận thưởng. 0 = không giới hạn. Hệ thống "
+"sẽ dùng điểm danh hằng ngày để reset."
 
-#: includes/settings-page.php:671
+#: includes/settings-page.php:690
 msgid "Online Reward"
 msgstr "Thưởng online"
 
-#: includes/settings-page.php:675
+#: includes/settings-page.php:694
 msgid "Minutes Required"
 msgstr "Số phút yêu cầu"
 
-#: includes/settings-page.php:679
+#: includes/settings-page.php:698
 msgid "Minimum minutes user must stay online to receive reward."
 msgstr "Số phút người dùng cần online để nhận thưởng."
 
-#: includes/settings-page.php:688
+#: includes/settings-page.php:707
 msgid "Coin rewarded when online duration is met."
 msgstr "Tặng Coin khi online đủ thời gian."
 
-#: includes/settings-page.php:697
+#: includes/settings-page.php:716
 msgid "EXP rewarded after being online for required time."
 msgstr "Tặng EXP sau khi online đủ thời gian."
 
-#: includes/settings-page.php:705
+#: includes/settings-page.php:724
 msgid "Cash rewarded for being active online."
 msgstr "Tặng Cash khi hoạt động online."
 
-#: includes/settings-page.php:710
+#: includes/settings-page.php:729
 msgid "VIP"
 msgstr "VIP"
 
-#: includes/settings-page.php:714
+#: includes/settings-page.php:733
 msgid "VIP Payment Currency"
 msgstr "Loại tiền thanh toán VIP"
 
-#: includes/settings-page.php:719
-#: includes/tools/redeem-codes.php:265
-#: includes/tools/topup.php:212
-#: includes/user-metabox.php:134
+#: includes/settings-page.php:738 includes/tools/redeem-codes.php:265
+#: includes/tools/topup.php:212 includes/user-metabox.php:134
 msgid "Coin"
 msgstr "Coin"
 
-#: includes/settings-page.php:720
-#: includes/tools/redeem-codes.php:266
-#: includes/tools/topup.php:216
-#: includes/user-metabox.php:138
+#: includes/settings-page.php:739 includes/tools/redeem-codes.php:266
+#: includes/tools/topup.php:216 includes/user-metabox.php:138
 msgid "Cash"
 msgstr "Cash"
 
-#: includes/settings-page.php:721
+#: includes/settings-page.php:740
 msgid "Both (allow user to choose)"
 msgstr "Cả hai (cho phép người dùng chọn)"
 
-#: includes/settings-page.php:736
+#: includes/settings-page.php:755
 msgid "Select which currency users can use to purchase VIP packages."
 msgstr "Chọn loại tiền người dùng có thể dùng để mua gói VIP."
 
-#: includes/settings-page.php:742
+#: includes/settings-page.php:761
 msgid "Disable VIP Stacking"
 msgstr "Tắt cộng dồn VIP"
 
-#: includes/settings-page.php:749
-msgid "Prevent users from purchasing/activating VIP again while their current VIP is still active."
-msgstr "Ngăn người dùng mua/kích hoạt VIP thêm lần nữa trong khi VIP hiện tại vẫn còn hạn."
+#: includes/settings-page.php:768
+msgid ""
+"Prevent users from purchasing/activating VIP again while their current VIP "
+"is still active."
+msgstr ""
+"Ngăn người dùng mua/kích hoạt VIP thêm lần nữa trong khi VIP hiện tại vẫn "
+"còn hạn."
 
-#: includes/settings-page.php:752
-msgid "When enabled, a user must wait until their current VIP expires before they can buy or redeem another VIP package/code. When disabled (default), new VIP time is added on top of the remaining time."
-msgstr "Khi bật, người dùng phải đợi VIP hiện tại hết hạn mới có thể mua hoặc dùng mã để kích hoạt VIP tiếp. Khi tắt (mặc định), thời gian VIP mới sẽ được cộng dồn vào thời gian còn lại."
+#: includes/settings-page.php:771
+msgid ""
+"When enabled, a user must wait until their current VIP expires before they "
+"can buy or redeem another VIP package/code. When disabled (default), new VIP "
+"time is added on top of the remaining time."
+msgstr ""
+"Khi bật, người dùng phải đợi VIP hiện tại hết hạn mới có thể mua hoặc dùng "
+"mã để kích hoạt VIP tiếp. Khi tắt (mặc định), thời gian VIP mới sẽ được cộng "
+"dồn vào thời gian còn lại."
 
-#: includes/settings-page.php:758
+#: includes/settings-page.php:777
 msgid "Disable VIP Purchase"
 msgstr "Tắt mua VIP"
 
-#: includes/settings-page.php:765
+#: includes/settings-page.php:784
 msgid "Completely turn off VIP purchasing/activation for all users."
 msgstr "Tắt hoàn toàn tính năng mua/kích hoạt VIP đối với tất cả người dùng."
 
-#: includes/settings-page.php:768
-msgid "When enabled, the VIP purchase UI is hidden and the purchase/redeem endpoints are blocked. Existing active VIP members are not affected."
-msgstr "Khi bật, giao diện mua VIP sẽ bị ẩn và các endpoint mua/redeem sẽ bị chặn. Các thành viên đang là VIP không bị ảnh hưởng."
+#: includes/settings-page.php:787
+msgid ""
+"When enabled, the VIP purchase UI is hidden and the purchase/redeem "
+"endpoints are blocked. Existing active VIP members are not affected."
+msgstr ""
+"Khi bật, giao diện mua VIP sẽ bị ẩn và các endpoint mua/redeem sẽ bị chặn. "
+"Các thành viên đang là VIP không bị ảnh hưởng."
 
-#: includes/settings-page.php:774
+#: includes/settings-page.php:793
 msgid "VIP Pricing (by Coin)"
 msgstr "Giá VIP (bằng Coin)"
 
-#: includes/settings-page.php:806
+#: includes/settings-page.php:825
 msgid "Set to 0 to disable this VIP package."
 msgstr "Đặt bằng 0 để tắt gói VIP này."
 
-#: includes/settings-page.php:812
+#: includes/settings-page.php:831
 msgid "VIP Pricing (by Cash)"
 msgstr "Giá VIP (bằng Cash)"
 
-#: includes/settings-page.php:844
+#: includes/settings-page.php:863
 msgid "Set to 0 to disable this VIP package for Cash."
 msgstr "Đặt 0 để vô hiệu hóa gói VIP này khi thanh toán bằng Cash."
 
-#: includes/settings-page.php:853
+#: includes/settings-page.php:872
 msgid "VIP Bonus"
 msgstr "Thưởng VIP"
 
-#: includes/settings-page.php:857
+#: includes/settings-page.php:876
 msgid "Bonus Coin (%)"
 msgstr "Tăng Coin (%)"
 
-#: includes/settings-page.php:861
+#: includes/settings-page.php:880
 msgid "Extra Coin gained when VIP, in percent."
 msgstr "Tăng Coin khi là VIP (tính theo %)."
 
-#: includes/settings-page.php:862
-#: includes/settings-page.php:876
+#: includes/settings-page.php:881 includes/settings-page.php:895
 msgid "This bonus does not apply to Cash/Coin exchange."
 msgstr "Khoản thưởng này không áp dụng cho việc đổi Cash/Coin."
 
-#: includes/settings-page.php:867
+#: includes/settings-page.php:886
 msgid "Bonus Cash (%)"
 msgstr "Thưởng Cash (%)"
 
-#: includes/settings-page.php:873
+#: includes/settings-page.php:892
 msgid "Extra Cash gained when VIP, in percent."
 msgstr "Thêm Cash khi là VIP, tính theo phần trăm."
 
-#: includes/settings-page.php:882
+#: includes/settings-page.php:901
 msgid "Bonus EXP (%)"
 msgstr "Tăng EXP (%)"
 
-#: includes/settings-page.php:886
+#: includes/settings-page.php:905
 msgid "Extra EXP gained when VIP, in percent."
 msgstr "Tăng EXP khi là VIP (tính theo %)."
 
-#: includes/settings-page.php:891
+#: includes/settings-page.php:910
 msgid "Referral Reward"
 msgstr "Thưởng giới thiệu"
 
-#: includes/settings-page.php:895
+#: includes/settings-page.php:914
 msgid "Coin for Referrer"
 msgstr "Coin cho người mời"
 
-#: includes/settings-page.php:898
+#: includes/settings-page.php:917
 msgid "Coin reward given to the person who shared their referral link."
 msgstr "Coin thưởng cho người đã chia sẻ liên kết giới thiệu."
 
-#: includes/settings-page.php:903
+#: includes/settings-page.php:922
 msgid "EXP for Referrer"
 msgstr "EXP cho người mời"
 
-#: includes/settings-page.php:906
+#: includes/settings-page.php:925
 msgid "EXP granted to referrer when someone registers through their link."
 msgstr "EXP tặng người mời khi có người đăng ký qua liên kết."
 
-#: includes/settings-page.php:911
+#: includes/settings-page.php:930
 msgid "Cash for Referrer"
 msgstr "Cash cho người mời"
 
-#: includes/settings-page.php:914
+#: includes/settings-page.php:933
 msgid "Cash awarded to the referrer."
 msgstr "Cash tặng cho người mời."
 
-#: includes/settings-page.php:919
+#: includes/settings-page.php:938
 msgid "Coin for New User"
 msgstr "Coin cho người mới"
 
-#: includes/settings-page.php:922
+#: includes/settings-page.php:941
 msgid "Coin bonus for new user who signs up via referral."
 msgstr "Coin tặng cho người mới khi đăng ký qua giới thiệu."
 
-#: includes/settings-page.php:927
+#: includes/settings-page.php:946
 msgid "EXP for New User"
 msgstr "EXP cho người mới"
 
-#: includes/settings-page.php:930
+#: includes/settings-page.php:949
 msgid "EXP bonus for the new referred user."
 msgstr "EXP tặng cho người mới được mời."
 
-#: includes/settings-page.php:935
+#: includes/settings-page.php:954
 msgid "Cash for New User"
 msgstr "Cash cho người mới"
 
-#: includes/settings-page.php:938
+#: includes/settings-page.php:957
 msgid "Cash given to new user (rarely used)."
 msgstr "Cash tặng cho người mới (hiếm dùng)."
 
-#: includes/tools/inbox-statistics.php:53
-#: includes/tools/redeem-codes.php:6
-#: includes/tools/send-notification.php:6
-#: includes/tools/topup.php:6
+#: includes/tools/inbox-statistics.php:53 includes/tools/redeem-codes.php:6
+#: includes/tools/send-notification.php:6 includes/tools/topup.php:6
 #: includes/tools/vip-codes.php:6
 msgid "You do not have permission to access this page."
 msgstr "Bạn không có quyền truy cập trang này."
 
 #: includes/tools/inbox-statistics.php:66
-msgid "Inbox table not found. Please ensure the User Engine plugin is properly installed."
-msgstr "Không tìm thấy bảng hộp thư. Vui lòng đảm bảo plugin User Engine đã được cài đặt đúng."
+msgid ""
+"Inbox table not found. Please ensure the User Engine plugin is properly "
+"installed."
+msgstr ""
+"Không tìm thấy bảng hộp thư. Vui lòng đảm bảo plugin User Engine đã được cài "
+"đặt đúng."
 
 #. translators: 1: message type, 2: deleted count
 #: includes/tools/inbox-statistics.php:87
@@ -1417,8 +1611,7 @@ msgstr "Dọn dẹp thất bại: loại không hợp lệ hoặc thiếu."
 msgid "Date Range:"
 msgstr "Khoảng thời gian:"
 
-#: includes/tools/inbox-statistics.php:139
-#: includes/user-metabox.php:328
+#: includes/tools/inbox-statistics.php:139 includes/user-metabox.php:328
 msgid "Last 7 Days"
 msgstr "7 ngày qua"
 
@@ -1435,8 +1628,7 @@ msgid "All Time"
 msgstr "Toàn bộ thời gian"
 
 #: includes/tools/inbox-statistics.php:153
-#: includes/tools/inbox-statistics.php:725
-#: includes/user-metabox.php:320
+#: includes/tools/inbox-statistics.php:725 includes/user-metabox.php:320
 msgid "Total Messages"
 msgstr "Tổng số tin nhắn"
 
@@ -1529,8 +1721,7 @@ msgid "Peak Day:"
 msgstr "Ngày cao điểm:"
 
 #: includes/tools/inbox-statistics.php:329
-#: includes/tools/inbox-statistics.php:619
-#: includes/user-metabox.php:201
+#: includes/tools/inbox-statistics.php:619 includes/user-metabox.php:201
 #: includes/user-metabox.php:336
 msgid "N/A"
 msgstr "Không có"
@@ -1550,8 +1741,12 @@ msgid "Last updated: %s"
 msgstr "Cập nhật lần cuối: %s"
 
 #: includes/tools/inbox-statistics.php:358
-msgid "Are you sure you want to permanently delete all messages of this type? This action cannot be undone."
-msgstr "Bạn có chắc muốn xóa vĩnh viễn tất cả tin nhắn của loại này không? Hành động này không thể hoàn tác."
+msgid ""
+"Are you sure you want to permanently delete all messages of this type? This "
+"action cannot be undone."
+msgstr ""
+"Bạn có chắc muốn xóa vĩnh viễn tất cả tin nhắn của loại này không? Hành động "
+"này không thể hoàn tác."
 
 #: includes/tools/inbox-statistics.php:362
 msgid "Cleanup Inbox by Type"
@@ -1566,8 +1761,12 @@ msgid "Delete All of This Type"
 msgstr "Xóa toàn bộ loại này"
 
 #: includes/tools/inbox-statistics.php:384
-msgid "Use this tool to purge messages by type in case of spikes or malformed entries."
-msgstr "Dùng công cụ này để quét sạch tin nhắn theo loại khi có đột biến hoặc dữ liệu lỗi."
+msgid ""
+"Use this tool to purge messages by type in case of spikes or malformed "
+"entries."
+msgstr ""
+"Dùng công cụ này để quét sạch tin nhắn theo loại khi có đột biến hoặc dữ "
+"liệu lỗi."
 
 #: includes/tools/inbox-statistics.php:516
 msgid "Unknown User"
@@ -1585,9 +1784,8 @@ msgstr "📭 Không tìm thấy bảng hộp thư"
 msgid "Please check your plugin installation."
 msgstr "Vui lòng kiểm tra cài đặt plugin của bạn."
 
-#: includes/tools/inbox-statistics.php:729
-#: includes/user-metabox.php:324
-#: init-user-engine.php:311
+#: includes/tools/inbox-statistics.php:729 includes/user-metabox.php:324
+#: init-user-engine.php:318
 msgid "Unread"
 msgstr "Chưa đọc"
 
@@ -1596,8 +1794,7 @@ msgid "Today"
 msgstr "Hôm nay"
 
 #: includes/tools/inbox-statistics.php:737
-#: includes/tools/send-notification.php:124
-#: includes/tools/topup.php:223
+#: includes/tools/send-notification.php:124 includes/tools/topup.php:223
 msgid "Recipients"
 msgstr "Người nhận"
 
@@ -1617,87 +1814,56 @@ msgstr "Xem toàn bộ thống kê"
 msgid "Create a Redeem Code"
 msgstr "Tạo mã quy đổi"
 
-#: includes/redeem-codes-handler.php:503
-#: includes/tools/redeem-codes.php:169
-#: includes/tools/redeem-codes.php:262
-#: includes/tools/redeem-codes.php:422
-#: includes/tools/vip-codes.php:168
-#: includes/tools/vip-codes.php:261
-#: includes/tools/vip-codes.php:416
-#: includes/vip-codes-handler.php:545
-msgid "Code"
-msgstr "Mã"
-
-#: includes/tools/redeem-codes.php:172
-#: includes/tools/vip-codes.php:171
+#: includes/tools/redeem-codes.php:172 includes/tools/vip-codes.php:171
 msgid "Leave empty to auto-generate"
 msgstr "Để trống để tự tạo mã"
 
-#: includes/tools/redeem-codes.php:177
-#: includes/tools/vip-codes.php:176
+#: includes/tools/redeem-codes.php:177 includes/tools/vip-codes.php:176
 msgid "Usage Type"
 msgstr "Loại sử dụng"
 
-#: includes/tools/redeem-codes.php:180
-#: includes/tools/vip-codes.php:179
+#: includes/tools/redeem-codes.php:180 includes/tools/vip-codes.php:179
 msgid "Single use"
 msgstr "Dùng 1 lần"
 
-#: includes/tools/redeem-codes.php:181
-#: includes/tools/vip-codes.php:180
+#: includes/tools/redeem-codes.php:181 includes/tools/vip-codes.php:180
 msgid "Multi-use (X times)"
 msgstr "Dùng nhiều lần (X lần)"
 
-#: includes/tools/redeem-codes.php:182
-#: includes/tools/vip-codes.php:181
+#: includes/tools/redeem-codes.php:182 includes/tools/vip-codes.php:181
 msgid "Locked to specific user"
 msgstr "Khóa với một người dùng cụ thể"
 
-#: includes/tools/redeem-codes.php:188
-#: includes/tools/topup.php:271
+#: includes/tools/redeem-codes.php:188 includes/tools/topup.php:271
 #: includes/tools/vip-codes.php:187
 msgid "Quantity"
 msgstr "Số lượng"
 
-#: includes/tools/redeem-codes.php:192
-#: includes/tools/vip-codes.php:191
-msgid "Number of single-use codes to generate. The Code field will be used as prefix."
+#: includes/tools/redeem-codes.php:192 includes/tools/vip-codes.php:191
+msgid ""
+"Number of single-use codes to generate. The Code field will be used as "
+"prefix."
 msgstr "Số lượng mã dùng một lần cần tạo. Trường Mã sẽ được dùng làm tiền tố."
 
-#: includes/tools/redeem-codes.php:198
-#: includes/tools/vip-codes.php:197
+#: includes/tools/redeem-codes.php:198 includes/tools/vip-codes.php:197
 msgid "Max Uses (X)"
 msgstr "Số lần sử dụng tối đa (X)"
 
-#: includes/tools/redeem-codes.php:200
-#: includes/tools/vip-codes.php:199
+#: includes/tools/redeem-codes.php:200 includes/tools/vip-codes.php:199
 msgid "Example: 5"
 msgstr "Ví dụ: 5"
 
-#: includes/tools/redeem-codes.php:205
-#: includes/tools/vip-codes.php:204
+#: includes/tools/redeem-codes.php:205 includes/tools/vip-codes.php:204
 msgid "Select User"
 msgstr "Chọn người dùng"
 
-#: includes/tools/redeem-codes.php:208
-#: includes/tools/vip-codes.php:207
+#: includes/tools/redeem-codes.php:208 includes/tools/vip-codes.php:207
 msgid "Search username or display name..."
 msgstr "Tìm bằng tên đăng nhập hoặc tên hiển thị..."
 
-#: includes/tools/redeem-codes.php:212
-#: includes/tools/vip-codes.php:211
+#: includes/tools/redeem-codes.php:212 includes/tools/vip-codes.php:211
 msgid "Only 1 user can be selected."
 msgstr "Chỉ được chọn 1 người dùng."
-
-#: includes/redeem-codes-handler.php:507
-#: includes/tools/redeem-codes.php:217
-msgid "Coin Amount"
-msgstr "Số lượng Coin"
-
-#: includes/redeem-codes-handler.php:508
-#: includes/tools/redeem-codes.php:222
-msgid "Cash Amount"
-msgstr "Số lượng Cash"
 
 #: includes/tools/redeem-codes.php:227
 msgid "Create Redeem Code"
@@ -1707,159 +1873,123 @@ msgstr "Tạo mã quy đổi"
 msgid "Existing Redeem Codes"
 msgstr "Danh sách mã quy đổi"
 
+#: includes/tools/redeem-codes.php:246 includes/tools/vip-codes.php:245
+msgid "Export CSV"
+msgstr "Xuất CSV"
+
+#: includes/tools/redeem-codes.php:250
+msgid "Exports the full list of redeem codes (all pages) as a CSV file."
+msgstr "Xuất toàn bộ danh sách mã redeem (tất cả các trang) ra file CSV."
+
 #: includes/tools/redeem-codes.php:255
 msgid "No redeem codes found."
 msgstr "Không tìm thấy mã quy đổi nào."
 
-#: includes/redeem-codes-handler.php:504
-#: includes/tools/redeem-codes.php:263
-#: includes/tools/send-notification.php:158
-#: includes/tools/topup.php:272
-#: includes/tools/vip-codes.php:262
-#: includes/vip-codes-handler.php:546
-msgid "Type"
-msgstr "Loại"
-
-#: includes/tools/redeem-codes.php:264
-#: includes/tools/vip-codes.php:263
+#: includes/tools/redeem-codes.php:264 includes/tools/vip-codes.php:263
 msgid "Locked User"
 msgstr "Người dùng được khóa"
 
-#: includes/tools/redeem-codes.php:267
-#: includes/tools/redeem-codes.php:386
-#: includes/tools/vip-codes.php:265
-#: includes/tools/vip-codes.php:381
+#: includes/tools/redeem-codes.php:267 includes/tools/redeem-codes.php:386
+#: includes/tools/vip-codes.php:265 includes/tools/vip-codes.php:381
 msgid "Used"
 msgstr "Đã sử dụng"
 
-#: includes/redeem-codes-handler.php:511
-#: includes/tools/redeem-codes.php:268
-#: includes/tools/vip-codes.php:266
-#: includes/vip-codes-handler.php:552
-msgid "Status"
-msgstr "Trạng thái"
-
-#: includes/tools/redeem-codes.php:269
-#: includes/tools/vip-codes.php:267
+#: includes/tools/redeem-codes.php:269 includes/tools/vip-codes.php:267
 msgid "Actions"
 msgstr "Thao tác"
 
 #. translators: 1: display name, 2: user_login, 3: user_id
-#: includes/tools/redeem-codes.php:318
-#: includes/tools/redeem-codes.php:450
-#: includes/tools/vip-codes.php:316
-#: includes/tools/vip-codes.php:444
+#: includes/tools/redeem-codes.php:318 includes/tools/redeem-codes.php:450
+#: includes/tools/vip-codes.php:316 includes/tools/vip-codes.php:444
 #, php-format
 msgid "%1$s (%2$s) — ID: %3$d"
 msgstr "%1$s (%2$s) — ID: %3$d"
 
 #. translators: %d: user ID
-#: includes/tools/redeem-codes.php:325
-#: includes/tools/vip-codes.php:323
+#: includes/tools/redeem-codes.php:325 includes/tools/vip-codes.php:323
 #, php-format
 msgid "User ID: %d"
 msgstr "ID người dùng: %d"
 
-#: includes/tools/redeem-codes.php:328
-#: includes/tools/vip-codes.php:326
+#: includes/tools/redeem-codes.php:328 includes/tools/vip-codes.php:326
 msgid "Not locked"
 msgstr "Không khóa"
 
-#: includes/tools/redeem-codes.php:348
-#: includes/tools/vip-codes.php:343
+#: includes/tools/redeem-codes.php:348 includes/tools/vip-codes.php:343
 msgid "logged"
 msgstr "ghi nhận"
 
-#: includes/tools/redeem-codes.php:357
-#: includes/tools/vip-codes.php:352
+#: includes/tools/redeem-codes.php:357 includes/tools/vip-codes.php:352
 #: includes/user-metabox.php:190
 msgid "Active"
 msgstr "Đang hoạt động"
 
-#: includes/tools/redeem-codes.php:359
-#: includes/tools/vip-codes.php:354
+#: includes/tools/redeem-codes.php:359 includes/tools/vip-codes.php:354
 msgid "Disabled"
 msgstr "Đã vô hiệu"
 
-#: includes/tools/redeem-codes.php:365
-#: includes/tools/vip-codes.php:360
+#: includes/tools/redeem-codes.php:365 includes/tools/vip-codes.php:360
 msgid "View Usage"
 msgstr "Xem sử dụng"
 
-#: includes/tools/redeem-codes.php:369
-#: includes/tools/vip-codes.php:364
+#: includes/tools/redeem-codes.php:369 includes/tools/vip-codes.php:364
 msgid "Disable this code?"
 msgstr "Vô hiệu mã này?"
 
-#: includes/tools/redeem-codes.php:370
-#: includes/tools/vip-codes.php:365
+#: includes/tools/redeem-codes.php:370 includes/tools/vip-codes.php:365
 msgid "Disable"
 msgstr "Vô hiệu"
 
-#: includes/tools/redeem-codes.php:381
-#: includes/tools/vip-codes.php:376
+#: includes/tools/redeem-codes.php:381 includes/tools/vip-codes.php:376
 msgid "Delete this unused code permanently?"
 msgstr "Xoá vĩnh viễn mã chưa sử dụng này?"
 
-#: includes/tools/redeem-codes.php:383
-#: includes/tools/vip-codes.php:378
-#: init-user-engine.php:319
+#: includes/tools/redeem-codes.php:383 includes/tools/vip-codes.php:378
+#: init-user-engine.php:326
 msgid "Delete"
 msgstr "Xoá"
 
-#: includes/tools/redeem-codes.php:406
-#: includes/tools/redeem-codes.php:508
-#: includes/tools/vip-codes.php:400
-#: includes/tools/vip-codes.php:502
+#: includes/tools/redeem-codes.php:406 includes/tools/redeem-codes.php:508
+#: includes/tools/vip-codes.php:400 includes/tools/vip-codes.php:502
 msgid "&laquo; Previous"
 msgstr "« Trước"
 
-#: includes/tools/redeem-codes.php:407
-#: includes/tools/redeem-codes.php:509
-#: includes/tools/vip-codes.php:401
-#: includes/tools/vip-codes.php:503
+#: includes/tools/redeem-codes.php:407 includes/tools/redeem-codes.php:509
+#: includes/tools/vip-codes.php:401 includes/tools/vip-codes.php:503
 msgid "Next &raquo;"
 msgstr "Tiếp »"
 
-#: includes/tools/redeem-codes.php:420
-#: includes/tools/vip-codes.php:414
+#: includes/tools/redeem-codes.php:420 includes/tools/vip-codes.php:414
 msgid "Usage History"
 msgstr "Lịch sử sử dụng"
 
-#: includes/tools/redeem-codes.php:429
-#: includes/tools/vip-codes.php:423
+#: includes/tools/redeem-codes.php:429 includes/tools/vip-codes.php:423
 msgid "No usage yet."
 msgstr "Chưa có lượt sử dụng."
 
-#: includes/tools/redeem-codes.php:436
-#: includes/tools/vip-codes.php:430
+#: includes/tools/redeem-codes.php:436 includes/tools/vip-codes.php:430
 msgid "User"
 msgstr "Người dùng"
 
-#: includes/tools/redeem-codes.php:437
-#: includes/tools/topup.php:274
+#: includes/tools/redeem-codes.php:437 includes/tools/topup.php:274
 #: includes/tools/vip-codes.php:431
 msgid "Time"
 msgstr "Thời gian"
 
-#: includes/tools/redeem-codes.php:438
-#: includes/tools/vip-codes.php:432
+#: includes/tools/redeem-codes.php:438 includes/tools/vip-codes.php:432
 msgid "Meta"
 msgstr "Meta"
 
-#: includes/tools/redeem-codes.php:462
-#: includes/tools/vip-codes.php:456
-#: init-user-engine.php:373
+#: includes/tools/redeem-codes.php:462 includes/tools/vip-codes.php:456
+#: init-user-engine.php:380
 msgid "Unknown"
 msgstr "Không rõ"
 
-#: includes/tools/redeem-codes.php:478
-#: includes/tools/vip-codes.php:472
+#: includes/tools/redeem-codes.php:478 includes/tools/vip-codes.php:472
 msgid "None"
 msgstr "Không có"
 
-#: includes/tools/redeem-codes.php:520
-#: includes/tools/vip-codes.php:514
+#: includes/tools/redeem-codes.php:520 includes/tools/vip-codes.php:514
 msgid "Close"
 msgstr "Đóng"
 
@@ -1887,18 +2017,15 @@ msgstr "Nội dung"
 msgid "Write your message content here..."
 msgstr "Nhập nội dung thông báo tại đây..."
 
-#: includes/tools/send-notification.php:129
-#: includes/tools/topup.php:228
+#: includes/tools/send-notification.php:129 includes/tools/topup.php:228
 msgid "Selected users"
 msgstr "Người dùng được chọn"
 
-#: includes/tools/send-notification.php:133
-#: includes/tools/topup.php:232
+#: includes/tools/send-notification.php:133 includes/tools/topup.php:232
 msgid "Apply to active VIPs"
 msgstr "Áp dụng cho VIP còn hạn"
 
-#: includes/tools/send-notification.php:137
-#: includes/tools/topup.php:236
+#: includes/tools/send-notification.php:137 includes/tools/topup.php:236
 msgid "Apply to all members"
 msgstr "Áp dụng cho toàn bộ thành viên"
 
@@ -1906,18 +2033,15 @@ msgstr "Áp dụng cho toàn bộ thành viên"
 msgid "Choose who will receive this notification."
 msgstr "Chọn nhóm người sẽ nhận thông báo này."
 
-#: includes/tools/send-notification.php:146
-#: includes/tools/topup.php:244
+#: includes/tools/send-notification.php:146 includes/tools/topup.php:244
 msgid "Select Users"
 msgstr "Chọn người dùng"
 
-#: includes/tools/send-notification.php:149
-#: includes/tools/topup.php:247
+#: includes/tools/send-notification.php:149 includes/tools/topup.php:247
 msgid "Search by username or display name..."
 msgstr "Tìm theo tên đăng nhập hoặc tên hiển thị..."
 
-#: includes/tools/send-notification.php:153
-#: includes/tools/topup.php:251
+#: includes/tools/send-notification.php:153 includes/tools/topup.php:251
 msgid "Selected user IDs will appear here."
 msgstr "ID người dùng đã chọn sẽ hiển thị tại đây."
 
@@ -1962,8 +2086,11 @@ msgid "Pin this message"
 msgstr "Ghim thông báo này"
 
 #: includes/tools/send-notification.php:191
-msgid "Pinned messages always appear at the top of the recipient's Inbox, above regular messages."
-msgstr "Tin đã ghim luôn hiển thị ở đầu Inbox của người nhận, trên các tin thường."
+msgid ""
+"Pinned messages always appear at the top of the recipient's Inbox, above "
+"regular messages."
+msgstr ""
+"Tin đã ghim luôn hiển thị ở đầu Inbox của người nhận, trên các tin thường."
 
 #: includes/tools/send-notification.php:196
 msgid "Expire At (optional)"
@@ -1974,8 +2101,13 @@ msgid "Optional expiration time"
 msgstr "Thời gian hết hạn (nếu có)"
 
 #: includes/tools/send-notification.php:200
-msgid "Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages."
-msgstr "Chỉ áp dụng cho tin đã ghim: khi tới thời điểm này, tin sẽ tự động bỏ ghim (vẫn còn trong Inbox như tin thường). Không ảnh hưởng gì tới tin không ghim."
+msgid ""
+"Only applies to pinned messages: once this time passes, the message is "
+"automatically unpinned (it stays in the Inbox as a regular message). Has no "
+"effect on unpinned messages."
+msgstr ""
+"Chỉ áp dụng cho tin đã ghim: khi tới thời điểm này, tin sẽ tự động bỏ ghim "
+"(vẫn còn trong Inbox như tin thường). Không ảnh hưởng gì tới tin không ghim."
 
 #: includes/tools/topup.php:47
 msgid "Please fill in all required fields correctly."
@@ -2013,8 +2145,7 @@ msgstr "Nạp Coin / Cash"
 msgid "Top-up successful."
 msgstr "Nạp tiền thành công."
 
-#: includes/tools/topup.php:199
-#: init-user-engine.php:378
+#: includes/tools/topup.php:199 init-user-engine.php:385
 msgid "Amount"
 msgstr "Số lượng"
 
@@ -2051,22 +2182,28 @@ msgid "Showing up to the latest 100 entries."
 msgstr "Hiển thị tối đa 100 mục gần nhất."
 
 #: includes/tools/vip-codes.php:155
-msgid "VIP Codes work just like Redeem Codes, but grant VIP membership days instead of Coin/Cash."
-msgstr "Mã VIP hoạt động giống Mã Redeem, nhưng cấp số ngày VIP thay vì Coin/Cash."
+msgid ""
+"VIP Codes work just like Redeem Codes, but grant VIP membership days instead "
+"of Coin/Cash."
+msgstr ""
+"Mã VIP hoạt động giống Mã Redeem, nhưng cấp số ngày VIP thay vì Coin/Cash."
 
 #: includes/tools/vip-codes.php:161
 msgid "Create a VIP Code"
 msgstr "Tạo Mã VIP"
 
-#: includes/tools/vip-codes.php:216
-#: includes/tools/vip-codes.php:264
+#: includes/tools/vip-codes.php:216 includes/tools/vip-codes.php:264
 #: includes/vip-codes-handler.php:549
 msgid "VIP Days"
 msgstr "Số ngày VIP"
 
 #: includes/tools/vip-codes.php:220
-msgid "Number of VIP days granted when this code is redeemed. Use a large number (e.g. 99999) for lifetime."
-msgstr "Số ngày VIP được cấp khi mã này được sử dụng. Dùng một số lớn (ví dụ 99999) để cấp VIP trọn đời."
+msgid ""
+"Number of VIP days granted when this code is redeemed. Use a large number (e."
+"g. 99999) for lifetime."
+msgstr ""
+"Số ngày VIP được cấp khi mã này được sử dụng. Dùng một số lớn (ví dụ 99999) "
+"để cấp VIP trọn đời."
 
 #: includes/tools/vip-codes.php:226
 msgid "Create VIP Code"
@@ -2076,13 +2213,20 @@ msgstr "Tạo Mã VIP"
 msgid "Existing VIP Codes"
 msgstr "Danh sách Mã VIP"
 
+#: includes/tools/vip-codes.php:249
+msgid "Exports the full list of VIP codes (all pages) as a CSV file."
+msgstr "Xuất toàn bộ danh sách mã VIP (tất cả các trang) ra file CSV."
+
 #: includes/tools/vip-codes.php:254
 msgid "No VIP codes found."
 msgstr "Chưa có mã VIP nào."
 
 #: includes/turnstile-forms.php:164
-msgid "Could not reach Cloudflare. Please check your server's outbound connection."
-msgstr "Không thể kết nối tới Cloudflare. Vui lòng kiểm tra kết nối ra ngoài (outbound) của server."
+msgid ""
+"Could not reach Cloudflare. Please check your server's outbound connection."
+msgstr ""
+"Không thể kết nối tới Cloudflare. Vui lòng kiểm tra kết nối ra ngoài "
+"(outbound) của server."
 
 #: includes/turnstile-forms.php:169
 msgid "Cloudflare returned an unexpected response. Please try again."
@@ -2093,11 +2237,14 @@ msgid "Could not parse the response from Cloudflare."
 msgstr "Không thể phân tích phản hồi từ Cloudflare."
 
 #: includes/turnstile-forms.php:181
-msgid "Secret Key is invalid. Please double-check it in your Cloudflare Turnstile dashboard."
-msgstr "Secret Key không hợp lệ. Vui lòng kiểm tra lại trong bảng điều khiển Cloudflare Turnstile của bạn."
+msgid ""
+"Secret Key is invalid. Please double-check it in your Cloudflare Turnstile "
+"dashboard."
+msgstr ""
+"Secret Key không hợp lệ. Vui lòng kiểm tra lại trong bảng điều khiển "
+"Cloudflare Turnstile của bạn."
 
-#: includes/turnstile-forms.php:224
-#: includes/turnstile-forms.php:254
+#: includes/turnstile-forms.php:224 includes/turnstile-forms.php:254
 #: includes/turnstile-forms.php:285
 msgid "<strong>Error:</strong> Captcha verification failed. Please try again."
 msgstr "<strong>Lỗi:</strong> Xác minh Captcha thất bại. Vui lòng thử lại."
@@ -2132,8 +2279,7 @@ msgstr "Tổng quan nhanh"
 msgid "Level"
 msgstr "Cấp"
 
-#: includes/user-metabox.php:158
-#: init-user-engine.php:372
+#: includes/user-metabox.php:158 init-user-engine.php:379
 msgid "EXP"
 msgstr "EXP"
 
@@ -2249,8 +2395,7 @@ msgstr "Các tin nhắn hộp thư gần đây"
 msgid "No inbox messages found."
 msgstr "Không có tin nhắn nào trong hộp thư."
 
-#: includes/user-metabox.php:554
-#: includes/user-metabox.php:647
+#: includes/user-metabox.php:554 includes/user-metabox.php:647
 msgid "Security check failed."
 msgstr "Kiểm tra bảo mật thất bại."
 
@@ -2280,8 +2425,7 @@ msgstr "Không thể thay đổi quyền tải lên ảnh đại diện."
 msgid "Level %d"
 msgstr "Cấp %d"
 
-#: includes/utils.php:192
-#: includes/utils.php:230
+#: includes/utils.php:192 includes/utils.php:230
 msgid "just now"
 msgstr "vừa xong"
 
@@ -2362,8 +2506,12 @@ msgstr "Bạn đã nhận được một mã VIP!"
 #. translators: %s: VIP code string assigned to the user
 #: includes/vip-codes-handler.php:165
 #, php-format
-msgid "You have been assigned a VIP code: %s. You can use it in the Redeem VIP section."
-msgstr "Bạn đã được gán một mã VIP: %s. Bạn có thể sử dụng mã này trong mục Redeem VIP."
+msgid ""
+"You have been assigned a VIP code: %s. You can use it in the Redeem VIP "
+"section."
+msgstr ""
+"Bạn đã được gán một mã VIP: %s. Bạn có thể sử dụng mã này trong mục Redeem "
+"VIP."
 
 #: includes/vip-codes-handler.php:271
 msgid "Please enter a VIP code."
@@ -2372,6 +2520,16 @@ msgstr "Vui lòng nhập mã VIP."
 #: includes/vip-codes-handler.php:308
 msgid "Invalid VIP code."
 msgstr "Mã VIP không hợp lệ."
+
+#: includes/vip-codes-handler.php:359 includes/vip.php:71
+msgid ""
+"You already have an active VIP membership. Please wait until it expires "
+"before activating again."
+msgstr "Bạn đang có VIP còn hạn. Vui lòng đợi hết hạn để kích hoạt lại."
+
+#: includes/vip-codes-handler.php:368 includes/vip.php:60
+msgid "VIP activation is currently disabled."
+msgstr "Tính năng kích hoạt VIP hiện đang bị tắt."
 
 #: includes/vip-codes-handler.php:491
 msgid "VIP Code Redeemed"
@@ -2383,20 +2541,9 @@ msgstr "Đã sử dụng Mã VIP"
 msgid "You received %d day(s) of VIP membership."
 msgstr "Bạn đã nhận được %d ngày thành viên VIP."
 
-#: includes/vip-codes-handler.php:513
-#: init-user-engine.php:457
+#: includes/vip-codes-handler.php:513 init-user-engine.php:464
 msgid "VIP code redeemed successfully!"
 msgstr "Sử dụng mã VIP thành công!"
-
-#: includes/vip-codes-handler.php:368
-#: includes/vip.php:60
-msgid "VIP activation is currently disabled."
-msgstr "Tính năng kích hoạt VIP hiện đang bị tắt."
-
-#: includes/vip-codes-handler.php:359
-#: includes/vip.php:71
-msgid "You already have an active VIP membership. Please wait until it expires before activating again."
-msgstr "Bạn đang có VIP còn hạn. Vui lòng đợi hết hạn để kích hoạt lại."
 
 #: includes/vip.php:91
 msgid "Invalid VIP package."
@@ -2404,8 +2551,7 @@ msgstr "Gói VIP không hợp lệ."
 
 #. translators: %s is the coin label (e.g., Coin, Xu).
 #. translators: %s is the cash label (e.g., Cash, Kim cương).
-#: includes/vip.php:105
-#: includes/vip.php:109
+#: includes/vip.php:105 includes/vip.php:109
 #, php-format
 msgid "VIP can only be purchased with %s."
 msgstr "VIP chỉ có thể mua bằng %s."
@@ -2418,11 +2564,24 @@ msgstr "Loại tiền đã chọn không hợp lệ."
 msgid "This VIP package is disabled."
 msgstr "Gói VIP này đã bị tắt."
 
+#. translators: %s is the cash label (e.g., Cash, Kim cương).
+#. translators: %s is the coin label (e.g., Coin, Xu).
+#. translators: %s = currency label (e.g. Coin, Cash)
+#: includes/vip.php:132 includes/vip.php:140 init-user-engine.php:356
+#: init-user-engine.php:397 init-user-engine.php:398
+#, php-format
+msgid "Not enough %s."
+msgstr "Không đủ %s."
+
 #. translators: %1$s = days/lifetime, %2$s = formatted price, %3$s = currency label.
 #: includes/vip.php:171
 #, php-format
-msgid "You have successfully purchased VIP for %1$s days using %2$s %3$s. Enjoy your exclusive benefits!"
-msgstr "Bạn đã mua VIP %1$s ngày thành công với %2$s %3$s. Tận hưởng đặc quyền của bạn!"
+msgid ""
+"You have successfully purchased VIP for %1$s days using %2$s %3$s. Enjoy "
+"your exclusive benefits!"
+msgstr ""
+"Bạn đã mua VIP %1$s ngày thành công với %2$s %3$s. Tận hưởng đặc quyền của "
+"bạn!"
 
 #: includes/vip.php:172
 msgid "lifetime"
@@ -2440,13 +2599,11 @@ msgstr "Bạn cần đăng nhập để mua VIP."
 msgid "Invalid VIP package selected."
 msgstr "Bạn đã chọn gói VIP không hợp lệ."
 
-#: init-user-engine.php:125
-#: init-user-engine.php:157
+#: init-user-engine.php:125 init-user-engine.php:164
 msgid "Login"
 msgstr "Đăng nhập"
 
-#: init-user-engine.php:126
-#: templates/register-form.php:55
+#: init-user-engine.php:126 templates/register-form.php:55
 msgid "Register"
 msgstr "Đăng ký"
 
@@ -2454,8 +2611,7 @@ msgstr "Đăng ký"
 msgid "Back to login"
 msgstr "Quay lại đăng nhập"
 
-#: init-user-engine.php:128
-#: templates/login-form.php:41
+#: init-user-engine.php:128 templates/login-form.php:41
 #: templates/login-form.php:45
 msgid "Create a new account"
 msgstr "Tạo tài khoản mới"
@@ -2468,531 +2624,518 @@ msgstr "Đang đăng ký..."
 msgid "Welcome! You can now log in."
 msgstr "Chào mừng! Bạn có thể đăng nhập ngay."
 
-#: init-user-engine.php:137
+#: init-user-engine.php:138
 msgid "Captcha not loaded. Please wait..."
 msgstr "Captcha chưa tải xong. Vui lòng chờ..."
 
-#: init-user-engine.php:138
+#: init-user-engine.php:139
 msgid "Captcha expired. Loading new one..."
 msgstr "Captcha đã hết hạn. Đang tải captcha mới..."
 
-#: init-user-engine.php:139
+#: init-user-engine.php:140
 msgid "Too many attempts. Please wait before trying again."
 msgstr "Bạn đã thử quá nhiều lần. Vui lòng chờ trước khi thử lại."
 
-#: init-user-engine.php:140
+#: init-user-engine.php:141
 msgid "Registration failed"
 msgstr "Đăng ký thất bại"
 
-#: init-user-engine.php:141
+#: init-user-engine.php:142
 msgid "Username or Email Address"
 msgstr "Tên đăng nhập hoặc địa chỉ email"
 
-#: init-user-engine.php:142
-#: templates/register-form.php:17
+#: init-user-engine.php:143 templates/register-form.php:17
 msgid "Password"
 msgstr "Mật khẩu"
 
-#: init-user-engine.php:294
+#: init-user-engine.php:144
+msgid "This username does not exist."
+msgstr "Tên đăng nhập này không tồn tại."
+
+#: init-user-engine.php:145
+msgid "This email address is not registered."
+msgstr "Địa chỉ email này chưa được đăng ký."
+
+#: init-user-engine.php:146
+msgid "Incorrect password. Please try again."
+msgstr "Sai mật khẩu. Vui lòng thử lại."
+
+#: init-user-engine.php:147
+msgid "Please enter your username or email address."
+msgstr "Vui lòng nhập tên đăng nhập hoặc địa chỉ email."
+
+#: init-user-engine.php:148
+msgid "Please enter your password."
+msgstr "Vui lòng nhập mật khẩu."
+
+#: init-user-engine.php:149
+msgid "Incorrect username or password. Please try again."
+msgstr "Sai tên đăng nhập hoặc mật khẩu. Vui lòng thử lại."
+
+#: init-user-engine.php:301
 msgid "Checked in"
 msgstr "Đã điểm danh"
 
-#: init-user-engine.php:295
+#: init-user-engine.php:302
 msgid "Checked in successfully!"
 msgstr "Điểm danh thành công!"
 
-#: init-user-engine.php:296
+#: init-user-engine.php:303
 msgid "You received your reward!"
 msgstr "Bạn đã nhận phần thưởng!"
 
-#: init-user-engine.php:297
+#: init-user-engine.php:304
 msgid "Still too early to claim!"
 msgstr "Chưa đến lúc nhận thưởng!"
 
-#: init-user-engine.php:298
+#: init-user-engine.php:305
 msgid "Checking in..."
 msgstr "Đang điểm danh..."
 
-#: init-user-engine.php:299
-#: init-user-engine.php:322
+#: init-user-engine.php:306 init-user-engine.php:329
 msgid "All messages marked as read."
 msgstr "Đã đánh dấu tất cả là đã đọc."
 
-#: init-user-engine.php:300
-#: init-user-engine.php:323
+#: init-user-engine.php:307 init-user-engine.php:330
 msgid "All messages deleted."
 msgstr "Đã xoá tất cả tin nhắn."
 
-#: init-user-engine.php:301
+#: init-user-engine.php:308
 msgid "Error!"
 msgstr "Lỗi!"
 
-#: init-user-engine.php:302
-#: templates/dashboard.php:105
+#: init-user-engine.php:309 templates/dashboard.php:105
 msgid "Transaction History"
 msgstr "Lịch sử giao dịch"
 
-#: init-user-engine.php:303
-#: templates/dashboard.php:99
+#: init-user-engine.php:310 templates/dashboard.php:99
 msgid "Daily Tasks"
 msgstr "Nhiệm vụ hàng ngày"
 
-#: init-user-engine.php:304
+#: init-user-engine.php:311
 msgid "No daily tasks found."
 msgstr "Không có nhiệm vụ nào."
 
-#: init-user-engine.php:305
+#: init-user-engine.php:312
 msgid "Failed to load daily tasks."
 msgstr "Tải nhiệm vụ thất bại."
 
-#: init-user-engine.php:306
-#: templates/dashboard.php:89
+#: init-user-engine.php:313 templates/dashboard.php:89
 msgid "Inbox"
 msgstr "Hộp thư"
 
-#: init-user-engine.php:307
+#: init-user-engine.php:314
 msgid "No messages in your inbox."
 msgstr "Không có tin nhắn nào trong hộp thư của bạn."
 
-#: init-user-engine.php:308
+#: init-user-engine.php:315
 msgid "No messages in this category."
 msgstr "Không có tin nhắn trong mục này."
 
-#: init-user-engine.php:309
+#: init-user-engine.php:316
 msgid "View all messages"
 msgstr "Xem tất cả tin nhắn"
 
-#: init-user-engine.php:310
+#: init-user-engine.php:317
 msgid "All"
 msgstr "Tất cả"
 
-#: init-user-engine.php:312
+#: init-user-engine.php:319
 msgid "System"
 msgstr "Hệ thống"
 
-#: init-user-engine.php:313
+#: init-user-engine.php:320
 msgid "Rewards"
 msgstr "Phần thưởng"
 
-#: init-user-engine.php:314
+#: init-user-engine.php:321
 msgid "Activity"
 msgstr "Hoạt động"
 
-#: init-user-engine.php:315
-#: init-user-engine.php:422
+#: init-user-engine.php:322 init-user-engine.php:429
 msgid "Other"
 msgstr "Khác"
 
-#: init-user-engine.php:424
-msgid "Date of Birth"
-msgstr "Ngày sinh"
-
-#: includes/rest-api.php:1032
-#: includes/rest-api.php:1043
-#: init-user-engine.php:425
-#: init-user-engine.php:427
-msgid "Please enter a valid date of birth."
-msgstr "Vui lòng nhập ngày sinh hợp lệ."
-
-#: includes/rest-api.php:1037
-#: init-user-engine.php:426
-msgid "Date of birth cannot be in the future."
-msgstr "Ngày sinh không được ở trong tương lai."
-
-#: init-user-engine.php:316
+#: init-user-engine.php:323
 msgid "Mark All as Read"
 msgstr "Đánh dấu tất cả đã đọc"
 
-#: init-user-engine.php:317
+#: init-user-engine.php:324
 msgid "Delete All"
 msgstr "Xoá tất cả"
 
-#: init-user-engine.php:318
+#: init-user-engine.php:325
 msgid "Mark as Read"
 msgstr "Đánh dấu đã đọc"
 
-#: init-user-engine.php:320
+#: init-user-engine.php:327
 msgid "No title"
 msgstr "Không có tiêu đề"
 
-#: init-user-engine.php:321
+#: init-user-engine.php:328
 msgid "Failed to load inbox."
 msgstr "Không thể tải hộp thư."
 
-#: init-user-engine.php:324
+#: init-user-engine.php:331
 msgid "Click again to confirm"
 msgstr "Nhấn lần nữa để xác nhận"
 
-#: init-user-engine.php:326
-#: templates/dashboard.php:82
+#: init-user-engine.php:333 templates/dashboard.php:82
 msgid "VIP Membership"
 msgstr "Thành viên VIP"
 
-#: init-user-engine.php:327
+#: init-user-engine.php:334
 msgid "Current status:"
 msgstr "Trạng thái hiện tại:"
 
-#: init-user-engine.php:328
+#: init-user-engine.php:335
 msgid "VIP until"
 msgstr "VIP đến"
 
-#: init-user-engine.php:329
+#: init-user-engine.php:336
 msgid "Not a VIP"
 msgstr "Chưa là VIP"
 
-#: init-user-engine.php:331
+#: init-user-engine.php:338
 msgid "VIP 7 days"
 msgstr "VIP 7 ngày"
 
-#: init-user-engine.php:332
+#: init-user-engine.php:339
 msgid "VIP 30 days"
 msgstr "VIP 30 ngày"
 
-#: init-user-engine.php:333
+#: init-user-engine.php:340
 msgid "VIP 90 days"
 msgstr "VIP 90 ngày"
 
-#: init-user-engine.php:334
+#: init-user-engine.php:341
 msgid "VIP 180 days"
 msgstr "VIP 180 ngày"
 
-#: init-user-engine.php:335
+#: init-user-engine.php:342
 msgid "VIP 360 days"
 msgstr "VIP 360 ngày"
 
-#: init-user-engine.php:336
+#: init-user-engine.php:343
 msgid "VIP Lifetime"
 msgstr "VIP trọn đời"
 
-#: init-user-engine.php:338
+#: init-user-engine.php:345
 msgid "Note:"
 msgstr "Lưu ý:"
 
-#: init-user-engine.php:339
+#: init-user-engine.php:346
 msgid "VIP will be extended if purchased again before expiration."
 msgstr "VIP sẽ được gia hạn nếu mua thêm trước khi hết hạn."
 
-#: init-user-engine.php:341
+#: init-user-engine.php:348
 msgid "Buy Now"
 msgstr "Mua ngay"
 
-#: init-user-engine.php:342
+#: init-user-engine.php:349
 msgid "VIP purchased successfully!"
 msgstr "Đã mua VIP thành công!"
 
-#: init-user-engine.php:343
+#: init-user-engine.php:350
 msgid "Could not purchase VIP package."
 msgstr "Không thể mua gói VIP."
 
-#: init-user-engine.php:344
+#: init-user-engine.php:351
 msgid "An error occurred during VIP purchase."
 msgstr "Đã xảy ra lỗi khi mua VIP."
 
-#: init-user-engine.php:345
+#: init-user-engine.php:352
 msgid "Unavailable"
 msgstr "Không khả dụng"
 
 #. translators: %s = currency label (e.g. Coin, Cash)
-#: init-user-engine.php:347
-#: init-user-engine.php:348
+#: init-user-engine.php:354 init-user-engine.php:355
 #, php-format
 msgid "Pay with %s"
 msgstr "Mua bằng %s"
 
-#. translators: %s is the cash label (e.g., Cash, Kim cương).
-#. translators: %s is the coin label (e.g., Coin, Xu).
-#. translators: %s = currency label (e.g. Coin, Cash)
-#: includes/vip.php:132
-#: includes/vip.php:140
-#: init-user-engine.php:349
-#: init-user-engine.php:390
-#: init-user-engine.php:391
-#, php-format
-msgid "Not enough %s."
-msgstr "Không đủ %s."
-
-#: init-user-engine.php:351
+#: init-user-engine.php:358
 msgid "Already VIP"
 msgstr "Đã là VIP"
 
-#: init-user-engine.php:352
+#: init-user-engine.php:359
 msgid "VIP activation is currently disabled by the site admin."
 msgstr "Tính năng kích hoạt VIP hiện đang bị quản trị viên tắt."
 
-#: init-user-engine.php:353
-msgid "You already have an active VIP. Please wait until it expires before activating it again."
+#: init-user-engine.php:360
+msgid ""
+"You already have an active VIP. Please wait until it expires before "
+"activating it again."
 msgstr "Bạn đang có VIP còn hạn. Vui lòng đợi hết hạn để kích hoạt lại."
 
-#: init-user-engine.php:355
+#: init-user-engine.php:362
 msgid "Invite Friends"
 msgstr "Mời bạn bè"
 
-#: init-user-engine.php:356
+#: init-user-engine.php:363
 msgid "Invite your friends and earn rewards"
 msgstr "Mời bạn bè và nhận phần thưởng"
 
-#: init-user-engine.php:357
+#: init-user-engine.php:364
 msgid "Your Referral Code"
 msgstr "Mã mời của bạn"
 
-#: init-user-engine.php:358
+#: init-user-engine.php:365
 msgid "Copy Link"
 msgstr "Sao chép liên kết"
 
-#: init-user-engine.php:359
+#: init-user-engine.php:366
 msgid "Copied!"
 msgstr "Đã sao chép!"
 
-#: init-user-engine.php:360
+#: init-user-engine.php:367
 msgid "Share via"
 msgstr "Chia sẻ qua"
 
-#: init-user-engine.php:361
+#: init-user-engine.php:368
 msgid "You and your friend will receive bonus when they register."
 msgstr "Bạn và bạn của bạn sẽ nhận thưởng khi họ đăng ký."
 
-#: init-user-engine.php:362
+#: init-user-engine.php:369
 msgid "Referral Benefits"
 msgstr "Quyền lợi khi mời bạn"
 
-#: init-user-engine.php:363
+#: init-user-engine.php:370
 msgid "You get:"
 msgstr "Bạn nhận được:"
 
-#: init-user-engine.php:364
+#: init-user-engine.php:371
 msgid "Your friend gets:"
 msgstr "Bạn của bạn nhận được:"
 
-#: init-user-engine.php:365
+#: init-user-engine.php:372
 msgid "Your Referral History"
 msgstr "Lịch sử mời bạn của bạn"
 
-#: init-user-engine.php:366
+#: init-user-engine.php:373
 msgid "No referral data yet."
 msgstr "Chưa có dữ liệu mời bạn."
 
-#: init-user-engine.php:367
+#: init-user-engine.php:374
 msgid "Could not load referral history."
 msgstr "Không thể tải lịch sử mời bạn."
 
-#: init-user-engine.php:369
+#: init-user-engine.php:376
 msgid "No EXP activity yet."
 msgstr "Chưa có hoạt động EXP nào."
 
-#: init-user-engine.php:370
+#: init-user-engine.php:377
 msgid "Experience Log"
 msgstr "Lịch sử EXP"
 
-#: init-user-engine.php:371
+#: init-user-engine.php:378
 msgid "Failed to load experience log."
 msgstr "Tải lịch sử EXP thất bại."
 
-#: init-user-engine.php:375
-#: templates/dashboard.php:112
+#: init-user-engine.php:382 templates/dashboard.php:112
 msgid "Exchange"
 msgstr "Đổi tiền"
 
-#: init-user-engine.php:377
+#: init-user-engine.php:384
 msgid "Rate"
 msgstr "Tỷ lệ"
 
-#: init-user-engine.php:379
+#: init-user-engine.php:386
 msgid "You will receive"
 msgstr "Bạn sẽ nhận"
 
-#: init-user-engine.php:380
+#: init-user-engine.php:387
 msgid "Max"
 msgstr "Tối đa"
 
-#: init-user-engine.php:381
+#: init-user-engine.php:388
 msgid "Convert"
 msgstr "Đổi"
 
-#: init-user-engine.php:382
-#: init-user-engine.php:439
+#: init-user-engine.php:389 init-user-engine.php:446
 msgid "Processing..."
 msgstr "Đang xử lý..."
 
-#: init-user-engine.php:383
+#: init-user-engine.php:390
 msgid "Enter a valid amount."
 msgstr "Vui lòng nhập số hợp lệ."
 
-#: init-user-engine.php:384
+#: init-user-engine.php:391
 msgid "Exchanged successfully!"
 msgstr "Đổi thành công!"
 
-#: init-user-engine.php:385
+#: init-user-engine.php:392
 msgid "Exchange failed."
 msgstr "Đổi thất bại."
 
-#: init-user-engine.php:386
+#: init-user-engine.php:393
 msgid "Conversion is irreversible. Please review before confirming."
 msgstr "Giao dịch không thể hoàn tác. Vui lòng kiểm tra trước khi xác nhận."
 
 #. translators: %1$s = source currency label, %2$s = target currency label
-#: init-user-engine.php:388
-#: init-user-engine.php:389
+#: init-user-engine.php:395 init-user-engine.php:396
 #, php-format
 msgid "%1$s to %2$s"
 msgstr "%1$s sang %2$s"
 
-#: init-user-engine.php:393
+#: init-user-engine.php:400
 msgid "Upload Avatar"
 msgstr "Tải lên ảnh đại diện"
 
-#: init-user-engine.php:394
+#: init-user-engine.php:401
 msgid "Drop image here or click to upload"
 msgstr "Kéo ảnh vào đây hoặc nhấn để tải lên"
 
-#: init-user-engine.php:395
+#: init-user-engine.php:402
 msgid "Save Avatar"
 msgstr "Lưu ảnh đại diện"
 
-#: init-user-engine.php:396
+#: init-user-engine.php:403
 msgid "Uploading..."
 msgstr "Đang tải lên..."
 
-#: init-user-engine.php:397
+#: init-user-engine.php:404
 msgid "Please select a valid image."
 msgstr "Vui lòng chọn một hình ảnh hợp lệ."
 
 #. translators: %s = max upload size in MB
-#: init-user-engine.php:399
+#: init-user-engine.php:406
 msgid "Upload failed. Please try again."
 msgstr "Tải lên thất bại. Vui lòng thử lại."
 
-#: init-user-engine.php:400
+#: init-user-engine.php:407
 msgid "Remove Avatar"
 msgstr "Xoá ảnh đại diện"
 
-#: init-user-engine.php:401
+#: init-user-engine.php:408
 msgid "Are you sure you want to remove your avatar?"
 msgstr "Bạn có chắc chắn muốn xoá ảnh đại diện không?"
 
-#: init-user-engine.php:402
+#: init-user-engine.php:409
 msgid "Removing..."
 msgstr "Đang xoá..."
 
-#: init-user-engine.php:403
+#: init-user-engine.php:410
 msgid "Failed to remove avatar. Please try again."
 msgstr "Xoá ảnh thất bại. Vui lòng thử lại."
 
-#: init-user-engine.php:405
-#: templates/dashboard.php:139
+#: init-user-engine.php:412 templates/dashboard.php:139
 msgid "Edit Profile"
 msgstr "Chỉnh sửa hồ sơ"
 
-#: init-user-engine.php:406
+#: init-user-engine.php:413
 msgid "Display Name"
 msgstr "Tên hiển thị"
 
-#: init-user-engine.php:407
+#: init-user-engine.php:414
 msgid "Your public display name"
 msgstr "Tên công khai hiển thị cho mọi người"
 
-#: init-user-engine.php:408
+#: init-user-engine.php:415
 msgid "Bio"
 msgstr "Giới thiệu"
 
-#: init-user-engine.php:409
+#: init-user-engine.php:416
 msgid "Short self introduction"
 msgstr "Giới thiệu ngắn về bản thân"
 
-#: init-user-engine.php:410
+#: init-user-engine.php:417
 msgid "New Password"
 msgstr "Mật khẩu mới"
 
-#: init-user-engine.php:411
+#: init-user-engine.php:418
 msgid "Leave blank to keep current password"
 msgstr "Để trống nếu không muốn đổi mật khẩu"
 
-#: init-user-engine.php:413
+#: init-user-engine.php:420
 msgid "https://facebook.com/yourprofile"
 msgstr "https://facebook.com/trangcuaban"
 
-#: init-user-engine.php:414
+#: init-user-engine.php:421
 msgid "https://twitter.com/yourhandle"
 msgstr "https://twitter.com/tencuaban"
 
-#: init-user-engine.php:415
+#: init-user-engine.php:422
 msgid "Your Discord username or invite"
 msgstr "Tên người dùng hoặc link Discord của bạn"
 
-#: init-user-engine.php:416
+#: init-user-engine.php:423
 msgid "https://yourwebsite.com"
 msgstr "https://trangwebcuaban.com"
 
-#: init-user-engine.php:418
+#: init-user-engine.php:425
 msgid "Gender"
 msgstr "Giới tính"
 
-#: init-user-engine.php:419
+#: init-user-engine.php:426
 msgid "Prefer not to say"
 msgstr "Không muốn tiết lộ"
 
-#: init-user-engine.php:420
+#: init-user-engine.php:427
 msgid "Male"
 msgstr "Nam"
 
-#: init-user-engine.php:421
+#: init-user-engine.php:428
 msgid "Female"
 msgstr "Nữ"
 
-#: init-user-engine.php:429
+#: init-user-engine.php:431
+msgid "Date of Birth"
+msgstr "Ngày sinh"
+
+#: init-user-engine.php:436
 msgid "Save"
 msgstr "Lưu thay đổi"
 
-#: init-user-engine.php:430
+#: init-user-engine.php:437
 msgid "Profile updated successfully!"
 msgstr "Cập nhật hồ sơ thành công!"
 
-#: init-user-engine.php:431
+#: init-user-engine.php:438
 msgid "Could not update profile."
 msgstr "Không thể cập nhật hồ sơ."
 
-#: init-user-engine.php:432
+#: init-user-engine.php:439
 msgid "Could not load profile data."
 msgstr "Không thể tải dữ liệu hồ sơ."
 
-#: init-user-engine.php:433
+#: init-user-engine.php:440
 msgid "An error occurred while updating."
 msgstr "Có lỗi xảy ra khi cập nhật."
 
-#: init-user-engine.php:435
+#: init-user-engine.php:442
 msgid "Redeem now"
 msgstr "Đổi ngay"
 
-#: init-user-engine.php:436
-#: templates/dashboard.php:125
+#: init-user-engine.php:443 templates/dashboard.php:125
 msgid "Redeem Code"
 msgstr "Mã quy đổi"
 
-#: init-user-engine.php:437
+#: init-user-engine.php:444
 msgid "Enter redeem code..."
 msgstr "Nhập mã quy đổi..."
 
-#: init-user-engine.php:438
+#: init-user-engine.php:445
 msgid "Redeem"
 msgstr "Đổi mã"
 
-#: init-user-engine.php:442
+#: init-user-engine.php:449
 msgid "You will receive:"
 msgstr "Bạn sẽ nhận được:"
 
-#: init-user-engine.php:452
+#: init-user-engine.php:459
 msgid "Failed to redeem code."
 msgstr "Không thể đổi mã."
 
-#: init-user-engine.php:454
-#: templates/dashboard.php:132
+#: init-user-engine.php:461 templates/dashboard.php:132
 msgid "Redeem VIP Code"
 msgstr "Mã VIP"
 
-#: init-user-engine.php:455
+#: init-user-engine.php:462
 msgid "Enter VIP code..."
 msgstr "Nhập mã VIP..."
 
-#: init-user-engine.php:456
+#: init-user-engine.php:463
 msgid "You will receive VIP membership days."
 msgstr "Bạn sẽ nhận được số ngày thành viên VIP."
 
@@ -3043,71 +3186,3 @@ msgstr "Đang tải..."
 #: templates/register-form.php:48
 msgid "Type your answer here"
 msgstr "Nhập câu trả lời của bạn"
-
-#: includes/redeem-codes-handler.php:21
-#: includes/vip-codes-handler.php:21
-msgid "Security check failed. Please refresh the page and try again."
-msgstr "Kiểm tra bảo mật thất bại. Vui lòng tải lại trang và thử lại."
-
-#: includes/redeem-codes-handler.php:502
-#: includes/vip-codes-handler.php:544
-msgid "ID"
-msgstr "ID"
-
-#: includes/redeem-codes-handler.php:505
-#: includes/vip-codes-handler.php:547
-msgid "Locked User ID"
-msgstr "ID người dùng bị khóa"
-
-#: includes/redeem-codes-handler.php:506
-#: includes/vip-codes-handler.php:548
-msgid "Locked Username"
-msgstr "Tên đăng nhập người dùng bị khóa"
-
-#: includes/redeem-codes-handler.php:509
-#: includes/vip-codes-handler.php:550
-msgid "Max Uses"
-msgstr "Số lượt dùng tối đa"
-
-#: includes/redeem-codes-handler.php:510
-#: includes/vip-codes-handler.php:551
-msgid "Used Count"
-msgstr "Số lượt đã dùng"
-
-#: includes/redeem-codes-handler.php:512
-#: includes/vip-codes-handler.php:553
-msgid "Valid From"
-msgstr "Hiệu lực từ"
-
-#: includes/redeem-codes-handler.php:513
-#: includes/vip-codes-handler.php:554
-msgid "Valid To"
-msgstr "Hiệu lực đến"
-
-#: includes/redeem-codes-handler.php:514
-#: includes/vip-codes-handler.php:555
-msgid "Created By"
-msgstr "Người tạo"
-
-#: includes/redeem-codes-handler.php:515
-#: includes/vip-codes-handler.php:556
-msgid "Created At"
-msgstr "Ngày tạo"
-
-#: includes/redeem-codes-handler.php:516
-#: includes/vip-codes-handler.php:557
-msgid "Updated At"
-msgstr "Ngày cập nhật"
-
-#: includes/tools/redeem-codes.php:246
-#: includes/tools/vip-codes.php:245
-msgid "Export CSV"
-msgstr "Xuất CSV"
-
-#: includes/tools/redeem-codes.php:250
-msgid "Exports the full list of redeem codes (all pages) as a CSV file."
-msgstr "Xuất toàn bộ danh sách mã redeem (tất cả các trang) ra file CSV."
-
-#: includes/tools/vip-codes.php:249
-msgid "Exports the full list of VIP codes (all pages) as a CSV file."
-msgstr "Xuất toàn bộ danh sách mã VIP (tất cả các trang) ra file CSV."

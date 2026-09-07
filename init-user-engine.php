@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.6.2
+ * Version: 1.6.3
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.6.2' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.6.3' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -128,6 +128,7 @@ function init_plugin_suite_user_engine_enqueue_guest_assets() {
             'register'             => __( 'Create a new account', 'init-user-engine' ),
             'registering'          => __( 'Registering...', 'init-user-engine' ),
             'register_success'     => __( 'Welcome! You can now log in.', 'init-user-engine' ),
+            'register_success_auto_login' => __( 'Welcome! Logging you in…', 'init-user-engine' ),
             'username_too_short'   => __( 'Username must be at least 3 characters.', 'init-user-engine' ),
             'username_invalid'     => __( 'Username can only contain letters, numbers and underscores.', 'init-user-engine' ),
             'email_invalid'        => __( 'Please enter a valid email address.', 'init-user-engine' ),
@@ -140,6 +141,12 @@ function init_plugin_suite_user_engine_enqueue_guest_assets() {
             'registration_failed'  => __( 'Registration failed', 'init-user-engine' ),
             'placeholder_username' => __( 'Username or Email Address', 'init-user-engine' ),
             'placeholder_password' => __( 'Password', 'init-user-engine' ),
+            'login_error_invalid_username'   => __( 'This username does not exist.', 'init-user-engine' ),
+            'login_error_invalid_email'      => __( 'This email address is not registered.', 'init-user-engine' ),
+            'login_error_incorrect_password' => __( 'Incorrect password. Please try again.', 'init-user-engine' ),
+            'login_error_empty_username'     => __( 'Please enter your username or email address.', 'init-user-engine' ),
+            'login_error_empty_password'     => __( 'Please enter your password.', 'init-user-engine' ),
+            'login_error_generic'            => __( 'Incorrect username or password. Please try again.', 'init-user-engine' ),
         ]
     ] );
 }

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.3
+Stable tag: 1.6.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -211,6 +211,14 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.4 – September 10, 2026 =
+- Fixed: permanently deleting a user (from Users → All Users, bulk delete, or the REST Users endpoint) used to leave that user's **EXP history** and **Inbox messages** behind in the database forever, since nothing ever cleaned them up after the account itself was gone
+  - Now hooked into WordPress core's `deleted_user` action (fires for both single-site `wp_delete_user()` and multisite `wpmu_delete_user()`, so one hook covers both): as soon as a user is permanently deleted, their EXP log rows and all Inbox messages are deleted right along with it
+  - Coin/Cash **transaction log stays untouched on purpose** — wallet history feeds into site-wide statistics and reconciliation (total coin/cash ever issued, revenue reports, etc.), so it's intentionally kept even after the user account is gone
+  - `iue_*` user meta (check-in streak, login bonus flags, profile bonus flag...) needed no extra handling — WordPress core already wipes all usermeta for the user before `deleted_user` fires
+  - Added action hook `init_plugin_suite_user_engine_user_data_purged` (fires with the deleted user's ID right after cleanup) so other plugins/add-ons can hook in and clean up their own related data too
+- No new user-facing strings in this release, so `.pot`/`.po` files are unchanged
 
 = 1.6.3 – September 7, 2026 =
 - Added a new **"Login After Register"** option (Init User Engine → Settings → General, disabled by default). When enabled, a successful registration through the plugin's REST endpoint (`/register`) immediately signs the new user in (`wp_set_auth_cookie()` + `wp_set_current_user()`, followed by the standard `wp_login` action for compatibility with other plugins/themes) instead of leaving them on the Login form

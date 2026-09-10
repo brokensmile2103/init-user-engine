@@ -542,6 +542,57 @@ function init_plugin_suite_user_engine_redirect_failed_login( $username, $error 
 	exit;
 }
 
+/**
+ * Dọn dẹp dữ liệu phụ trợ khi 1 user bị xóa VĨNH VIỄN khỏi WordPress.
+ *
+ * Phạm vi dọn dẹp (đã cân nhắc kỹ):
+ * - EXP log (bảng init_user_engine_exp_log)  → xóa toàn bộ theo user_id.
+ * - Inbox   (bảng init_user_engine_inbox)    → xóa toàn bộ theo user_id.
+ *
+ * CỐ Ý KHÔNG đụng vào:
+ * - Transaction log / coin/cash (bảng init_user_engine_transaction_log):
+ *   giữ nguyên để không làm mất dữ liệu thống kê, báo cáo, đối soát của
+ *   toàn hệ thống (vd tổng coin/cash đã phát ra), kể cả khi user đã bị xóa.
+ * - usermeta (iue_checkin_last, iue_last_login_bonus, v.v...): WordPress
+ *   core đã tự xóa toàn bộ usermeta của user ngay trong wp_delete_user()/
+ *   wpmu_delete_user(), TRƯỚC KHI action 'deleted_user' được bắn ra, nên
+ *   không cần và không nên xử lý lại ở đây.
+ *
+ * Action 'deleted_user' được WordPress core bắn ra ở cả 2 trường hợp nên
+ * chỉ cần đăng ký đúng 1 lần là đủ:
+ * - Single site: wp_delete_user()   – wp-admin/includes/user.php
+ * - Multisite:   wpmu_delete_user() – wp-includes/ms-functions.php
+ *
+ * @param int $user_id ID của user vừa bị xóa.
+ */
+add_action( 'deleted_user', 'init_plugin_suite_user_engine_purge_data_on_user_deleted', 10, 1 );
+function init_plugin_suite_user_engine_purge_data_on_user_deleted( $user_id ) {
+	$user_id = (int) $user_id;
+	if ( $user_id <= 0 ) {
+		return;
+	}
+
+	// 1) Xóa lịch sử EXP của user.
+	if ( function_exists( 'init_plugin_suite_user_engine_delete_exp_log_by_user' ) ) {
+		init_plugin_suite_user_engine_delete_exp_log_by_user( $user_id );
+	}
+
+	// 2) Xóa toàn bộ Inbox của user (đã tự flush cache unread bên trong).
+	if ( function_exists( 'init_plugin_suite_user_engine_delete_all_inbox' ) ) {
+		init_plugin_suite_user_engine_delete_all_inbox( $user_id );
+	}
+
+	/**
+	 * Cho phép plugin/add-on khác dọn dẹp thêm dữ liệu riêng của họ khi
+	 * 1 user bị xóa vĩnh viễn khỏi Init User Engine (vd: log riêng, cache
+	 * riêng của họ...). KHÔNG dùng hook này để xóa transaction log — đó
+	 * là quyết định thiết kế có chủ đích, xem ghi chú phía trên.
+	 *
+	 * @param int $user_id ID của user vừa bị xóa.
+	 */
+	do_action( 'init_plugin_suite_user_engine_user_data_purged', $user_id );
+}
+
 // Hook vào action khi VIP bị gỡ
 add_action( 'init_plugin_suite_user_engine_vip_removed', function( $user_id, $prev_expiry, $vip_log_after ) {
 	// Tiêu đề và nội dung inbox message

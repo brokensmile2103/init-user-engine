@@ -969,6 +969,43 @@ function init_plugin_suite_user_engine_invalidate_exp_cache( $user_id ) {
 	wp_cache_delete( init_plugin_suite_user_engine_count_cache_key( 'exp', $user_id ), $group );
 }
 
+// ==========================
+// Xóa dữ liệu khi user bị xóa vĩnh viễn
+// ==========================
+
+/**
+ * Xóa toàn bộ EXP log (bảng init_user_engine_exp_log) của 1 user.
+ *
+ * Dùng khi user bị xóa VĨNH VIỄN khỏi WordPress (xem hooks.php,
+ * action 'deleted_user') — lịch sử EXP không còn ý nghĩa gì với 1 tài
+ * khoản không còn tồn tại nữa nên được dọn dẹp luôn, tránh rác DB.
+ *
+ * Cố ý KHÔNG dùng chung hàm này cho transaction log (coin/cash): dữ
+ * liệu giao dịch cần được giữ lại phục vụ thống kê/đối soát toàn hệ
+ * thống (tổng coin/cash đã phát ra...) kể cả sau khi user bị xóa.
+ *
+ * @param int $user_id
+ * @return int|false Số dòng đã xóa, false nếu có lỗi.
+ */
+function init_plugin_suite_user_engine_delete_exp_log_by_user( $user_id ) {
+	$user_id = (int) $user_id;
+	if ( $user_id <= 0 ) {
+		return false;
+	}
+
+	global $wpdb;
+	$table = init_plugin_suite_user_engine_exp_table();
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$result = $wpdb->delete( $table, [ 'user_id' => $user_id ], [ '%d' ] );
+
+	if ( $result ) {
+		init_plugin_suite_user_engine_invalidate_exp_cache( $user_id );
+	}
+
+	return $result;
+}
+
 add_action(
 	'init_plugin_suite_user_engine_transaction_logged',
 	function( $user_id ) {

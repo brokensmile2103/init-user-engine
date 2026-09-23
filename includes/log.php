@@ -249,6 +249,14 @@ function init_plugin_suite_user_engine_format_log_message( $entry ) {
 			// translators: %d is the number of days in the check-in streak
 			$message = sprintf( __( 'Check-in streak reached %d days', 'init-user-engine' ), $m[1] );
 			break;
+		case ( preg_match( '/^streak_restore_(\d+)$/', $source, $m ) ? true : false ):
+			$days    = (int) $m[1];
+			$message = sprintf(
+				// translators: %d is the number of missed days covered to keep the check-in streak.
+				_n( 'Kept check-in streak (%d missed day)', 'Kept check-in streak (%d missed days)', $days, 'init-user-engine' ),
+				$days
+			);
+			break;
 		case 'checkin':
 			$message = __( 'Daily check-in reward', 'init-user-engine' );
 			break;

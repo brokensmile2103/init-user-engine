@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 // ==========================
 // Create Database
 // ==========================
-register_activation_hook( __FILE__, 'init_plugin_suite_user_engine_on_activation' );
+register_activation_hook( INIT_PLUGIN_SUITE_IUE_FILE, 'init_plugin_suite_user_engine_on_activation' );
 add_action( 'wpmu_new_blog', 'init_plugin_suite_user_engine_on_new_blog', 10, 6 );
 
 // Chỉ chạy check_table khi version trong DB khác với version hiện tại của code

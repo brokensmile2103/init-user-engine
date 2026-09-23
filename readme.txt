@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - EXP & Level system with hookable progression logic  
 - Coin & Cash dual-wallet system with transaction logs and a configurable exchange rate between the two currencies  
 - Daily check-in with streak milestones and an online-time bonus timer  
+- Optional **Streak Recovery**: members who miss a few days can spend Coin to keep their check-in streak alive (allowed missed days and Coin price per day are configurable, off by default)  
 - Built-in reward hooks for registration, daily login, comments, published posts, and completed WooCommerce orders (when WooCommerce is active)
 
 **VIP Membership**
@@ -148,6 +149,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_vip_expire_soon_threshold` – Modify the threshold (in seconds) used to determine when VIP is considered close to expiration  
 - `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element
 - `init_plugin_suite_user_engine_theme_colors` – Modify theme color system (primary and active colors)
+- `init_plugin_suite_user_engine_streak_restore_max_days` – Modify how many missed check-in days a user may cover to keep their streak (return `0` to disable it for that user)
+- `init_plugin_suite_user_engine_streak_restore_cost` – Modify the Coin cost of keeping a streak (receives total cost, missed days, and user ID)
 
 === Actions ===
 
@@ -158,6 +161,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_inbox_inserted` – After new inbox message  
 - `init_plugin_suite_user_engine_referral_completed` – When referral is completed  
 - `init_plugin_suite_user_engine_after_checkin` – After user check-in  
+- `init_plugin_suite_user_engine_streak_restored` – After a user paid Coin to keep their check-in streak (user ID, missed days, cost, new streak)  
 - `init_plugin_suite_user_engine_after_claim_reward` – After user claims reward  
 - `init_plugin_suite_user_engine_vip_purchased` – After VIP is purchased  
 - `init_plugin_suite_user_engine_add_exp` – Triggered when adding EXP via hook  
@@ -171,7 +175,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 **Base:** `/wp-json/inituser/v1/`
 
 - `POST /register` – Create a new user account  
-- `POST /checkin` – Daily check-in  
+- `POST /checkin` – Daily check-in (optional JSON body: `prompt_restore`, `restore_streak`, `restore_cost` for Streak Recovery)  
 - `POST /claim-reward` – Claim reward after online duration  
 - `GET  /transactions` – Get Coin/Cash transaction log  
 - `GET  /exp-log` – Get EXP log  
@@ -211,6 +215,24 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.5 – September 24, 2026 =
+- Added **Streak Recovery** (Init User Engine → Settings → Streak Recovery). When a member misses a few days, they can now spend Coin to keep their check-in streak instead of losing it
+  - Two new settings: **Missed Days Allowed** (how many missed days can be covered, `0` = feature off) and **Coin Cost per Missed Day** (`0` = free). Off by default, so nothing changes on existing sites until an admin turns it on
+  - Clicking **Check In** after a gap opens the plugin's standard modal showing the current streak, missed days, total cost and the member's balance, with two choices: keep the streak (pay), or reset it and check in anyway. Closing the modal does nothing. Missing more days than allowed simply resets the streak as before
+  - Keeping a streak covers the missed days but does not count them as check-ins: the streak continues from where it was and today adds +1, so streak milestone rewards (7/30/90…) behave exactly as before
+  - Every charge is written to the Coin transaction log as a deduction with a readable reason (e.g. "Kept check-in streak (2 missed days)"), shown in the member's Transaction History and in the admin user metabox
+  - The frontend only ever shows the configured **Coin Label**, never a hardcoded "Coin"; all new frontend and error strings are label-aware
+  - Safety: the price is re-checked on the server against what the member was shown (rejected if it changed), the balance is verified just before charging, and if the log entry cannot be written the Coin is handed back and the streak is left untouched
+  - `POST /checkin` gained three optional JSON fields: `prompt_restore` (answer with status `restore_available` instead of checking in when the streak can be kept — nothing is changed), `restore_streak` and `restore_cost`. Clients that don't send them behave exactly as before
+  - Added filters `init_plugin_suite_user_engine_streak_restore_max_days` and `init_plugin_suite_user_engine_streak_restore_cost`, and action `init_plugin_suite_user_engine_streak_restored`
+  - New logic lives in `includes/streak-restore.php`
+- Fixed: `POST /checkin` had no protection against overlapping requests, so two requests fired at the same moment could both pass the "already checked in today" test and reward the same day twice. Check-ins are now serialized per user with the same short-lived mutex pattern used by the exchange endpoints; a request that arrives while another is running gets a `409 busy` response
+- Fixed: modals opened from the logged-in dashboard never played their open animation. The `fadeIn`/`slideDown` keyframes referenced by `#iue-modal` only existed in `style-guest.css`, which is not loaded for logged-in users. Added namespaced `iue-fade-in`/`iue-slide-down` keyframes to `style-user.css` (so a theme's own `fadeIn`/`slideDown` can no longer interfere) plus a `prefers-reduced-motion` opt-out
+- Fixed: leaving the **Coin Label** or **Cash Label** field empty made the frontend (dashboard data, Referral benefits, exchange and VIP screens) display a blank currency name, and the VIP purchase inbox message could show an empty label. Both now fall back to "Coin" / "Cash" through the shared `init_plugin_suite_user_engine_get_coin_label()` / `..._get_cash_label()` helpers
+- Fixed: after a failed check-in request (a server error, or a network failure) the check-in button used to switch to "Checked in" or fall back to an untranslated "Check-in" (it read a translation key that was never defined); it now returns to its normal, translated label and shows the error
+- Fixed: the plugin's activation hook was registered against `includes/init.php` instead of the main plugin file, so it never ran and the database tables were only created later, on the first `admin_init`. It now runs on activation as intended (the `admin_init` version check stays as the upgrade path)
+- Updated `.pot`/`.po`/`.mo` translation files with the new strings introduced above (Vietnamese translation included), regenerated with WP-CLI
 
 = 1.6.4 – September 10, 2026 =
 - Fixed: permanently deleting a user (from Users → All Users, bulk delete, or the REST Users endpoint) used to leave that user's **EXP history** and **Inbox messages** behind in the database forever, since nothing ever cleaned them up after the account itself was gone

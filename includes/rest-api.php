@@ -561,8 +561,45 @@ function init_plugin_suite_user_engine_validate_captcha($token, $user_answer) {
     return true;
 }
 
-// Handle daily check-in, reward EXP/coin, update streak and milestones
+/**
+ * POST /checkin - run the check-in for the current user, one request at a time.
+ *
+ * The check-in reads, charges and writes the same user meta, so overlapping
+ * requests must never run together (no double reward, no double charge).
+ * Same transient mutex pattern as the exchange endpoints; it auto-expires
+ * after 15s in case of a fatal.
+ *
+ * Optional JSON body (all used by the streak recovery flow):
+ * - prompt_restore (bool): if the user may keep a broken streak, answer with
+ *   status "restore_available" instead of checking in. Nothing is changed.
+ * - restore_streak (bool): pay Coin for the missed days and keep the streak.
+ * - restore_cost (int):    the price the user was shown; rejected if it changed.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_checkin( WP_REST_Request $request ) {
+	$lock_key = 'iue_checkin_lock_' . get_current_user_id();
+
+	if ( get_transient( $lock_key ) ) {
+		return new WP_Error(
+			'busy',
+			__( 'Another check-in is in progress. Please wait a moment.', 'init-user-engine' ),
+			array( 'status' => 409 )
+		);
+	}
+
+	set_transient( $lock_key, 1, 15 );
+
+	try {
+		return init_plugin_suite_user_engine_do_checkin( $request );
+	} finally {
+		delete_transient( $lock_key );
+	}
+}
+
+// Handle daily check-in, reward EXP/coin, update streak and milestones
+function init_plugin_suite_user_engine_do_checkin( WP_REST_Request $request ) {
     $user_id = get_current_user_id();
     if ( ! $user_id ) {
         return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
@@ -577,9 +614,26 @@ function init_plugin_suite_user_engine_api_checkin( WP_REST_Request $request ) {
         return new WP_REST_Response( [ 'status' => 'already_checked_in' ], 200 );
     }
 
+	// Paid streak recovery (opt-in in Settings; $restore is null when disabled or not applicable).
+	$restore      = init_plugin_suite_user_engine_get_streak_restore_offer( $user_id );
+	$restore_paid = null;
+
+	if ( rest_sanitize_boolean( $request->get_param( 'restore_streak' ) ) ) {
+		// Charges only if the offer is still valid and the price matches what the user saw.
+		$restore_paid = init_plugin_suite_user_engine_pay_streak_restore( $user_id, $restore, $request->get_param( 'restore_cost' ) );
+
+		if ( is_wp_error( $restore_paid ) ) {
+			return $restore_paid;
+		}
+	} elseif ( $restore && rest_sanitize_boolean( $request->get_param( 'prompt_restore' ) ) ) {
+		// Let the user decide first; nothing has been changed or charged yet.
+		return new WP_REST_Response( array_merge( array( 'status' => 'restore_available' ), $restore ), 200 );
+	}
+
+	// A paid restore keeps the streak alive: the missed days are covered, today counts as +1.
     // Tính hôm qua dựa trên timezone site (tránh lệch UTC)
     $yesterday = gmdate( 'Y-m-d', strtotime( '-1 day', current_time( 'timestamp' ) ) );
-    $streak    = ( $last === $yesterday ) ? $streak + 1 : 1;
+    $streak    = ( $last === $yesterday || $restore_paid ) ? $streak + 1 : 1;
     $total    += 1;
 
     init_plugin_suite_user_engine_update_meta( $user_id, 'iue_checkin_last', $today );
@@ -668,9 +722,24 @@ function init_plugin_suite_user_engine_api_checkin( WP_REST_Request $request ) {
         'cash'   => $cash_added,
     ] );
 
+	if ( $restore_paid ) {
+		/**
+		 * Fires after a member paid Coin to keep their check-in streak.
+		 *
+		 * @since 1.6.5
+		 *
+		 * @param int $user_id     User ID.
+		 * @param int $missed_days Missed days that were covered.
+		 * @param int $cost        Coin charged.
+		 * @param int $streak      The streak after today's check-in.
+		 */
+		do_action( 'init_plugin_suite_user_engine_streak_restored', $user_id, $restore_paid['missed_days'], $restore_paid['cost'], $streak );
+	}
+
     return new WP_REST_Response( [
         'status'            => 'success',
         'streak'            => $streak,
+		'streak_restored'   => (bool) $restore_paid,
         'exp'               => $new_exp_data['current_exp'],
         'coin'              => $new_coin,
         'cash'              => $new_cash,

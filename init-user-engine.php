@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.6.4
+ * Version: 1.6.5
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.6.4' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.6.5' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -44,6 +44,7 @@ require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'core.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'exp.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'coin.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'cash.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'streak-restore.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'shortcode.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'rest-api.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'log.php';
@@ -224,8 +225,9 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         true
     );
 
-    $label_coin     = array_key_exists( 'label_coin', $settings ) ? sanitize_text_field( $settings['label_coin'] ) : 'Coin';
-    $label_cash     = array_key_exists( 'label_cash', $settings ) ? sanitize_text_field( $settings['label_cash'] ) : 'Cash';
+    // Helpers fall back to 'Coin' / 'Cash' when the admin leaves a label empty.
+    $label_coin     = init_plugin_suite_user_engine_get_coin_label();
+    $label_cash     = init_plugin_suite_user_engine_get_cash_label();
     $user_id        = get_current_user_id();
     $is_vip         = init_plugin_suite_user_engine_is_vip();
 
@@ -303,6 +305,28 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'reward_claimed'           => __( 'You received your reward!', 'init-user-engine' ),
             'reward_too_early'         => __( 'Still too early to claim!', 'init-user-engine' ),
             'checking_in'              => __( 'Checking in...', 'init-user-engine' ),
+
+            'checkin_restore_title'        => __( 'Keep Your Streak', 'init-user-engine' ),
+            'checkin_restore_intro'        => sprintf(
+                /* translators: %s = currency label (e.g. Coin, Xu) */
+                __( 'You missed a few days. Spend %s to keep your streak going, or check in now and start over.', 'init-user-engine' ),
+                $label_coin
+            ),
+            'checkin_restore_streak'       => __( 'Current streak', 'init-user-engine' ),
+            'checkin_restore_missed'       => __( 'Missed days', 'init-user-engine' ),
+            'checkin_restore_cost'         => __( 'Cost', 'init-user-engine' ),
+            'checkin_restore_balance'      => __( 'Your balance', 'init-user-engine' ),
+            'checkin_restore_free'         => __( 'Free', 'init-user-engine' ),
+            'checkin_restore_confirm'      => __( 'Keep Streak', 'init-user-engine' ),
+            'checkin_restore_skip'         => __( 'Reset Streak & Check In', 'init-user-engine' ),
+            'checkin_restore_note'         => __( 'Choosing to reset still checks you in today, but your streak restarts from 1.', 'init-user-engine' ),
+            'checkin_restore_insufficient' => sprintf(
+                /* translators: %s = currency label (e.g. Coin, Cash) */
+                __( 'Not enough %s.', 'init-user-engine' ),
+                $label_coin
+            ),
+            'checkin_restore_success'      => __( 'Streak kept and checked in successfully!', 'init-user-engine' ),
+
             'mark_all_read_success'    => __( 'All messages marked as read.', 'init-user-engine' ),
             'delete_all_success'       => __( 'All messages deleted.', 'init-user-engine' ),
             'error'                    => __( 'Error!', 'init-user-engine' ),

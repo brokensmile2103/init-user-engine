@@ -128,6 +128,9 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['checkin_exp']          	 = absint( $input['checkin_exp'] ?? 50 );
 	$output['checkin_cash']         	 = absint( $input['checkin_cash'] ?? 0 );
 
+	$output['checkin_restore_days'] 	 = absint( $input['checkin_restore_days'] ?? 0 );
+	$output['checkin_restore_cost'] 	 = absint( $input['checkin_restore_cost'] ?? 100 );
+
 	$output['comment_exp']       		 = absint( $input['comment_exp'] ?? 10 );
 	$output['comment_coin']      		 = absint( $input['comment_coin'] ?? 2 );
 	$output['comment_daily_cap'] 		 = absint( $input['comment_daily_cap'] ?? 0 );
@@ -649,6 +652,28 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<input type="number" min="0" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[checkin_cash]"
 							value="<?php echo esc_attr( $options['checkin_cash'] ?? 0 ); ?>" />
 						<p class="description"><?php esc_html_e( 'Cash rewarded upon check-in (rarely used, mostly 0).', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'Streak Recovery', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Missed Days Allowed', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0" step="1" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[checkin_restore_days]"
+							value="<?php echo esc_attr( $options['checkin_restore_days'] ?? 0 ); ?>" />
+						<p class="description"><?php esc_html_e( 'How many missed check-in days a member can cover to keep their streak. 0 = disabled (any missed day resets the streak).', 'init-user-engine' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Coin Cost per Missed Day', 'init-user-engine' ); ?></th>
+					<td>
+						<input type="number" min="0" step="1" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[checkin_restore_cost]"
+							value="<?php echo esc_attr( $options['checkin_restore_cost'] ?? 100 ); ?>" />
+						<p class="description"><?php esc_html_e( 'Coin deducted for each missed day when a member keeps their streak. 0 = free.', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 

@@ -515,7 +515,7 @@
 	inset: 0;
 	background: rgba(0, 0, 0, 0.55);
 	backdrop-filter: blur(6px);
-	animation: fadeIn 0.3s ease-out;
+	animation: iue-fade-in 0.3s ease-out;
 }
 
 #iue-modal .iue-modal-content {
@@ -530,7 +530,7 @@
 	border-radius: 12px;
 	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 	overflow: hidden;
-	animation: slideDown 0.3s ease-out;
+	animation: iue-slide-down 0.3s ease-out;
 }
 
 #iue-modal .iue-modal-content.iue-modal-medium {
@@ -592,6 +592,24 @@
 @keyframes iue-spin {
 	from { transform: rotate(0deg); }
 	to { transform: rotate(360deg); }
+}
+
+/* Modal open animation. Namespaced so a theme's own fadeIn/slideDown can never clash. */
+@keyframes iue-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes iue-slide-down {
+	from { transform: translate(-50%, -25%); opacity: 0; }
+	to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#iue-modal .iue-overlay,
+	#iue-modal .iue-modal-content {
+		animation: none;
+	}
 }
 
 .iue-error {
@@ -2016,4 +2034,112 @@
 	background: var(--iue-theme-color);
 	color: #fff;
 	border-color: var(--iue-theme-color);
+}
+
+/* ===== Check-in streak restore ===== */
+.iue-streak-restore {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	font-size: 14px;
+}
+
+.iue-streak-restore-intro {
+	margin: 0;
+	text-align: center;
+}
+
+.iue-streak-restore-list {
+	list-style: none;
+	margin: 0;
+	padding: 8px 14px;
+	background: rgba(0, 0, 0, 0.05);
+	border-radius: 8px;
+}
+
+.iue-streak-restore-list li {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin: 0;
+	padding: 6px 0;
+}
+
+.iue-streak-restore-list strong {
+	color: var(--iue-theme-color);
+	text-align: right;
+}
+
+#iue-modal.dark .iue-streak-restore-list {
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.iue-streak-restore-warning {
+	margin: 0;
+	padding: 8px 10px;
+	font-size: 14px;
+	line-height: 1.6;
+	text-align: center;
+	color: #8a6100;
+	background: #fff6e5;
+	border: 1px solid #f0d693;
+	border-radius: 8px;
+}
+
+#iue-modal.dark .iue-streak-restore-warning {
+	color: #ffd478;
+	background: #3a2f10;
+	border-color: #5a4a1a;
+}
+
+.iue-streak-restore-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.iue-streak-restore-actions .iue-btn {
+	padding: 10px 18px;
+	font-size: 14px;
+	border: 1px solid var(--iue-theme-color);
+	border-radius: 999px;
+	background: var(--iue-theme-color);
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s, border-color 0.2s;
+}
+
+.iue-streak-restore-actions .iue-btn:hover:not(:disabled) {
+	background: var(--iue-theme-active-color);
+	border-color: var(--iue-theme-active-color);
+}
+
+.iue-streak-restore-actions .iue-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.iue-streak-restore-actions .iue-btn-secondary {
+	background: transparent;
+	color: var(--iue-theme-color);
+}
+
+.iue-streak-restore-actions .iue-btn-secondary:hover:not(:disabled) {
+	background: rgba(0, 0, 0, 0.05);
+	border-color: var(--iue-theme-color);
+}
+
+#iue-modal.dark .iue-streak-restore-actions .iue-btn-secondary:hover:not(:disabled) {
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.iue-streak-restore-note {
+	margin: 0;
+	text-align: center;
+	line-height: 1.4;
+	color: #777;
+}
+
+#iue-modal.dark .iue-streak-restore-note {
+	color: #aaa;
 }

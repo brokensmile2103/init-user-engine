@@ -708,35 +708,64 @@ function initCheckin() {
 
     if (checkExistingCountdown()) return;
 
-    button.addEventListener('click', () => {
-        button.disabled = true;
-        button.textContent = InitUserEngineData.i18n.checking_in || '...';
-
-        fetch(InitUserEngineData.rest_url + '/checkin', {
+    // POST /checkin. Optional flags used by the streak restore flow:
+    //   prompt_restore        ask for an offer instead of checking in when days were missed
+    //   restore_streak / restore_cost   accept that offer at the price that was shown
+    function requestCheckin(payload = {}) {
+        return fetch(InitUserEngineData.rest_url + '/checkin', {
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 'X-WP-Nonce': InitUserEngineData.nonce
-            }
+            },
+            body: JSON.stringify(payload)
         })
-        .then(res => res.json())
+        .then(res => res.json());
+    }
+
+    function applyCheckinSuccess(data) {
+        checkinBox.dataset.checkin = '1';
+        streakEl.textContent = data.streak;
+
+        if (typeof data.coin  !== 'undefined') coinEl.textContent = iueFmt(data.coin);
+        if (typeof data.cash  !== 'undefined') cashEl.textContent = iueFmt(data.cash);
+        if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
+
+        document.dispatchEvent(new CustomEvent('iue:checkin:success', { detail: data }));
+        if (parseInt(data.level_up_count || 0, 10) > 0) {
+            document.dispatchEvent(new CustomEvent('iue:level:up', { detail: data }));
+        }
+
+        InitUserEngineToast.show(
+            data.streak_restored
+                ? InitUserEngineData.i18n.checkin_restore_success
+                : InitUserEngineData.i18n.checkin_success,
+            'success'
+        );
+        startCountdown(COUNTDOWN);
+    }
+
+    button.addEventListener('click', () => {
+        const idleLabel = button.textContent;
+
+        button.disabled = true;
+        button.textContent = InitUserEngineData.i18n.checking_in || '...';
+
+        requestCheckin({ prompt_restore: true })
         .then(data => {
             if (data.status === 'success') {
-                checkinBox.dataset.checkin = '1';
-                streakEl.textContent = data.streak;
-
-                if (typeof data.coin  !== 'undefined') coinEl.textContent = iueFmt(data.coin);
-                if (typeof data.cash  !== 'undefined') cashEl.textContent = iueFmt(data.cash);
-                if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
-
-                document.dispatchEvent(new CustomEvent('iue:checkin:success', { detail: data }));
-                if (parseInt(data.level_up_count || 0, 10) > 0) {
-                    document.dispatchEvent(new CustomEvent('iue:level:up', { detail: data }));
-                }
-
-                InitUserEngineToast.show(InitUserEngineData.i18n.checkin_success, 'success');
-                startCountdown(COUNTDOWN);
+                applyCheckinSuccess(data);
+            } else if (data.status === 'restore_available') {
+                // Missed a few days: let the user choose before anything is charged.
+                button.disabled = false;
+                button.textContent = idleLabel;
+                loadCheckinRestoreModal(data, { request: requestCheckin, onSuccess: applyCheckinSuccess });
+            } else if (data.code) {
+                // REST error (e.g. another check-in still in progress).
+                button.disabled = false;
+                button.textContent = idleLabel;
+                InitUserEngineToast.show(iueEsc(data.message || InitUserEngineData.i18n.error), 'error');
             } else {
                 button.disabled = false;
                 button.textContent = InitUserEngineData.i18n.already_checked_in || 'Checked in';
@@ -746,9 +775,91 @@ function initCheckin() {
         .catch(err => {
             console.error(err);
             button.disabled = false;
-            button.textContent = InitUserEngineData.i18n.checkin || 'Check-in';
+            button.textContent = idleLabel;
             InitUserEngineToast.show(InitUserEngineData.i18n.error, 'error');
         });
+    });
+}
+
+// CHECKIN: keep a broken streak by spending Coin
+// offer    = server answer with status 'restore_available' (streak, missed_days, cost, balance...)
+// handlers = { request(payload) -> Promise<json>, onSuccess(json) }
+function loadCheckinRestoreModal(offer, handlers) {
+    const t         = InitUserEngineData.i18n || {};
+    const labelCoin = InitUserEngineData.label_coin || 'Coin';
+
+    const cost      = Math.max(0, parseInt(offer.cost, 10) || 0);
+    const balance   = Math.max(0, parseInt(offer.balance, 10) || 0);
+    const canAfford = balance >= cost;
+    const costText  = cost > 0 ? `${iueFmt(cost)} ${labelCoin}` : (t.checkin_restore_free || 'Free');
+
+    const confirmLabel = `${t.checkin_restore_confirm || 'Keep Streak'} (${costText})`;
+    const skipLabel    = t.checkin_restore_skip || 'Reset Streak & Check In';
+
+    // Same as the menu links: tuck the mini dashboard away while a modal is open.
+    const dashboard = document.querySelector('.iue-dashboard');
+    if (dashboard) dashboard.classList.remove('open');
+
+    showUserEngineModal(t.checkin_restore_title || 'Keep Your Streak', `
+        <div class="iue-streak-restore">
+            <p class="iue-streak-restore-intro">${iueEsc(t.checkin_restore_intro || `You missed a few days. Spend ${labelCoin} to keep your streak going, or check in now and start over.`)}</p>
+
+            <ul class="iue-streak-restore-list">
+                <li><span>${iueEsc(t.checkin_restore_streak || 'Current streak')}</span><strong>${iueFmt(offer.streak)}</strong></li>
+                <li><span>${iueEsc(t.checkin_restore_missed || 'Missed days')}</span><strong>${iueFmt(offer.missed_days)}</strong></li>
+                <li><span>${iueEsc(t.checkin_restore_cost || 'Cost')}</span><strong>${iueEsc(costText)}</strong></li>
+                <li><span>${iueEsc(t.checkin_restore_balance || 'Your balance')}</span><strong>${iueFmt(balance)} ${iueEsc(labelCoin)}</strong></li>
+            </ul>
+
+            ${canAfford ? '' : `<p class="iue-streak-restore-warning">${iueEsc(t.checkin_restore_insufficient || `Not enough ${labelCoin}.`)}</p>`}
+
+            <div class="iue-streak-restore-actions">
+                <button type="button" class="iue-btn" id="iue-streak-restore-confirm"${canAfford ? '' : ' disabled'}>${iueEsc(confirmLabel)}</button>
+                <button type="button" class="iue-btn iue-btn-secondary" id="iue-streak-restore-skip">${iueEsc(skipLabel)}</button>
+            </div>
+
+            <p class="iue-streak-restore-note">${iueEsc(t.checkin_restore_note || 'Choosing to reset still checks you in today, but your streak restarts from 1.')}</p>
+        </div>
+    `, 'small');
+
+    const confirmBtn = document.getElementById('iue-streak-restore-confirm');
+    const skipBtn    = document.getElementById('iue-streak-restore-skip');
+    if (!confirmBtn || !skipBtn) return;
+
+    function submit(payload, pressedBtn, pressedLabel) {
+        confirmBtn.disabled = true;
+        skipBtn.disabled    = true;
+        pressedBtn.textContent = t.checking_in || '...';
+
+        handlers.request(payload)
+        .then(res => {
+            closeModal();
+
+            if (res && res.status === 'success') {
+                handlers.onSuccess(res);
+            } else if (res && res.status === 'already_checked_in') {
+                InitUserEngineToast.show(iueEsc(t.already_checked_in), 'info');
+            } else {
+                // Not enough balance, price changed, offer expired...: nothing was charged.
+                // The Check In button is enabled again and will fetch a fresh offer.
+                InitUserEngineToast.show(iueEsc((res && res.message) || t.error), 'error');
+            }
+        })
+        .catch(err => {
+            console.error('[Init User Engine] Streak restore error:', err);
+            InitUserEngineToast.show(iueEsc(t.error), 'error');
+            confirmBtn.disabled = !canAfford;
+            skipBtn.disabled    = false;
+            pressedBtn.textContent = pressedLabel;
+        });
+    }
+
+    confirmBtn.addEventListener('click', () => {
+        submit({ restore_streak: true, restore_cost: cost }, confirmBtn, confirmLabel);
+    });
+
+    skipBtn.addEventListener('click', () => {
+        submit({}, skipBtn, skipLabel);
     });
 }
 
@@ -2477,6 +2588,11 @@ function setupConfirmableButton(button, options = {}) {
         }
     });
 }
+
+// Escape text before it goes into an innerHTML template
+const iueEsc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[c]));
 
 // Number formatting helpers
 const iueFmt = (n) => {

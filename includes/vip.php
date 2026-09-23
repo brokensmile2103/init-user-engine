@@ -163,8 +163,8 @@ function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $cur
 	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_vip_log', $log );
 
 	$currency_label = $currency === 'cash'
-		? ( $options['label_cash'] ?? 'Cash' )
-		: ( $options['label_coin'] ?? 'Coin' );
+		? init_plugin_suite_user_engine_get_cash_label()
+		: init_plugin_suite_user_engine_get_coin_label();
 
 	$content = sprintf(
 		// translators: %1$s = days/lifetime, %2$s = formatted price, %3$s = currency label.

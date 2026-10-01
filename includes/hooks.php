@@ -275,75 +275,92 @@ add_action( 'wp_insert_comment', function( $comment_id, $comment ) {
  * - Nếu user có meta 'iue_custom_avatar' thì dùng nó, set found_avatar=true
  * - Giữ nguyên các args khác để tránh side effects
  */
-add_filter( 'pre_get_avatar_data', function( $args, $id_or_email ) {
-    $user_id = 0;
+add_filter( 'pre_get_avatar_data', 'init_plugin_suite_user_engine_filter_avatar_data', 9999, 2 );
 
-    if ( is_numeric( $id_or_email ) ) {
-        $user_id = (int) $id_or_email;
-    } elseif ( is_object( $id_or_email ) ) {
-        // Comment object / WP_User / WP_Comment etc.
-        if ( isset( $id_or_email->user_id ) && $id_or_email->user_id ) {
-            $user_id = (int) $id_or_email->user_id;
-        } elseif ( $id_or_email instanceof WP_User ) {
-            $user_id = (int) $id_or_email->ID;
-        }
-    } elseif ( is_string( $id_or_email ) && is_email( $id_or_email ) ) {
-        $u = get_user_by( 'email', $id_or_email );
-        $user_id = $u ? (int) $u->ID : 0;
-    }
+/**
+ * Áp avatar của Init User Engine (hoặc avatar mặc định khi tắt Gravatar) vào dữ liệu avatar.
+ *
+ * @param array $args        Dữ liệu avatar (size, url, found_avatar...).
+ * @param mixed $id_or_email User ID, email, WP_User, WP_Comment, WP_Post...
+ * @return array
+ */
+function init_plugin_suite_user_engine_filter_avatar_data( $args, $id_or_email ) {
+	$user_id = 0;
 
-    if ( ! $user_id ) {
-        return $args; // Không xác định user => để mặc định
-    }
+	if ( is_numeric( $id_or_email ) ) {
+		$user_id = (int) $id_or_email;
+	} elseif ( is_object( $id_or_email ) ) {
+		// Comment object / WP_User / WP_Comment etc...
+		if ( isset( $id_or_email->user_id ) && $id_or_email->user_id ) {
+			$user_id = (int) $id_or_email->user_id;
+		} elseif ( $id_or_email instanceof WP_User ) {
+			$user_id = (int) $id_or_email->ID;
+		}
+	} elseif ( is_string( $id_or_email ) && is_email( $id_or_email ) ) {
+		$u       = get_user_by( 'email', $id_or_email );
+		$user_id = $u ? (int) $u->ID : 0;
+	}
 
-    // Tùy chọn disable gravatar
-    $options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
-    $disable_gravatar = ! empty( $options['disable_gravatar'] );
+	if ( ! $user_id ) {
+		return $args; // Không xác định user => để mặc định.
+	}
 
-    // Lấy avatar IUE
-    $custom_50 = get_user_meta( $user_id, 'iue_custom_avatar', true );
-    if ( $custom_50 && filter_var( $custom_50, FILTER_VALIDATE_URL ) ) {
-        $size = (int) ( $args['size'] ?? 50 );
+	// Tùy chọn disable gravatar.
+	$options          = get_option( INIT_PLUGIN_SUITE_IUE_OPTION );
+	$disable_gravatar = ! empty( $options['disable_gravatar'] );
 
-        // Map kích thước đơn giản 50/80
-        $use_url = $custom_50;
-        if ( $size >= 80 ) {
-            $use_url = str_replace( '-50.', '-80.', $custom_50 );
-        }
+	// Lấy avatar IUE.
+	$custom_50 = get_user_meta( $user_id, 'iue_custom_avatar', true );
+	if ( $custom_50 && filter_var( $custom_50, FILTER_VALIDATE_URL ) ) {
+		$size = (int) ( $args['size'] ?? 50 );
 
-        // Gán lại dữ liệu avatar
-        $args['url']          = esc_url( $use_url );
-        $args['found_avatar'] = true;         // báo với WP là đã tìm được
-        $args['height']       = $size;
-        $args['width']        = $size;
+		// Map kích thước đơn giản 50/80.
+		$use_url = $custom_50;
+		if ( $size >= 80 ) {
+			$use_url = str_replace( '-50.', '-80.', $custom_50 );
+		}
 
-        return $args; // QUAN TRỌNG: return sớm để override mọi thứ khác
-    }
+		// Gán lại dữ liệu avatar.
+		$args['url']          = esc_url( $use_url );
+		$args['found_avatar'] = true; // Báo với WP là đã tìm được.
+		$args['height']       = $size;
+		$args['width']        = $size;
 
-    // Không có avatar IUE:
-    if ( $disable_gravatar ) {
-        $args['url']          = trailingslashit( INIT_PLUGIN_SUITE_IUE_ASSETS_URL ) . 'img/default-avatar.svg';
-        $args['found_avatar'] = true;
-        $args['height']       = (int) ( $args['size'] ?? 50 );
-        $args['width']        = (int) ( $args['size'] ?? 50 );
-        return $args;
-    }
+		return $args; // QUAN TRỌNG: return sớm để override mọi thứ khác.
+	}
 
-    // Mặc định: để Nextend/WP xử lý
-    return $args;
-}, 9999, 2 );
+	// Không có avatar IUE.
+	if ( $disable_gravatar ) {
+		$args['url']          = trailingslashit( INIT_PLUGIN_SUITE_IUE_ASSETS_URL ) . 'img/default-avatar.svg';
+		$args['found_avatar'] = true;
+		$args['height']       = (int) ( $args['size'] ?? 50 );
+		$args['width']        = (int) ( $args['size'] ?? 50 );
+		return $args;
+	}
+
+	// Mặc định: để Nextend/WP xử lý.
+	return $args;
+}
 
 /**
  * (Tùy chọn) Đồng bộ filter get_avatar_url để những nơi gọi trực tiếp URL vẫn được override
  * Ưu tiên cao để chắc chắn thắng
+ *
+ * Gọi thẳng hàm xử lý của plugin thay vì apply_filters( 'pre_get_avatar_data' ):
+ * get_avatar_url() vốn đã chạy pre_get_avatar_data 1 lần bên trong get_avatar_data(),
+ * chạy lại toàn bộ filter đó (của mọi plugin khác) cho MỖI avatar là thừa và tốn kém
+ * trên các trang có nhiều avatar (danh sách bình luận, bảng xếp hạng...).
  */
 add_filter( 'get_avatar_url', function( $url, $id_or_email, $args ) {
-    $data = apply_filters( 'pre_get_avatar_data', array(
-        'size'  => $args['size'] ?? 50,
-        'url'   => $url,
-    ), $id_or_email );
+	$data = init_plugin_suite_user_engine_filter_avatar_data(
+		array(
+			'size' => $args['size'] ?? 50,
+			'url'  => $url,
+		),
+		$id_or_email
+	);
 
-    return isset( $data['url'] ) ? $data['url'] : $url;
+	return isset( $data['url'] ) ? $data['url'] : $url;
 }, 9999, 3 );
 
 // Ẩn admin-bar
@@ -536,6 +553,87 @@ function init_plugin_suite_user_engine_redirect_failed_login( $username, $error 
 			'iue_login_code'   => $error_code,
 		],
 		$referer
+	);
+
+	wp_safe_redirect( $redirect_url );
+	exit;
+}
+
+add_action( 'lost_password', 'init_plugin_suite_user_engine_redirect_failed_lostpassword', 10, 1 );
+
+/**
+ * Xử lý lỗi khi form "Quên mật khẩu" trong modal đăng nhập được submit
+ * (templates/lostpassword-form.php — form POST thẳng tới wp-login.php?action=lostpassword).
+ *
+ * - Thành công: WordPress tự chuyển hướng theo field redirect_to (do guest.js
+ *   điền sẵn URL trang hiện tại kèm iue_lostpass=sent), không cần xử lý ở đây.
+ * - Thất bại: mặc định WordPress hiển thị lỗi ngay tại wp-login.php. Hàm này
+ *   đưa người dùng quay lại đúng trang họ vừa đứng, kèm 2 tham số tạm thời để
+ *   guest.js tự mở lại modal ở form "Quên mật khẩu" và hiển thị thông báo:
+ *   - iue_lostpass=failed
+ *   - iue_lostpass_code=<code> (một trong các giá trị $allowed_codes bên dưới)
+ *
+ * Chỉ can thiệp khi request là POST có cờ iue_lostpassword=1 (tức là đến từ
+ * modal của plugin) và mã lỗi nằm trong whitelist. Mọi lỗi khác (vd: captcha
+ * của plugin bên thứ 3) vẫn giữ hành vi gốc của WordPress để người dùng đọc
+ * được đúng thông báo lỗi.
+ *
+ * @param WP_Error|null $errors Lỗi được WordPress truyền vào action 'lost_password'.
+ * @return void
+ */
+function init_plugin_suite_user_engine_redirect_failed_lostpassword( $errors = null ) {
+	if ( ! ( $errors instanceof WP_Error ) || ! $errors->has_errors() ) {
+		return;
+	}
+
+	if ( empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- wp-login.php không dùng nonce cho form lostpassword mặc định của WordPress; chỉ đọc cờ để quyết định chuyển hướng.
+	if ( empty( $_POST['iue_lostpassword'] ) ) {
+		return;
+	}
+
+	// Whitelist mã lỗi: đều là các mã mà form "Lost your password?" gốc của
+	// WordPress vẫn tự hiển thị, nên không phát sinh rủi ro dò tài khoản mới.
+	$allowed_codes = [
+		'empty_username',
+		'invalid_email',
+		'invalidcombo',
+		'retrieve_password_email_failure',
+		'no_password_reset',
+		'iue_turnstile_failed',
+	];
+
+	$error_code = sanitize_key( (string) $errors->get_error_code() );
+	if ( ! in_array( $error_code, $allowed_codes, true ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- xem giải thích ở trên.
+	$redirect_to = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';
+	if ( '' === $redirect_to ) {
+		$redirect_to = (string) wp_get_referer();
+	}
+
+	$redirect_to = wp_validate_redirect( $redirect_to, '' );
+
+	if ( '' === $redirect_to
+		|| false !== strpos( $redirect_to, 'wp-login.php' )
+		|| false !== strpos( $redirect_to, 'wp-admin' )
+	) {
+		return;
+	}
+
+	$redirect_to = remove_query_arg( [ 'iue_lostpass', 'iue_lostpass_code' ], $redirect_to );
+
+	$redirect_url = add_query_arg(
+		[
+			'iue_lostpass'      => 'failed',
+			'iue_lostpass_code' => $error_code,
+		],
+		$redirect_to
 	);
 
 	wp_safe_redirect( $redirect_url );

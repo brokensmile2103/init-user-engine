@@ -13,6 +13,38 @@ function init_plugin_suite_user_engine_get_coin_label() {
 	return '' !== $label ? $label : 'Coin';
 }
 
+/**
+ * Có hiển thị form "Quên mật khẩu" ngay trong modal đăng nhập hay không.
+ *
+ * Thứ tự ưu tiên:
+ * 1. Admin có đặt "Custom Lost Password URL" → luôn dùng URL đó (không dùng modal).
+ * 2. Option "Lost Password in Modal" (mặc định BẬT, kể cả với site cài từ bản cũ
+ *    chưa từng lưu option này).
+ *
+ * @param array|null $settings Settings của plugin (truyền vào để tránh gọi lại get_option()).
+ * @return bool
+ */
+function init_plugin_suite_user_engine_use_lostpassword_modal( $settings = null ) {
+	if ( ! is_array( $settings ) ) {
+		$settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+		$settings = is_array( $settings ) ? $settings : [];
+	}
+
+	if ( ! empty( $settings['custom_lostpass_url'] ) ) {
+		return false;
+	}
+
+	$enabled = ! isset( $settings['lostpass_modal'] ) || ! empty( $settings['lostpass_modal'] );
+
+	/**
+	 * Cho phép theme/plugin khác bật/tắt form "Quên mật khẩu" trong modal.
+	 *
+	 * @param bool  $enabled  Kết quả hiện tại.
+	 * @param array $settings Settings của plugin.
+	 */
+	return (bool) apply_filters( 'init_plugin_suite_user_engine_lostpassword_modal_enabled', $enabled, $settings );
+}
+
 // Get the admin-configured label for the Cash currency (falls back to 'Cash').
 function init_plugin_suite_user_engine_get_cash_label() {
 	$options = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );

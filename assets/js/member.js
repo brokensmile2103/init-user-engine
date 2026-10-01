@@ -653,9 +653,11 @@ function initCheckin() {
             }
         }, 1000);
 
-        // Lưu khi ẩn tab hoặc tắt trang
+        // Lưu khi ẩn tab hoặc tắt trang.
+        // Dùng 'pagehide' thay cho 'beforeunload': listener beforeunload khiến một số trình duyệt
+        // (Firefox, Safari) bỏ qua back/forward cache → bấm Back phải tải lại toàn bộ trang.
         document.addEventListener('visibilitychange', saveRemainingTime);
-        window.addEventListener('beforeunload', saveRemainingTime);
+        window.addEventListener('pagehide', saveRemainingTime);
     }
 
     function claimReward() {
@@ -937,8 +939,7 @@ let currentInboxFilter = 'all';
 function loadInbox(page = 1, filter = currentInboxFilter) {
     currentInboxFilter = filter;
     const perPage = 20;
-    const endpoint =
-        `${InitUserEngineData.rest_url}/inbox?page=${page}&per_page=${perPage}&filter=${filter}`;
+    const endpoint = iueRestUrl('/inbox', { page, per_page: perPage, filter });
     const headers = {
         'Content-Type': 'application/json',
         'X-WP-Nonce': InitUserEngineData.nonce
@@ -1346,7 +1347,7 @@ function loadExpLog(page = 1) {
     const percent = Math.min(100, Math.round((currentExp / expRequired) * 100));
     const perPage = 20;
 
-    const endpoint = `${InitUserEngineData.rest_url}/exp-log?page=${page}&per_page=${perPage}`;
+    const endpoint = iueRestUrl('/exp-log', { page, per_page: perPage });
     const headers = {
         'Content-Type': 'application/json',
         'X-WP-Nonce': InitUserEngineData.nonce
@@ -1755,7 +1756,7 @@ window.InitUserEngineToast = (function () {
 // TRANSACTION
 function loadTransactionHistory(page = 1) {
     const perPage = 20;
-    const endpoint = `${InitUserEngineData.rest_url}/transactions?page=${page}&per_page=${perPage}`;
+    const endpoint = iueRestUrl('/transactions', { page, per_page: perPage });
     const headers = {
         'Content-Type': 'application/json',
         'X-WP-Nonce': InitUserEngineData.nonce
@@ -2609,6 +2610,15 @@ const iueTodayISO = () => {
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
 };
+
+// Ghép URL REST kèm query string. rest_url có thể đã chứa sẵn "?" khi site dùng
+// permalink "Plain" (dạng ?rest_route=/inituser/v1) → phải nối bằng "&" thay vì "?".
+function iueRestUrl(path, params = {}) {
+    const base  = InitUserEngineData.rest_url + path;
+    const query = new URLSearchParams(params).toString();
+    if (!query) return base;
+    return base + (base.indexOf('?') === -1 ? '?' : '&') + query;
+}
 
 // Init
 document.addEventListener('DOMContentLoaded', function () {

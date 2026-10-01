@@ -113,6 +113,7 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$output['disable_captcha'] 			 = ! empty( $input['disable_captcha'] ) ? 1 : 0;
 	$output['disable_registration'] 	 = ! empty( $input['disable_registration'] ) ? 1 : 0;
 	$output['login_after_register'] 	 = ! empty( $input['login_after_register'] ) ? 1 : 0;
+	$output['lostpass_modal']            = ! empty( $input['lostpass_modal'] ) ? 1 : 0;
 
 	$output['turnstile_site_key']   	 = sanitize_text_field( $input['turnstile_site_key'] ?? '' );
 	$output['turnstile_secret_key'] 	 = sanitize_text_field( $input['turnstile_secret_key'] ?? '' );
@@ -381,6 +382,24 @@ function init_plugin_suite_user_engine_render_settings_page() {
 				</tr>
 
 				<tr>
+					<th scope="row"><?php esc_html_e( 'Lost Password in Modal', 'init-user-engine' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[lostpass_modal]"
+								value="1"
+								<?php checked( $options['lostpass_modal'] ?? 1, 1 ); ?>
+							/>
+							<?php esc_html_e( 'Show the "Forgot password?" form right inside the login modal.', 'init-user-engine' ); ?>
+						</label>
+						<p class="description">
+							<?php esc_html_e( 'Uses the native WordPress password reset flow, so your site must be able to send emails. Disable it if your site has not set up email sending yet — the link will then go to the default wp-login.php page.', 'init-user-engine' ); ?><br>
+							<?php esc_html_e( 'If a Custom Lost Password URL is set below, that URL always takes priority.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'Avatar', 'init-user-engine' ); ?></h2></th>
 				</tr>
 
@@ -620,7 +639,7 @@ function init_plugin_suite_user_engine_render_settings_page() {
 					<td>
 						<input type="url" name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[custom_lostpass_url]"
 							value="<?php echo esc_attr( $options['custom_lostpass_url'] ?? '' ); ?>" class="regular-text" />
-						<p class="description"><?php esc_html_e( 'Redirect here when user clicks "Lost password". Leave blank to use default wp-login.php?action=lostpassword.', 'init-user-engine' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Redirect here when user clicks "Lost password". Takes priority over the Lost Password in Modal option. Leave blank to use the modal form (or the default wp-login.php?action=lostpassword when that option is off).', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
 

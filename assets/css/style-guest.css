@@ -83,9 +83,10 @@
 	font-size: 16px;
 }
 
-/* ==== Form Fields (Login + Register) ==== */
+/* ==== Form Fields (Login + Register + Lost Password) ==== */
 .iue-login-form input[type="text"],
 .iue-login-form input[type="password"],
+.iue-lostpassword-form input[type="text"],
 .iue-register-form input[type="text"],
 .iue-register-form input[type="number"],
 .iue-register-form input[type="email"],
@@ -102,6 +103,7 @@
 }
 .iue-login-form input[type="text"]:focus,
 .iue-login-form input[type="password"]:focus,
+.iue-lostpassword-form input[type="text"]:focus,
 .iue-register-form input[type="text"]:focus,
 .iue-register-form input[type="number"]:focus,
 .iue-register-form input[type="email"]:focus,
@@ -129,10 +131,11 @@
 	vertical-align: middle;
 }
 
-/* ==== Submit Button (Login + Register) ==== */
+/* ==== Submit Button (Login + Register + Lost Password) ==== */
 .iue-login-form input[type="submit"],
 .iue-login-form .login-submit input[type="submit"],
-.iue-register-form button.iue-submit {
+.iue-register-form button.iue-submit,
+.iue-lostpassword-form button.iue-submit {
 	display: inline-block;
 	width: 100%;
 	padding: 14px 0;
@@ -150,23 +153,42 @@
 
 /* hover: nhẹ, có cảm giác responsive mà không lòe loẹt */
 .iue-login-form input[type="submit"]:hover,
-.iue-register-form button.iue-submit:hover {
+.iue-register-form button.iue-submit:hover,
+.iue-lostpassword-form button.iue-submit:hover {
 	transform: translateY(-1px);
 	filter: brightness(1.05) saturate(1.1);
 }
 
 /* active: cảm giác nhấn thực */
 .iue-login-form input[type="submit"]:active,
-.iue-register-form button.iue-submit:active {
+.iue-register-form button.iue-submit:active,
+.iue-lostpassword-form button.iue-submit:active {
 	transform: scale(0.985);
 	filter: brightness(0.9);
 }
 
 /* focus: viền tinh tế, không shadow */
 .iue-login-form input[type="submit"]:focus-visible,
-.iue-register-form button.iue-submit:focus-visible {
+.iue-register-form button.iue-submit:focus-visible,
+.iue-lostpassword-form button.iue-submit:focus-visible {
 	outline: 2px solid var(--iue-theme-active-color);
 	outline-offset: 3px;
+}
+
+/* disabled: đang gửi form (chống bấm nhiều lần) */
+.iue-lostpassword-form button.iue-submit:disabled {
+	opacity: 0.7;
+	cursor: wait;
+	transform: none;
+	filter: none;
+}
+
+/* ==== Lost Password intro ==== */
+.iue-lostpassword-intro {
+	margin: 0 0 16px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #555;
 }
 
 
@@ -215,7 +237,8 @@
 
 /* ==== Slide transition ==== */
 #iue-form-login,
-#iue-form-register {
+#iue-form-register,
+#iue-form-lostpassword {
 	position: relative;
 	opacity: 1;
 	transform: translateX(0);
@@ -297,7 +320,8 @@
 #init-user-engine-login-modal.dark .iue-register-form input[type="text"],
 #init-user-engine-login-modal.dark .iue-register-form input[type="number"],
 #init-user-engine-login-modal.dark .iue-register-form input[type="email"],
-#init-user-engine-login-modal.dark .iue-register-form input[type="password"] {
+#init-user-engine-login-modal.dark .iue-register-form input[type="password"],
+#init-user-engine-login-modal.dark .iue-lostpassword-form input[type="text"] {
 	border-bottom-color: #444;
 	color: #eee;
 	background: transparent;
@@ -305,16 +329,19 @@
 #init-user-engine-login-modal.dark .iue-login-form input[type="text"]:focus,
 #init-user-engine-login-modal.dark .iue-login-form input[type="number"]:focus,
 #init-user-engine-login-modal.dark .iue-login-form input[type="password"]:focus,
-#init-user-engine-login-modal.dark .iue-register-form input:focus {
+#init-user-engine-login-modal.dark .iue-register-form input:focus,
+#init-user-engine-login-modal.dark .iue-lostpassword-form input:focus {
 	border-bottom-color: var(--iue-theme-color);
 }
 #init-user-engine-login-modal.dark .iue-login-form input[type="submit"],
-#init-user-engine-login-modal.dark .iue-register-form button.iue-submit {
+#init-user-engine-login-modal.dark .iue-register-form button.iue-submit,
+#init-user-engine-login-modal.dark .iue-lostpassword-form button.iue-submit {
 	background: linear-gradient(135deg, var(--iue-theme-color), var(--iue-theme-active-color));
 	color: #fff;
 }
 #init-user-engine-login-modal.dark .iue-login-form input[type="submit"]:hover,
-#init-user-engine-login-modal.dark .iue-register-form button.iue-submit:hover {
+#init-user-engine-login-modal.dark .iue-register-form button.iue-submit:hover,
+#init-user-engine-login-modal.dark .iue-lostpassword-form button.iue-submit:hover {
 	background: linear-gradient(135deg, var(--iue-theme-active-color), var(--iue-theme-color));
 }
 #init-user-engine-login-modal.dark .iue-login-form .login-remember,
@@ -323,6 +350,9 @@
 }
 #init-user-engine-login-modal.dark .iue-reset-link a:hover {
 	color: #999;
+}
+#init-user-engine-login-modal.dark .iue-lostpassword-intro {
+	color: #aaa;
 }
 #init-user-engine-login-modal.dark .iue-register-link a {
 	color: var(--iue-theme-color);

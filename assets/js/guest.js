@@ -148,6 +148,121 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.history.replaceState({}, document.title, cleanUrl);
 	})();
 
+	// ============ FORM VIEWS: login / register / lostpassword ============
+	// Quản lý việc chuyển qua lại giữa các form trong modal. Template login-form.php
+	// có thể bị theme override (bản cũ không có form Quên mật khẩu) nên mọi phần tử
+	// đều có thể vắng mặt — khi đó link giữ hành vi mặc định (chuyển trang).
+	const viewI18n = window.InitUserEngineData?.i18n || {};
+	const viewPanels = {
+		login:        document.getElementById('iue-form-login'),
+		register:     document.getElementById('iue-form-register'),
+		lostpassword: document.getElementById('iue-form-lostpassword'),
+	};
+	const viewTitles = {
+		login:        viewI18n.title_login        || 'Login',
+		register:     viewI18n.title_register     || 'Register',
+		lostpassword: viewI18n.title_lostpassword || 'Lost Password',
+	};
+	const viewHeaderTitle = modal.querySelector('.iue-header h3');
+	const registerLink    = document.getElementById('iue-register-link');
+	const lostPassLink    = document.getElementById('iue-lostpass-link');
+	const textBackToLogin = viewI18n.back_to_login || 'Back to login';
+	const textRegister    = viewI18n.register      || 'Create a new account';
+	const textLostPass    = lostPassLink ? lostPassLink.textContent.trim() : '';
+
+	// Register chỉ chuyển form trong modal khi KHÔNG dùng custom URL
+	const canShowRegister = !!(registerLink && viewPanels.login && viewPanels.register && registerLink.dataset.hasCustomUrl !== '1');
+	// Quên mật khẩu chỉ hiển thị trong modal khi option bật (data-iue-modal="1") và không có custom URL
+	const canShowLostPass = !!(lostPassLink && viewPanels.login && viewPanels.lostpassword && lostPassLink.dataset.iueModal === '1');
+
+	let currentView = 'login';
+
+	function showView(view) {
+		if (view === 'register' && !canShowRegister) return;
+		if (view === 'lostpassword' && !canShowLostPass) return;
+		if (!viewPanels[view] || view === currentView) return;
+
+		currentView = view;
+
+		// 1. Toggle form visibility
+		Object.keys(viewPanels).forEach(name => {
+			const panel = viewPanels[name];
+			if (!panel) return;
+			if (name === view) {
+				panel.classList.remove('iue-hidden');
+				panel.classList.add('iue-animating');
+			} else {
+				panel.classList.add('iue-hidden');
+			}
+		});
+
+		// 2. Cleanup animation
+		setTimeout(() => {
+			Object.keys(viewPanels).forEach(name => {
+				if (viewPanels[name]) viewPanels[name].classList.remove('iue-animating');
+			});
+		}, 400);
+
+		// 3. Update link text
+		if (canShowRegister) registerLink.textContent = view === 'register' ? textBackToLogin : textRegister;
+		if (canShowLostPass) lostPassLink.textContent = view === 'lostpassword' ? textBackToLogin : textLostPass;
+
+		// 4. Update header title
+		if (viewHeaderTitle) viewHeaderTitle.textContent = viewTitles[view];
+
+		// 5. LAZY init Register / Turnstile chỉ khi form thực sự được mở
+		if (view === 'register') {
+			initRegisterFormIfNeeded();
+			const turnstileEl = document.getElementById('iue-turnstile');
+			if (turnstileEl) iueLoadTurnstile(() => iueRenderTurnstile());
+		} else if (view === 'lostpassword') {
+			const lostTurnstileEl = document.getElementById('iue-turnstile-wplostpassword');
+			if (lostTurnstileEl) iueLoadTurnstile(() => iueRenderTurnstile('iue-turnstile-wplostpassword', '_iueWidgetIdLostPassword'));
+		}
+
+		// 6. Focus first input
+		const targetInput = viewPanels[view].querySelector('input:not([type="hidden"])');
+		if (targetInput) setTimeout(() => targetInput.focus(), 50);
+	}
+
+	if (registerLink && registerLink.dataset.hasCustomUrl === '1') {
+		registerLink.addEventListener('click', e => { e.preventDefault(); window.location.href = registerLink.dataset.url; });
+	} else if (canShowRegister) {
+		registerLink.addEventListener('click', e => {
+			e.preventDefault();
+			showView(currentView === 'register' ? 'login' : 'register');
+		});
+	}
+
+	if (canShowLostPass) {
+		lostPassLink.addEventListener('click', e => {
+			e.preventDefault();
+			showView(currentView === 'lostpassword' ? 'login' : 'lostpassword');
+		});
+	}
+
+	// Hiển thị thông báo ở đầu 1 form (tái sử dụng style .iue-register-message)
+	function showFormNotice(container, noticeId, message, type) {
+		if (!container) return;
+		let notice = document.getElementById(noticeId);
+		if (!notice) {
+			notice = document.createElement('div');
+			notice.id = noticeId;
+			container.prepend(notice);
+		}
+		notice.className = `iue-register-message ${type}`;
+		notice.textContent = message;
+	}
+
+	// Xóa các tham số tạm thời khỏi URL để tránh hiện lại thông báo khi tải lại trang hoặc chia sẻ URL.
+	function cleanQueryParams(keys) {
+		const params = new URLSearchParams(window.location.search);
+		keys.forEach(key => params.delete(key));
+		const cleanQuery = params.toString();
+		const cleanUrl = window.location.pathname + (cleanQuery ? `?${cleanQuery}` : '') + window.location.hash;
+		window.history.replaceState({}, document.title, cleanUrl);
+	}
+
 	// Trigger qua data-iue="login"
 	document.querySelectorAll('[data-iue="login"]').forEach(el => {
 		el.addEventListener('click', function (e) { e.preventDefault(); openLoginModal(); });
@@ -158,80 +273,127 @@ document.addEventListener('DOMContentLoaded', function () {
 		el.addEventListener('click', function (e) {
 			e.preventDefault();
 
-			// Mở modal trước
+			// Mở modal trước, rồi chuyển sang tab Đăng ký (nếu đang dùng modal, không phải custom URL)
 			openLoginModal();
-
-			// Rồi chuyển sang tab Đăng ký (nếu đang dùng modal, không phải custom URL)
-			const registerLink = document.getElementById('iue-register-link');
-			if (registerLink) {
-				const hasCustomUrl = registerLink.dataset.hasCustomUrl === '1';
-
-				// Nếu không có custom URL → dùng toggle form trong modal
-				if (!hasCustomUrl) {
-					registerLink.click();
-				}
-			}
+			showView('register');
 		});
 	});
 
-	// Toggle login/register
-	(function toggleLoginRegisterForm() {
-		const registerLink = document.getElementById('iue-register-link');
-		const loginForm    = document.getElementById('iue-form-login');
-		const registerForm = document.getElementById('iue-form-register');
-		const headerTitle  = document.querySelector('.iue-header h3');
-		if (!registerLink || !loginForm || !registerForm || !headerTitle) return;
-
-		const hasCustomUrl = registerLink.dataset.hasCustomUrl === '1';
-		const i18n         = window.InitUserEngineData?.i18n || {};
-		const textLogin    = i18n.back_to_login    || 'Back to login';
-		const textRegister = i18n.register         || 'Create a new account';
-		const titleLogin   = i18n.title_login      || 'Login';
-		const titleRegister= i18n.title_register   || 'Register';
-
-		if (hasCustomUrl) {
-			registerLink.addEventListener('click', e => { e.preventDefault(); window.location.href = registerLink.dataset.url; });
-			return;
-		}
-
-		let showingRegister = false;
-
-		registerLink.addEventListener('click', e => {
+	// Trigger qua data-iue="lostpassword"
+	document.querySelectorAll('[data-iue="lostpassword"]').forEach(el => {
+		el.addEventListener('click', function (e) {
+			// Không dùng modal (option tắt / custom URL) → để link hoạt động như bình thường
+			if (!canShowLostPass) {
+				if (lostPassLink && el.tagName !== 'A') window.location.href = lostPassLink.href;
+				return;
+			}
 			e.preventDefault();
-			showingRegister = !showingRegister;
+			openLoginModal();
+			showView('lostpassword');
+		});
+	});
 
-			// 1. Toggle form visibility
-			if (showingRegister) {
-				loginForm.classList.add('iue-hidden');
-				registerForm.classList.remove('iue-hidden');
-				registerForm.classList.add('iue-animating');
+	// ============ LOST PASSWORD FORM ============
+	// Form là <form> thật, POST thẳng tới wp-login.php?action=lostpassword (luồng gốc của WordPress).
+	// JS chỉ điền redirect_to để quay lại đúng trang hiện tại và chặn submit sớm khi rõ ràng thiếu dữ liệu.
+	(function initLostPasswordForm() {
+		const form = document.getElementById('iue-lostpassword-form');
+		if (!form || !canShowLostPass) return;
 
-				// LAZY init Register + Turnstile
-				initRegisterFormIfNeeded();
-				const turnstileEl = document.getElementById('iue-turnstile');
-				if (turnstileEl) iueLoadTurnstile(() => iueRenderTurnstile());
-			} else {
-				registerForm.classList.add('iue-hidden');
-				loginForm.classList.remove('iue-hidden');
-				loginForm.classList.add('iue-animating');
+		const submitBtn   = form.querySelector('button[type="submit"]');
+		const submitLabel = submitBtn ? submitBtn.textContent.trim() : '';
+
+		form.addEventListener('submit', function (e) {
+			const userField = form.querySelector('input[name="user_login"]');
+			if (userField && !userField.value.trim()) {
+				e.preventDefault();
+				showFormNotice(form, 'iue-lostpass-notice', viewI18n.lostpass_error_empty || 'Please enter a username or email address.', 'error');
+				userField.focus();
+				return;
 			}
 
-			// 2. Cleanup animation
-			setTimeout(() => {
-				loginForm.classList.remove('iue-animating');
-				registerForm.classList.remove('iue-animating');
-			}, 400);
+			// Turnstile: server vẫn luôn xác thực lại — đây chỉ là UX tốt hơn, tránh rời trang khi rõ ràng thiếu captcha
+			const turnstileEl = document.getElementById('iue-turnstile-wplostpassword');
+			if (turnstileEl && typeof turnstile !== 'undefined' && turnstile.getResponse) {
+				if (!turnstile.getResponse(window._iueWidgetIdLostPassword)) {
+					e.preventDefault();
+					showFormNotice(form, 'iue-lostpass-notice', viewI18n.captcha_required || 'Please complete the captcha.', 'error');
+					return;
+				}
+			}
 
-			// 3. Update link text
-			registerLink.textContent = showingRegister ? textLogin : textRegister;
+			// Sau khi gửi email thành công, WordPress sẽ chuyển hướng về đúng URL này
+			const redirectInput = form.querySelector('input[name="redirect_to"]');
+			if (redirectInput) {
+				try {
+					const returnUrl = new URL(window.location.href);
+					['iue_lostpass', 'iue_lostpass_code', 'iue_login_failed', 'iue_login_code'].forEach(key => returnUrl.searchParams.delete(key));
+					returnUrl.searchParams.set('iue_lostpass', 'sent');
+					returnUrl.hash = '';
+					redirectInput.value = returnUrl.toString();
+				} catch (err) {
+					redirectInput.value = '';
+				}
+			}
 
-			// 4. Update header title
-			headerTitle.textContent = showingRegister ? titleRegister : titleLogin;
-
-			// 5. Focus first input
-			const targetInput = showingRegister ? registerForm.querySelector('input') : loginForm.querySelector('input');
-			if (targetInput) setTimeout(() => targetInput.focus(), 50);
+			// Chống bấm gửi nhiều lần (button bị disable SAU khi form đã bắt đầu submit)
+			if (submitBtn) {
+				setTimeout(() => {
+					if (e.defaultPrevented) return;
+					submitBtn.disabled = true;
+					submitBtn.textContent = viewI18n.processing || 'Processing...';
+				}, 0);
+			}
 		});
+
+		// Khôi phục nút gửi khi người dùng bấm Back và trang được lấy lại từ bfcache
+		window.addEventListener('pageshow', function (e) {
+			if (!e.persisted || !submitBtn || !submitBtn.disabled) return;
+			submitBtn.disabled = false;
+			submitBtn.textContent = submitLabel;
+		});
+	})();
+
+	// Tự mở modal + hiển thị kết quả sau khi gửi form Quên mật khẩu.
+	// - iue_lostpass=sent   : WordPress đã gửi email thành công (redirect_to do JS điền ở trên)
+	// - iue_lostpass=failed : server (includes/hooks.php) đưa người dùng quay lại kèm mã lỗi
+	(function handleLostPasswordRedirect() {
+		const params = new URLSearchParams(window.location.search);
+		const state  = params.get('iue_lostpass');
+		if (state !== 'sent' && state !== 'failed') return;
+
+		openLoginModal();
+
+		if (state === 'sent') {
+			showFormNotice(
+				document.getElementById('loginform') || viewPanels.login,
+				'iue-login-notice',
+				viewI18n.lostpass_sent || 'Check your email for the confirmation link.',
+				'success'
+			);
+		} else {
+			const messagesByCode = {
+				empty_username:                  viewI18n.lostpass_error_empty,
+				invalid_email:                   viewI18n.lostpass_error_invalid,
+				invalidcombo:                    viewI18n.lostpass_error_invalid,
+				retrieve_password_email_failure: viewI18n.lostpass_error_email,
+				no_password_reset:               viewI18n.lostpass_error_not_allowed,
+				iue_turnstile_failed:            viewI18n.lostpass_error_captcha,
+			};
+			const code = params.get('iue_lostpass_code') || '';
+			const message = (Object.prototype.hasOwnProperty.call(messagesByCode, code) && messagesByCode[code])
+				? messagesByCode[code]
+				: (viewI18n.lostpass_error_generic || 'Could not process your request. Please try again.');
+
+			if (canShowLostPass) {
+				showView('lostpassword');
+				showFormNotice(document.getElementById('iue-lostpassword-form'), 'iue-lostpass-notice', message, 'error');
+			} else {
+				showFormNotice(document.getElementById('loginform') || viewPanels.login, 'iue-login-notice', message, 'error');
+			}
+		}
+
+		cleanQueryParams(['iue_lostpass', 'iue_lostpass_code']);
 	})();
 
 	// ============ REGISTER FORM (lazy) ============
@@ -277,7 +439,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (!hasCaptcha) return;
 			try {
 				const timestamp = Date.now();
-				const res = await fetch(`${InitUserEngineData.rest_url}/captcha?_=${timestamp}`, {
+				// rest_url có thể đã chứa "?" khi site dùng permalink "Plain" (?rest_route=...)
+				const captchaUrl = `${InitUserEngineData.rest_url}/captcha`;
+				const res = await fetch(`${captchaUrl}${captchaUrl.indexOf('?') === -1 ? '?' : '&'}_=${timestamp}`, {
 					headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
 				});
 				if (!res.ok) throw new Error('Failed to load captcha');
@@ -553,14 +717,11 @@ document.addEventListener('DOMContentLoaded', function () {
 			input.dataset.iuePwdEnhanced = "1";
 		}
 
-		// Gắn ngay cho login
+		// Gắn ngay cho login + register.
+		// Form đăng ký được render sẵn (ẩn) trong modal từ server nên đã có trong DOM ngay lúc này,
+		// không cần MutationObserver theo dõi toàn bộ <body> (tốn CPU trên mọi thay đổi DOM của trang).
 		attachToggle(document.getElementById("user_pass"));
-
-		// Theo dõi register form để gắn khi xuất hiện
-		const observer = new MutationObserver(() => {
-			attachToggle(document.getElementById("iue_register_password"));
-		});
-		observer.observe(document.body, { childList: true, subtree: true });
+		attachToggle(document.getElementById("iue_register_password"));
 
 	})();
 

@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.5-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.6.6-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -13,6 +13,18 @@
 Init User Engine is a gamified user module built from scratch for frontend-first WordPress sites. Everything runs via REST API and Vanilla JS — no jQuery, no PHP-based forms, no bloat.
 
 You get full control over user interactions: check-in, VIP purchase, Coin/EXP rewards, inbox notifications, referral tracking — all in one slick modal dashboard.
+
+## What's New in 1.6.6: Lost Password in the Login Modal
+
+The **"Forgot password?"** link now opens a lost password form **right inside the login modal** — no more jumping to `wp-login.php`.
+
+- New setting **Lost Password in Modal** (Settings, below *Login After Register*). Enabled by default; turn it off if your site can't send emails yet and the link goes back to `wp-login.php?action=lostpassword`
+- A **Custom Lost Password URL** still takes priority whenever it is set
+- Uses the native WordPress reset flow, so the reset email, the `lostpassword_form` / `lostpassword_post` hooks and the Turnstile "Lost Password Form" protection keep working
+- Visitors come back to the same page with the modal open and a success notice or an inline error
+- Theme override via `your-theme/init-user-engine/lostpassword-form.php`, open it from anywhere with `data-iue="lostpassword"`, and toggle it in code with the `init_plugin_suite_user_engine_lostpassword_modal_enabled` filter
+
+Also in this release: lighter guest script (no more page-wide `MutationObserver`), cheaper avatar URL filtering, back/forward cache friendly check-in countdown, the deactivation hook now actually clears the plugin's cron events, and the transient cleanup no longer deletes unexpired captchas on sites ahead of UTC.
 
 ## What's New in 1.6.5: Streak Recovery
 
@@ -33,6 +45,7 @@ Also in this release: check-ins are now serialized per user (no double rewards f
 - Frontend login & registration modal with Cloudflare Turnstile (or built-in math captcha) protection
 - Optional "Login After Register" to sign users in automatically right after they create an account (disabled by default)
 - Failed logins reopen the login modal on the current page with an inline error message, instead of redirecting to `wp-login.php`
+- "Forgot password?" form inside the login modal using the native WordPress reset flow (optional, on by default; a custom Lost Password URL always wins)
 - Optional protection of the native WordPress login/register/lost-password forms using the same Turnstile setup
 - Optional "Require Login to Access Site" mode that gates the entire frontend behind the login modal
 - Option to temporarily disable new registrations, plus custom Register / Lost Password URLs

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.5
+Stable tag: 1.6.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - Failed logins reopen the login modal on the current page with an inline error message, instead of redirecting to `wp-login.php`  
 - Cloudflare Turnstile captcha on registration, with a built-in math-question captcha as automatic fallback when no Turnstile keys are set  
 - Optional protection of the native WordPress login, registration, and lost-password forms (`wp-login.php`) using the same Turnstile setup  
+- "Forgot password?" form right inside the login modal, using the native WordPress reset flow (can be turned off; a custom Lost Password URL always takes priority)  
 - Custom redirect URLs for "Register" and "Lost password" links  
 - Optional "Require Login to Access Site" mode that gates the entire frontend behind the built-in login modal  
 - Ability to temporarily disable new registrations without affecting other plugins or WordPress core
@@ -151,6 +152,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_theme_colors` – Modify theme color system (primary and active colors)
 - `init_plugin_suite_user_engine_streak_restore_max_days` – Modify how many missed check-in days a user may cover to keep their streak (return `0` to disable it for that user)
 - `init_plugin_suite_user_engine_streak_restore_cost` – Modify the Coin cost of keeping a streak (receives total cost, missed days, and user ID)
+- `init_plugin_suite_user_engine_lostpassword_modal_enabled` – Enable or disable the lost password form inside the login modal (receives the current value and the plugin settings)
 
 === Actions ===
 
@@ -215,6 +217,21 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.6 – October 1, 2026 =
+- Added **Lost Password in Modal** (Init User Engine → Settings, right below *Login After Register*). The "Forgot password?" link in the login modal now opens a lost password form inside the same modal instead of sending visitors to `wp-login.php`
+  - Enabled by default. Turn it off if your site cannot send emails yet — the link then goes to the default `wp-login.php?action=lostpassword` page as before
+  - **Custom Lost Password URL** (Custom Links) still takes priority: when it is set, the link always goes there, whatever this option says
+  - Uses the native WordPress password reset flow: the form posts to `wp-login.php?action=lostpassword`, so the reset email, `lostpassword_form` / `lostpassword_post` hooks and the Turnstile "Lost Password Form" protection all keep working
+  - After submitting, visitors land back on the same page with the modal open: a success notice in the login form when the email was sent, or an inline error in the lost password form (unknown user, empty field, email sending failure, captcha failure). Any other error keeps WordPress's default `wp-login.php` behaviour so its exact message is still shown
+  - Template `lostpassword-form.php` can be overridden from `your-theme/init-user-engine/`; any element can also open it with `data-iue="lostpassword"`
+  - Added filter `init_plugin_suite_user_engine_lostpassword_modal_enabled`
+- Performance: the guest script no longer runs a `MutationObserver` on the whole `<body>` (it fired on every DOM change of the page just to attach the password toggle to the registration form, which is already in the page)
+- Performance: the `get_avatar_url` filter no longer re-runs every plugin's `pre_get_avatar_data` callbacks for each avatar; it only applies Init User Engine's own avatar logic (the result is the same)
+- Performance: the check-in countdown now saves its state on `pagehide` instead of `beforeunload`, so browsers can keep the page in the back/forward cache
+- Fixed: the deactivation hook was registered against `includes/core.php` instead of the main plugin file, so it never ran and the plugin's cron events stayed scheduled after deactivation. All three recurring events are now cleared on deactivation (they are scheduled again automatically on reactivation)
+- Fixed: the twice-daily cleanup compared transient expiry times (stored in UTC) with the site's local time, so on sites ahead of UTC it could delete registration captchas and rate-limit counters that had not expired yet
+- Updated `.pot`/`.po`/`.mo` translation files with the new strings introduced above (Vietnamese translation included), regenerated with WP-CLI
 
 = 1.6.5 – September 24, 2026 =
 - Added **Streak Recovery** (Init User Engine → Settings → Streak Recovery). When a member misses a few days, they can now spend Coin to keep their check-in streak instead of losing it

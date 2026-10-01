@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.6.5
+ * Version: 1.6.6
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.6.5' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.6.6' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -148,6 +148,15 @@ function init_plugin_suite_user_engine_enqueue_guest_assets() {
             'login_error_empty_username'     => __( 'Please enter your username or email address.', 'init-user-engine' ),
             'login_error_empty_password'     => __( 'Please enter your password.', 'init-user-engine' ),
             'login_error_generic'            => __( 'Incorrect username or password. Please try again.', 'init-user-engine' ),
+            'title_lostpassword'             => __( 'Lost Password', 'init-user-engine' ),
+            'processing'                     => __( 'Processing...', 'init-user-engine' ),
+            'lostpass_sent'                  => __( 'Check your email for the confirmation link to reset your password.', 'init-user-engine' ),
+            'lostpass_error_empty'           => __( 'Please enter a username or email address.', 'init-user-engine' ),
+            'lostpass_error_invalid'         => __( 'There is no account with that username or email address.', 'init-user-engine' ),
+            'lostpass_error_email'           => __( 'The email could not be sent. Please contact the site administrator.', 'init-user-engine' ),
+            'lostpass_error_not_allowed'     => __( 'Password reset is not allowed for this account.', 'init-user-engine' ),
+            'lostpass_error_captcha'         => __( 'Captcha verification failed. Please try again.', 'init-user-engine' ),
+            'lostpass_error_generic'         => __( 'Could not process your request. Please try again.', 'init-user-engine' ),
         ]
     ] );
 }

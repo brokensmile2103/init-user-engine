@@ -231,6 +231,7 @@ You can search users, customize message type, link, priority, and even set expir
 - Performance: the check-in countdown now saves its state on `pagehide` instead of `beforeunload`, so browsers can keep the page in the back/forward cache
 - Fixed: the deactivation hook was registered against `includes/core.php` instead of the main plugin file, so it never ran and the plugin's cron events stayed scheduled after deactivation. All three recurring events are now cleared on deactivation (they are scheduled again automatically on reactivation)
 - Fixed: the twice-daily cleanup compared transient expiry times (stored in UTC) with the site's local time, so on sites ahead of UTC it could delete registration captchas and rate-limit counters that had not expired yet
+- Fixed: on sites using "Plain" permalinks (REST URL like `?rest_route=/inituser/v1`), requests that add their own query string were malformed: the registration math captcha never loaded, and Inbox, Transaction History and Experience Log pagination failed. Query strings are now appended with `&` when the REST URL already has one
 - Updated `.pot`/`.po`/`.mo` translation files with the new strings introduced above (Vietnamese translation included), regenerated with WP-CLI
 
 = 1.6.5 – September 24, 2026 =

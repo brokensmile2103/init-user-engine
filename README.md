@@ -24,7 +24,7 @@ The **"Forgot password?"** link now opens a lost password form **right inside th
 - Visitors come back to the same page with the modal open and a success notice or an inline error
 - Theme override via `your-theme/init-user-engine/lostpassword-form.php`, open it from anywhere with `data-iue="lostpassword"`, and toggle it in code with the `init_plugin_suite_user_engine_lostpassword_modal_enabled` filter
 
-Also in this release: lighter guest script (no more page-wide `MutationObserver`), cheaper avatar URL filtering, back/forward cache friendly check-in countdown, the deactivation hook now actually clears the plugin's cron events, and the transient cleanup no longer deletes unexpired captchas on sites ahead of UTC.
+Also in this release: lighter guest script (no more page-wide `MutationObserver`), cheaper avatar URL filtering, back/forward cache friendly check-in countdown, the deactivation hook now actually clears the plugin's cron events, the transient cleanup no longer deletes unexpired captchas on sites ahead of UTC, and the registration captcha plus Inbox/History/EXP log pagination now work on sites using "Plain" permalinks.
 
 ## What's New in 1.6.5: Streak Recovery
 

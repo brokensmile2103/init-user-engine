@@ -550,7 +550,7 @@ function init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler() {
 	$last_user_id = -1;
 
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( 0 );
+		set_time_limit( 0 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Xóa theo lô trên bảng Inbox hàng triệu dòng có thể chạy lâu; tránh dừng giữa chừng.
 	}
 
 	do {
@@ -702,7 +702,7 @@ function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
 	// và GIỮ KHÓA trên toàn bộ bảng tới khi xong, chặn mọi thao tác Inbox khác của tất
 	// cả user. Thay vào đó: tìm id theo con trỏ (đọc không khóa) rồi xóa đúng các id đó.
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( 0 );
+		set_time_limit( 0 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Xóa theo lô trên bảng Inbox hàng triệu dòng có thể chạy lâu; tránh dừng giữa chừng.
 	}
 
 	$deleted = 0;

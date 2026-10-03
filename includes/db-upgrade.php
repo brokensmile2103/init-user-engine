@@ -338,7 +338,7 @@ function init_plugin_suite_user_engine_run_index_upgrade() {
 	// Tạo index trên bảng lớn có thể mất vài chục giây: không để PHP dừng giữa chừng.
 	ignore_user_abort( true );
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( 0 );
+		set_time_limit( 0 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- ALTER TABLE trên bảng hàng triệu dòng có thể mất vài phút và không chia nhỏ được; chỉ chạy nền (WP-Cron) hoặc khi bảng còn nhỏ.
 	}
 
 	$errors = [];

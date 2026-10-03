@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.6
+Stable tag: 1.6.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -217,6 +217,18 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.6.7 – October 3, 2026 =
+- Performance (large sites): rebuilt the database indexes used by the Inbox, after a production slow query log showed "Mark All as Read" (`UPDATE … WHERE user_id = … AND status = 'unread'`) taking 2.5 seconds on a 1.2M-message Inbox
+  - New composite index `user_status (user_id, status)`: the unread badge count, "Mark All as Read" and the Unread tab now read the index only instead of loading every message row of the user (about 181 → 3 pages read per unread count in our 1.25M-row benchmark)
+  - New composite index `user_pinned_created (user_id, pinned, created_at)`: the Inbox list (`ORDER BY pinned DESC, created_at DESC`) is read straight from the index, no more filesort
+  - Dropped single-column `user_id` indexes on the Inbox, Transaction log and EXP log tables. They were fully covered by composite indexes that start with `user_id`, so they only cost extra writes and disk space (every Coin/EXP change writes to these tables)
+  - Safe on big databases: the index upgrade runs in the background through WP-Cron, never inside a page load (small and new sites are upgraded instantly). It uses online DDL (`ALGORITHM=INPLACE, LOCK=NONE`), so reads and writes keep working while indexes are built; it gives up after 3 seconds if it has to wait for a table lock, instead of making other queries queue behind it, then retries an hour later (up to 24 times); and a lock option makes sure only one process ever runs it. If WP-Cron is not running, the upgrade runs on the next admin page load after the event is more than an hour late
+  - You can also run it yourself during quiet hours (replace `wp_` with your table prefix); the plugin detects the new indexes and marks the upgrade as done: `ALTER TABLE wp_init_user_engine_inbox ADD KEY user_status (user_id, status), ADD KEY user_pinned_created (user_id, pinned, created_at), DROP KEY user_id, ALGORITHM=INPLACE, LOCK=NONE;` then `ALTER TABLE wp_init_user_engine_transaction_log DROP KEY user_id;` and `ALTER TABLE wp_init_user_engine_exp_log DROP KEY user_id;`
+- Performance: the weekly orphaned-Inbox cleanup no longer runs a single `DELETE … LEFT JOIN` over the whole Inbox table. That statement scanned and locked every row (even when nothing needed deleting), blocking every member's Inbox actions while it ran; in our benchmark a member's "Mark All as Read" waited 7.9 seconds. It now walks the distinct user IDs through the index, checks them against the users table in batches of 500 and deletes only orphaned messages, at most 1,000 rows per statement (0.45 s and no table-wide locks when there is nothing to delete)
+- Performance: **Inbox Statistics → Delete All of This Type** now deletes in batches of 1,000 by primary key instead of one `DELETE … WHERE type = …`, which locked the whole table until done (members' Inbox actions waited 7 seconds while 200k messages were deleted in our benchmark; now under 0.1 second)
+- Fixed: the orphaned-Inbox cleanup used `$wpdb->prefix . 'users'` as the users table, which does not exist on Multisite sub-sites (the users table is shared network-wide). It now uses `$wpdb->users`
+- The new background event is cleared on deactivation along with the plugin's other cron events
 
 = 1.6.6 – October 1, 2026 =
 - Added **Lost Password in Modal** (Init User Engine → Settings, right below *Login After Register*). The "Forgot password?" link in the login modal now opens a lost password form inside the same modal instead of sending visitors to `wp-login.php`

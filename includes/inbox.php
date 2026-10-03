@@ -526,18 +526,83 @@ add_action('init_plugin_suite_user_engine_cleanup_orphaned_inbox', 'init_plugin_
 /**
  * Hàm xử lý dọn dẹp inbox mồ côi
  * Xóa các inbox thuộc về user_id không tồn tại nữa
+ *
+ * Từ v1.6.7 chạy theo lô thay vì 1 câu DELETE ... LEFT JOIN trên toàn bảng:
+ * câu cũ phải quét và GIỮ KHÓA trên mọi dòng của bảng Inbox (hàng triệu dòng
+ * trên site lớn) suốt thời gian chạy, khiến mọi thao tác Inbox khác (đánh dấu
+ * đã đọc, xóa...) của tất cả user phải chờ theo — kể cả khi không có tin mồ côi nào.
+ *
+ * Cách mới:
+ * 1. Duyệt danh sách user_id riêng biệt trong Inbox theo con trỏ (đọc index,
+ *    không khóa dòng nào), mỗi lần 500 user.
+ * 2. Đối chiếu với bảng users để tìm user không còn tồn tại.
+ * 3. Chỉ xóa tin của đúng các user đó, mỗi câu DELETE tối đa 1000 dòng.
+ *
+ * Dùng $wpdb->users (đúng cả trên Multisite, nơi bảng users dùng chung cho
+ * cả mạng) thay vì $wpdb->prefix . 'users'.
  */
 function init_plugin_suite_user_engine_cleanup_orphaned_inbox_handler() {
-    global $wpdb;
-    
-    $inbox_table = $wpdb->prefix . 'init_user_engine_inbox';
-    $users_table = $wpdb->prefix . 'users';
-    
-    // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $wpdb->query("DELETE i FROM {$inbox_table} i LEFT JOIN {$users_table} u ON i.user_id = u.ID WHERE u.ID IS NULL");
-    // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-    // Không flush cache ở đây vì orphaned user đã không còn session để dùng cache.
+	global $wpdb;
+
+	$inbox_table  = init_plugin_suite_user_engine_get_inbox_table();
+	$scan_batch   = 500;
+	$delete_batch = 1000;
+	$last_user_id = -1;
+
+	if ( function_exists( 'set_time_limit' ) ) {
+		set_time_limit( 0 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Xóa theo lô trên bảng Inbox hàng triệu dòng có thể chạy lâu; tránh dừng giữa chừng.
+	}
+
+	do {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$user_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT DISTINCT user_id FROM {$inbox_table} WHERE user_id > %d ORDER BY user_id ASC LIMIT %d",
+				$last_user_id,
+				$scan_batch
+			)
+		);
+
+		if ( empty( $user_ids ) ) {
+			break;
+		}
+
+		$user_ids     = array_map( 'absint', $user_ids );
+		$last_user_id = (int) end( $user_ids );
+		$fetched      = count( $user_ids );
+
+		$placeholders = implode( ',', array_fill( 0, count( $user_ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$existing = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders chỉ gồm các %d.
+				"SELECT ID FROM {$wpdb->users} WHERE ID IN ({$placeholders})",
+				$user_ids
+			)
+		);
+
+		$orphans = array_values( array_diff( $user_ids, array_map( 'absint', (array) $existing ) ) );
+
+		foreach ( array_chunk( $orphans, 100 ) as $orphan_chunk ) {
+			$orphan_placeholders = implode( ',', array_fill( 0, count( $orphan_chunk ), '%d' ) );
+			$orphan_params       = array_merge( $orphan_chunk, [ $delete_batch ] );
+
+			do {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+				$deleted = $wpdb->query(
+					$wpdb->prepare(
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $orphan_placeholders chỉ gồm các %d.
+						"DELETE FROM {$inbox_table} WHERE user_id IN ({$orphan_placeholders}) LIMIT %d",
+						$orphan_params
+					)
+				);
+			} while ( $deleted && $deleted >= $delete_batch );
+		}
+	} while ( $fetched === $scan_batch );
+
+	// Không flush cache ở đây vì orphaned user đã không còn session để dùng cache.
 }
 
 // ─────────────────────────────────────────────
@@ -606,48 +671,92 @@ function init_plugin_suite_user_engine_get_inbox_types() {
 // Handle cleanup inbox by type
 add_action( 'admin_post_iue_cleanup_inbox_type', 'init_plugin_suite_user_engine_handle_cleanup_inbox_type' );
 function init_plugin_suite_user_engine_handle_cleanup_inbox_type() {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
-    }
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+	}
 
-    check_admin_referer( 'iue_cleanup_inbox_type' );
+	check_admin_referer( 'iue_cleanup_inbox_type' );
 
-    $type  = isset( $_POST['iue_cleanup_type'] ) ? sanitize_text_field( wp_unslash( $_POST['iue_cleanup_type'] ) ) : '';
-    $types = init_plugin_suite_user_engine_get_inbox_types();
+	$type  = isset( $_POST['iue_cleanup_type'] ) ? sanitize_text_field( wp_unslash( $_POST['iue_cleanup_type'] ) ) : '';
+	$types = init_plugin_suite_user_engine_get_inbox_types();
 
-    if ( empty( $type ) || ! in_array( $type, $types, true ) ) {
-        wp_safe_redirect( add_query_arg(
-            array(
-                'page'               => 'init-user-engine-inbox-stats',
-                'iue_cleanup_done'   => 1,
-                'iue_cleanup_status' => 'invalid',
-            ),
-            admin_url( 'admin.php' )
-        ) );
-        exit;
-    }
+	if ( empty( $type ) || ! in_array( $type, $types, true ) ) {
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'               => 'init-user-engine-inbox-stats',
+					'iue_cleanup_done'   => 1,
+					'iue_cleanup_status' => 'invalid',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
+	}
 
-    global $wpdb;
-    $table = init_plugin_suite_user_engine_get_inbox_table();
+	global $wpdb;
+	$table = init_plugin_suite_user_engine_get_inbox_table();
 
-    // Xoá theo type (sử dụng prepare để an toàn)
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE type = %s", $type ) );
+	// Xoá theo type, chia lô theo khóa chính.
+	// Cột `type` không có index, nên 1 câu DELETE ... WHERE type = %s duy nhất sẽ quét
+	// và GIỮ KHÓA trên toàn bộ bảng tới khi xong, chặn mọi thao tác Inbox khác của tất
+	// cả user. Thay vào đó: tìm id theo con trỏ (đọc không khóa) rồi xóa đúng các id đó.
+	if ( function_exists( 'set_time_limit' ) ) {
+		set_time_limit( 0 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Xóa theo lô trên bảng Inbox hàng triệu dòng có thể chạy lâu; tránh dừng giữa chừng.
+	}
 
-    // Không flush cache theo từng user ở đây vì cleanup type có thể ảnh hưởng nhiều user.
-    // Cache sẽ tự expire sau TTL (5 phút) – chấp nhận được cho thao tác admin hiếm gặp này.
+	$deleted = 0;
+	$last_id = 0;
+	$batch   = 1000;
 
-    wp_safe_redirect( add_query_arg(
-        array(
-            'page'               => 'init-user-engine-inbox-stats',
-            'iue_cleanup_done'   => 1,
-            'iue_cleanup_status' => 'ok',
-            'iue_cleanup_type'   => rawurlencode( $type ),
-            'iue_deleted'        => (int) $deleted,
-        ),
-        admin_url( 'admin.php' )
-    ) );
-    exit;
+	do {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT id FROM {$table} WHERE id > %d AND type = %s ORDER BY id ASC LIMIT %d",
+				$last_id,
+				$type,
+				$batch
+			)
+		);
+
+		if ( empty( $ids ) ) {
+			break;
+		}
+
+		$ids     = array_map( 'absint', $ids );
+		$last_id = (int) end( $ids );
+		$fetched = count( $ids );
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$deleted += (int) $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders chỉ gồm các %d.
+				"DELETE FROM {$table} WHERE id IN ({$placeholders}) AND type = %s",
+				array_merge( $ids, [ $type ] )
+			)
+		);
+	} while ( $fetched === $batch );
+
+	// Không flush cache theo từng user ở đây vì cleanup type có thể ảnh hưởng nhiều user.
+	// Cache sẽ tự expire sau TTL (5 phút) – chấp nhận được cho thao tác admin hiếm gặp này.
+
+	wp_safe_redirect(
+		add_query_arg(
+			array(
+				'page'               => 'init-user-engine-inbox-stats',
+				'iue_cleanup_done'   => 1,
+				'iue_cleanup_status' => 'ok',
+				'iue_cleanup_type'   => rawurlencode( $type ),
+				'iue_deleted'        => (int) $deleted,
+			),
+			admin_url( 'admin.php' )
+		)
+	);
+	exit;
 }
 
 // ─────────────────────────────────────────────

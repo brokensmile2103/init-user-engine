@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.6
+Stable tag: 1.6.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -218,6 +218,18 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.6.7 – October 3, 2026 =
+- Performance (large sites): rebuilt the database indexes used by the Inbox, after a production slow query log showed "Mark All as Read" (`UPDATE … WHERE user_id = … AND status = 'unread'`) taking 2.5 seconds on a 1.2M-message Inbox
+  - New composite index `user_status (user_id, status)`: the unread badge count, "Mark All as Read" and the Unread tab now read the index only instead of loading every message row of the user (about 181 → 3 pages read per unread count in our 1.25M-row benchmark)
+  - New composite index `user_pinned_created (user_id, pinned, created_at)`: the Inbox list (`ORDER BY pinned DESC, created_at DESC`) is read straight from the index, no more filesort
+  - Dropped single-column `user_id` indexes on the Inbox, Transaction log and EXP log tables. They were fully covered by composite indexes that start with `user_id`, so they only cost extra writes and disk space (every Coin/EXP change writes to these tables)
+  - Safe on big databases: the index upgrade runs in the background through WP-Cron, never inside a page load (small and new sites are upgraded instantly). It uses online DDL (`ALGORITHM=INPLACE, LOCK=NONE`), so reads and writes keep working while indexes are built; it gives up after 3 seconds if it has to wait for a table lock, instead of making other queries queue behind it, then retries an hour later (up to 24 times); and a lock option makes sure only one process ever runs it. If WP-Cron is not running, the upgrade runs on the next admin page load after the event is more than an hour late
+  - You can also run it yourself during quiet hours (replace `wp_` with your table prefix); the plugin detects the new indexes and marks the upgrade as done: `ALTER TABLE wp_init_user_engine_inbox ADD KEY user_status (user_id, status), ADD KEY user_pinned_created (user_id, pinned, created_at), DROP KEY user_id, ALGORITHM=INPLACE, LOCK=NONE;` then `ALTER TABLE wp_init_user_engine_transaction_log DROP KEY user_id;` and `ALTER TABLE wp_init_user_engine_exp_log DROP KEY user_id;`
+- Performance: the weekly orphaned-Inbox cleanup no longer runs a single `DELETE … LEFT JOIN` over the whole Inbox table. That statement scanned and locked every row (even when nothing needed deleting), blocking every member's Inbox actions while it ran; in our benchmark a member's "Mark All as Read" waited 7.9 seconds. It now walks the distinct user IDs through the index, checks them against the users table in batches of 500 and deletes only orphaned messages, at most 1,000 rows per statement (0.45 s and no table-wide locks when there is nothing to delete)
+- Performance: **Inbox Statistics → Delete All of This Type** now deletes in batches of 1,000 by primary key instead of one `DELETE … WHERE type = …`, which locked the whole table until done (members' Inbox actions waited 7 seconds while 200k messages were deleted in our benchmark; now under 0.1 second)
+- Fixed: the orphaned-Inbox cleanup used `$wpdb->prefix . 'users'` as the users table, which does not exist on Multisite sub-sites (the users table is shared network-wide). It now uses `$wpdb->users`
+- The new background event is cleared on deactivation along with the plugin's other cron events
+
 = 1.6.6 – October 1, 2026 =
 - Added **Lost Password in Modal** (Init User Engine → Settings, right below *Login After Register*). The "Forgot password?" link in the login modal now opens a lost password form inside the same modal instead of sending visitors to `wp-login.php`
   - Enabled by default. Turn it off if your site cannot send emails yet — the link then goes to the default `wp-login.php?action=lostpassword` page as before
@@ -296,211 +308,6 @@ You can search users, customize message type, link, priority, and even set expir
   - New dedicated `assets/css/require-login.css` and `assets/js/require-login.js` files render the gate's background and auto-open the login modal, kept separate from PHP output for coding-standards compliance
 - Fixed: the frontend guest script (`guest.js`) only exposed `window.openLoginModal` (and wired up Escape-to-close, Alt+L, and hash-triggered opening) when an avatar element was present on the page. Pages without the avatar shortcode/widget — including the new Require Login gate — could not open the login modal at all. The avatar element is now optional; the modal and its triggers work on any page as long as the modal itself is rendered (always the case via `wp_footer`)
 - Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included); `.mo` not rebuilt as part of this change
-
-= 1.5.9 – August 29, 2026 =
-- Changed: "Send Notification" (Init User Engine → Send Notification) now uses a dedicated **admin** message type instead of reusing **system**, which was also used internally by several unrelated automated notices (VIP removed, redeem code success, VIP code success). Admin-sent notices and automated system notices are now cleanly separated
-  - The "System" filter tab in the user-facing Inbox still includes admin-sent messages, same as before
-  - Previously sent messages (type `system`) are not migrated and keep displaying normally in the Inbox; only newly sent notifications use the new `admin` type
-- Fixed: **"Pin this message"** on the Send Notification screen had no visible effect beyond storing a flag — pinned messages now always float to the top of the Inbox list, ahead of unpinned messages, across every filter tab
-- Fixed: the **"Expire At"** field on Send Notification was saved to the database but never actually read back anywhere — it had no effect at all, on any message
-  - Clarified and scoped its behavior to work together with the pin fix above: **Expire At now only applies to pinned messages** — once the time passes, the message is automatically unpinned (it remains fully visible in the Inbox as a regular message, nothing is hidden or deleted). Unpinned messages ignore this field entirely and never expire
-  - Added an hourly cron job (`init_plugin_suite_user_engine_unpin_expired_inbox`) that clears the `pinned` flag on messages past their `expire_at`; it only ever updates that one column, never deletes or alters message content
-  - Added inline descriptions on the Send Notification screen clarifying this scope for both the "Pin this message" checkbox and the "Expire At" field
-- Fixed: the **Date Range** filter (Last 7/30/90 Days, All Time) on the Inbox Statistics page (Users → Init User Engine → Inbox Statistics) only affected the "Daily Activity" chart; every other number on the page (Total/Unread/Pinned Messages, Total Recipients, Message Types, Priority Levels, Top Recipients, Active Recipients, Peak Day) silently ignored it and always showed all-time (or hardcoded 30/90-day) figures
-  - All of the above now correctly scope to the selected range
-  - "Active Recipients" and "Peak Day" no longer use a hardcoded 30/90-day window — they follow the selected range like everything else; label updated from "Active Recipients (30d)" to "Active Recipients" to match
-  - "Sent Today", "This Week", and "This Month" remain fixed calendar anchors by design, independent of the Date Range selector
-- Added a short-lived (5 min) cache for the Inbox Statistics page, shared across all its stat sections, to avoid re-running its ~10 aggregate queries on every page load/range change
-- Added a database index on `created_at` for the inbox table to keep the now range-aware statistics queries fast on large tables. Applied automatically and safely via `dbDelta()` on next admin page load — existing data is untouched, no manual DB work or reinstall needed
-- Updated `.pot`/`.po` translation files for the above: added `admin` / `Active Recipients` / the two new Pin & Expire At description strings, removed the now-unused `system` (as a standalone label) / `Active Recipients (30d)` strings, and corrected stale source-line references throughout
-
-= 1.5.8 – August 22, 2026 =
-- Fixed: several user-facing notifications and REST API error messages ignored the admin-configured **Coin Label** / **Cash Label** and always displayed the hardcoded English words "Coin"/"Cash" regardless of the custom label set in Settings → Currency Labels
-  - Affected: level-up bonus notice, sign-up/order/review reward notices, all Coin ⇄ Cash exchange error messages (invalid amount, min/max limit, insufficient balance, zero-result, update failed), and VIP purchase error messages (wrong currency, insufficient balance)
-  - All of the above now consistently use the configured label, matching the behavior already used by Redeem Codes, Top-up, and the VIP purchase success message
-  - Added shared helpers `init_plugin_suite_user_engine_get_coin_label()` and `init_plugin_suite_user_engine_get_cash_label()` in `includes/utils.php`
-- Fixed: frontend JS (`member.js`) referenced an `exchange_insufficient_coin` translation string for the Coin→Cash exchange screen that was never localized from PHP, silently falling back to a hardcoded, non-translatable "Not enough Coin." string; now properly localized and label-aware
-- Removed a leftover duplicate/dead array key in the frontend localization data (`exchange_insufficient`) that was immediately overwritten and never actually used
-- Updated `.pot`/`.po` translation files to match: merged duplicate Coin/Cash message pairs into shared, label-aware strings; Vietnamese translation now consistently uses "Coin" instead of the previous literal "xu"/"đồng xu" wording throughout
-
-= 1.5.7 – August 16, 2026 =
-- Added **Date of Birth** field to the frontend Edit Profile modal, stored per-user instead of a raw age number so it stays accurate over time without users needing to re-enter it
-  - New REST field `dob` on both `GET /profile/me` and `POST /profile/update`
-  - Server-side validation rejects malformed dates, future dates, and dates older than 120 years; invalid input is rejected before any other profile field is saved
-- Added `init_plugin_suite_user_engine_get_age( $user_id )` helper — computes a user's current age from their stored date of birth, returns `0` if not set
-- Added new i18n strings for the Date of Birth field and its validation messages
-
-= 1.5.6 – August 16, 2026 =
-- Added **VIP Codes** — a dedicated code system for granting VIP membership days, alongside the existing Coin/Cash Redeem Codes
-  - New admin page (User Engine → VIP Codes) with the same workflow as Redeem Codes: single/batch, multi-use, and user-locked codes, usage history, disable/delete
-  - New REST endpoint `POST /redeem-vip-code`, using the same transaction-locked, race-condition-safe redemption flow as Redeem Codes
-  - New "Redeem VIP Code" option in the frontend user dashboard, with its own modal
-- Added **Disable VIP Stacking** setting
-  - When enabled, a user with an active VIP can't purchase or redeem another VIP package/code until the current one expires, instead of extending it
-  - Enforced consistently across both Coin/Cash purchase and VIP Code redemption, with a row-level DB lock on redemption to prevent two simultaneous requests from both stacking VIP before either write completes
-- Added **Disable VIP Purchase** setting
-  - Completely turns off VIP purchasing/activation for all users; hides the purchase UI and the "Redeem VIP Code" menu item, and blocks both the purchase and VIP Code redeem endpoints
-  - Existing active VIP members are unaffected — only new activations are blocked
-- Changed: VIP Lifetime package now stores 99999 days instead of 9999 (previously only ~27 years, which confused users); all existing lifetime-detection logic remains compatible with old data
-- Added new i18n strings for VIP Codes, VIP stacking, and VIP purchase-disabled notices
-
-= 1.5.5 – August 11, 2026 =
-- Added **Cloudflare Turnstile protection for WordPress's default forms**
-  - Extends the same Turnstile widget to WordPress's native Login, Registration, and Lost Password forms (`wp-login.php`), not just this plugin's own registration endpoint
-  - Three new toggles under Cloudflare Turnstile → Protect Default WordPress Forms: Login Form, Registration Form, Lost Password Form
-  - Login protection covers both the native `wp-login.php` page and the plugin's own login modal, since both submit through the same WordPress login flow
-  - Registration protection applies to WordPress's native `wp-login.php?action=register` page (only relevant when "Anyone can register" is enabled), independent from this plugin's own registration form/endpoint
-  - All three require both Turnstile keys to be set and only take effect when "Disable Captcha" is off, same as the existing registration captcha
-  - Turnstile script for the login modal only loads once the modal is actually opened, matching the existing lazy-load behavior of the registration widget
-- Added **Test API button** for Cloudflare Turnstile
-  - Verifies the Secret Key against Cloudflare directly from the Settings page, before saving
-  - Site Key can only be fully confirmed once the widget actually renders in the browser (e.g. on the registration form)
-- Added new i18n strings for the Turnstile form protection settings and the Test API button
-
-= 1.5.4 – August 11, 2026 =
-- Fixed: Admin User Overview metabox (Recent Transactions / Recent EXP-related data) stopped showing new activity after the meta → custom table migration (v1.5.x). Root cause: the transaction/EXP log reader queried the **oldest** 100 entries (`ORDER BY logged_at ASC LIMIT 100`) instead of the most recent ones, so entries logged after a user passed 100 total transactions never appeared. Now correctly fetches and displays the latest 100 entries
-- Improved: Admin User Overview metabox now performs a single aggregate query for inbox stats (total / last 7 days / last message time) instead of 3 separate `COUNT`/`MAX` queries, reducing database round-trips on profile page loads
-- Improved: Minor cleanup of redundant array processing when rendering the Recent Transactions list
-- `Tested up to: 7.1`
-
-= 1.5.3 – July 29, 2026 =
-- Added **two-way currency exchange** between Cash and Coin
-  - New REST endpoint `POST /exchange-reverse` to convert Coin → Cash
-  - Exchange modal now supports toggling between Cash → Coin and Coin → Cash
-  - Added independent exchange rate settings for both directions
-  - Rate limiting, idempotency, and mutex locks applied to both endpoints
-- Added **VIP bonus for Cash**
-  - VIP users now receive configurable bonus Cash (%) on all Cash additions
-  - Aligns with existing VIP bonus behavior for Coin and EXP
-- Added **VIP purchase by Cash**
-  - VIP packages can now be priced and purchased using Cash instead of Coin
-  - New setting to choose payment currency: Coin only, Cash only, or Both
-  - When set to Both, users can toggle between Coin and Cash in the purchase modal
-  - VIP purchase log now records the currency used for each transaction
-- Added new i18n strings for exchange direction, VIP currency selection, and Cash-related notifications
-
-= 1.5.2 – May 17, 2026 =
-- Updated custom dashicon CSS to use `currentColor` for full compatibility with WordPress Administration Color Schemes
-- Removed hardcoded icon colors that conflicted with theme-aware color variables
-- Ensured compatibility with WordPress 7.0's updated admin color system
-
-= 1.5.1 – April 22, 2026 =
-- Refactored migration architecture to use self-looping WP-Cron instead of admin_init execution
-- Introduced background migration runner (`init_plugin_suite_iue_migration_event`) with automatic rescheduling
-- Added transient-based locking mechanism to prevent concurrent migration execution
-- Migration process is now fully decoupled from admin traffic and runs reliably in low-traffic environments
-- Improved stability and consistency of batch migration for large datasets
-- Activation hook now schedules migration automatically if not already completed
-- Maintained full backward compatibility with existing migration logic and data structures
-
-= 1.5.0 – April 21, 2026 =
-- Migrated transaction log (coin/cash) and EXP log from user meta to dedicated database tables
-- Introduced `init_user_engine_transaction_log` and `init_user_engine_exp_log` tables for better scalability
-- Automatic data migration from old user meta (`iue_coin_cash_log`, `iue_exp_log`) with cleanup on completion
-- Migration runs in batches of 200 users to prevent timeouts on large sites and resumes if interrupted
-- REST API pagination for transaction and EXP history now uses true COUNT + OFFSET instead of loading all records
-- Added `wp_cache` support for transaction and EXP log reads with automatic invalidation on write
-- Database schema check is now version-gated to avoid redundant queries on every admin load
-- Schema and migration are also triggered via `upgrader_process_complete` for reliable update handling
-- Full backward compatibility maintained: all hooks, filters, and i18n strings are preserved
-
-= 1.4.9 – April 15, 2026 =
-- Added filter to override theme color system (theme_color, theme_active_color)
-- Introduced centralized color hook for easier customization from themes and addons
-- Ensured safe fallback when filter returns incomplete or invalid values
-
-= 1.4.8 – March 25, 2026 =
-- Fixed check-in countdown not starting on new devices after login
-- Countdown now resets to full duration on unrecognized devices
-- Remaining time is saved only on tab hide and page unload, not every second
-- Fixed date comparison using locale-aware format to prevent UTC offset mismatch
-
-= 1.4.7 – March 24, 2026 =
-- Added wp_cache support for unread Inbox count
-- Reduced database load by caching COUNT(*) queries per user
-- Cache is automatically cleared on insert, read, delete, and bulk operations
-- Introduced centralized cache helpers and consistent naming
-- Improved performance and internal code structure for better maintainability
-
-= 1.4.6 – February 7, 2026 =
-- Fixed redeem code generation logic to respect custom codes
-- Single-use codes now preserve exact input when quantity is 1
-- Prefix + random suffix only applies to batch generation (qty > 1)
-- Multi-use and locked codes no longer force random suffixes
-
-= 1.4.5 – February 4, 2026 =
-- Fixed Inbox pagination not respecting the active filter
-- Total message count and total pages are now calculated per category
-- Prevents incorrect page numbers when switching between filters
-- Ensures accurate server-side pagination and consistent navigation
-
-= 1.4.4 – February 4, 2026 =
-- Added bulk generation for single-use redeem codes
-  - Supports quantity-based creation with automatic prefix usage
-  - Generates random 6-character suffix using `wp_generate_password()`
-  - When quantity = 1, uses the exact input code (no random suffix appended)
-- Added safe delete action for redeem codes (only unused codes can be removed)
-- Improved redeem code creation flow with better validation, sanitization, and consistent behavior across modes
-- Upgraded Inbox system with categorized filters
-  - Added filters: All, Unread, System, Rewards, Activity, Other
-  - Server-side filtering with correct pagination
-  - Logical grouping of message types for cleaner UX
-- Minor UI and internal refinements for consistency and maintainability
-
-= 1.4.3 – January 28, 2026 =
-- Added VIP state–aware body classes for frontend customization
-  - Automatically adds `iue-vip` for active VIP users
-  - Adds `iue-vip-expired` for users whose VIP has expired
-  - Adds `iue-expire-soon` when VIP is close to expiration (default: ≤ 1 day)
-- Introduced extensibility hooks for VIP presentation logic
-  - New filter `init_plugin_suite_user_engine_vip_expire_soon_threshold` to customize the “expire soon” window
-  - New filter `init_plugin_suite_user_engine_body_vip_classes` to allow developers to add or modify VIP-related body classes
-- Improved separation between VIP core logic and UI layer
-  - Enables lightweight CSS-based customization without conditional checks
-  - Keeps VIP business logic isolated and stable
-- Minor internal refinement for consistency and long-term maintainability
-
-= 1.4.2 – November 19, 2025 =
-- Updated **transaction logging system** for Coin & Cash
-  - VIP users now automatically receive the correct **bonus %** directly inside the log entry
-  - Log entries now include:
-    - `original` (amount before bonus)
-    - `amount` (amount after bonus)
-    - `vip_bonus` flag and `bonus_percent` value
-  - Ensures perfectly aligned behavior with `init_plugin_suite_user_engine_add_coin()`
-- Improved accuracy of VIP-related operations
-  - Bonus only applies to **Coin** and only when **adding** (no bonus for deductions)
-  - Avoids mismatch between displayed history and real balance changes
-- Enhanced internal data consistency
-  - Log entries capped at 100 items with stable array slicing
-  - Ensures clean, lightweight meta storage over long-term usage
-- Minor structural refinement for better readability and maintainable code paths
-
-= 1.4.1 – November 17, 2025 =
-- Fixed VIP bonus logic when modifying Coin balance
-  - Bonus percentage now applies **only when adding** positive Coin amounts
-  - Negative adjustments (deducting Coin) **no longer receive bonus**
-- Added support for `data-iue="register"`
-  - Automatically opens the modal **and switches directly to the Register tab**
-  - Ignores custom register URL mode (only toggles modal when active)
-- Improved WPCS compatibility
-  - Added targeted `phpcs:ignore` rules for PluginCheck false positives
-  - Clean handling of dynamic table names in prepared SQL queries
-- No other changes; fast patch release for immediate correctness
-
-= 1.4.0 – November 4, 2025 =
-- Improved **Admin User Overview** security model
-  - Any user can view their own overview (Coin, Cash, Level, VIP info, Inbox)
-  - Action buttons (Remove VIP / Toggle Avatar Upload Ban / Inbox Statistics) are now restricted to administrators only
-  - UI gracefully disables restricted actions for non-admin users instead of hiding them
-- Added server-side permission guards for sensitive actions
-  - `iue_remove_vip` and `iue_toggle_avatar_ban` now require `manage_options`
-  - Requests are validated using capability check + nonce verification
-  - Prevents URL/REST crafting or manual calls to admin-post endpoints
-- Improved admin notices behavior
-  - Success/error messages only appear for administrators
-  - Notices limited to `profile.php` and `user-edit.php` screens
-- Minor code cleanup and consistency improvements to maintainable structure
 
 View full changelog (all versions): [Init User Engine – Changelog](https://en.inithtml.com/plugin/init-user-engine/)
 

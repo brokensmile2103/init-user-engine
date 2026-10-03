@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.6-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.6.7-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -13,6 +13,16 @@
 Init User Engine is a gamified user module built from scratch for frontend-first WordPress sites. Everything runs via REST API and Vanilla JS — no jQuery, no PHP-based forms, no bloat.
 
 You get full control over user interactions: check-in, VIP purchase, Coin/EXP rewards, inbox notifications, referral tracking — all in one slick modal dashboard.
+
+## What's New in 1.6.7: Faster Inbox on Large Sites
+
+Built for sites with millions of rows (tested against a 1.25M-message Inbox and a 3M-row transaction log on MariaDB 10.11).
+
+- **New Inbox indexes** `user_status (user_id, status)` and `user_pinned_created (user_id, pinned, created_at)`: the unread count, "Mark All as Read", the Unread tab and the Inbox list now read the index only (no row lookups, no filesort)
+- **Redundant `user_id` indexes dropped** on the Inbox, Transaction log and EXP log tables (already covered by composite indexes), so every Coin/EXP write is cheaper
+- **Safe upgrade on big databases**: runs in the background via WP-Cron with online DDL (`ALGORITHM=INPLACE, LOCK=NONE`), gives up after 3 s instead of queueing behind a table lock, retries hourly, and is protected by a lock so only one process runs it
+- **No more table-wide locks**: the weekly orphaned-Inbox cleanup and "Delete All of This Type" now work in small batches; before, they locked every Inbox row and made members' Inbox actions wait for seconds
+- Multisite fix: the orphaned-Inbox cleanup now uses the shared network users table
 
 ## What's New in 1.6.6: Lost Password in the Login Modal
 

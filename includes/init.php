@@ -29,6 +29,7 @@ function init_plugin_suite_user_engine_on_activation() {
             init_plugin_suite_user_engine_create_vip_code_table();
             init_plugin_suite_user_engine_create_transaction_log_table();
             init_plugin_suite_user_engine_create_exp_log_table();
+            init_plugin_suite_user_engine_maybe_schedule_index_upgrade( true );
             restore_current_blog();
         }
     } else {
@@ -37,6 +38,9 @@ function init_plugin_suite_user_engine_on_activation() {
         init_plugin_suite_user_engine_create_vip_code_table();
         init_plugin_suite_user_engine_create_transaction_log_table();
         init_plugin_suite_user_engine_create_exp_log_table();
+
+        // Bảng mới tạo → thêm index ghép ngay; site cũ dữ liệu lớn → chạy nền qua WP-Cron.
+        init_plugin_suite_user_engine_maybe_schedule_index_upgrade( true );
     }
 
     update_option( 'iue_plugin_db_version', INIT_PLUGIN_SUITE_IUE_VERSION );
@@ -52,6 +56,7 @@ function init_plugin_suite_user_engine_on_new_blog( $blog_id, $user_id, $domain,
     init_plugin_suite_user_engine_create_vip_code_table();
     init_plugin_suite_user_engine_create_transaction_log_table();
     init_plugin_suite_user_engine_create_exp_log_table();
+    init_plugin_suite_user_engine_maybe_schedule_index_upgrade( true );
     restore_current_blog();
 }
 
@@ -73,8 +78,10 @@ function init_plugin_suite_user_engine_check_table() {
     // toàn nhiều lần — tự so sánh cấu trúc bảng hiện có với SQL khai báo
     // rồi CHỈ thêm cột/index còn thiếu (ALTER TABLE ADD ...), không bao
     // giờ xóa cột hay dữ liệu sẵn có. Nhờ vậy site đã cài plugin từ trước
-    // cũng tự nhận được index mới (vd created_at ở v1.5.9) mà không cần
-    // cài lại hay chạm tay vào DB.
+    // cũng tự nhận được cột mới mà không cần cài lại hay chạm tay vào DB.
+    //
+    // Từ v1.6.7, index ghép theo user do includes/db-upgrade.php thêm
+    // (online, chạy nền) — xem ghi chú trong create_inbox_table().
     init_plugin_suite_user_engine_create_inbox_table();
 
     // Backfill 1 lần: bỏ ghim các tin ĐÃ ĐỌC từ trước khi có UX "tự bỏ ghim
@@ -150,12 +157,17 @@ function init_plugin_suite_user_engine_create_inbox_table() {
         expire_at BIGINT UNSIGNED DEFAULT NULL,
         created_at BIGINT UNSIGNED NOT NULL,
         PRIMARY KEY (id),
-        KEY user_id (user_id),
         KEY status (status),
         KEY priority (priority),
         KEY pinned (pinned),
         KEY created_at (created_at)
     ) $charset_collate;";
+
+    // Index ghép theo user (user_status, user_pinned_created) KHÔNG khai báo ở đây mà do
+    // includes/db-upgrade.php quản lý: hàm này còn được gọi lại (dbDelta) trên site đã có
+    // dữ liệu lớn, nên mọi thay đổi index phải đi qua luồng nâng cấp online/chạy nền đó.
+    // Cũng không khai báo KEY user_id: đã thừa vì 2 index ghép trên đều bắt đầu bằng user_id
+    // (dbDelta chỉ thêm, không bao giờ xóa index, nên site cũ vẫn giữ nguyên tới khi nâng cấp).
 
     dbDelta( $sql );
 }
@@ -267,7 +279,6 @@ function init_plugin_suite_user_engine_create_transaction_log_table() {
         bonus_percent INT UNSIGNED NOT NULL DEFAULT 0,
         logged_at DATETIME NOT NULL,
         PRIMARY KEY (id),
-        KEY user_id (user_id),
         KEY user_type (user_id, type),
         KEY user_logged_at (user_id, logged_at),
         KEY source (source),
@@ -296,7 +307,6 @@ function init_plugin_suite_user_engine_create_exp_log_table() {
         vip_bonus TINYINT(1) NOT NULL DEFAULT 0,
         logged_at DATETIME NOT NULL,
         PRIMARY KEY (id),
-        KEY user_id (user_id),
         KEY user_logged_at (user_id, logged_at),
         KEY source (source),
         KEY logged_at (logged_at)

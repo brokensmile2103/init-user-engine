@@ -97,4 +97,5 @@ function init_plugin_suite_user_engine_on_deactivation() {
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_cleanup_transients' );
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_cleanup_orphaned_inbox' );
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_unpin_expired_inbox' );
+	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_db_index_upgrade' );
 }

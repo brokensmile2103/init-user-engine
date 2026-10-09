@@ -27,8 +27,41 @@ function init_plugin_suite_user_engine_set_level( $user_id, $level ) {
 	update_user_meta( $user_id, 'iue_level', max( 1, (int) $level ) );
 }
 
-// Add EXP, handle level-up, reward coins, and trigger actions
+/**
+ * Add EXP, handle level-up, reward coins, and trigger actions.
+ *
+ * @since 1.6.8 Serialized per user, so two parallel calls can no longer both
+ *              cross the same level and each pay the level-up Coin bonus.
+ *
+ * @param int $user_id   User ID.
+ * @param int $exp_added EXP to add.
+ * @return array
+ */
 function init_plugin_suite_user_engine_add_exp( $user_id, $exp_added = 0 ) {
+	// If the lock cannot be taken in time the EXP is still added (never lose it);
+	// the next call will run serialized again.
+	$locked = init_plugin_suite_user_engine_lock_user( $user_id, 5 );
+
+	try {
+		return init_plugin_suite_user_engine_do_add_exp( $user_id, $exp_added );
+	} finally {
+		if ( $locked ) {
+			init_plugin_suite_user_engine_unlock_user( $user_id );
+		}
+	}
+}
+
+/**
+ * Add EXP and handle level-ups. Call init_plugin_suite_user_engine_add_exp() instead.
+ *
+ * @since 1.6.8 Split out of init_plugin_suite_user_engine_add_exp().
+ * @access private
+ *
+ * @param int $user_id   User ID.
+ * @param int $exp_added EXP to add.
+ * @return array
+ */
+function init_plugin_suite_user_engine_do_add_exp( $user_id, $exp_added = 0 ) {
 	$exp_added = (int) $exp_added;
 
 	// Bonus EXP nếu là VIP và $exp_added > 0

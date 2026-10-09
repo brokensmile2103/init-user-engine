@@ -76,8 +76,40 @@ function init_plugin_suite_user_engine_check_vip_activation_allowed( $user_id ) 
 	return true;
 }
 
-// Purchase a VIP package (supports coin / cash / both)
+/**
+ * Purchase a VIP package (supports coin / cash / both).
+ *
+ * @since 1.6.8 Runs under the per-user lock and charges atomically, so parallel
+ *              requests can no longer buy several packages with one balance.
+ *
+ * @param int    $user_id    User ID.
+ * @param int    $package_id Package ID (1-6).
+ * @param string $currency   'coin' or 'cash'.
+ * @return true|WP_Error
+ */
 function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $currency = 'coin' ) {
+	if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 5 ) ) {
+		return init_plugin_suite_user_engine_busy_error();
+	}
+
+	try {
+		return init_plugin_suite_user_engine_do_purchase_vip( $user_id, $package_id, $currency );
+	} finally {
+		init_plugin_suite_user_engine_unlock_user( $user_id );
+	}
+}
+
+/**
+ * Purchase a VIP package. Must run while holding the per-user lock.
+ *
+ * @since 1.6.8 Split out of init_plugin_suite_user_engine_purchase_vip().
+ *
+ * @param int    $user_id    User ID.
+ * @param int    $package_id Package ID (1-6).
+ * @param string $currency   'coin' or 'cash'.
+ * @return true|WP_Error
+ */
+function init_plugin_suite_user_engine_do_purchase_vip( $user_id, $package_id, $currency = 'coin' ) {
 	$vip_days = [
 		1 => 7,
 		2 => 30,
@@ -124,24 +156,12 @@ function init_plugin_suite_user_engine_purchase_vip( $user_id, $package_id, $cur
 		return new WP_Error( 'vip_disabled', __( 'This VIP package is disabled.', 'init-user-engine' ) );
 	}
 
-	// Check balance & deduct.
-	if ( $currency === 'cash' ) {
-		$current_cash = init_plugin_suite_user_engine_get_cash( $user_id );
-		if ( $current_cash < $price ) {
-			// translators: %s is the cash label (e.g., Cash, Kim cương).
-			return new WP_Error( 'not_enough_cash', sprintf( __( 'Not enough %s.', 'init-user-engine' ), init_plugin_suite_user_engine_get_cash_label() ) );
-		}
-		init_plugin_suite_user_engine_set_cash( $user_id, $current_cash - $price );
-		init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $price, 'vip_package_' . $package_id, 'deduct' );
-	} else {
-		$current_coin = init_plugin_suite_user_engine_get_coin( $user_id );
-		if ( $current_coin < $price ) {
-			// translators: %s is the coin label (e.g., Coin, Xu).
-			return new WP_Error( 'not_enough_coin', sprintf( __( 'Not enough %s.', 'init-user-engine' ), init_plugin_suite_user_engine_get_coin_label() ) );
-		}
-		init_plugin_suite_user_engine_set_coin( $user_id, $current_coin - $price );
-		init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $price, 'vip_package_' . $package_id, 'deduct' );
+	// Charge atomically: nothing is taken unless the whole price is available at this instant.
+	$charged = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash' === $currency ? 'cash' : 'coin', -$price );
+	if ( is_wp_error( $charged ) ) {
+		return $charged;
 	}
+	init_plugin_suite_user_engine_log_transaction( $user_id, 'cash' === $currency ? 'cash' : 'coin', $price, 'vip_package_' . $package_id, 'deduct' );
 
 	// Extend VIP.
 	init_plugin_suite_user_engine_add_vip_days( $user_id, $vip_days[ $package_id ] );

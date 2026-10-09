@@ -6,7 +6,18 @@ function init_plugin_suite_user_engine_get_cash( $user_id ) {
 	return (int) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_cash', 0 );
 }
 
-// Set cash value for a user (auto-fix negative)
+/**
+ * Overwrite a user's Cash balance (clamped to >= 0).
+ *
+ * This is an absolute write meant for admin tools. Relative changes must use
+ * init_plugin_suite_user_engine_add_cash() / init_plugin_suite_user_engine_spend_cash(),
+ * which are atomic; reading the balance and writing it back with this function
+ * can overwrite a concurrent change.
+ *
+ * @param int $user_id User ID.
+ * @param int $value   New balance.
+ * @return void
+ */
 function init_plugin_suite_user_engine_set_cash( $user_id, $value ) {
     $value      = max( 0, (int) $value );
     $old_value  = (int) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_cash', 0 );
@@ -25,7 +36,20 @@ function init_plugin_suite_user_engine_set_cash( $user_id, $value ) {
     do_action( 'init_plugin_suite_user_engine_cash_changed', $user_id, $value, $old_value );
 }
 
-// Add cash to user and return new total
+/**
+ * Add Cash to a user (atomic) and return the new balance.
+ *
+ * A negative $amount deducts as much as is available, never below 0. To charge
+ * a price use init_plugin_suite_user_engine_spend_cash() instead, which fails
+ * without touching the balance when the user cannot afford it.
+ *
+ * @since 1.6.8 The change is applied with one atomic UPDATE (no read-modify-write).
+ *
+ * @param int  $user_id         User ID.
+ * @param int  $amount          Amount to add (negative to deduct).
+ * @param bool $apply_vip_bonus Optional. Add the VIP bonus % to positive amounts. Default true.
+ * @return int New balance.
+ */
 function init_plugin_suite_user_engine_add_cash( $user_id, $amount, $apply_vip_bonus = true ) {
     $amount = (int) $amount;
 
@@ -40,13 +64,15 @@ function init_plugin_suite_user_engine_add_cash( $user_id, $amount, $apply_vip_b
         }
     }
 
-    $cash = init_plugin_suite_user_engine_get_cash( $user_id );
-    $amount = apply_filters( 'init_plugin_suite_user_engine_calculated_cash_amount', $amount, $user_id );
-    $cash += $amount;
+    $amount = (int) apply_filters( 'init_plugin_suite_user_engine_calculated_cash_amount', $amount, $user_id );
 
-    init_plugin_suite_user_engine_set_cash( $user_id, $cash );
+    $result = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash', $amount, true );
 
-    return $cash;
+    if ( is_wp_error( $result ) ) {
+        return init_plugin_suite_user_engine_get_cash( $user_id );
+    }
+
+    return $result['new'];
 }
 
 /**
@@ -114,84 +140,51 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
     }
     set_transient( $rl_key, $attempts + 1, MINUTE_IN_SECONDS );
 
-    // --- Idempotency (10 minutes) ---
-    if ( $idemp_key !== '' ) {
-        $idem_store_key = 'iue_xchg_idem_' . $user_id . '_' . hash( 'sha256', $idemp_key );
-        if ( get_transient( $idem_store_key ) ) {
-            return new WP_Error( 'duplicate_request', __( 'Duplicate exchange request detected.', 'init-user-engine' ), [ 'status' => 409 ] );
-        }
-        // mark seen; will be extended on success response as well
-        set_transient( $idem_store_key, 1, 10 * MINUTE_IN_SECONDS );
+    // Calculate coins (avoid FP edge by epsilon)
+    $coins_to_add = (int) floor( ( $cash_amount * $rate ) + 1e-6 );
+    if ( $coins_to_add <= 0 ) {
+        // translators: %1$s is the coin label, %2$s is the cash label (e.g., Coin, Cash).
+        return new WP_Error( 'zero_result', sprintf( __( 'The exchange would result in 0 %1$s. Increase the %2$s amount.', 'init-user-engine' ), $coin_label, $cash_label ), [ 'status' => 400 ] );
     }
 
-    // --- Mutex lock (prevent concurrent double-spend) ---
-    $lock_key = 'iue_xchg_lock_' . $user_id;
-    if ( get_transient( $lock_key ) ) {
-        return new WP_Error( 'busy', __( 'Another exchange is in progress. Please wait a moment.', 'init-user-engine' ), [ 'status' => 409 ] );
+    // --- One wallet operation per user at a time (atomic lock, auto-released on fatal) ---
+    if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 5 ) ) {
+        return init_plugin_suite_user_engine_busy_error();
     }
-    // hold lock for a short window; auto-expires in 15s in case of fatal
-    set_transient( $lock_key, 1, 15 );
 
     try {
-        // Read balances just-in-time under lock
-        $current_cash = (int) init_plugin_suite_user_engine_get_cash( $user_id );
-        $current_coin = (int) init_plugin_suite_user_engine_get_coin( $user_id );
-
-        if ( $cash_amount > $current_cash ) {
-            // translators: %s is the cash label (e.g., Cash, Kim cương).
-            return new WP_Error( 'insufficient_funds', sprintf( __( 'Not enough %s to exchange.', 'init-user-engine' ), $cash_label ), [ 'status' => 400 ] );
+        // --- Idempotency (10 minutes), checked while holding the lock ---
+        $idem_store_key = '';
+        if ( '' !== $idemp_key ) {
+            $idem_store_key = 'iue_xchg_idem_' . $user_id . '_' . hash( 'sha256', $idemp_key );
+            if ( get_transient( $idem_store_key ) ) {
+                return new WP_Error( 'duplicate_request', __( 'Duplicate exchange request detected.', 'init-user-engine' ), [ 'status' => 409 ] );
+            }
         }
 
-        // Calculate coins (avoid FP edge by epsilon)
-        $coins_to_add = (int) floor( ($cash_amount * $rate) + 1e-6 );
-        if ( $coins_to_add <= 0 ) {
-            // translators: %1$s is the coin label, %2$s is the cash label (e.g., Coin, Cash).
-            return new WP_Error( 'zero_result', sprintf( __( 'The exchange would result in 0 %1$s. Increase the %2$s amount.', 'init-user-engine' ), $coin_label, $cash_label ), [ 'status' => 400 ] );
+        // Lưu ý: Đổi tiền (Cash <-> Coin) KHÔNG được cộng thêm % thưởng VIP.
+
+        // 1) Take the Cash. Atomic: nothing changes unless the whole amount is available right now.
+        $spent = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash', -$cash_amount );
+        if ( is_wp_error( $spent ) ) {
+            if ( 'not_enough_cash' === $spent->get_error_code() ) {
+                // translators: %s is the cash label (e.g., Cash, Kim cương).
+                return new WP_Error( 'insufficient_funds', sprintf( __( 'Not enough %s to exchange.', 'init-user-engine' ), $cash_label ), [ 'status' => 400 ] );
+            }
+            return $spent;
         }
 
-        // --- Apply updates (best-effort atomic) ---
-        // Lưu ý: Đổi tiền (Cash <-> Coin) KHÔNG được cộng thêm % thưởng VIP,
-        // nên mọi lệnh gọi add_cash()/add_coin() bên dưới đều truyền $apply_vip_bonus = false.
-
-        // 1) Deduct cash
-        $new_cash = init_plugin_suite_user_engine_add_cash( $user_id, -$cash_amount, false );
-        if ( $new_cash === null || $new_cash === false ) {
-            // translators: %s is the cash label (e.g., Cash, Kim cương).
-            return new WP_Error( 'update_failed', sprintf( __( 'Could not deduct %s.', 'init-user-engine' ), $cash_label ), [ 'status' => 500 ] );
-        }
-        if ( (int) $new_cash < 0 ) {
-            // Rollback & abort if somehow negative
-            init_plugin_suite_user_engine_add_cash( $user_id, $cash_amount, false );
-            return new WP_Error( 'race_condition', __( 'Balance changed. Please try again.', 'init-user-engine' ), [ 'status' => 409 ] );
-        }
-
-        // 2) Add coin (no VIP bonus on exchange)
+        // 2) Give the Coin (no VIP bonus on exchange). add_coin() is atomic too.
         $new_coin = init_plugin_suite_user_engine_add_coin( $user_id, $coins_to_add, false );
-        if ( $new_coin === null || $new_coin === false ) {
-            // Rollback Cash if coin failed
-            init_plugin_suite_user_engine_add_cash( $user_id, $cash_amount, false );
-            // translators: %s is the coin label (e.g., Coin, Xu).
-            return new WP_Error( 'update_failed', sprintf( __( 'Could not add %s.', 'init-user-engine' ), $coin_label ), [ 'status' => 500 ] );
-        }
+        $new_cash = (int) $spent['new'];
 
         // Logs (không cộng bonus VIP cho log của giao dịch đổi tiền)
-        init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', -$cash_amount, 'exchange', 'deduct', false );
-        init_plugin_suite_user_engine_log_transaction( $user_id, 'coin',  $coins_to_add, 'exchange', 'add', false );
+        init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $cash_amount, 'exchange', 'deduct', false );
+        init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $coins_to_add, 'exchange', 'add', false );
 
         do_action( 'init_plugin_suite_user_engine_after_exchange', $user_id, $cash_amount, $coins_to_add, $rate );
 
-        // Extend idem record with a small body so clients can safely retry (optional)
-        if ( ! empty( $idem_store_key ) ) {
-            set_transient( $idem_store_key, [
-                'status'        => 'exchanged',
-                'rate'          => $rate,
-                'cash_spent'    => $cash_amount,
-                'coin_received' => $coins_to_add,
-                'balances'      => [ 'cash' => (int) $new_cash, 'coin' => (int) $new_coin ],
-            ], 10 * MINUTE_IN_SECONDS );
-        }
-
-        return new WP_REST_Response( [
+        $payload = [
             'status'        => 'exchanged',
             'rate'          => $rate,
             'cash_spent'    => $cash_amount,
@@ -200,11 +193,17 @@ function init_plugin_suite_user_engine_api_exchange_cash_to_coin( WP_REST_Reques
                 'cash' => (int) $new_cash,
                 'coin' => (int) $new_coin,
             ],
-        ], 200 );
+        ];
+
+        // Remember the key only after a successful exchange, so a failed attempt can be retried.
+        if ( '' !== $idem_store_key ) {
+            set_transient( $idem_store_key, $payload, 10 * MINUTE_IN_SECONDS );
+        }
+
+        return new WP_REST_Response( $payload, 200 );
 
     } finally {
-        // Always release lock
-        delete_transient( $lock_key );
+        init_plugin_suite_user_engine_unlock_user( $user_id );
     }
 }
 
@@ -273,82 +272,51 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
     }
     set_transient( $rl_key, $attempts + 1, MINUTE_IN_SECONDS );
 
-    // --- Idempotency (10 minutes) ---
-    if ( $idemp_key !== '' ) {
-        $idem_store_key = 'iue_xchg_coin_idem_' . $user_id . '_' . hash( 'sha256', $idemp_key );
-        if ( get_transient( $idem_store_key ) ) {
-            return new WP_Error( 'duplicate_request', __( 'Duplicate exchange request detected.', 'init-user-engine' ), [ 'status' => 409 ] );
-        }
-        set_transient( $idem_store_key, 1, 10 * MINUTE_IN_SECONDS );
+    // Calculate cash (avoid FP edge by epsilon)
+    $cash_to_add = (int) floor( ( $coin_amount * $rate ) + 1e-6 );
+    if ( $cash_to_add <= 0 ) {
+        // translators: %1$s is the cash label, %2$s is the coin label (e.g., Cash, Coin).
+        return new WP_Error( 'zero_result', sprintf( __( 'The exchange would result in 0 %1$s. Increase the %2$s amount.', 'init-user-engine' ), $cash_label, $coin_label ), [ 'status' => 400 ] );
     }
 
-    // --- Mutex lock (prevent concurrent double-spend) ---
-    $lock_key = 'iue_xchg_coin_lock_' . $user_id;
-    if ( get_transient( $lock_key ) ) {
-        return new WP_Error( 'busy', __( 'Another exchange is in progress. Please wait a moment.', 'init-user-engine' ), [ 'status' => 409 ] );
+    // --- One wallet operation per user at a time (atomic lock, auto-released on fatal) ---
+    if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 5 ) ) {
+        return init_plugin_suite_user_engine_busy_error();
     }
-    set_transient( $lock_key, 1, 15 );
 
     try {
-        // Read balances just-in-time under lock
-        $current_coin = (int) init_plugin_suite_user_engine_get_coin( $user_id );
-        $current_cash = (int) init_plugin_suite_user_engine_get_cash( $user_id );
-
-        if ( $coin_amount > $current_coin ) {
-            // translators: %s is the coin label (e.g., Coin, Xu).
-            return new WP_Error( 'insufficient_funds', sprintf( __( 'Not enough %s to exchange.', 'init-user-engine' ), $coin_label ), [ 'status' => 400 ] );
+        // --- Idempotency (10 minutes), checked while holding the lock ---
+        $idem_store_key = '';
+        if ( '' !== $idemp_key ) {
+            $idem_store_key = 'iue_xchg_coin_idem_' . $user_id . '_' . hash( 'sha256', $idemp_key );
+            if ( get_transient( $idem_store_key ) ) {
+                return new WP_Error( 'duplicate_request', __( 'Duplicate exchange request detected.', 'init-user-engine' ), [ 'status' => 409 ] );
+            }
         }
 
-        // Calculate cash (avoid FP edge by epsilon)
-        $cash_to_add = (int) floor( ( $coin_amount * $rate ) + 1e-6 );
-        if ( $cash_to_add <= 0 ) {
-            // translators: %1$s is the cash label, %2$s is the coin label (e.g., Cash, Coin).
-            return new WP_Error( 'zero_result', sprintf( __( 'The exchange would result in 0 %1$s. Increase the %2$s amount.', 'init-user-engine' ), $cash_label, $coin_label ), [ 'status' => 400 ] );
+        // Lưu ý: Đổi tiền (Coin <-> Cash) KHÔNG được cộng thêm % thưởng VIP.
+
+        // 1) Take the Coin. Atomic: nothing changes unless the whole amount is available right now.
+        $spent = init_plugin_suite_user_engine_wallet_change( $user_id, 'coin', -$coin_amount );
+        if ( is_wp_error( $spent ) ) {
+            if ( 'not_enough_coin' === $spent->get_error_code() ) {
+                // translators: %s is the coin label (e.g., Coin, Xu).
+                return new WP_Error( 'insufficient_funds', sprintf( __( 'Not enough %s to exchange.', 'init-user-engine' ), $coin_label ), [ 'status' => 400 ] );
+            }
+            return $spent;
         }
 
-        // --- Apply updates (best-effort atomic) ---
-        // Lưu ý: Đổi tiền (Coin <-> Cash) KHÔNG được cộng thêm % thưởng VIP,
-        // nên mọi lệnh gọi add_cash()/add_coin() bên dưới đều truyền $apply_vip_bonus = false.
-
-        // 1) Deduct coin
-        $new_coin = init_plugin_suite_user_engine_add_coin( $user_id, -$coin_amount, false );
-        if ( $new_coin === null || $new_coin === false ) {
-            // translators: %s is the coin label (e.g., Coin, Xu).
-            return new WP_Error( 'update_failed', sprintf( __( 'Could not deduct %s.', 'init-user-engine' ), $coin_label ), [ 'status' => 500 ] );
-        }
-        if ( (int) $new_coin < 0 ) {
-            // Rollback & abort if somehow negative
-            init_plugin_suite_user_engine_add_coin( $user_id, $coin_amount, false );
-            return new WP_Error( 'race_condition', __( 'Balance changed. Please try again.', 'init-user-engine' ), [ 'status' => 409 ] );
-        }
-
-        // 2) Add cash (no VIP bonus on exchange)
+        // 2) Give the Cash (no VIP bonus on exchange). add_cash() is atomic too.
         $new_cash = init_plugin_suite_user_engine_add_cash( $user_id, $cash_to_add, false );
-        if ( $new_cash === null || $new_cash === false ) {
-            // Rollback Coin if cash failed
-            init_plugin_suite_user_engine_add_coin( $user_id, $coin_amount, false );
-            // translators: %s is the cash label (e.g., Cash, Kim cương).
-            return new WP_Error( 'update_failed', sprintf( __( 'Could not add %s.', 'init-user-engine' ), $cash_label ), [ 'status' => 500 ] );
-        }
+        $new_coin = (int) $spent['new'];
 
         // Logs (không cộng bonus VIP cho log của giao dịch đổi tiền)
-        init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', -$coin_amount, 'exchange_reverse', 'deduct', false );
-        init_plugin_suite_user_engine_log_transaction( $user_id, 'cash',  $cash_to_add, 'exchange_reverse', 'add', false );
+        init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $coin_amount, 'exchange_reverse', 'deduct', false );
+        init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $cash_to_add, 'exchange_reverse', 'add', false );
 
         do_action( 'init_plugin_suite_user_engine_after_exchange_reverse', $user_id, $coin_amount, $cash_to_add, $rate );
 
-        // Extend idem record
-        if ( ! empty( $idem_store_key ) ) {
-            set_transient( $idem_store_key, [
-                'status'        => 'exchanged',
-                'rate'          => $rate,
-                'coin_spent'    => $coin_amount,
-                'cash_received' => $cash_to_add,
-                'balances'      => [ 'coin' => (int) $new_coin, 'cash' => (int) $new_cash ],
-            ], 10 * MINUTE_IN_SECONDS );
-        }
-
-        return new WP_REST_Response( [
+        $payload = [
             'status'        => 'exchanged',
             'rate'          => $rate,
             'coin_spent'    => $coin_amount,
@@ -357,10 +325,16 @@ function init_plugin_suite_user_engine_api_exchange_coin_to_cash( WP_REST_Reques
                 'coin' => (int) $new_coin,
                 'cash' => (int) $new_cash,
             ],
-        ], 200 );
+        ];
+
+        // Remember the key only after a successful exchange, so a failed attempt can be retried.
+        if ( '' !== $idem_store_key ) {
+            set_transient( $idem_store_key, $payload, 10 * MINUTE_IN_SECONDS );
+        }
+
+        return new WP_REST_Response( $payload, 200 );
 
     } finally {
-        // Always release lock
-        delete_transient( $lock_key );
+        init_plugin_suite_user_engine_unlock_user( $user_id );
     }
 }

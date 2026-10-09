@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.7
+Stable tag: 1.6.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -218,6 +218,25 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.6.8 – October 10, 2026 =
+- Security: Coin and Cash balances are now changed atomically. Before, every change read the balance, computed the new value in PHP and wrote it back (`update_user_meta`), so requests running at the same time could all spend the same balance, or a reward could overwrite a purchase made at the same moment
+  - New `init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delta, $allow_partial = false )`: one `UPDATE` statement; when spending, the funds check is part of the `WHERE` clause, so the balance can never be spent twice and never goes negative
+  - New `init_plugin_suite_user_engine_spend_coin()` / `init_plugin_suite_user_engine_spend_cash()`: charge a price or return `WP_Error` (`not_enough_coin` / `not_enough_cash`) without changing anything
+  - `init_plugin_suite_user_engine_add_coin()` / `init_plugin_suite_user_engine_add_cash()` keep their signature, VIP bonus and filters, and are now atomic. A negative amount still never goes below 0; the function now returns the real new balance (it could return a negative number before)
+  - The `init_plugin_suite_user_engine_coin_changed` / `..._cash_changed` actions still fire after every change
+- Security: new per-user lock (`init_plugin_suite_user_engine_lock_user()` / `init_plugin_suite_user_engine_unlock_user()`, plus generic `init_plugin_suite_user_engine_acquire_lock()` / `init_plugin_suite_user_engine_release_lock()`). It is a row in the options table created with `INSERT IGNORE`, so only one request can hold it; it is re-entrant, released at shutdown even after a fatal error, and a stale lock expires after 30 seconds (filter `init_plugin_suite_user_engine_user_lock_ttl`)
+- Security: the check-in endpoint used a transient as mutex (`get_transient()` then `set_transient()`), which two requests arriving together could both pass. It now uses the per-user lock
+- Security: **Claim Online Reward** had no lock at all, so parallel requests could each pay the bonus. It now runs under the per-user lock
+- Security: **Exchange** (Cash ↔ Coin) and **VIP purchase** now run under the per-user lock and take the payment atomically; with VIP stacking disabled, parallel purchases could also buy several packages
+- Security: **Keep Streak** (paid streak restore) takes the Coin atomically and refunds it atomically if the log entry cannot be written
+- Security: EXP gains are serialized per user, so two parallel calls can no longer cross the same level and each pay the level-up Coin bonus
+- Fixed: comment rewards could exceed the daily cap, the once-only profile bonus could be paid twice, and the daily login bonus could be paid several times when the first page view of the day fired several requests at once
+- Fixed: a WooCommerce order that goes to "completed" more than once paid the order reward again. It is now paid once per order (order meta `_iue_order_reward_given`)
+- Fixed: Top-up tool (admin) now applies the change atomically, so it can no longer overwrite a purchase the member makes at the same moment
+- Fixed: the database index upgrade lock used `add_option()`, which runs `INSERT … ON DUPLICATE KEY UPDATE` and can succeed for two processes. It now uses the atomic lock
+- Fixed: `uninstall.php` deleted a wrong option name (the plugin constant is not defined during uninstall), so the plugin settings were never removed. It also removes leftover lock rows now
+- Exchange: the idempotency key is now remembered only after a successful exchange, so a failed attempt (for example not enough balance) can be retried with the same key
+
 = 1.6.7 – October 3, 2026 =
 - Performance (large sites): rebuilt the database indexes used by the Inbox, after a production slow query log showed "Mark All as Read" (`UPDATE … WHERE user_id = … AND status = 'unread'`) taking 2.5 seconds on a 1.2M-message Inbox
   - New composite index `user_status (user_id, status)`: the unread badge count, "Mark All as Read" and the Unread tab now read the index only instead of loading every message row of the user (about 181 → 3 pages read per unread count in our 1.25M-row benchmark)
@@ -315,3 +334,8 @@ View full changelog (all versions): [Init User Engine – Changelog](https://en.
 
 This plugin is licensed under the GPLv2 or later.  
 You are free to use, modify, and distribute it under the same license.
+
+== Upgrade Notice ==
+
+= 1.6.8 =
+Security update: Coin/Cash changes are now atomic and spending flows are locked per user, fixing race conditions that let parallel requests spend the same balance several times. Update recommended for all sites.

@@ -25,6 +25,31 @@ add_action( 'wp_insert_comment', function ( $comment_id, $comment_object ) {
 		return;
 	}
 
+	// Serialize per user (1.6.8): parallel comment requests used to read the same
+	// counter and all pass the daily cap. If the lock is busy, skip the reward.
+	if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 3 ) ) {
+		return;
+	}
+
+	try {
+		init_plugin_suite_user_engine_award_comment_reward( $user_id, $exp_each, $coin_each, $daily_cap );
+	} finally {
+		init_plugin_suite_user_engine_unlock_user( $user_id );
+	}
+}, 10, 2 );
+
+/**
+ * Pay the comment reward unless today's cap is reached. Runs under the per-user lock.
+ *
+ * @since 1.6.8
+ *
+ * @param int $user_id   User ID.
+ * @param int $exp_each  EXP per comment.
+ * @param int $coin_each Coin per comment.
+ * @param int $daily_cap Max rewarded comments per check-in day (0 = unlimited).
+ * @return void
+ */
+function init_plugin_suite_user_engine_award_comment_reward( $user_id, $exp_each, $coin_each, $daily_cap ) {
 	// Neo bằng ngày check-in cuối cùng
 	$checkin_last = (string) init_plugin_suite_user_engine_get_meta( $user_id, 'iue_checkin_last', '' );
 
@@ -55,7 +80,7 @@ add_action( 'wp_insert_comment', function ( $comment_id, $comment_object ) {
 
 	// Tăng counter
 	init_plugin_suite_user_engine_update_meta( $user_id, 'iue_comment_awarded_count', $count + 1 );
-}, 10, 2 );
+}
 
 // Award EXP + coin on first-time post publish
 add_action( 'transition_post_status', function ( $new_status, $old_status, $post ) {
@@ -124,12 +149,25 @@ add_action( 'user_register', function ( $user_id ) {
 
 // Award EXP + coin when user updates profile (once only)
 add_action( 'profile_update', function ( $user_id, $old_user_data ) {
-	$already = get_user_meta( $user_id, 'iue_profile_bonus_given', true );
-	if ( $already === '1' ) {
+	// Cheap exit before taking the lock.
+	if ( get_user_meta( $user_id, 'iue_profile_bonus_given', true ) === '1' ) {
 		return;
 	}
 
-	update_user_meta( $user_id, 'iue_profile_bonus_given', 1 );
+	// Once-only bonus: re-check under the per-user lock so parallel updates cannot both pay it.
+	if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 3 ) ) {
+		return;
+	}
+
+	try {
+		if ( get_user_meta( $user_id, 'iue_profile_bonus_given', true ) === '1' ) {
+			return;
+		}
+
+		update_user_meta( $user_id, 'iue_profile_bonus_given', 1 );
+	} finally {
+		init_plugin_suite_user_engine_unlock_user( $user_id );
+	}
 
 	// Lấy exp và coin từ filter duy nhất
 	$rewards = apply_filters( 'init_plugin_suite_user_engine_update_profile_rewards', [
@@ -162,7 +200,21 @@ add_action( 'init', function () {
 		return;
 	}
 
-	update_user_meta( $user_id, 'iue_last_login_bonus', $today );
+	// The first page view of the day often fires several requests at once (page +
+	// REST/AJAX calls). Only the one that gets the lock pays; the others skip.
+	if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 0 ) ) {
+		return;
+	}
+
+	try {
+		if ( get_user_meta( $user_id, 'iue_last_login_bonus', true ) === $today ) {
+			return;
+		}
+
+		update_user_meta( $user_id, 'iue_last_login_bonus', $today );
+	} finally {
+		init_plugin_suite_user_engine_unlock_user( $user_id );
+	}
 
 	// Lấy exp và coin từ filter duy nhất
 	$rewards = apply_filters( 'init_plugin_suite_user_engine_daily_login_rewards', [
@@ -190,6 +242,25 @@ add_action( 'woocommerce_order_status_completed', function ( $order_id ) {
 
 	$user_id = $order->get_user_id();
 	$total   = (float) $order->get_total();
+
+	// Pay once per order: an order can move to "completed" more than once
+	// (completed -> processing -> completed), and status hooks can overlap.
+	$guard = 'woo_order_reward_' . (int) $order_id;
+	if ( ! init_plugin_suite_user_engine_acquire_lock( $guard, 5 ) ) {
+		return;
+	}
+
+	try {
+		$order->read_meta_data( true );
+		if ( $order->get_meta( '_iue_order_reward_given' ) ) {
+			return;
+		}
+
+		$order->update_meta_data( '_iue_order_reward_given', time() );
+		$order->save_meta_data();
+	} finally {
+		init_plugin_suite_user_engine_release_lock( $guard );
+	}
 
 	// Default reward calculation
 	$default_rewards = [

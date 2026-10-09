@@ -3369,3 +3369,15 @@ msgstr "Đang tải..."
 #: templates/register-form.php:48
 msgid "Type your answer here"
 msgstr "Nhập câu trả lời của bạn"
+
+#: includes/wallet.php
+msgid "Another request is being processed. Please try again in a moment."
+msgstr "Đang có một yêu cầu khác được xử lý. Vui lòng thử lại sau giây lát."
+
+#: includes/wallet.php
+msgid "Could not update the balance. Please try again."
+msgstr "Không thể cập nhật số dư. Vui lòng thử lại."
+
+#: includes/wallet.php
+msgid "Invalid wallet."
+msgstr "Ví không hợp lệ."

@@ -3308,3 +3308,15 @@ msgstr ""
 #: templates/register-form.php:48
 msgid "Type your answer here"
 msgstr ""
+
+#: includes/wallet.php
+msgid "Another request is being processed. Please try again in a moment."
+msgstr ""
+
+#: includes/wallet.php
+msgid "Could not update the balance. Please try again."
+msgstr ""
+
+#: includes/wallet.php
+msgid "Invalid wallet."
+msgstr ""

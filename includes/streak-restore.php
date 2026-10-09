@@ -177,22 +177,25 @@ function init_plugin_suite_user_engine_pay_streak_restore( $user_id, $offer, $ex
 		);
 	}
 
-	$balance = init_plugin_suite_user_engine_get_coin( $user_id );
-
 	if ( $cost > 0 ) {
-		if ( $balance < $cost ) {
-			return new WP_Error(
-				'not_enough_coin',
-				sprintf(
-					/* translators: %s is the coin label (e.g., Coin, Xu). */
-					__( 'Not enough %s.', 'init-user-engine' ),
-					init_plugin_suite_user_engine_get_coin_label()
-				),
-				array( 'status' => 400 )
-			);
-		}
+		// Atomic: the Coin is taken only if the whole cost is available at this instant.
+		$charged = init_plugin_suite_user_engine_wallet_change( $user_id, 'coin', -$cost );
 
-		init_plugin_suite_user_engine_set_coin( $user_id, $balance - $cost );
+		if ( is_wp_error( $charged ) ) {
+			if ( 'not_enough_coin' === $charged->get_error_code() ) {
+				return new WP_Error(
+					'not_enough_coin',
+					sprintf(
+						/* translators: %s is the coin label (e.g., Coin, Xu). */
+						__( 'Not enough %s.', 'init-user-engine' ),
+						init_plugin_suite_user_engine_get_coin_label()
+					),
+					array( 'status' => 400 )
+				);
+			}
+
+			return $charged;
+		}
 
 		$logged = init_plugin_suite_user_engine_log_transaction(
 			$user_id,
@@ -204,8 +207,8 @@ function init_plugin_suite_user_engine_pay_streak_restore( $user_id, $offer, $ex
 		);
 
 		if ( ! $logged ) {
-			// No log entry means no charge: hand the Coin back and stop.
-			init_plugin_suite_user_engine_set_coin( $user_id, $balance );
+			// No log entry means no charge: hand the Coin back (atomic credit) and stop.
+			init_plugin_suite_user_engine_wallet_change( $user_id, 'coin', $cost );
 
 			return new WP_Error(
 				'restore_failed',

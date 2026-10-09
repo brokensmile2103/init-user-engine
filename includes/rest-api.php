@@ -566,8 +566,8 @@ function init_plugin_suite_user_engine_validate_captcha($token, $user_answer) {
  *
  * The check-in reads, charges and writes the same user meta, so overlapping
  * requests must never run together (no double reward, no double charge).
- * Same transient mutex pattern as the exchange endpoints; it auto-expires
- * after 15s in case of a fatal.
+ * Guarded by the atomic per-user lock (see includes/wallet.php), which is
+ * released automatically even after a fatal error.
  *
  * Optional JSON body (all used by the streak recovery flow):
  * - prompt_restore (bool): if the user may keep a broken streak, answer with
@@ -579,9 +579,11 @@ function init_plugin_suite_user_engine_validate_captcha($token, $user_answer) {
  * @return WP_REST_Response|WP_Error
  */
 function init_plugin_suite_user_engine_api_checkin( WP_REST_Request $request ) {
-	$lock_key = 'iue_checkin_lock_' . get_current_user_id();
+	$user_id = get_current_user_id();
 
-	if ( get_transient( $lock_key ) ) {
+	// Atomic per-user lock (1.6.8): the old transient mutex was a get-then-set,
+	// so two requests arriving together could both pass it.
+	if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 5 ) ) {
 		return new WP_Error(
 			'busy',
 			__( 'Another check-in is in progress. Please wait a moment.', 'init-user-engine' ),
@@ -589,12 +591,10 @@ function init_plugin_suite_user_engine_api_checkin( WP_REST_Request $request ) {
 		);
 	}
 
-	set_transient( $lock_key, 1, 15 );
-
 	try {
 		return init_plugin_suite_user_engine_do_checkin( $request );
 	} finally {
-		delete_transient( $lock_key );
+		init_plugin_suite_user_engine_unlock_user( $user_id );
 	}
 }
 
@@ -750,12 +750,42 @@ function init_plugin_suite_user_engine_do_checkin( WP_REST_Request $request ) {
     ], 200 );
 }
 
-// Handle bonus claim after being online for X minutes
+/**
+ * POST /claim-reward - pay the "stay online" bonus, at most once per check-in.
+ *
+ * Runs under the per-user lock: without it, several parallel requests could all
+ * read iue_checkin_rewarded = false and each pay the bonus.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_claim_reward( WP_REST_Request $request ) {
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return new WP_Error( 'unauthorized', 'Unauthorized', array( 'status' => 401 ) );
+	}
+
+	if ( ! init_plugin_suite_user_engine_lock_user( $user_id, 5 ) ) {
+		return init_plugin_suite_user_engine_busy_error();
+	}
+
+	try {
+		return init_plugin_suite_user_engine_do_claim_reward( $request );
+	} finally {
+		init_plugin_suite_user_engine_unlock_user( $user_id );
+	}
+}
+
+/**
+ * Pay the online bonus. Must run while holding the per-user lock.
+ *
+ * @since 1.6.8 Split out of init_plugin_suite_user_engine_api_claim_reward().
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response|WP_Error
+ */
+function init_plugin_suite_user_engine_do_claim_reward( WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Kept for symmetry with the REST callback.
     $user_id = get_current_user_id();
-    if ( ! $user_id ) {
-        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
-    }
 
     $now          = current_time( 'timestamp' );
     $today        = init_plugin_suite_user_engine_today();

@@ -54,11 +54,10 @@ function init_plugin_suite_user_engine_render_topup_page() {
 
             foreach ( $user_ids as $user_id ) {
                 if ( 'coin' === $type ) {
-                    $before = (int) init_plugin_suite_user_engine_get_coin( $user_id );
-                    $target = max( 0, $before + (int) $amount );
-                    init_plugin_suite_user_engine_set_coin( $user_id, $target );
-
-                    $delta = $target - $before;
+                    // Atomic relative change (1.6.8): a read-then-set here could overwrite
+                    // a purchase the member made at the same moment. Never goes below 0.
+                    $changed = init_plugin_suite_user_engine_wallet_change( $user_id, 'coin', (int) $amount, true );
+                    $delta   = is_wp_error( $changed ) ? 0 : (int) $changed['delta'];
                     if ( 0 !== $delta ) {
                         $applied = abs( $delta );
                         $change  = ( $delta < 0 ) ? 'deduct' : 'add';
@@ -73,11 +72,10 @@ function init_plugin_suite_user_engine_render_topup_page() {
                         }
                     }
                 } else {
-                    $before = (int) init_plugin_suite_user_engine_get_cash( $user_id );
-                    $target = max( 0, $before + (int) $amount );
-                    init_plugin_suite_user_engine_set_cash( $user_id, $target );
-
-                    $delta = $target - $before;
+                    // Atomic relative change (1.6.8): a read-then-set here could overwrite
+                    // a purchase the member made at the same moment. Never goes below 0.
+                    $changed = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash', (int) $amount, true );
+                    $delta   = is_wp_error( $changed ) ? 0 : (int) $changed['delta'];
                     if ( 0 !== $delta ) {
                         $applied = abs( $delta );
                         $change  = ( $delta < 0 ) ? 'deduct' : 'add';

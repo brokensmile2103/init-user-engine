@@ -296,26 +296,14 @@ function init_plugin_suite_user_engine_apply_index_changes( $table, array $add, 
 /**
  * Giữ mutex để không bao giờ có 2 tiến trình cùng nâng cấp index.
  *
- * Hàm add_option() chỉ thành công cho đúng 1 tiến trình (option là UNIQUE). Lock quá 1 giờ được
- * coi là treo (vd PHP bị kill giữa chừng) và được giành lại.
+ * 1.6.8: dùng lock nguyên tử chung (INSERT IGNORE trên option_name UNIQUE). Bản cũ dùng
+ * add_option(), nhưng add_option() chạy INSERT ... ON DUPLICATE KEY UPDATE nên 2 tiến trình
+ * có thể cùng "thắng". Lock quá 1 giờ được coi là treo (PHP bị kill giữa chừng) và được giành lại.
  *
  * @return bool
  */
 function init_plugin_suite_user_engine_acquire_index_lock() {
-	$now = time();
-
-	if ( add_option( 'iue_db_index_lock', $now, '', 'no' ) ) {
-		return true;
-	}
-
-	$locked_at = (int) get_option( 'iue_db_index_lock', 0 );
-	if ( $locked_at > 0 && ( $now - $locked_at ) < HOUR_IN_SECONDS ) {
-		return false;
-	}
-
-	update_option( 'iue_db_index_lock', $now, 'no' );
-
-	return true;
+	return init_plugin_suite_user_engine_acquire_lock( 'db_index_upgrade', 0, HOUR_IN_SECONDS );
 }
 
 /**
@@ -377,7 +365,8 @@ function init_plugin_suite_user_engine_run_index_upgrade() {
 		}
 	}
 
-	delete_option( 'iue_db_index_lock' );
+	init_plugin_suite_user_engine_release_lock( 'db_index_upgrade' );
+	delete_option( 'iue_db_index_lock' ); // Lock cũ (trước 1.6.8), nếu còn sót.
 
 	return empty( $errors );
 }

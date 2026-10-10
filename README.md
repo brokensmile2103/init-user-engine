@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.6.9-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.7.0-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -26,6 +26,8 @@ You get full control over user interactions: check-in, VIP purchase, Coin/EXP re
 - Option to temporarily disable new registrations, plus custom Register / Lost Password URLs
 - EXP & level system with streaks, milestones, and bonuses
 - Coin & Cash dual-wallet system with transaction history, custom currency labels, and a configurable exchange rate between the two currencies
+- Race-safe wallet: every Coin/Cash change is a single atomic update, and spending flows (check-in, VIP, exchange, rewards) run under a per-user lock
+- Live balance sync: every Coin/Cash number on the page updates as soon as the balance changes, across open tabs too
 - Manual Coin/Cash top-up and deduction tool for selected users, active VIPs, or all members
 - Daily check-in with streak milestones, an online-time reward, and optional Coin-powered streak recovery
 - Daily Tasks with per-task rewards
@@ -35,6 +37,7 @@ You get full control over user interactions: check-in, VIP purchase, Coin/EXP re
 - Redeem Code / Gift Code system with auto rewards (Coin/Cash), plus a dedicated VIP Codes module — both exportable to CSV from wp-admin
 - Built-in inbox system (custom DB table) with pinned/expiring messages and an Inbox Statistics dashboard
 - Profile editing: display name, bio, social links, gender, and date of birth
+- Optional display name change limit (e.g. once every 7 days, like TikTok), enforced everywhere including `wp-admin/profile.php`, with an admin "Unlock Display Name" button
 - Custom avatar upload & preview, with configurable upload policy (everyone / VIP only / disabled) and max file size; optional Gravatar disable
 - Admin panel to send targeted notifications, plus a per-user overview metabox on the profile screen
 - Automatic cleanup of a user's EXP log and Inbox when the account is permanently deleted (Coin/Cash transaction history is intentionally kept for reconciliation)
@@ -71,10 +74,11 @@ Base: `/wp-json/inituser/v1/`
 - `GET  /referral-log` – Get referral history  
 - `POST /avatar` – Upload avatar  
 - `POST /avatar/remove` – Revert to default avatar  
-- `GET  /profile/me` – Get current user profile  
+- `GET  /profile/me` – Get current user profile (includes `display_name_limit`)  
 - `POST /profile/update` – Update profile information  
 - `POST /redeem-code` – Redeem gift code → returns `{ success, message, Coin, Cash }`  
-- `POST /redeem-vip-code` – Redeem a VIP code → grants VIP duration
+- `POST /redeem-vip-code` – Redeem a VIP code → grants VIP duration  
+- `GET  /balance` – Get the current member's Coin/Cash balance
 
 ### Streak Recovery flow
 
@@ -125,7 +129,12 @@ Other responses you may see: `409 restore_unavailable` (nothing to restore), `40
 - `init_plugin_suite_user_engine_body_vip_classes` – Add, remove, or modify VIP-related CSS classes applied to the `<body>` element  
 - `init_plugin_suite_user_engine_theme_colors` – Modify theme color system (primary and active colors)  
 - `init_plugin_suite_user_engine_require_login_bypass` – Exclude a specific request from the "Require Login to Access Site" gate  
-- `init_plugin_suite_user_engine_admin_user_extra_stats` – Add extra stat items to the per-user overview metabox in wp-admin
+- `init_plugin_suite_user_engine_admin_user_extra_stats` – Add extra stat items to the per-user overview metabox in wp-admin  
+- `init_plugin_suite_user_engine_lostpassword_modal_enabled` – Enable or disable the lost password form inside the login modal  
+- `init_plugin_suite_user_engine_user_lock_ttl` – Change how long a per-user lock may live (default 30 seconds)  
+- `init_plugin_suite_user_engine_balance_sync_enabled` – Turn live balance sync off for a request  
+- `init_plugin_suite_user_engine_display_name_change_days` – Modify the days a member must wait between display name changes (`0` = unlimited)  
+- `init_plugin_suite_user_engine_display_name_limit_applies` – Return `false` to let a user change their display name freely
 
 ### Actions
 
@@ -150,13 +159,25 @@ Other responses you may see: `409 restore_unavailable` (nothing to restore), `40
 - `init_plugin_suite_user_engine_add_exp` – Triggered when adding EXP via hook  
 - `init_plugin_suite_user_engine_add_coin` – Triggered when adding Coin via hook  
 - `init_plugin_suite_user_engine_coin_changed` – After user's Coin balance changes  
-- `init_plugin_suite_user_engine_cash_changed` – After user's Cash balance changes
+- `init_plugin_suite_user_engine_cash_changed` – After user's Cash balance changes  
+- `init_plugin_suite_user_engine_display_name_unlocked` – After an admin lets a member change their display name again
 
 ### JavaScript events
 
 - `iue:checkin:success` – Fired on `document` after a successful check-in (`event.detail` holds the response, including `streak` and `streak_restored`)  
 - `iue:reward:claimed` – After the online reward is claimed  
-- `iue:level:up` – After a level-up
+- `iue:level:up` – After a level-up  
+- `iue:balance:change` – After the Coin/Cash balance changes (`event.detail`: `{ coin, cash, changed }`)
+
+JS API: `window.InitUserEngineBalance` – `set()`, `get()`, `refresh()`
+
+### PHP helpers
+
+- `init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delta )` – Atomic Coin/Cash change  
+- `init_plugin_suite_user_engine_spend_coin()` / `_spend_cash()` – Charge a price or return `WP_Error`  
+- `init_plugin_suite_user_engine_lock_user()` / `_unlock_user()` – Per-user lock for your own balance flows  
+- `init_plugin_suite_user_engine_get_balances( $user_id )` – Current Coin and Cash  
+- `init_plugin_suite_user_engine_is_display_name_locked( $user_id )` / `_unlock_display_name( $user_id )` – Display name limit status and reset
 
 ## Installation
 
@@ -164,7 +185,8 @@ Other responses you may see: `409 restore_unavailable` (nothing to restore), `40
 2. Activate via WordPress admin  
 3. Add `[init_user_engine]` anywhere to get started  
 4. Done — the dashboard and all modals load automatically  
-5. Optional: enable streak recovery in **Init User Engine → Settings → Streak Recovery**
+5. Optional: enable streak recovery in **Init User Engine → Settings → Streak Recovery**  
+6. Optional: set a display name change limit in **Init User Engine → Settings → Display Name**
 
 ## License
 

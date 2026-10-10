@@ -585,8 +585,6 @@ function initCheckin() {
     const timer       = checkinBox.querySelector('.iue-checkin-timer');
     const countdownEl = timer.querySelector('.iue-timer-countdown');
     const streakEl    = checkinBox.querySelector('.iue-checkin-streak');
-    const coinEl      = document.querySelector('.iue-value-coin');
-    const cashEl      = document.querySelector('.iue-value-cash');
 
     const STORAGE_KEY_REMAINING = 'iue_checkin_remaining_seconds';
     const STORAGE_KEY_DATE      = 'iue_checkin_date';
@@ -672,8 +670,7 @@ function initCheckin() {
         .then(res => res.json())
         .then(data => {
             if (data.status === 'reward_claimed') {
-                if (typeof data.coin  !== 'undefined') coinEl.textContent = iueFmt(data.coin);
-                if (typeof data.cash  !== 'undefined') cashEl.textContent = iueFmt(data.cash);
+                IUEBalance.set({ coin: data.coin, cash: data.cash });
                 if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
 
                 document.dispatchEvent(new CustomEvent('iue:reward:claimed', { detail: data }));
@@ -730,8 +727,7 @@ function initCheckin() {
         checkinBox.dataset.checkin = '1';
         streakEl.textContent = data.streak;
 
-        if (typeof data.coin  !== 'undefined') coinEl.textContent = iueFmt(data.coin);
-        if (typeof data.cash  !== 'undefined') cashEl.textContent = iueFmt(data.cash);
+        IUEBalance.set({ coin: data.coin, cash: data.cash });
         if (typeof data.level !== 'undefined') updateUserLevelBadge(data.level);
 
         document.dispatchEvent(new CustomEvent('iue:checkin:success', { detail: data }));
@@ -1844,12 +1840,11 @@ function loadVipModal() {
     const labelCash = InitUserEngineData.label_cash || 'Cash';
     const userIsVip = InitUserEngineData.is_vip || false;
     const vipExpiry = InitUserEngineData.vip_expiry || 0;
-    const userCoin = InitUserEngineData.user_coin || 0;
-    const userCash = InitUserEngineData.user_cash || 0;
     const paymentCurrency = InitUserEngineData.vip_payment_currency || 'coin';
     const purchaseDisabled = !!InitUserEngineData.vip_purchase_disabled;
     const stackingDisabled = !!InitUserEngineData.vip_stacking_disabled;
-    const blockedByStacking = stackingDisabled && userIsVip;
+    // 1.6.9: tính lại sau mỗi lần mua (mua xong là đã VIP).
+    let blockedByStacking = stackingDisabled && userIsVip;
 
     const statusText = userIsVip
         ? (t.vip_until || 'VIP until') + ' ' + new Date(vipExpiry * 1000).toLocaleDateString()
@@ -1918,15 +1913,18 @@ function loadVipModal() {
         for (let i = 1; i <= 6; i++) {
             const info = packageInfo[i];
 
+            // 1.6.9: luôn đọc số dư hiện tại (trước đây chụp 1 lần lúc mở modal,
+            // nên sau khi mua / điểm danh trạng thái "đủ tiền" bị sai).
+            const live = IUEBalance.get();
             let rawPrice, priceLabel, userBalance;
             if (activeCurrency === 'cash') {
                 rawPrice = cashPrices['vip_cash_price_' + i];
                 priceLabel = labelCash;
-                userBalance = userCash;
+                userBalance = live.cash !== null ? live.cash : (parseInt(InitUserEngineData.user_cash, 10) || 0);
             } else {
                 rawPrice = coinPrices['vip_price_' + i];
                 priceLabel = labelCoin;
-                userBalance = userCoin;
+                userBalance = live.coin !== null ? live.coin : (parseInt(InitUserEngineData.user_coin, 10) || 0);
             }
 
             const price = parseInt(rawPrice || 0, 10);
@@ -1988,18 +1986,20 @@ function loadVipModal() {
                 InitUserEngineData.is_vip = true;
                 InitUserEngineData.vip_expiry = res.new_expiry;
 
-                const priceKey = activeCurrency === 'cash'
-                    ? ('vip_cash_price_' + packageId)
-                    : ('vip_price_' + packageId);
-                const price = parseInt(
-                    (activeCurrency === 'cash' ? cashPrices : coinPrices)[priceKey] || 0,
-                    10
-                );
-
-                if (activeCurrency === 'cash') {
-                    InitUserEngineData.user_cash = Math.max(0, InitUserEngineData.user_cash - price);
+                // 1.6.9: số dư thật từ server → cập nhật mọi nơi hiển thị Coin/Cash
+                // (trước đây chỉ trừ trong bộ nhớ, thanh số dư không đổi).
+                if (res.balances) {
+                    IUEBalance.set(res.balances);
                 } else {
-                    InitUserEngineData.user_coin = Math.max(0, InitUserEngineData.user_coin - price);
+                    IUEBalance.refresh().then(() => renderGrid());
+                }
+
+                blockedByStacking = stackingDisabled;
+                if (blockedByStacking) {
+                    const note = document.querySelector('#iue-modal .iue-vip-note');
+                    if (note) {
+                        note.innerHTML = `<p class="iue-vip-note--warning">${t.vip_stacking_disabled_note || 'You already have an active VIP. Please wait until it expires before activating it again.'}</p>`;
+                    }
                 }
 
                 const vipStatus = document.querySelector('.iue-vip-status');
@@ -2036,6 +2036,16 @@ function loadVipModal() {
             });
         });
     }
+
+    // 1.6.9: số dư đổi ở nơi khác (tab khác, header đồng bộ...) khi modal đang mở → vẽ lại.
+    const onBalanceChange = () => {
+        if (!grid.isConnected) {
+            document.removeEventListener('iue:balance:change', onBalanceChange);
+            return;
+        }
+        renderGrid();
+    };
+    document.addEventListener('iue:balance:change', onBalanceChange);
 
     renderGrid();
 }
@@ -2205,14 +2215,7 @@ function loadExchangeModal() {
         .then(res => res.json())
         .then(res => {
             if (res && res.status === 'exchanged') {
-                const coinEl = document.querySelector('.iue-value-coin');
-                const cashEl = document.querySelector('.iue-value-cash');
-                if (coinEl && typeof res.balances?.coin !== 'undefined') {
-                    coinEl.textContent = iueFmt(res.balances.coin);
-                }
-                if (cashEl && typeof res.balances?.cash !== 'undefined') {
-                    cashEl.textContent = iueFmt(res.balances.cash);
-                }
+                IUEBalance.set(res.balances || {});
 
                 InitUserEngineToast.show(t.exchange_success || 'Exchanged successfully!', 'success');
                 closeModal();
@@ -2294,17 +2297,13 @@ function loadRedeemModal() {
         .then(res => res.json())
         .then(res => {
             if (res && res.success) {
-                // cập nhật số dư trên dashboard nếu có
-                const coinEl = document.querySelector('.iue-value-coin');
-                const cashEl = document.querySelector('.iue-value-cash');
-
-                if (coinEl && typeof res.coin !== 'undefined') {
-                    const current = iueParse(coinEl.textContent);
-                    coinEl.textContent = iueFmt(current + Number(res.coin || 0));
-                }
-                if (cashEl && typeof res.cash !== 'undefined') {
-                    const current = iueParse(cashEl.textContent);
-                    cashEl.textContent = iueFmt(current + Number(res.cash || 0));
+                // 1.6.9: dùng số dư thật từ server (đã gồm bonus VIP). Bản cũ cộng
+                // res.coin vào số đang hiển thị nên lệch khi có bonus VIP, và cộng
+                // trùng nếu số dư đã được đồng bộ qua header.
+                if (res.balances) {
+                    IUEBalance.set(res.balances);
+                } else {
+                    IUEBalance.refresh();
                 }
 
                 InitUserEngineToast.show(t.redeem_success || 'Redeem successful!', 'success');
@@ -2601,6 +2600,164 @@ const iueFmt = (n) => {
   return Number.isFinite(v) ? v.toLocaleString('vi-VN') : '0';
 };
 const iueParse = (text) => parseInt(String(text || '0').replace(/[^\d-]/g, ''), 10) || 0;
+
+// =====================================================================
+// Live balance sync (1.6.9)
+//
+// One place that keeps every Coin/Cash number on the page in sync:
+//   - every element with class .iue-value-coin / .iue-value-cash,
+//     or with data-iue-balance="coin|cash"
+//   - InitUserEngineData.user_coin / user_cash (used by the VIP modal)
+//
+// The server sends X-IUE-Coin / X-IUE-Cash headers on any REST or AJAX
+// response that changed the signed-in user's balance (check-in, VIP,
+// exchange, theme shops, games...). fetch() and XMLHttpRequest are
+// observed (headers only, the body is never touched), so features update
+// the balance without any extra code. Other open tabs follow through
+// BroadcastChannel, and a page restored from the back/forward cache asks
+// GET /balance for the real numbers.
+//
+// Public API: window.InitUserEngineBalance.set({ coin, cash }), .get(),
+// .refresh(). Event: 'iue:balance:change' on document, detail { coin, cash, changed }.
+// =====================================================================
+const IUEBalance = (() => {
+    const CURRENCIES = ['coin', 'cash'];
+    const state = { coin: null, cash: null };
+    let channel = null;
+
+    const data = window.InitUserEngineData || {};
+    if (typeof data.user_coin !== 'undefined') state.coin = parseInt(data.user_coin, 10) || 0;
+    if (typeof data.user_cash !== 'undefined') state.cash = parseInt(data.user_cash, 10) || 0;
+
+    try {
+        if ('BroadcastChannel' in window && data.current_user) {
+            channel = new BroadcastChannel('iue-balance-' + data.current_user);
+            channel.onmessage = (e) => {
+                if (e && e.data && typeof e.data === 'object') set(e.data, { broadcast: false });
+            };
+        }
+    } catch (_) {
+        channel = null;
+    }
+
+    function toValue(v) {
+        if (v === null || typeof v === 'undefined' || v === '') return null;
+        const n = typeof v === 'number' ? v : parseInt(String(v).replace(/[^\d-]/g, ''), 10);
+        return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+    }
+
+    function render(currency, value) {
+        const nodes = document.querySelectorAll('.iue-value-' + currency + ', [data-iue-balance="' + currency + '"]');
+        nodes.forEach((el) => {
+            el.textContent = iueFmt(value);
+            el.setAttribute('data-value', String(value));
+        });
+    }
+
+    function set(next, opts = {}) {
+        if (!next || typeof next !== 'object') return get();
+
+        const changed = {};
+        CURRENCIES.forEach((cur) => {
+            const v = toValue(next[cur]);
+            if (v === null) return;
+            if (state[cur] !== v) changed[cur] = v;
+            state[cur] = v;
+            render(cur, v);
+        });
+
+        if (window.InitUserEngineData) {
+            if (state.coin !== null) window.InitUserEngineData.user_coin = state.coin;
+            if (state.cash !== null) window.InitUserEngineData.user_cash = state.cash;
+        }
+
+        if (Object.keys(changed).length) {
+            document.dispatchEvent(new CustomEvent('iue:balance:change', {
+                detail: { coin: state.coin, cash: state.cash, changed }
+            }));
+            if (channel && opts.broadcast !== false) {
+                try { channel.postMessage({ coin: state.coin, cash: state.cash }); } catch (_) {}
+            }
+        }
+
+        return get();
+    }
+
+    function get() {
+        return { coin: state.coin, cash: state.cash };
+    }
+
+    function fromHeaderValues(coin, cash) {
+        if (coin === null && cash === null) return;
+        set({ coin, cash });
+    }
+
+    const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+
+    let refreshing = null;
+    function refresh() {
+        if (refreshing) return refreshing;
+        if (!data.rest_url || !originalFetch) return Promise.resolve(get());
+
+        refreshing = originalFetch(data.rest_url + '/balance', {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { 'X-WP-Nonce': data.nonce || '' }
+        })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((json) => (json ? set(json) : get()))
+            .catch(() => get())
+            .finally(() => { refreshing = null; });
+
+        return refreshing;
+    }
+
+    // --- Observe fetch() (headers only) ---
+    if (originalFetch && !window.fetch.__iueBalanceSync) {
+        const wrapped = function () {
+            return originalFetch.apply(null, arguments).then((res) => {
+                try {
+                    if (res && res.headers) {
+                        fromHeaderValues(res.headers.get('X-IUE-Coin'), res.headers.get('X-IUE-Cash'));
+                    }
+                } catch (_) {}
+                return res;
+            });
+        };
+        wrapped.__iueBalanceSync = true;
+        window.fetch = wrapped;
+    }
+
+    // --- Observe XMLHttpRequest (jQuery, UIkit util.ajax...) ---
+    const XHR = window.XMLHttpRequest;
+    if (XHR && XHR.prototype && !XHR.prototype.__iueBalanceSync) {
+        const originalSend = XHR.prototype.send;
+        XHR.prototype.send = function () {
+            this.addEventListener('load', function () {
+                try {
+                    // getAllResponseHeaders() only lists readable headers, so it never
+                    // logs "unsafe header" warnings on cross-origin requests.
+                    const raw = this.getAllResponseHeaders() || '';
+                    const coin = /^x-iue-coin:\s*(\d+)/im.exec(raw);
+                    const cash = /^x-iue-cash:\s*(\d+)/im.exec(raw);
+                    fromHeaderValues(coin ? coin[1] : null, cash ? cash[1] : null);
+                } catch (_) {}
+            });
+            return originalSend.apply(this, arguments);
+        };
+        XHR.prototype.__iueBalanceSync = true;
+    }
+
+    // A page restored from the back/forward cache shows old numbers: ask the server.
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) refresh();
+    });
+
+    return { set, get, refresh };
+})();
+
+window.InitUserEngineBalance = IUEBalance;
 
 // Ngày hôm nay theo local time, định dạng YYYY-MM-DD (dùng làm max cho input[type=date])
 const iueTodayISO = () => {

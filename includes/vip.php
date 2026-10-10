@@ -250,6 +250,7 @@ function init_plugin_suite_user_engine_api_purchase_vip( WP_REST_Request $reques
 		'is_vip'      => true,
 		'package_id'  => $package_id,
 		'currency'    => $currency,
+		'balances'   => init_plugin_suite_user_engine_get_balances( $user_id ), // 1.6.9: đồng bộ số dư ngay.
 	] );
 }
 

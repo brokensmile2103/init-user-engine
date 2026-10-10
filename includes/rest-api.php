@@ -30,6 +30,17 @@ function init_plugin_suite_user_engine_register_rest_routes() {
         },
     ] );
 
+	// GET /balance – Số dư Coin/Cash hiện tại (đồng bộ số dư trực tiếp).
+	register_rest_route(
+		$namespace,
+		'/balance',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'init_plugin_suite_user_engine_api_get_balance',
+			'permission_callback' => 'is_user_logged_in',
+		)
+	);
+
     // POST /claim-reward – Nhận thưởng sau khi online 10 phút
     register_rest_route( $namespace, '/claim-reward', [
         'methods'             => 'POST',
@@ -748,6 +759,23 @@ function init_plugin_suite_user_engine_do_checkin( WP_REST_Request $request ) {
         'total_bonus_coin'  => $new_exp_data['total_bonus_coin'],
         'exp_added'         => $new_exp_data['exp_added'],
     ], 200 );
+}
+
+/**
+ * GET /balance - current Coin and Cash of the signed-in user, read from the database.
+ *
+ * Used by the live balance sync to refresh a page restored from the back/forward
+ * cache, or whenever a script needs the exact balance.
+ *
+ * @since 1.6.9
+ *
+ * @return WP_REST_Response
+ */
+function init_plugin_suite_user_engine_api_get_balance() {
+	$response = rest_ensure_response( init_plugin_suite_user_engine_get_balances( get_current_user_id() ) );
+	$response->header( 'Cache-Control', 'no-store, private' );
+
+	return $response;
 }
 
 /**

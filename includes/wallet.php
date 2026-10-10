@@ -580,3 +580,169 @@ function init_plugin_suite_user_engine_spend_cash( $user_id, $amount ) {
 	$result = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash', -absint( $amount ) );
 	return is_wp_error( $result ) ? $result : $result['new'];
 }
+
+// -----------------------------------------------------------------------------
+// Live balance sync
+// -----------------------------------------------------------------------------
+
+/**
+ * Whether the current user's balance changed during this request.
+ *
+ * @since 1.6.9
+ *
+ * @param bool $touch Optional. Mark the balance as changed. Default false.
+ * @return bool
+ */
+function init_plugin_suite_user_engine_balance_touched( $touch = false ) {
+	static $touched = false;
+
+	if ( $touch ) {
+		$touched = true;
+	}
+
+	return $touched;
+}
+
+/**
+ * Whether this request can carry the live balance headers (REST or admin-ajax only,
+ * never a full page that a page cache could store and serve to someone else).
+ *
+ * @since 1.6.9
+ *
+ * @return bool
+ */
+function init_plugin_suite_user_engine_is_balance_sync_request() {
+	$is_rest = defined( 'REST_REQUEST' ) && REST_REQUEST;
+
+	/**
+	 * Filters whether balance changes are reported to the browser in this request.
+	 *
+	 * @since 1.6.9
+	 *
+	 * @param bool $enabled True for REST and admin-ajax requests.
+	 */
+	return (bool) apply_filters( 'init_plugin_suite_user_engine_balance_sync_enabled', $is_rest || wp_doing_ajax() );
+}
+
+/**
+ * Send the new balance of the signed-in user as a response header.
+ *
+ * Front-end scripts read X-IUE-Coin / X-IUE-Cash from every response and update
+ * every balance on the page, whatever feature changed it. Sent right away so it
+ * also works for handlers that end with wp_send_json(); REST responses get the
+ * final values again in init_plugin_suite_user_engine_rest_balance_headers().
+ *
+ * @since 1.6.9
+ *
+ * @param int    $user_id  User whose balance changed.
+ * @param string $currency 'coin' or 'cash'.
+ * @param int    $value    New balance.
+ * @return void
+ */
+function init_plugin_suite_user_engine_send_balance_header( $user_id, $currency, $value ) {
+	$current = get_current_user_id();
+
+	if ( ! $current || (int) $user_id !== $current || ! init_plugin_suite_user_engine_is_balance_sync_request() ) {
+		return;
+	}
+
+	init_plugin_suite_user_engine_balance_touched( true );
+
+	if ( headers_sent() ) {
+		return;
+	}
+
+	header( ( 'cash' === $currency ? 'X-IUE-Cash' : 'X-IUE-Coin' ) . ': ' . max( 0, (int) $value ) );
+}
+
+add_action( 'init_plugin_suite_user_engine_coin_changed', 'init_plugin_suite_user_engine_sync_coin_header', 99, 2 );
+
+/**
+ * Report a Coin change to the browser.
+ *
+ * @since 1.6.9
+ *
+ * @param int $user_id User ID.
+ * @param int $value   New balance.
+ * @return void
+ */
+function init_plugin_suite_user_engine_sync_coin_header( $user_id, $value ) {
+	init_plugin_suite_user_engine_send_balance_header( $user_id, 'coin', $value );
+}
+
+add_action( 'init_plugin_suite_user_engine_cash_changed', 'init_plugin_suite_user_engine_sync_cash_header', 99, 2 );
+
+/**
+ * Report a Cash change to the browser.
+ *
+ * @since 1.6.9
+ *
+ * @param int $user_id User ID.
+ * @param int $value   New balance.
+ * @return void
+ */
+function init_plugin_suite_user_engine_sync_cash_header( $user_id, $value ) {
+	init_plugin_suite_user_engine_send_balance_header( $user_id, 'cash', $value );
+}
+
+add_filter( 'rest_post_dispatch', 'init_plugin_suite_user_engine_rest_balance_headers', 99, 1 );
+
+/**
+ * Attach both final balances to a REST response when the user's balance changed.
+ *
+ * Read from the database at the very end, so the values are right even if the
+ * request changed the balance several times or rolled a change back.
+ *
+ * @since 1.6.9
+ *
+ * @param WP_HTTP_Response $response Response.
+ * @return WP_HTTP_Response
+ */
+function init_plugin_suite_user_engine_rest_balance_headers( $response ) {
+	if ( ! init_plugin_suite_user_engine_balance_touched() || ! ( $response instanceof WP_HTTP_Response ) ) {
+		return $response;
+	}
+
+	$user_id = get_current_user_id();
+
+	if ( ! $user_id ) {
+		return $response;
+	}
+
+	$response->header( 'X-IUE-Coin', (string) init_plugin_suite_user_engine_wallet_read( $user_id, 'coin' ) );
+	$response->header( 'X-IUE-Cash', (string) init_plugin_suite_user_engine_wallet_read( $user_id, 'cash' ) );
+
+	return $response;
+}
+
+add_filter( 'rest_exposed_cors_headers', 'init_plugin_suite_user_engine_expose_balance_headers' );
+
+/**
+ * Let browsers read the balance headers on cross-origin REST calls too.
+ *
+ * @since 1.6.9
+ *
+ * @param string[] $headers Exposed headers.
+ * @return string[]
+ */
+function init_plugin_suite_user_engine_expose_balance_headers( $headers ) {
+	$headers[] = 'X-IUE-Coin';
+	$headers[] = 'X-IUE-Cash';
+
+	return $headers;
+}
+
+/**
+ * Current balances of a user, read from the database.
+ *
+ * @since 1.6.9
+ *
+ * @param int $user_id User ID.
+ * @return array { @type int $coin, @type int $cash }
+ */
+function init_plugin_suite_user_engine_get_balances( $user_id ) {
+	return array(
+		'coin' => init_plugin_suite_user_engine_wallet_read( $user_id, 'coin' ),
+		'cash' => init_plugin_suite_user_engine_wallet_read( $user_id, 'cash' ),
+	);
+}

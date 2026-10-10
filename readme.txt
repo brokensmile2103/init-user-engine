@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.8
+Stable tag: 1.6.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -218,6 +218,18 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.6.9 – October 10, 2026 =
+- New: **Live balance sync**. Every Coin/Cash number on the page (`.iue-value-coin`, `.iue-value-cash` and any element with `data-iue-balance="coin|cash"`) now updates as soon as the balance changes, whatever changed it. Before, check-in updated the dashboard but buying VIP did not, and every theme/plugin feature had to update the number itself
+  - Every REST or admin-ajax response that changed the signed-in member's own balance now carries `X-IUE-Coin` / `X-IUE-Cash` headers with the final values (read from the database at the end of the request). Never sent on full page loads, and only for the member's own balance
+  - The member script reads these headers from every `fetch()` / `XMLHttpRequest` response (headers only, the response body is never touched), so any feature built on Init User Engine updates the balance with no extra code
+  - Other open tabs of the same member follow through `BroadcastChannel`, and a page restored from the browser's back/forward cache asks the server for the real balance
+  - New endpoint `GET /wp-json/inituser/v1/balance` (signed-in members only, not cached)
+  - New JavaScript API `window.InitUserEngineBalance` (`set()`, `get()`, `refresh()`) and event `iue:balance:change` on `document` (detail `{ coin, cash, changed }`)
+  - New PHP helper `init_plugin_suite_user_engine_get_balances( $user_id )` and filter `init_plugin_suite_user_engine_balance_sync_enabled`
+- VIP purchase and redeem code responses now include the new `balances`
+- Fixed: after buying VIP the dashboard balance did not change, and the VIP modal kept the balance from when it was opened, so the "can afford" state of the packages was wrong after a purchase or a check-in. With VIP stacking disabled, the packages now switch to "Already VIP" right after a purchase
+- Fixed: redeeming a code added the code amount to the number shown on screen, which was wrong for VIP members (the VIP bonus was not included). The real balance from the server is now shown
+
 = 1.6.8 – October 10, 2026 =
 - Security: Coin and Cash balances are now changed atomically. Before, every change read the balance, computed the new value in PHP and wrote it back (`update_user_meta`), so requests running at the same time could all spend the same balance, or a reward could overwrite a purchase made at the same moment
   - New `init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delta, $allow_partial = false )`: one `UPDATE` statement; when spending, the funds check is part of the `WHERE` clause, so the balance can never be spent twice and never goes negative
@@ -336,6 +348,9 @@ This plugin is licensed under the GPLv2 or later.
 You are free to use, modify, and distribute it under the same license.
 
 == Upgrade Notice ==
+
+= 1.6.9 =
+Coin/Cash balances now update live everywhere on the page (VIP purchase, redeem codes, theme features) and stay in sync across open tabs.
 
 = 1.6.8 =
 Security update: Coin/Cash changes are now atomic and spending flows are locked per user, fixing race conditions that let parallel requests spend the same balance several times. Update recommended for all sites.

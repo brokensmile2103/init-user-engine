@@ -467,12 +467,14 @@ function init_plugin_suite_user_engine_api_redeem_code( WP_REST_Request $request
     );
 
     // ===== Trả về client
-    return [
-        'success' => true,
-        'message' => __( 'Redeem successful!', 'init-user-engine' ),
-        'coin'    => (int) $coin_added,
-        'cash'    => (int) $cash_added,
-    ];
+	return array(
+		'success'  => true,
+		'message'  => __( 'Redeem successful!', 'init-user-engine' ),
+		'coin'     => (int) $coin_added,
+		'cash'     => (int) $cash_added,
+		// 1.6.9: số dư thật sau khi đổi mã (đã gồm bonus VIP) để giao diện cập nhật đúng.
+		'balances' => init_plugin_suite_user_engine_get_balances( $user_id ),
+	);
 }
 
 /**

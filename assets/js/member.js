@@ -1435,29 +1435,54 @@ function renderExpLogItem(entry, i18n = {}) {
 function loadEditProfileModal() {
     const t = InitUserEngineData.i18n || {};
 
-    // Fetch profile trước khi render modal
+    // Mở modal ngay kèm spinner (đồng bộ với các modal khác), rồi mới tải dữ liệu hồ sơ.
+    showUserEngineModal(t.edit_profile_title || 'Edit Profile', `
+        <div class="iue-loading iue-edit-profile-loading">
+            <svg width="30" height="30" viewBox="0 0 25 25" fill="none">
+                <path d="M4.5 12.5a8 8 0 1 0 8-8" stroke="currentColor" stroke-width="1"/>
+            </svg>
+        </div>`);
+
+    // Chỉ render khi modal vẫn đang chờ dữ liệu này (chưa bị đóng hoặc thay bằng modal khác).
+    const isStillLoading = () => !!document.querySelector('#iue-modal .iue-edit-profile-loading');
+
     fetch(`${InitUserEngineData.rest_url}/profile/me`, {
         credentials: 'include',
         headers: {
             'X-WP-Nonce': InitUserEngineData.nonce
         }
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
+        return res.json();
+    })
     .then(user => {
+        if (!isStillLoading()) return;
         renderEditProfileModal(user, t);
     })
     .catch(err => {
         console.error('[Init User Engine] Failed to fetch profile:', err);
+        if (!isStillLoading()) return;
+
+        const container = document.querySelector('#iue-modal .iue-modal-body');
+        if (container) {
+            renderError(container, t.fetch_profile_failed || 'Could not load profile data.');
+        }
         InitUserEngineToast.show(t.fetch_profile_failed || 'Could not load profile data.', 'error');
     });
 }
 
 function renderEditProfileModal(user, t) {
+    const nameLimit = user.display_name_limit || {};
+
     showUserEngineModal(t.edit_profile_title || 'Edit Profile', `
        <div class="iue-edit-profile-container">
            <div class="iue-form-group">
                <label for="iue-display-name">${t.display_name || 'Display Name'}</label>
-               <input type="text" id="iue-display-name" value="${user.display_name || ''}" placeholder="${t.display_name_placeholder || 'Your public display name'}" />
+               <input type="text" id="iue-display-name" value="" placeholder="${t.display_name_placeholder || 'Your public display name'}" />
+               <p class="iue-form-hint" id="iue-display-name-hint" hidden></p>
            </div>
            <div class="iue-form-group">
                <label for="iue-bio">${t.bio || 'Bio'}</label>
@@ -1501,6 +1526,25 @@ function renderEditProfileModal(user, t) {
            </div>
        </div>
    `);
+
+    // Gán giá trị qua DOM để tên có dấu nháy hay ký tự đặc biệt không phá vỡ HTML.
+    const nameInput = document.querySelector('#iue-display-name');
+    const nameHint  = document.querySelector('#iue-display-name-hint');
+
+    if (nameInput) {
+        nameInput.value = user.display_name || '';
+
+        // Giới hạn đổi tên hiển thị: khoá ô nhập khi chưa tới ngày được đổi, server vẫn kiểm tra lại.
+        if (nameLimit.locked) {
+            nameInput.disabled = true;
+        }
+
+        if (nameHint && nameLimit.notice) {
+            nameHint.textContent = nameLimit.notice;
+            nameHint.hidden = false;
+            nameInput.setAttribute('aria-describedby', 'iue-display-name-hint');
+        }
+    }
 
     const saveBtn = document.querySelector('#iue-save-profile');
     if (!saveBtn) return;

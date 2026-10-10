@@ -1193,6 +1193,29 @@
 	border-color: var(--iue-theme-color);
 }
 
+/* Hint under a field (e.g. display name change limit) */
+.iue-form-hint {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: #666;
+}
+
+.iue-form-group input:disabled {
+	background: #f3f3f3;
+	color: #777;
+	cursor: not-allowed;
+}
+
+.dark .iue-form-hint {
+	color: #999;
+}
+
+.dark .iue-form-group input:disabled {
+	background: #2a2a2a;
+	color: #888;
+}
+
 /* Textarea fixed height */
 .iue-form-group textarea {
 	resize: vertical;

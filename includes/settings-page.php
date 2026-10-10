@@ -106,6 +106,9 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$max_mb_val	 						 = is_numeric( $max_mb_raw ) ? (float) $max_mb_raw : 0;
 	$output['avatar_max_upload_mb'] 	 = max( 0, $max_mb_val );
 
+	// 0 = không giới hạn; tối đa 3650 ngày (10 năm).
+	$output['display_name_change_days']  = max( 0, min( 3650, (int) ( $input['display_name_change_days'] ?? 0 ) ) );
+
 	$output['require_login'] 			 = ! empty( $input['require_login'] ) ? 1 : 0;
 
 	$output['hide_admin_bar_subscriber'] = ! empty( $input['hide_admin_bar_subscriber'] ) ? 1 : 0;
@@ -395,6 +398,26 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description">
 							<?php esc_html_e( 'Uses the native WordPress password reset flow, so your site must be able to send emails. Disable it if your site has not set up email sending yet — the link will then go to the default wp-login.php page.', 'init-user-engine' ); ?><br>
 							<?php esc_html_e( 'If a Custom Lost Password URL is set below, that URL always takes priority.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'Display Name', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
+				<tr>
+					<th scope="row"><label for="iue-display-name-change-days"><?php esc_html_e( 'Display Name Change Limit (days)', 'init-user-engine' ); ?></label></th>
+					<td>
+						<input type="number" min="0" max="3650" step="1" class="small-text"
+							id="iue-display-name-change-days"
+							name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[display_name_change_days]"
+							value="<?php echo esc_attr( $options['display_name_change_days'] ?? 0 ); ?>" />
+						<?php esc_html_e( 'days', 'init-user-engine' ); ?>
+						<p class="description">
+							<?php esc_html_e( 'Members can change their display name only once in this many days (for example 7, like TikTok). Set to 0 to allow unlimited changes.', 'init-user-engine' ); ?><br>
+							<?php esc_html_e( 'Applies everywhere a member can change their own display name: the Edit Profile modal, the WordPress profile page (wp-admin/profile.php), the REST API and WooCommerce Account details.', 'init-user-engine' ); ?><br>
+							<?php esc_html_e( 'Administrators (users who can edit other users) are not limited, and can still change any member’s display name from Users → Edit user without starting the member’s waiting period.', 'init-user-engine' ); ?>
 						</p>
 					</td>
 				</tr>

@@ -276,6 +276,13 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				<?php endif; ?>
 
 				<?php
+				// -- Display name change limit: status + "Unlock Display Name" (below Ban Avatar Upload)
+				if ( function_exists( 'init_plugin_suite_user_engine_render_display_name_unlock' ) ) {
+					init_plugin_suite_user_engine_render_display_name_unlock( $user_id );
+				}
+				?>
+
+				<?php
 				// ==================== NEW: Recent Transactions (up to 100) ====================
 				$__tx_log = [];
 				if ( function_exists( 'init_plugin_suite_user_engine_get_transaction_log' ) ) {

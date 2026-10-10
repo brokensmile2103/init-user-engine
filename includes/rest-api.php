@@ -1149,6 +1149,9 @@ function init_plugin_suite_user_engine_api_get_profile( WP_REST_Request $request
         'website'      => get_user_meta( $user_id, 'iue_website', true ),
         'gender'       => get_user_meta( $user_id, 'iue_gender', true ),
         'dob'          => get_user_meta( $user_id, 'iue_dob', true ),
+
+        // Giới hạn đổi tên hiển thị (days = 0 nghĩa là không giới hạn với user này).
+        'display_name_limit' => init_plugin_suite_user_engine_get_display_name_limit_data( $user_id ),
     ];
 
     return rest_ensure_response( $profile );
@@ -1218,10 +1221,36 @@ function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $requ
     $website  = esc_url_raw( $data['website'] ?? '' );
     $gender   = sanitize_key( $data['gender'] ?? '' );
 
-    wp_update_user( [
-        'ID'           => $user_id,
-        'display_name' => $display_name,
-    ] );
+    // Đổi tên hiển thị: kiểm tra giới hạn số ngày trước khi lưu bất kỳ field nào.
+    // Giữ per-user lock từ lúc kiểm tra tới lúc lưu để 2 request song song không cùng lọt qua.
+    $display_name_changed     = ( (string) $user_info->display_name !== (string) $display_name );
+    $check_display_name_limit = $display_name_changed && init_plugin_suite_user_engine_display_name_limit_applies( $user_id );
+
+    if ( $check_display_name_limit && ! init_plugin_suite_user_engine_lock_user( $user_id, 3 ) ) {
+        return init_plugin_suite_user_engine_busy_error();
+    }
+
+    try {
+        if ( $check_display_name_limit ) {
+            $check = init_plugin_suite_user_engine_check_display_name_change( $user_id, $display_name );
+            if ( is_wp_error( $check ) ) {
+                return $check;
+            }
+        }
+
+        wp_update_user( [
+            'ID'           => $user_id,
+            'display_name' => $display_name,
+        ] );
+    } finally {
+        if ( $check_display_name_limit ) {
+            init_plugin_suite_user_engine_unlock_user( $user_id );
+        }
+    }
+
+    // Đọc lại tên thật đã lưu (có thể đã được filter khác chỉnh sửa).
+    $saved_user   = get_userdata( $user_id );
+    $display_name = $saved_user ? $saved_user->display_name : $display_name;
 
     if ( $password !== '' ) {
         wp_set_password( $password, $user_id );

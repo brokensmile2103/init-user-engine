@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.9
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - Modal dashboard showing level, EXP progress, Coin/Cash wallet, and quick links  
 - Custom avatar upload with live preview, crop-free flow, and one-click revert to the default/Gravatar image  
 - Configurable upload policy (allow everyone, VIP only, or disable uploads entirely) with a configurable max file size  
+- Optional display name change limit (e.g. once every 7 days, like TikTok), enforced in the profile modal, `wp-admin/profile.php`, the REST API and WooCommerce Account details  
 - Theme override support: any template file can be overridden by copying it to `your-theme/init-user-engine/`
 
 **Accounts, Login & Registration**
@@ -93,7 +94,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 **Admin Tools**
 
 - Manual Top-up tool for Coin/Cash (Users → Init User Engine → Top-up Coin/Cash)  
-- Per-user overview metabox on the WordPress profile/edit-user screen (level, wallet, VIP status, recent activity)
+- Per-user overview metabox on the WordPress profile/edit-user screen (level, wallet, VIP status, recent activity), with one-click Remove VIP, Ban Avatar Upload and Unlock Display Name actions
 
 **Developer-Friendly**
 
@@ -153,6 +154,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_streak_restore_max_days` – Modify how many missed check-in days a user may cover to keep their streak (return `0` to disable it for that user)
 - `init_plugin_suite_user_engine_streak_restore_cost` – Modify the Coin cost of keeping a streak (receives total cost, missed days, and user ID)
 - `init_plugin_suite_user_engine_lostpassword_modal_enabled` – Enable or disable the lost password form inside the login modal (receives the current value and the plugin settings)
+- `init_plugin_suite_user_engine_display_name_change_days` – Modify how many days a member has to wait between two display name changes (receives the days from the settings and the user ID; `0` = unlimited)
+- `init_plugin_suite_user_engine_display_name_limit_applies` – Return `false` to let a user (or role) change their display name freely (receives the current value and the user ID)
 
 === Actions ===
 
@@ -171,6 +174,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_coin_changed` – After user’s Coin balance is updated  
 - `init_plugin_suite_user_engine_cash_changed` – After user’s Cash balance is updated  
 - `init_plugin_suite_user_engine_admin_send_notice` – When admin sends notification via wp-admin.
+- `init_plugin_suite_user_engine_display_name_unlocked` – After an administrator lets a member change their display name again (user ID)
 
 === REST API Endpoints ===
 
@@ -190,7 +194,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `GET  /referral-log` – Get referral history  
 - `POST /avatar` – Upload new avatar  
 - `POST /avatar/remove` – Remove custom avatar and revert to default  
-- `GET  /profile/me` – Get current user profile  
+- `GET  /profile/me` – Get current user profile (includes `display_name_limit`: `days`, `locked`, `next_change`, `notice`)  
 - `POST /profile/update` – Update profile information
 - `GET  /daily-tasks` – Get list of completed daily tasks and rewards
 - `POST /exchange` – Convert Cash → Coin based on exchange rate
@@ -217,6 +221,22 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.0 – October 11, 2026 =
+- New: **Display Name Change Limit** (Init User Engine → Settings → Display Name). Members can change their display name only once every N days, like TikTok (for example 7). Set to 0 for unlimited changes; 0 is the default, so nothing changes until you set it
+  - Enforced everywhere a member can change their own display name, not only in the Edit Profile modal: `wp-admin/profile.php` (WordPress lets members change it freely there), the core REST API (`/wp/v2/users/me`), WooCommerce Account details, and any other plugin that calls `wp_update_user()` for the signed-in member. The check runs in `wp_pre_insert_user_data`, so a change made too early keeps the current display name
+  - The Edit Profile modal, `wp-admin/profile.php` and WooCommerce Account details show a clear message with the date and time of the next allowed change. While the member has to wait, the display name field is disabled in the modal and on `profile.php`
+  - The Edit Profile modal returns an error (`display_name_locked`, HTTP 403) and saves nothing when the display name cannot be changed yet; saving other fields with the same display name still works
+  - Administrators (users who can edit other users) are not limited. A change an administrator makes to a member's display name does not start the member's waiting period
+  - New **Unlock Display Name** button in the user overview box on the Edit User screen (next to *Ban Avatar Upload*). It shows until when the member is locked, and one click lets them change their display name again right away; their next change starts a new waiting period. Administrators only, protected by a nonce
+  - The waiting period starts from the member's last own change (user meta `iue_display_name_changed_at`). Changes are recorded even while the limit is 0, so a limit set later applies right away
+  - Race-safe: the check and the record run under the per-user lock, so two requests sent at the same moment cannot both change the display name
+  - New filters `init_plugin_suite_user_engine_display_name_change_days` and `init_plugin_suite_user_engine_display_name_limit_applies`, new action `init_plugin_suite_user_engine_display_name_unlocked`, and new PHP helpers `init_plugin_suite_user_engine_is_display_name_locked( $user_id )`, `init_plugin_suite_user_engine_get_display_name_next_change( $user_id )` and `init_plugin_suite_user_engine_unlock_display_name( $user_id )`
+  - `GET /wp-json/inituser/v1/profile/me` now includes `display_name_limit` (`days`, `locked`, `next_change`, `notice`)
+- `POST /profile/update` now returns the display name actually saved
+- Improved: the **Edit Profile** modal now opens right away with a loading spinner and fills in the form when the profile data arrives, like every other modal. Before, nothing happened until the data was loaded, then the modal appeared all at once. If the modal is closed (or another modal is opened) while loading, the late response is ignored; if loading fails, the error is shown inside the modal
+- Fixed: a display name containing a double quote (`"`) broke the display name field in the Edit Profile modal. The value is now set safely
+- Translations: POT file regenerated with WP-CLI, Vietnamese translation updated
 
 = 1.6.9 – October 10, 2026 =
 - New: **Live balance sync**. Every Coin/Cash number on the page (`.iue-value-coin`, `.iue-value-cash` and any element with `data-iue-balance="coin|cash"`) now updates as soon as the balance changes, whatever changed it. Before, check-in updated the dashboard but buying VIP did not, and every theme/plugin feature had to update the number itself
@@ -348,6 +368,9 @@ This plugin is licensed under the GPLv2 or later.
 You are free to use, modify, and distribute it under the same license.
 
 == Upgrade Notice ==
+
+= 1.7.0 =
+New optional Display Name Change Limit (e.g. once every 7 days, like TikTok), enforced in the profile modal, wp-admin/profile.php, the REST API and WooCommerce, with an admin Unlock button. Edit Profile modal now opens instantly. Off by default.
 
 = 1.6.9 =
 Coin/Cash balances now update live everywhere on the page (VIP purchase, redeem codes, theme features) and stay in sync across open tabs.

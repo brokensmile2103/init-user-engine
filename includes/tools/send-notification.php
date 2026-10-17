@@ -6,8 +6,9 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 		wp_die( esc_html__( 'You do not have permission to access this page.', 'init-user-engine' ) );
 	}
 
-	$sent  = false;
-	$error = '';
+	$sent       = false;
+	$error      = '';
+	$queued_job = null; // 1.7.1: job chạy nền (All members / Active VIPs).
 
 	if (
 		isset( $_POST['iue_send_notice_nonce'] )
@@ -23,19 +24,37 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 
 		// Recipients: selected | vip | all (đồng bộ với Top-up)
 		$target_radio = sanitize_key( $_POST['iue_target'] ?? 'selected' ); // 'all' | 'vip' | 'selected'
-		if ( 'all' === $target_radio ) {
-			$user_ids = get_users( [ 'fields' => 'ID' ] );
-			$user_ids = array_map( 'absint', $user_ids );
-		} elseif ( 'vip' === $target_radio ) {
-			// YÊU CẦU hàm VIP có sẵn, không fallback
-			$user_ids = (array) init_plugin_suite_user_engine_get_active_vip_users( 'ids' );
-			$user_ids = array_map( 'absint', $user_ids );
+		if ( 'all' === $target_radio || 'vip' === $target_radio ) {
+			// 1.7.1: không nạp toàn bộ user ID vào request này nữa — gửi NỀN theo
+			// lô 500 qua WP-Cron (xem includes/bulk-jobs.php).
+			$user_ids = [];
 		} else {
 			$user_ids_raw = sanitize_text_field( wp_unslash( $_POST['iue_user_ids'] ?? '' ) );
 			$user_ids     = array_filter( array_map( 'absint', explode( ',', $user_ids_raw ) ) );
 		}
 
-		if ( empty( $title ) || empty( $content ) || empty( $user_ids ) ) {
+		if ( empty( $title ) || empty( $content ) ) {
+			$error = __( 'Please fill in all required fields.', 'init-user-engine' );
+		} elseif ( 'all' === $target_radio || 'vip' === $target_radio ) {
+			$queued_job = init_plugin_suite_user_engine_create_bulk_job(
+				'notice',
+				$target_radio,
+				[
+					'title'    => $title,
+					'content'  => $content,
+					'type'     => $type,
+					'priority' => $priority,
+					'link'     => $link,
+					'pinned'   => $pinned,
+					'expire'   => $expire ? (int) $expire : null,
+				]
+			);
+
+			if ( is_wp_error( $queued_job ) ) {
+				$error      = $queued_job->get_error_message();
+				$queued_job = null;
+			}
+		} elseif ( empty( $user_ids ) ) {
 			$error = __( 'Please fill in all required fields.', 'init-user-engine' );
 		} else {
 			// Gửi THEO LÔ cho ổn định (đồng bộ phong cách Top-up)
@@ -61,6 +80,11 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 
 			/**
 			 * Hook theo dõi sự kiện gửi thông báo từ admin.
+			 *
+			 * Từ 1.7.1, với "All members" / "Active VIPs" hook này chạy 1 lần
+			 * cho MỖI LÔ gửi nền (tối đa 500 user/lô, $user_ids = user của lô
+			 * đó). Cần biết khi nào gửi xong toàn bộ → dùng action
+			 * init_plugin_suite_user_engine_bulk_job_finished.
 			 *
 			 * @param int[]  $user_ids Danh sách user nhận.
 			 * @param string $title    Tiêu đề.
@@ -94,6 +118,18 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 
 		<?php if ( $sent ) : ?>
 			<div class="notice notice-success"><p><?php esc_html_e( 'Notification sent successfully.', 'init-user-engine' ); ?></p></div>
+		<?php elseif ( $queued_job ) : ?>
+			<div class="notice notice-success"><p>
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %s: number of members. */
+						__( 'Notification queued for %s members. It is sent in the background in small batches; progress is shown below.', 'init-user-engine' ),
+						number_format_i18n( (int) $queued_job['total'] )
+					)
+				);
+				?>
+			</p></div>
 		<?php elseif ( $error ) : ?>
 			<div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
 		<?php endif; ?>
@@ -204,6 +240,8 @@ function init_plugin_suite_user_engine_render_send_notification_page() {
 
 			<?php submit_button( __( 'Send Notification', 'init-user-engine' ) ); ?>
 		</form>
+
+		<?php init_plugin_suite_user_engine_render_bulk_jobs_panel( 'notice' ); ?>
 	</div>
 	<?php
 }

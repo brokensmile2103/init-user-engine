@@ -13,8 +13,9 @@ function init_plugin_suite_user_engine_render_topup_page() {
     $coin_label = $coin_label !== '' ? $coin_label : 'Coin';
     $cash_label = $cash_label !== '' ? $cash_label : 'Cash';
 
-    $success = false;
-    $error   = '';
+    $success    = false;
+    $error      = '';
+    $queued_job = null; // 1.7.1: job chạy nền (All members / Active VIPs).
 
     if (
         isset( $_POST['iue_topup_nonce'] )
@@ -26,123 +27,139 @@ function init_plugin_suite_user_engine_render_topup_page() {
         $target_radio = sanitize_key( $_POST['iue_target'] ?? 'selected' ); // 'all' | 'vip' | 'selected'
 
         // Xác định danh sách user theo radio (KHÔNG back-compat checkboxes)
-        if ( $target_radio === 'all' ) {
-            $user_ids = get_users( [ 'fields' => 'ID' ] );
-            $send_all = true;
-            $send_vip = false;
-        } elseif ( $target_radio === 'vip' ) {
-            // YÊU CẦU hàm VIP có sẵn, không fallback
-            $user_ids = (array) init_plugin_suite_user_engine_get_active_vip_users( 'ids' );
-            $send_all = false;
-            $send_vip = true;
+        if ( 'all' === $target_radio || 'vip' === $target_radio ) {
+            // 1.7.1: "All members" / "Active VIPs" chạy NỀN theo lô qua WP-Cron
+            // (xem includes/bulk-jobs.php) thay vì cộng tiền cho toàn bộ member
+            // ngay trong request này — site vài chục nghìn member sẽ timeout
+            // giữa chừng và không biết ai đã được cộng.
+            if ( 0 === $amount || ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
+                $error = __( 'Please fill in all required fields correctly.', 'init-user-engine' );
+            } else {
+                $queued_job = init_plugin_suite_user_engine_create_bulk_job(
+                    'topup',
+                    $target_radio,
+                    [
+                        'amount'   => $amount,
+                        'currency' => $type,
+                        'label'    => 'cash' === $type ? $cash_label : $coin_label,
+                    ]
+                );
+
+                if ( is_wp_error( $queued_job ) ) {
+                    $error      = $queued_job->get_error_message();
+                    $queued_job = null;
+                } else {
+                    init_plugin_suite_user_engine_add_topup_log( $amount, $type, 'all' === $target_radio ? 'ALL' : 'VIP' );
+                }
+            }
         } else {
             $raw      = sanitize_text_field( wp_unslash( $_POST['iue_user_ids'] ?? '' ) );
             $user_ids = array_filter( array_map( 'absint', explode( ',', $raw ) ) );
             $send_all = false;
             $send_vip = false;
-        }
 
-        // amount = 0; type sai; không có user => lỗi
-        if ( 0 === $amount || empty( $user_ids ) || ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
-            $error = __( 'Please fill in all required fields correctly.', 'init-user-engine' );
-        } else {
-            // Gom inbox theo batch: $inbox_batches[ 'coin'|'cash' ][ 'add'|'deduct' ][ $applied ] = [ user_id, ... ]
-            $inbox_batches = [
-                'coin' => [ 'add' => [], 'deduct' => [] ],
-                'cash' => [ 'add' => [], 'deduct' => [] ],
-            ];
+            // amount = 0; type sai; không có user => lỗi
+            if ( 0 === $amount || empty( $user_ids ) || ! in_array( $type, [ 'coin', 'cash' ], true ) ) {
+                $error = __( 'Please fill in all required fields correctly.', 'init-user-engine' );
+            } else {
+                // Gom inbox theo batch: $inbox_batches[ 'coin'|'cash' ][ 'add'|'deduct' ][ $applied ] = [ user_id, ... ]
+                $inbox_batches = [
+                    'coin' => [ 'add' => [], 'deduct' => [] ],
+                    'cash' => [ 'add' => [], 'deduct' => [] ],
+                ];
 
-            foreach ( $user_ids as $user_id ) {
-                if ( 'coin' === $type ) {
-                    // Atomic relative change (1.6.8): a read-then-set here could overwrite
-                    // a purchase the member made at the same moment. Never goes below 0.
-                    $changed = init_plugin_suite_user_engine_wallet_change( $user_id, 'coin', (int) $amount, true );
-                    $delta   = is_wp_error( $changed ) ? 0 : (int) $changed['delta'];
-                    if ( 0 !== $delta ) {
-                        $applied = abs( $delta );
-                        $change  = ( $delta < 0 ) ? 'deduct' : 'add';
+                foreach ( $user_ids as $user_id ) {
+                    if ( 'coin' === $type ) {
+                        // Atomic relative change (1.6.8): a read-then-set here could overwrite
+                        // a purchase the member made at the same moment. Never goes below 0.
+                        $changed = init_plugin_suite_user_engine_wallet_change( $user_id, 'coin', (int) $amount, true );
+                        $delta   = is_wp_error( $changed ) ? 0 : (int) $changed['delta'];
+                        if ( 0 !== $delta ) {
+                            $applied = abs( $delta );
+                            $change  = ( $delta < 0 ) ? 'deduct' : 'add';
 
-                        init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $applied, 'topup_admin', $change );
+                            init_plugin_suite_user_engine_log_transaction( $user_id, 'coin', $applied, 'topup_admin', $change, false ); // RAW: không cộng % VIP vào log.
 
-                        if ( $applied > 0 ) {
-                            if ( ! isset( $inbox_batches['coin'][ $change ][ $applied ] ) ) {
-                                $inbox_batches['coin'][ $change ][ $applied ] = [];
+                            if ( $applied > 0 ) {
+                                if ( ! isset( $inbox_batches['coin'][ $change ][ $applied ] ) ) {
+                                    $inbox_batches['coin'][ $change ][ $applied ] = [];
+                                }
+                                $inbox_batches['coin'][ $change ][ $applied ][] = $user_id;
                             }
-                            $inbox_batches['coin'][ $change ][ $applied ][] = $user_id;
                         }
-                    }
-                } else {
-                    // Atomic relative change (1.6.8): a read-then-set here could overwrite
-                    // a purchase the member made at the same moment. Never goes below 0.
-                    $changed = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash', (int) $amount, true );
-                    $delta   = is_wp_error( $changed ) ? 0 : (int) $changed['delta'];
-                    if ( 0 !== $delta ) {
-                        $applied = abs( $delta );
-                        $change  = ( $delta < 0 ) ? 'deduct' : 'add';
+                    } else {
+                        // Atomic relative change (1.6.8): a read-then-set here could overwrite
+                        // a purchase the member made at the same moment. Never goes below 0.
+                        $changed = init_plugin_suite_user_engine_wallet_change( $user_id, 'cash', (int) $amount, true );
+                        $delta   = is_wp_error( $changed ) ? 0 : (int) $changed['delta'];
+                        if ( 0 !== $delta ) {
+                            $applied = abs( $delta );
+                            $change  = ( $delta < 0 ) ? 'deduct' : 'add';
 
-                        init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $applied, 'topup_admin', $change );
+                            init_plugin_suite_user_engine_log_transaction( $user_id, 'cash', $applied, 'topup_admin', $change, false );
 
-                        if ( $applied > 0 ) {
-                            if ( ! isset( $inbox_batches['cash'][ $change ][ $applied ] ) ) {
-                                $inbox_batches['cash'][ $change ][ $applied ] = [];
+                            if ( $applied > 0 ) {
+                                if ( ! isset( $inbox_batches['cash'][ $change ][ $applied ] ) ) {
+                                    $inbox_batches['cash'][ $change ][ $applied ] = [];
+                                }
+                                $inbox_batches['cash'][ $change ][ $applied ][] = $user_id;
                             }
-                            $inbox_batches['cash'][ $change ][ $applied ][] = $user_id;
                         }
                     }
                 }
-            }
 
-            // BẮN INBOX THEO LÔ (bulk)
-            $send_bulk_for_type = function( $money_type, $label ) use ( $inbox_batches ) {
-                foreach ( [ 'add', 'deduct' ] as $chg ) {
-                    if ( empty( $inbox_batches[ $money_type ][ $chg ] ) ) continue;
+                // BẮN INBOX THEO LÔ (bulk)
+                $send_bulk_for_type = function( $money_type, $label ) use ( $inbox_batches ) {
+                    foreach ( [ 'add', 'deduct' ] as $chg ) {
+                        if ( empty( $inbox_batches[ $money_type ][ $chg ] ) ) continue;
 
-                    foreach ( $inbox_batches[ $money_type ][ $chg ] as $applied => $uids ) {
-                        if ( empty( $uids ) ) continue;
+                        foreach ( $inbox_batches[ $money_type ][ $chg ] as $applied => $uids ) {
+                            if ( empty( $uids ) ) continue;
 
-                        if ( 'deduct' === $chg ) {
-                            // translators: %s = currency label (e.g., Coin or Cash)
-                            $title   = sprintf( __( 'Admin Adjustment %s', 'init-user-engine' ), $label );
-                            // translators: 1: amount, 2: currency label
-                            $content = sprintf( __( '%1$d %2$s has been deducted by admin.', 'init-user-engine' ), (int) $applied, $label );
-                            $icon    = 'warning';
-                        } else {
-                            // translators: %s = currency label (e.g., Coin or Cash)
-                            $title   = sprintf( __( 'Admin Top-up %s', 'init-user-engine' ), $label );
-                            // translators: 1: amount, 2: currency label
-                            $content = sprintf( __( 'You have received %1$d %2$s from the admin.', 'init-user-engine' ), (int) $applied, $label );
-                            $icon    = 'gift';
+                            if ( 'deduct' === $chg ) {
+                                // translators: %s = currency label (e.g., Coin or Cash)
+                                $title   = sprintf( __( 'Admin Adjustment %s', 'init-user-engine' ), $label );
+                                // translators: 1: amount, 2: currency label
+                                $content = sprintf( __( '%1$d %2$s has been deducted by admin.', 'init-user-engine' ), (int) $applied, $label );
+                                $icon    = 'warning';
+                            } else {
+                                // translators: %s = currency label (e.g., Coin or Cash)
+                                $title   = sprintf( __( 'Admin Top-up %s', 'init-user-engine' ), $label );
+                                // translators: 1: amount, 2: currency label
+                                $content = sprintf( __( 'You have received %1$d %2$s from the admin.', 'init-user-engine' ), (int) $applied, $label );
+                                $icon    = 'gift';
+                            }
+
+                            init_plugin_suite_user_engine_send_inbox_to_users_bulk(
+                                $uids,
+                                $title,
+                                $content,
+                                $icon,
+                                [ 'topup_by_admin' => 1 ],
+                                null,
+                                'normal',
+                                '',
+                                0,
+                                (int) apply_filters( 'init_user_engine_inbox_bulk_chunk_size', 500, $uids, $title, $money_type )
+                            );
                         }
-
-                        init_plugin_suite_user_engine_send_inbox_to_users_bulk(
-                            $uids,
-                            $title,
-                            $content,
-                            $icon,
-                            [ 'topup_by_admin' => 1 ],
-                            null,
-                            'normal',
-                            '',
-                            0,
-                            (int) apply_filters( 'init_user_engine_inbox_bulk_chunk_size', 500, $uids, $title, $money_type )
-                        );
                     }
+                };
+
+                $send_bulk_for_type( 'coin', $coin_label );
+                $send_bulk_for_type( 'cash', $cash_label );
+
+                // Ghi log chuỗi (CHUẨN HOÁ TARGET), KHÔNG kiểm tra function_exists
+                $target_label = $send_all ? 'ALL' : ( $send_vip ? 'VIP' : '' );
+                if ( $target_label === '' ) {
+                    $target_label = ( count( $user_ids ) === 1 )
+                        ? ( 'uid:' . (int) $user_ids[0] )     // 1 user cụ thể
+                        : ( 'user:' . count( $user_ids ) );   // nhiều user = số lượng
                 }
-            };
+                init_plugin_suite_user_engine_add_topup_log( $amount, $type, $target_label );
 
-            $send_bulk_for_type( 'coin', $coin_label );
-            $send_bulk_for_type( 'cash', $cash_label );
-
-            // Ghi log chuỗi (CHUẨN HOÁ TARGET), KHÔNG kiểm tra function_exists
-            $target_label = $send_all ? 'ALL' : ( $send_vip ? 'VIP' : '' );
-            if ( $target_label === '' ) {
-                $target_label = ( count( $user_ids ) === 1 )
-                    ? ( 'uid:' . (int) $user_ids[0] )     // 1 user cụ thể
-                    : ( 'user:' . count( $user_ids ) );   // nhiều user = số lượng
+                $success = true;
             }
-            init_plugin_suite_user_engine_add_topup_log( $amount, $type, $target_label );
-
-            $success = true;
         }
     }
 
@@ -185,6 +202,18 @@ function init_plugin_suite_user_engine_render_topup_page() {
 
         <?php if ( $success ) : ?>
             <div class="notice notice-success"><p><?php esc_html_e( 'Top-up successful.', 'init-user-engine' ); ?></p></div>
+        <?php elseif ( $queued_job ) : ?>
+            <div class="notice notice-success"><p>
+                <?php
+                echo esc_html(
+                    sprintf(
+                        /* translators: %s: number of members. */
+                        __( 'Top-up queued for %s members. It runs in the background in small batches; progress is shown below.', 'init-user-engine' ),
+                        number_format_i18n( (int) $queued_job['total'] )
+                    )
+                );
+                ?>
+            </p></div>
         <?php elseif ( $error ) : ?>
             <div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
         <?php endif; ?>
@@ -253,6 +282,8 @@ function init_plugin_suite_user_engine_render_topup_page() {
 
             <?php submit_button( __( 'Top-up Now', 'init-user-engine' ) ); ?>
         </form>
+
+        <?php init_plugin_suite_user_engine_render_bulk_jobs_panel( 'topup' ); ?>
 
         <!-- ====================
              LOG: Hiển thị dưới cùng (KHÔNG có cột User, gắn link vào Target)

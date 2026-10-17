@@ -458,9 +458,8 @@ function init_plugin_suite_user_engine_get_inbox_quick_stats( $user_id ) {
 
 	$table = init_plugin_suite_user_engine_get_inbox_table();
 
-	// Check table exists
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table}'" ) !== $table ) {
+	// Check table exists (prepared + esc_like: "_" in the table name is a LIKE wildcard).
+	if ( ! init_plugin_suite_user_engine_db_table_exists( $table ) ) {
 		return $stats;
 	}
 

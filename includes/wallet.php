@@ -346,33 +346,85 @@ function init_plugin_suite_user_engine_wallet_meta_key( $currency ) {
 }
 
 /**
+ * Find the usermeta row that stores a wallet, straight from the database (no cache).
+ *
+ * The lookup goes through the `user_id` index of the usermeta table, so it
+ * reads only the rows of one user, however big the table is. A wallet
+ * normally has one row; if old data left duplicates, the oldest row (lowest
+ * umeta_id) is the wallet, the same row get_user_meta( $user_id, $key, true )
+ * returns. The oldest row is picked here in PHP on purpose: with
+ * `ORDER BY umeta_id LIMIT 1` MySQL/MariaDB may decide to walk the primary key
+ * of the whole table instead of using the `user_id` index.
+ *
+ * @since 1.7.1
+ * @access private
+ *
+ * @param int    $user_id  User ID.
+ * @param string $meta_key Wallet meta key (see init_plugin_suite_user_engine_wallet_meta_key()).
+ * @return array|null|false {
+ *     Wallet row, null when the user has no wallet row yet, false on a database error.
+ *
+ *     @type int $id    umeta_id of the row.
+ *     @type int $value Stored balance as an integer (legacy data may be negative).
+ * }
+ */
+function init_plugin_suite_user_engine_wallet_find_row( $user_id, $meta_key ) {
+	global $wpdb;
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The live row is needed for an atomic UPDATE by primary key.
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT umeta_id, meta_value FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s",
+			absint( $user_id ),
+			$meta_key
+		),
+		ARRAY_A
+	);
+
+	if ( '' !== $wpdb->last_error ) {
+		return false;
+	}
+
+	if ( empty( $rows ) ) {
+		return null;
+	}
+
+	$wallet = null;
+
+	foreach ( $rows as $row ) {
+		$id = (int) $row['umeta_id'];
+
+		if ( null === $wallet || $id < $wallet['id'] ) {
+			$wallet = array(
+				'id'    => $id,
+				'value' => (int) $row['meta_value'],
+			);
+		}
+	}
+
+	return $wallet;
+}
+
+/**
  * Read a balance straight from the database (no cache).
  *
  * @since 1.6.8
+ * @since 1.7.1 Uses init_plugin_suite_user_engine_wallet_find_row().
  *
  * @param int    $user_id  User ID.
  * @param string $currency 'coin' or 'cash'.
  * @return int
  */
 function init_plugin_suite_user_engine_wallet_read( $user_id, $currency ) {
-	global $wpdb;
-
 	$meta_key = init_plugin_suite_user_engine_wallet_meta_key( $currency );
 
 	if ( '' === $meta_key ) {
 		return 0;
 	}
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The live balance is needed right after an atomic UPDATE.
-	$value = $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT meta_value FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s ORDER BY umeta_id ASC LIMIT 1",
-			absint( $user_id ),
-			$meta_key
-		)
-	);
+	$row = init_plugin_suite_user_engine_wallet_find_row( $user_id, $meta_key );
 
-	return max( 0, (int) $value );
+	return $row ? max( 0, $row['value'] ) : 0;
 }
 
 /**
@@ -383,12 +435,24 @@ function init_plugin_suite_user_engine_wallet_read( $user_id, $currency ) {
  *   and changes nothing unless the whole amount is available at that instant.
  * - $delta < 0 and $allow_partial = true: deduct as much as possible, never below 0.
  *
- * The balance row is changed by one UPDATE whose WHERE clause carries the
- * funds check, so concurrent requests cannot overspend. The legacy hooks
- * `init_plugin_suite_user_engine_coin_changed` / `..._cash_changed` still fire.
- * No VIP bonus or amount filter is applied here.
+ * How it works: the wallet row is first looked up through the `user_id` index,
+ * then changed by one UPDATE that targets that row by primary key. The new
+ * value is computed by the database (`meta_value + n`), never in PHP, and when
+ * spending, the funds check is part of the same UPDATE's WHERE clause, so
+ * concurrent requests can never overspend or overwrite each other. If the row
+ * changed between the lookup and the UPDATE (deleted, or the funds were spent
+ * by another request), the UPDATE changes nothing and the change is retried.
+ *
+ * Before 1.7.1 the row was selected inside the UPDATE with a subquery on the
+ * same table. MySQL/MariaDB cannot use the primary key for that, so every
+ * change scanned the whole usermeta table (about 0.3 s per change at 800k rows,
+ * growing with the table).
+ *
+ * The legacy hooks `init_plugin_suite_user_engine_coin_changed` /
+ * `..._cash_changed` still fire. No VIP bonus or amount filter is applied here.
  *
  * @since 1.6.8
+ * @since 1.7.1 Updates the wallet row by primary key instead of a self-referencing subquery.
  *
  * @param int    $user_id       User ID.
  * @param string $currency      'coin' or 'cash'.
@@ -421,40 +485,75 @@ function init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delt
 		);
 	}
 
-	$amount  = abs( $delta );
-	$before  = null;
-	$applied = null;
+	$amount   = abs( $delta );
+	$is_spend = ( $delta < 0 && ! $allow_partial );
+	$applied  = null;
 
 	for ( $attempt = 0; $attempt < 3 && null === $applied; $attempt++ ) {
+		$row = init_plugin_suite_user_engine_wallet_find_row( $user_id, $meta_key );
+
+		if ( false === $row ) {
+			return init_plugin_suite_user_engine_wallet_db_error();
+		}
+
+		if ( null === $row ) {
+			if ( $delta < 0 ) {
+				// Nothing to take from a wallet that does not exist yet.
+				return $allow_partial
+					? init_plugin_suite_user_engine_wallet_unchanged( $user_id, $currency )
+					: init_plugin_suite_user_engine_wallet_insufficient_error( $currency );
+			}
+
+			// First credit ever for this wallet: create the row. "unique" keeps a second process from adding another.
+			wp_cache_delete( $user_id, 'user_meta' );
+
+			if ( add_user_meta( $user_id, $meta_key, (string) $amount, true ) ) {
+				$applied = $delta;
+			}
+
+			// Otherwise another request created the row in the meantime: credit that row on the next attempt.
+			continue;
+		}
+
+		if ( $is_spend && $row['value'] < $amount ) {
+			// Fast fail. The UPDATE below checks the funds again, so this is never the only guard.
+			return init_plugin_suite_user_engine_wallet_insufficient_error( $currency );
+		}
+
+		if ( $delta < 0 && $allow_partial && 0 === $row['value'] ) {
+			return init_plugin_suite_user_engine_wallet_unchanged( $user_id, $currency );
+		}
+
 		if ( $delta > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic increment; the meta API cannot do it.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic increment by primary key; the meta API cannot do it.
 			$affected = $wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$wpdb->usermeta} SET meta_value = CAST(meta_value AS SIGNED) + %d WHERE umeta_id = ( SELECT id FROM ( SELECT MIN(umeta_id) AS id FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s ) AS iue_wallet_row )",
+					"UPDATE {$wpdb->usermeta} SET meta_value = CAST(meta_value AS SIGNED) + %d WHERE umeta_id = %d AND user_id = %d AND meta_key = %s",
 					$amount,
+					$row['id'],
 					$user_id,
 					$meta_key
 				)
 			);
 		} elseif ( $allow_partial ) {
-			$before = init_plugin_suite_user_engine_wallet_read( $user_id, $currency );
-
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic decrement clamped at 0.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic decrement clamped at 0, by primary key.
 			$affected = $wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$wpdb->usermeta} SET meta_value = GREATEST( 0, CAST(meta_value AS SIGNED) - %d ) WHERE umeta_id = ( SELECT id FROM ( SELECT MIN(umeta_id) AS id FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s ) AS iue_wallet_row )",
+					"UPDATE {$wpdb->usermeta} SET meta_value = GREATEST( 0, CAST(meta_value AS SIGNED) - %d ) WHERE umeta_id = %d AND user_id = %d AND meta_key = %s",
 					$amount,
+					$row['id'],
 					$user_id,
 					$meta_key
 				)
 			);
 		} else {
 			// The funds check lives in the WHERE clause: the row only changes if the balance covers the amount.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic conditional decrement.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic conditional decrement by primary key.
 			$affected = $wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$wpdb->usermeta} SET meta_value = CAST(meta_value AS SIGNED) - %d WHERE umeta_id = ( SELECT id FROM ( SELECT MIN(umeta_id) AS id FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s ) AS iue_wallet_row ) AND CAST(meta_value AS SIGNED) >= %d",
+					"UPDATE {$wpdb->usermeta} SET meta_value = CAST(meta_value AS SIGNED) - %d WHERE umeta_id = %d AND user_id = %d AND meta_key = %s AND CAST(meta_value AS SIGNED) >= %d",
 					$amount,
+					$row['id'],
 					$user_id,
 					$meta_key,
 					$amount
@@ -463,53 +562,27 @@ function init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delt
 		}
 
 		if ( false === $affected ) {
-			return new WP_Error( 'wallet_db_error', __( 'Could not update the balance. Please try again.', 'init-user-engine' ), array( 'status' => 500 ) );
+			return init_plugin_suite_user_engine_wallet_db_error();
 		}
 
 		if ( $affected > 0 ) {
-			$applied = ( $delta < 0 && $allow_partial ) ? -min( $amount, (int) $before ) : $delta;
-			break;
+			$applied = ( $delta < 0 && $allow_partial ) ? -min( $amount, max( 0, $row['value'] ) ) : $delta;
 		}
 
-		// Nothing changed: the wallet row is missing, the funds are short, or (partial) it is already 0.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Live existence check.
-		$row_exists = (bool) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT umeta_id FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s LIMIT 1",
-				$user_id,
-				$meta_key
-			)
-		);
-
-		if ( $delta < 0 ) {
-			if ( $allow_partial ) {
-				$balance = init_plugin_suite_user_engine_wallet_read( $user_id, $currency );
-
-				return array(
-					'old'   => $balance,
-					'new'   => $balance,
-					'delta' => 0,
-				);
-			}
-
-			return init_plugin_suite_user_engine_wallet_insufficient_error( $currency );
-		}
-
-		if ( $row_exists ) {
-			// A credit always changes an existing row, so the row appeared after our UPDATE: retry it.
-			continue;
-		}
-
-		// First credit ever for this wallet: create the row. "unique" keeps a second process from adding another.
-		wp_cache_delete( $user_id, 'user_meta' );
-
-		if ( add_user_meta( $user_id, $meta_key, (string) $amount, true ) ) {
-			$applied = $delta;
-		}
+		// Nothing changed: the row was deleted or (spend) the funds were spent since the lookup. Look it up again.
 	}
 
 	if ( null === $applied ) {
-		return new WP_Error( 'wallet_db_error', __( 'Could not update the balance. Please try again.', 'init-user-engine' ), array( 'status' => 500 ) );
+		if ( $is_spend ) {
+			// The database refused the funds check on every attempt.
+			return init_plugin_suite_user_engine_wallet_insufficient_error( $currency );
+		}
+
+		if ( $delta < 0 ) {
+			return init_plugin_suite_user_engine_wallet_unchanged( $user_id, $currency );
+		}
+
+		return init_plugin_suite_user_engine_wallet_db_error();
 	}
 
 	wp_cache_delete( $user_id, 'user_meta' );
@@ -530,6 +603,38 @@ function init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delt
 		'new'   => $new,
 		'delta' => $applied,
 	);
+}
+
+/**
+ * Result of a wallet change that changed nothing.
+ *
+ * @since 1.7.1
+ * @access private
+ *
+ * @param int    $user_id  User ID.
+ * @param string $currency 'coin' or 'cash'.
+ * @return array { @type int $old, @type int $new, @type int $delta }
+ */
+function init_plugin_suite_user_engine_wallet_unchanged( $user_id, $currency ) {
+	$balance = init_plugin_suite_user_engine_wallet_read( $user_id, $currency );
+
+	return array(
+		'old'   => $balance,
+		'new'   => $balance,
+		'delta' => 0,
+	);
+}
+
+/**
+ * Error returned when the database could not change a balance.
+ *
+ * @since 1.7.1
+ * @access private
+ *
+ * @return WP_Error
+ */
+function init_plugin_suite_user_engine_wallet_db_error() {
+	return new WP_Error( 'wallet_db_error', __( 'Could not update the balance. Please try again.', 'init-user-engine' ), array( 'status' => 500 ) );
 }
 
 /**

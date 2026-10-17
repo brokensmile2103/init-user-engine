@@ -268,6 +268,8 @@ function init_plugin_suite_user_engine_get_active_vip_users( $return = 'ids' ) {
     $query = new WP_User_Query( [
         'fields' => $fields,
         'number' => -1, // lấy hết
+        // Không cần tổng số dòng: bỏ SQL_CALC_FOUND_ROWS + query FOUND_ROWS() thừa.
+        'count_total' => false,
         // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         'meta_query' => [
             [

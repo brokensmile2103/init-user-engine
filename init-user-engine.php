@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.7.0
+ * Version: 1.7.1
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.0' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.1' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -51,6 +51,7 @@ require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'shortcode.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'rest-api.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'log.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'inbox.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'bulk-jobs.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'hooks.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'vip.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'referral.php';

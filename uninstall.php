@@ -31,3 +31,15 @@ $wpdb->query(
 		$wpdb->esc_like( '_iue_lock_' ) . '%'
 	)
 );
+
+// Delete background bulk jobs (Top-up / Send Notification to all members or VIPs).
+delete_option( 'iue_bulk_jobs_active' );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-off cleanup on uninstall.
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->options} WHERE option_name = %s OR option_name LIKE %s",
+		'iue_bulk_jobs',
+		$wpdb->esc_like( 'iue_bulk_job_' ) . '%'
+	)
+);
+wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_run_bulk_jobs' );

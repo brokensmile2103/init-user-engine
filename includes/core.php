@@ -98,4 +98,6 @@ function init_plugin_suite_user_engine_on_deactivation() {
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_cleanup_orphaned_inbox' );
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_unpin_expired_inbox' );
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_db_index_upgrade' );
+	// Job nền đang chạy dở sẽ tự chạy tiếp khi plugin được kích hoạt lại (xem watchdog trong includes/bulk-jobs.php).
+	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_run_bulk_jobs' );
 }

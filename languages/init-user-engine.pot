@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.7.0\n"
+"Project-Id-Version: Init User Engine 1.7.1\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-10T18:14:14+00:00\n"
+"POT-Creation-Date: 2026-10-17T14:09:58+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: init-user-engine\n"
@@ -55,6 +55,171 @@ msgstr ""
 msgid "Secret Key is valid — Cloudflare accepted the request. Site Key can only be fully confirmed once the widget actually renders in the browser (e.g. on the registration form)."
 msgstr ""
 
+#: includes/bulk-jobs.php:275
+msgid "Invalid background job."
+msgstr ""
+
+#: includes/bulk-jobs.php:307
+msgid "No members match the selected recipients."
+msgstr ""
+
+#: includes/bulk-jobs.php:311
+msgid "Could not save the background job. Please try again."
+msgstr ""
+
+#: includes/bulk-jobs.php:758
+#: includes/bulk-jobs.php:836
+msgid "Could not save the job progress. It will be retried."
+msgstr ""
+
+#. translators: %s = currency label (e.g., Coin or Cash)
+#: includes/bulk-jobs.php:785
+#: includes/tools/topup.php:121
+msgid "Admin Adjustment %s"
+msgstr ""
+
+#. translators: 1: amount, 2: currency label
+#: includes/bulk-jobs.php:787
+#: includes/tools/topup.php:123
+msgid "%1$d %2$s has been deducted by admin."
+msgstr ""
+
+#. translators: %s = currency label (e.g., Coin or Cash)
+#: includes/bulk-jobs.php:791
+#: includes/tools/topup.php:127
+msgid "Admin Top-up %s"
+msgstr ""
+
+#. translators: 1: amount, 2: currency label
+#: includes/bulk-jobs.php:793
+#: includes/tools/topup.php:129
+msgid "You have received %1$d %2$s from the admin."
+msgstr ""
+
+#: includes/bulk-jobs.php:994
+#: includes/bulk-jobs.php:1081
+#: includes/tools/inbox-statistics.php:53
+#: includes/tools/redeem-codes.php:6
+#: includes/tools/send-notification.php:6
+#: includes/tools/topup.php:6
+#: includes/tools/vip-codes.php:6
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: includes/bulk-jobs.php:1121
+msgid "Processing from this page… keep this tab open."
+msgstr ""
+
+#: includes/bulk-jobs.php:1138
+msgid "Cancelling…"
+msgstr ""
+
+#: includes/bulk-jobs.php:1142
+msgid "Queued"
+msgstr ""
+
+#: includes/bulk-jobs.php:1143
+msgid "Running"
+msgstr ""
+
+#: includes/bulk-jobs.php:1144
+msgid "Done"
+msgstr ""
+
+#: includes/bulk-jobs.php:1145
+msgid "Cancelled"
+msgstr ""
+
+#: includes/bulk-jobs.php:1146
+msgid "Failed"
+msgstr ""
+
+#: includes/bulk-jobs.php:1177
+msgid "Background Jobs"
+msgstr ""
+
+#: includes/bulk-jobs.php:1179
+msgid "\"All members\" and \"Active VIPs\" run in the background in small batches, so large sites never hit a time limit. You can leave this page; progress updates by itself while it is open."
+msgstr ""
+
+#: includes/bulk-jobs.php:1184
+msgid "Created"
+msgstr ""
+
+#: includes/bulk-jobs.php:1185
+#: includes/tools/topup.php:302
+msgid "Target"
+msgstr ""
+
+#: includes/bulk-jobs.php:1186
+msgid "Details"
+msgstr ""
+
+#: includes/bulk-jobs.php:1187
+msgid "Progress"
+msgstr ""
+
+#: includes/bulk-jobs.php:1188
+#: includes/redeem-codes-handler.php:513
+#: includes/tools/redeem-codes.php:268
+#: includes/tools/vip-codes.php:266
+#: includes/vip-codes-handler.php:552
+msgid "Status"
+msgstr ""
+
+#: includes/bulk-jobs.php:1212
+#: includes/log.php:925
+msgid "Active VIPs"
+msgstr ""
+
+#: includes/bulk-jobs.php:1212
+#: includes/log.php:926
+msgid "All members"
+msgstr ""
+
+#. translators: %s: number of members whose balance changed.
+#: includes/bulk-jobs.php:1217
+msgid "%s changed"
+msgstr ""
+
+#. translators: %s: number of messages sent.
+#: includes/bulk-jobs.php:1221
+msgid "%s sent"
+msgstr ""
+
+#. translators: 1: members processed, 2: total members, 3: percent.
+#: includes/bulk-jobs.php:1236
+msgid "%1$s / %2$s (%3$d%%)"
+msgstr ""
+
+#. translators: %s: number of members that failed.
+#: includes/bulk-jobs.php:1248
+msgid "%s failed"
+msgstr ""
+
+#. translators: %d: minutes.
+#: includes/bulk-jobs.php:1261
+msgid "No progress for %d minute."
+msgid_plural "No progress for %d minutes."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/bulk-jobs.php:1267
+msgid "Jobs run on WP-Cron. If this site runs WP-Cron from a system cron job, the job continues at its next run. If cron does not run on this site, you can process it from this page while it stays open."
+msgstr ""
+
+#: includes/bulk-jobs.php:1268
+msgid "Process from this page"
+msgstr ""
+
+#: includes/bulk-jobs.php:1273
+msgid "Stop this job? Members already processed keep what they received."
+msgstr ""
+
+#: includes/bulk-jobs.php:1277
+msgid "Cancel"
+msgstr ""
+
 #: includes/cash.php:86
 #: includes/cash.php:218
 #: includes/referral.php:108
@@ -63,7 +228,7 @@ msgstr ""
 
 #: includes/cash.php:98
 #: includes/cash.php:230
-#: init-user-engine.php:419
+#: init-user-engine.php:420
 msgid "Exchange is currently disabled."
 msgstr ""
 
@@ -144,8 +309,8 @@ msgstr ""
 #: includes/display-name-limit.php:587
 #: includes/inbox.php:675
 #: includes/redeem-codes-handler.php:15
-#: includes/user-metabox.php:548
-#: includes/user-metabox.php:640
+#: includes/user-metabox.php:547
+#: includes/user-metabox.php:639
 #: includes/vip-codes-handler.php:15
 #: includes/vip-codes-handler.php:39
 #: includes/vip-codes-handler.php:198
@@ -197,28 +362,28 @@ msgstr ""
 msgid "<strong>%1$s</strong> replied to your comment: <em>%2$s</em>"
 msgstr ""
 
-#: includes/hooks.php:460
+#: includes/hooks.php:496
 msgid "Thanks for your review!"
 msgstr ""
 
 #. translators: %1$d = EXP, %2$d = coin amount, %3$s = coin label (e.g., Coin, Xu).
-#: includes/hooks.php:463
+#: includes/hooks.php:499
 msgid "You earned +%1$d EXP and +%2$d %3$s for submitting a review. Keep it up!"
 msgstr ""
 
-#: includes/hooks.php:543
+#: includes/hooks.php:579
 msgid "This site is available to logged-in members only."
 msgstr ""
 
-#: includes/hooks.php:546
+#: includes/hooks.php:582
 msgid "Click here to log in"
 msgstr ""
 
-#: includes/hooks.php:768
+#: includes/hooks.php:804
 msgid "Your VIP status has been removed"
 msgstr ""
 
-#: includes/hooks.php:769
+#: includes/hooks.php:805
 msgid "An administrator has cancelled your VIP membership. If you think this is a mistake, please contact support."
 msgstr ""
 
@@ -362,14 +527,6 @@ msgstr ""
 msgid "Publish your first post"
 msgstr ""
 
-#: includes/log.php:925
-msgid "Active VIPs"
-msgstr ""
-
-#: includes/log.php:926
-msgid "All members"
-msgstr ""
-
 #. translators: %d = number of users.
 #: includes/log.php:931
 msgid "%d user"
@@ -402,30 +559,30 @@ msgid "You have been assigned a redeem code: %s. You can use it in the Redeem se
 msgstr ""
 
 #: includes/redeem-codes-handler.php:271
-#: init-user-engine.php:493
+#: init-user-engine.php:494
 msgid "Please enter a redeem code."
 msgstr ""
 
 #: includes/redeem-codes-handler.php:298
-#: init-user-engine.php:487
+#: init-user-engine.php:488
 msgid "Invalid redeem code."
 msgstr ""
 
 #: includes/redeem-codes-handler.php:308
 #: includes/vip-codes-handler.php:318
-#: init-user-engine.php:489
+#: init-user-engine.php:490
 msgid "This code is not active yet."
 msgstr ""
 
 #: includes/redeem-codes-handler.php:316
 #: includes/vip-codes-handler.php:326
-#: init-user-engine.php:488
+#: init-user-engine.php:489
 msgid "This code has expired."
 msgstr ""
 
 #: includes/redeem-codes-handler.php:326
 #: includes/vip-codes-handler.php:336
-#: init-user-engine.php:492
+#: init-user-engine.php:493
 msgid "This code is assigned to another user."
 msgstr ""
 
@@ -436,13 +593,13 @@ msgstr ""
 
 #: includes/redeem-codes-handler.php:357
 #: includes/vip-codes-handler.php:399
-#: init-user-engine.php:491
+#: init-user-engine.php:492
 msgid "This code has already been used up."
 msgstr ""
 
 #: includes/redeem-codes-handler.php:378
 #: includes/vip-codes-handler.php:420
-#: init-user-engine.php:490
+#: init-user-engine.php:491
 msgid "This code has already been used."
 msgstr ""
 
@@ -465,7 +622,7 @@ msgstr ""
 #: includes/redeem-codes-handler.php:455
 #: includes/redeem-codes-handler.php:472
 #: includes/vip-codes-handler.php:496
-#: init-user-engine.php:484
+#: init-user-engine.php:485
 msgid "Redeem successful!"
 msgstr ""
 
@@ -487,8 +644,8 @@ msgstr ""
 
 #: includes/redeem-codes-handler.php:506
 #: includes/tools/redeem-codes.php:263
-#: includes/tools/send-notification.php:158
-#: includes/tools/topup.php:270
+#: includes/tools/send-notification.php:194
+#: includes/tools/topup.php:301
 #: includes/tools/vip-codes.php:262
 #: includes/vip-codes-handler.php:546
 msgid "Type"
@@ -522,13 +679,6 @@ msgstr ""
 #: includes/redeem-codes-handler.php:512
 #: includes/vip-codes-handler.php:551
 msgid "Used Count"
-msgstr ""
-
-#: includes/redeem-codes-handler.php:513
-#: includes/tools/redeem-codes.php:268
-#: includes/tools/vip-codes.php:266
-#: includes/vip-codes-handler.php:552
-msgid "Status"
 msgstr ""
 
 #: includes/redeem-codes-handler.php:514
@@ -791,17 +941,17 @@ msgid "Too many registration attempts. Please try again later."
 msgstr ""
 
 #: includes/rest-api.php:451
-#: init-user-engine.php:136
+#: init-user-engine.php:137
 msgid "Username must be at least 3 characters."
 msgstr ""
 
 #: includes/rest-api.php:455
-#: init-user-engine.php:137
+#: init-user-engine.php:138
 msgid "Username can only contain letters, numbers and underscores."
 msgstr ""
 
 #: includes/rest-api.php:459
-#: init-user-engine.php:138
+#: init-user-engine.php:139
 msgid "Please enter a valid email address."
 msgstr ""
 
@@ -814,17 +964,17 @@ msgid "Email already registered."
 msgstr ""
 
 #: includes/rest-api.php:471
-#: init-user-engine.php:139
+#: init-user-engine.php:140
 msgid "Password must be at least 6 characters."
 msgstr ""
 
 #: includes/rest-api.php:475
-#: init-user-engine.php:140
+#: init-user-engine.php:141
 msgid "Password must contain both letters and numbers."
 msgstr ""
 
 #: includes/rest-api.php:523
-#: init-user-engine.php:135
+#: init-user-engine.php:136
 msgid "Welcome! Logging you in…"
 msgstr ""
 
@@ -833,7 +983,7 @@ msgid "Registration successful. You can now log in."
 msgstr ""
 
 #: includes/rest-api.php:532
-#: init-user-engine.php:141
+#: init-user-engine.php:142
 msgid "Please complete the captcha."
 msgstr ""
 
@@ -878,7 +1028,7 @@ msgstr ""
 #. translators: %s = max upload size in MB
 #: includes/rest-api.php:927
 #: includes/rest-api.php:960
-#: init-user-engine.php:441
+#: init-user-engine.php:442
 msgid "Image too large (max %sMB)"
 msgstr ""
 
@@ -900,13 +1050,13 @@ msgstr ""
 
 #: includes/rest-api.php:1183
 #: includes/rest-api.php:1194
-#: init-user-engine.php:468
-#: init-user-engine.php:470
+#: init-user-engine.php:469
+#: init-user-engine.php:471
 msgid "Please enter a valid date of birth."
 msgstr ""
 
 #: includes/rest-api.php:1188
-#: init-user-engine.php:469
+#: init-user-engine.php:470
 msgid "Date of birth cannot be in the future."
 msgstr ""
 
@@ -916,22 +1066,22 @@ msgstr ""
 
 #: includes/settings-page.php:18
 #: includes/settings-page.php:19
-#: init-user-engine.php:515
+#: init-user-engine.php:516
 msgid "Settings"
 msgstr ""
 
 #: includes/settings-page.php:27
 #: includes/settings-page.php:28
-#: includes/tools/inbox-statistics.php:757
-#: includes/tools/send-notification.php:93
-#: includes/tools/send-notification.php:205
+#: includes/tools/inbox-statistics.php:755
+#: includes/tools/send-notification.php:117
+#: includes/tools/send-notification.php:241
 msgid "Send Notification"
 msgstr ""
 
 #: includes/settings-page.php:38
 #: includes/settings-page.php:39
-#: includes/tools/inbox-statistics.php:64
-#: includes/tools/inbox-statistics.php:131
+#: includes/tools/inbox-statistics.php:63
+#: includes/tools/inbox-statistics.php:130
 msgid "Inbox Statistics"
 msgstr ""
 
@@ -1109,7 +1259,7 @@ msgid "If a Custom Lost Password URL is set below, that URL always takes priorit
 msgstr ""
 
 #: includes/settings-page.php:406
-#: init-user-engine.php:449
+#: init-user-engine.php:450
 msgid "Display Name"
 msgstr ""
 
@@ -1428,14 +1578,14 @@ msgstr ""
 
 #: includes/settings-page.php:805
 #: includes/tools/redeem-codes.php:265
-#: includes/tools/topup.php:210
+#: includes/tools/topup.php:239
 #: includes/user-metabox.php:134
 msgid "Coin"
 msgstr ""
 
 #: includes/settings-page.php:806
 #: includes/tools/redeem-codes.php:266
-#: includes/tools/topup.php:214
+#: includes/tools/topup.php:243
 #: includes/user-metabox.php:138
 msgid "Cash"
 msgstr ""
@@ -1585,11 +1735,11 @@ msgstr ""
 #. translators: %s is the currency label (e.g., Coin, Cash).
 #. translators: %s = currency label (e.g. Coin, Cash)
 #: includes/streak-restore.php:190
-#: includes/wallet.php:551
-#: init-user-engine.php:337
-#: init-user-engine.php:392
-#: init-user-engine.php:433
+#: includes/wallet.php:656
+#: init-user-engine.php:338
+#: init-user-engine.php:393
 #: init-user-engine.php:434
+#: init-user-engine.php:435
 msgid "Not enough %s."
 msgstr ""
 
@@ -1597,223 +1747,215 @@ msgstr ""
 msgid "Could not keep your streak. Please try again."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:53
-#: includes/tools/redeem-codes.php:6
-#: includes/tools/send-notification.php:6
-#: includes/tools/topup.php:6
-#: includes/tools/vip-codes.php:6
-msgid "You do not have permission to access this page."
-msgstr ""
-
-#: includes/tools/inbox-statistics.php:66
+#: includes/tools/inbox-statistics.php:65
 msgid "Inbox table not found. Please ensure the User Engine plugin is properly installed."
 msgstr ""
 
 #. translators: 1: message type, 2: deleted count
-#: includes/tools/inbox-statistics.php:87
+#: includes/tools/inbox-statistics.php:86
 msgid "Cleanup completed for type \"%1$s\". Deleted %2$d messages."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:94
+#: includes/tools/inbox-statistics.php:93
 msgid "Cleanup failed: invalid or missing type."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:137
+#: includes/tools/inbox-statistics.php:136
 msgid "Date Range:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:139
+#: includes/tools/inbox-statistics.php:138
 #: includes/user-metabox.php:335
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:140
+#: includes/tools/inbox-statistics.php:139
 msgid "Last 30 Days"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:141
+#: includes/tools/inbox-statistics.php:140
 msgid "Last 90 Days"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:142
+#: includes/tools/inbox-statistics.php:141
 msgid "All Time"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:153
-#: includes/tools/inbox-statistics.php:725
+#: includes/tools/inbox-statistics.php:152
+#: includes/tools/inbox-statistics.php:723
 #: includes/user-metabox.php:327
 msgid "Total Messages"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:161
+#: includes/tools/inbox-statistics.php:160
 msgid "Unread Messages"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:170
+#: includes/tools/inbox-statistics.php:169
 msgid "Sent Today"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:178
+#: includes/tools/inbox-statistics.php:177
 msgid "Total Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:189
+#: includes/tools/inbox-statistics.php:188
 msgid "📊 Message Types Distribution"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:206
+#: includes/tools/inbox-statistics.php:205
 msgid "No message type data available."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:212
+#: includes/tools/inbox-statistics.php:211
 msgid "🚨 Priority Levels"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:223
+#: includes/tools/inbox-statistics.php:222
 msgid "No priority data available."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:230
+#: includes/tools/inbox-statistics.php:229
 msgid "📈 Engagement Analytics"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:233
+#: includes/tools/inbox-statistics.php:232
 msgid "Overall Read Rate"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:241
+#: includes/tools/inbox-statistics.php:240
 msgid "Avg Messages per User"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:246
+#: includes/tools/inbox-statistics.php:245
 msgid "Pinned Messages"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:251
+#: includes/tools/inbox-statistics.php:250
 msgid "Active Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:264
+#: includes/tools/inbox-statistics.php:263
 msgid "📊 Daily Activity"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:285
+#: includes/tools/inbox-statistics.php:284
 msgid "No activity data for selected period."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:292
+#: includes/tools/inbox-statistics.php:291
 msgid "🏆 Top Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:301
+#: includes/tools/inbox-statistics.php:300
 msgid "total"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:303
+#: includes/tools/inbox-statistics.php:302
 msgid "unread"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:311
+#: includes/tools/inbox-statistics.php:310
 msgid "No recipient data available."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:317
+#: includes/tools/inbox-statistics.php:316
 msgid "📝 Recent Activity Summary"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:320
+#: includes/tools/inbox-statistics.php:319
 msgid "This Week:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:324
+#: includes/tools/inbox-statistics.php:323
 msgid "This Month:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:328
+#: includes/tools/inbox-statistics.php:327
 msgid "Peak Day:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:329
-#: includes/tools/inbox-statistics.php:619
+#: includes/tools/inbox-statistics.php:328
+#: includes/tools/inbox-statistics.php:618
 #: includes/user-metabox.php:201
 #: includes/user-metabox.php:343
 msgid "N/A"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:332
+#: includes/tools/inbox-statistics.php:331
 msgid "Avg Daily:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:346
+#: includes/tools/inbox-statistics.php:345
 msgid "Refresh Data"
 msgstr ""
 
 #. translators: %s is the formatted date and time when the data was last updated
-#: includes/tools/inbox-statistics.php:351
+#: includes/tools/inbox-statistics.php:350
 msgid "Last updated: %s"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:358
+#: includes/tools/inbox-statistics.php:357
 msgid "Are you sure you want to permanently delete all messages of this type? This action cannot be undone."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:362
+#: includes/tools/inbox-statistics.php:361
 msgid "Cleanup Inbox by Type"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:375
+#: includes/tools/inbox-statistics.php:374
 msgid "No types available"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:381
+#: includes/tools/inbox-statistics.php:380
 msgid "Delete All of This Type"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:384
+#: includes/tools/inbox-statistics.php:383
 msgid "Use this tool to purge messages by type in case of spikes or malformed entries."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:516
+#: includes/tools/inbox-statistics.php:515
 msgid "Unknown User"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:650
+#: includes/tools/inbox-statistics.php:649
 msgid "Inbox Overview"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:669
+#: includes/tools/inbox-statistics.php:667
 msgid "📭 Inbox Table Not Found"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:670
+#: includes/tools/inbox-statistics.php:668
 msgid "Please check your plugin installation."
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:729
+#: includes/tools/inbox-statistics.php:727
 #: includes/user-metabox.php:331
-#: init-user-engine.php:354
+#: init-user-engine.php:355
 msgid "Unread"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:733
+#: includes/tools/inbox-statistics.php:731
 msgid "Today"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:737
-#: includes/tools/send-notification.php:124
-#: includes/tools/topup.php:221
+#: includes/tools/inbox-statistics.php:735
+#: includes/tools/send-notification.php:160
+#: includes/tools/topup.php:250
 msgid "Recipients"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:743
+#: includes/tools/inbox-statistics.php:741
 msgid "Read Rate:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:747
+#: includes/tools/inbox-statistics.php:745
 msgid "Avg per User:"
 msgstr ""
 
-#: includes/tools/inbox-statistics.php:754
+#: includes/tools/inbox-statistics.php:752
 msgid "View Full Statistics"
 msgstr ""
 
@@ -1847,7 +1989,7 @@ msgid "Locked to specific user"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:188
-#: includes/tools/topup.php:269
+#: includes/tools/topup.php:300
 #: includes/tools/vip-codes.php:187
 msgid "Quantity"
 msgstr ""
@@ -1977,7 +2119,7 @@ msgstr ""
 
 #: includes/tools/redeem-codes.php:383
 #: includes/tools/vip-codes.php:378
-#: init-user-engine.php:362
+#: init-user-engine.php:363
 msgid "Delete"
 msgstr ""
 
@@ -2011,7 +2153,7 @@ msgid "User"
 msgstr ""
 
 #: includes/tools/redeem-codes.php:437
-#: includes/tools/topup.php:272
+#: includes/tools/topup.php:303
 #: includes/tools/vip-codes.php:431
 msgid "Time"
 msgstr ""
@@ -2023,7 +2165,7 @@ msgstr ""
 
 #: includes/tools/redeem-codes.php:462
 #: includes/tools/vip-codes.php:456
-#: init-user-engine.php:416
+#: init-user-engine.php:417
 msgid "Unknown"
 msgstr ""
 
@@ -2037,186 +2179,174 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: includes/tools/send-notification.php:39
+#: includes/tools/send-notification.php:37
+#: includes/tools/send-notification.php:58
 msgid "Please fill in all required fields."
 msgstr ""
 
-#: includes/tools/send-notification.php:96
+#: includes/tools/send-notification.php:120
 msgid "Notification sent successfully."
 msgstr ""
 
-#: includes/tools/send-notification.php:106
+#. translators: %s: number of members.
+#: includes/tools/send-notification.php:127
+msgid "Notification queued for %s members. It is sent in the background in small batches; progress is shown below."
+msgstr ""
+
+#: includes/tools/send-notification.php:142
 msgid "Title"
 msgstr ""
 
-#: includes/tools/send-notification.php:110
+#: includes/tools/send-notification.php:146
 msgid "Enter notification title..."
 msgstr ""
 
-#: includes/tools/send-notification.php:115
+#: includes/tools/send-notification.php:151
 msgid "Content"
 msgstr ""
 
-#: includes/tools/send-notification.php:118
+#: includes/tools/send-notification.php:154
 msgid "Write your message content here..."
 msgstr ""
 
-#: includes/tools/send-notification.php:129
-#: includes/tools/topup.php:226
+#: includes/tools/send-notification.php:165
+#: includes/tools/topup.php:255
 msgid "Selected users"
 msgstr ""
 
-#: includes/tools/send-notification.php:133
-#: includes/tools/topup.php:230
+#: includes/tools/send-notification.php:169
+#: includes/tools/topup.php:259
 msgid "Apply to active VIPs"
 msgstr ""
 
-#: includes/tools/send-notification.php:137
-#: includes/tools/topup.php:234
+#: includes/tools/send-notification.php:173
+#: includes/tools/topup.php:263
 msgid "Apply to all members"
 msgstr ""
 
-#: includes/tools/send-notification.php:139
+#: includes/tools/send-notification.php:175
 msgid "Choose who will receive this notification."
 msgstr ""
 
-#: includes/tools/send-notification.php:146
-#: includes/tools/topup.php:242
+#: includes/tools/send-notification.php:182
+#: includes/tools/topup.php:271
 msgid "Select Users"
 msgstr ""
 
-#: includes/tools/send-notification.php:149
-#: includes/tools/topup.php:245
+#: includes/tools/send-notification.php:185
+#: includes/tools/topup.php:274
 msgid "Search by username or display name..."
 msgstr ""
 
-#: includes/tools/send-notification.php:153
-#: includes/tools/topup.php:249
+#: includes/tools/send-notification.php:189
+#: includes/tools/topup.php:278
 msgid "Selected user IDs will appear here."
 msgstr ""
 
-#: includes/tools/send-notification.php:161
+#: includes/tools/send-notification.php:197
 msgid "admin"
 msgstr ""
 
-#: includes/tools/send-notification.php:162
+#: includes/tools/send-notification.php:198
 msgid "gift"
 msgstr ""
 
-#: includes/tools/send-notification.php:163
+#: includes/tools/send-notification.php:199
 msgid "event"
 msgstr ""
 
-#: includes/tools/send-notification.php:164
+#: includes/tools/send-notification.php:200
 msgid "warning"
 msgstr ""
 
-#: includes/tools/send-notification.php:170
+#: includes/tools/send-notification.php:206
 msgid "Priority"
 msgstr ""
 
-#: includes/tools/send-notification.php:173
+#: includes/tools/send-notification.php:209
 msgid "normal"
 msgstr ""
 
-#: includes/tools/send-notification.php:174
+#: includes/tools/send-notification.php:210
 msgid "high"
 msgstr ""
 
-#: includes/tools/send-notification.php:180
+#: includes/tools/send-notification.php:216
 msgid "Optional Link"
 msgstr ""
 
-#: includes/tools/send-notification.php:183
+#: includes/tools/send-notification.php:219
 msgid "https://example.com/optional-link"
 msgstr ""
 
-#: includes/tools/send-notification.php:190
+#: includes/tools/send-notification.php:226
 msgid "Pin this message"
 msgstr ""
 
-#: includes/tools/send-notification.php:191
+#: includes/tools/send-notification.php:227
 msgid "Pinned messages always appear at the top of the recipient's Inbox, above regular messages."
 msgstr ""
 
-#: includes/tools/send-notification.php:196
+#: includes/tools/send-notification.php:232
 msgid "Expire At (optional)"
 msgstr ""
 
-#: includes/tools/send-notification.php:199
+#: includes/tools/send-notification.php:235
 msgid "Optional expiration time"
 msgstr ""
 
-#: includes/tools/send-notification.php:200
+#: includes/tools/send-notification.php:236
 msgid "Only applies to pinned messages: once this time passes, the message is automatically unpinned (it stays in the Inbox as a regular message). Has no effect on unpinned messages."
 msgstr ""
 
-#: includes/tools/topup.php:47
+#: includes/tools/topup.php:36
+#: includes/tools/topup.php:63
 msgid "Please fill in all required fields correctly."
 msgstr ""
 
-#. translators: %s = currency label (e.g., Coin or Cash)
-#: includes/tools/topup.php:105
-msgid "Admin Adjustment %s"
-msgstr ""
-
-#. translators: 1: amount, 2: currency label
-#: includes/tools/topup.php:107
-msgid "%1$d %2$s has been deducted by admin."
-msgstr ""
-
-#. translators: %s = currency label (e.g., Coin or Cash)
-#: includes/tools/topup.php:111
-msgid "Admin Top-up %s"
-msgstr ""
-
-#. translators: 1: amount, 2: currency label
-#: includes/tools/topup.php:113
-msgid "You have received %1$d %2$s from the admin."
-msgstr ""
-
-#: includes/tools/topup.php:184
+#: includes/tools/topup.php:201
 msgid "Top-up Coin / Cash"
 msgstr ""
 
-#: includes/tools/topup.php:187
+#: includes/tools/topup.php:204
 msgid "Top-up successful."
 msgstr ""
 
-#: includes/tools/topup.php:197
-#: init-user-engine.php:421
+#. translators: %s: number of members.
+#: includes/tools/topup.php:211
+msgid "Top-up queued for %s members. It runs in the background in small batches; progress is shown below."
+msgstr ""
+
+#: includes/tools/topup.php:226
+#: init-user-engine.php:422
 msgid "Amount"
 msgstr ""
 
-#: includes/tools/topup.php:200
+#: includes/tools/topup.php:229
 msgid "Positive to add, negative to deduct. Deduction will not go below 0."
 msgstr ""
 
-#: includes/tools/topup.php:205
+#: includes/tools/topup.php:234
 msgid "Top-up Type"
 msgstr ""
 
-#: includes/tools/topup.php:236
+#: includes/tools/topup.php:265
 msgid "Choose who will receive this top-up."
 msgstr ""
 
-#: includes/tools/topup.php:254
+#: includes/tools/topup.php:283
 msgid "Top-up Now"
 msgstr ""
 
-#: includes/tools/topup.php:261
+#: includes/tools/topup.php:292
 msgid "Recent Top-up Logs"
 msgstr ""
 
-#: includes/tools/topup.php:264
+#: includes/tools/topup.php:295
 msgid "No logs yet."
 msgstr ""
 
-#: includes/tools/topup.php:271
-msgid "Target"
-msgstr ""
-
-#: includes/tools/topup.php:294
+#: includes/tools/topup.php:325
 msgid "Showing up to the latest 100 entries."
 msgstr ""
 
@@ -2306,7 +2436,7 @@ msgid "Level"
 msgstr ""
 
 #: includes/user-metabox.php:158
-#: init-user-engine.php:415
+#: init-user-engine.php:416
 msgid "EXP"
 msgstr ""
 
@@ -2422,28 +2552,28 @@ msgstr ""
 msgid "No inbox messages found."
 msgstr ""
 
-#: includes/user-metabox.php:561
-#: includes/user-metabox.php:654
+#: includes/user-metabox.php:560
+#: includes/user-metabox.php:653
 msgid "Security check failed."
 msgstr ""
 
-#: includes/user-metabox.php:712
+#: includes/user-metabox.php:711
 msgid "VIP status has been removed for this user."
 msgstr ""
 
-#: includes/user-metabox.php:713
+#: includes/user-metabox.php:712
 msgid "Failed to remove VIP status."
 msgstr ""
 
-#: includes/user-metabox.php:739
+#: includes/user-metabox.php:738
 msgid "User is now banned from uploading avatar."
 msgstr ""
 
-#: includes/user-metabox.php:740
+#: includes/user-metabox.php:739
 msgid "User is now allowed to upload avatar."
 msgstr ""
 
-#: includes/user-metabox.php:741
+#: includes/user-metabox.php:740
 msgid "Failed to toggle avatar upload permission."
 msgstr ""
 
@@ -2524,7 +2654,7 @@ msgid "Captcha expired or already used. Please refresh and try again."
 msgstr ""
 
 #: includes/utils.php:361
-#: init-user-engine.php:161
+#: init-user-engine.php:162
 msgid "Captcha verification failed. Please try again."
 msgstr ""
 
@@ -2565,7 +2695,7 @@ msgid "You received %d day(s) of VIP membership."
 msgstr ""
 
 #: includes/vip-codes-handler.php:513
-#: init-user-engine.php:500
+#: init-user-engine.php:501
 msgid "VIP code redeemed successfully!"
 msgstr ""
 
@@ -2613,637 +2743,636 @@ msgstr ""
 msgid "Another request is being processed. Please try again in a moment."
 msgstr ""
 
-#: includes/wallet.php:411
+#: includes/wallet.php:475
 msgid "Invalid wallet."
 msgstr ""
 
-#: includes/wallet.php:466
-#: includes/wallet.php:512
+#: includes/wallet.php:637
 msgid "Could not update the balance. Please try again."
 msgstr ""
 
-#: init-user-engine.php:129
-#: init-user-engine.php:177
+#: init-user-engine.php:130
+#: init-user-engine.php:178
 msgid "Login"
 msgstr ""
 
-#: init-user-engine.php:130
+#: init-user-engine.php:131
 #: templates/register-form.php:55
 msgid "Register"
 msgstr ""
 
-#: init-user-engine.php:131
+#: init-user-engine.php:132
 msgid "Back to login"
 msgstr ""
 
-#: init-user-engine.php:132
+#: init-user-engine.php:133
 #: templates/login-form.php:50
 #: templates/login-form.php:54
 msgid "Create a new account"
 msgstr ""
 
-#: init-user-engine.php:133
+#: init-user-engine.php:134
 msgid "Registering..."
 msgstr ""
 
-#: init-user-engine.php:134
+#: init-user-engine.php:135
 msgid "Welcome! You can now log in."
 msgstr ""
 
-#: init-user-engine.php:142
+#: init-user-engine.php:143
 msgid "Captcha not loaded. Please wait..."
 msgstr ""
 
-#: init-user-engine.php:143
+#: init-user-engine.php:144
 msgid "Captcha expired. Loading new one..."
 msgstr ""
 
-#: init-user-engine.php:144
+#: init-user-engine.php:145
 msgid "Too many attempts. Please wait before trying again."
 msgstr ""
 
-#: init-user-engine.php:145
+#: init-user-engine.php:146
 msgid "Registration failed"
 msgstr ""
 
-#: init-user-engine.php:146
+#: init-user-engine.php:147
 #: templates/lostpassword-form.php:25
 msgid "Username or Email Address"
 msgstr ""
 
-#: init-user-engine.php:147
+#: init-user-engine.php:148
 #: templates/register-form.php:17
 msgid "Password"
 msgstr ""
 
-#: init-user-engine.php:148
+#: init-user-engine.php:149
 msgid "This username does not exist."
 msgstr ""
 
-#: init-user-engine.php:149
+#: init-user-engine.php:150
 msgid "This email address is not registered."
 msgstr ""
 
-#: init-user-engine.php:150
+#: init-user-engine.php:151
 msgid "Incorrect password. Please try again."
 msgstr ""
 
-#: init-user-engine.php:151
+#: init-user-engine.php:152
 msgid "Please enter your username or email address."
 msgstr ""
 
-#: init-user-engine.php:152
+#: init-user-engine.php:153
 msgid "Please enter your password."
 msgstr ""
 
-#: init-user-engine.php:153
+#: init-user-engine.php:154
 msgid "Incorrect username or password. Please try again."
 msgstr ""
 
-#: init-user-engine.php:154
+#: init-user-engine.php:155
 msgid "Lost Password"
 msgstr ""
 
-#: init-user-engine.php:155
-#: init-user-engine.php:425
-#: init-user-engine.php:482
+#: init-user-engine.php:156
+#: init-user-engine.php:426
+#: init-user-engine.php:483
 msgid "Processing..."
 msgstr ""
 
-#: init-user-engine.php:156
+#: init-user-engine.php:157
 msgid "Check your email for the confirmation link to reset your password."
 msgstr ""
 
-#: init-user-engine.php:157
+#: init-user-engine.php:158
 msgid "Please enter a username or email address."
 msgstr ""
 
-#: init-user-engine.php:158
+#: init-user-engine.php:159
 msgid "There is no account with that username or email address."
 msgstr ""
 
-#: init-user-engine.php:159
+#: init-user-engine.php:160
 msgid "The email could not be sent. Please contact the site administrator."
 msgstr ""
 
-#: init-user-engine.php:160
+#: init-user-engine.php:161
 msgid "Password reset is not allowed for this account."
 msgstr ""
 
-#: init-user-engine.php:162
+#: init-user-engine.php:163
 msgid "Could not process your request. Please try again."
 msgstr ""
 
-#: init-user-engine.php:315
+#: init-user-engine.php:316
 msgid "Checked in"
 msgstr ""
 
-#: init-user-engine.php:316
+#: init-user-engine.php:317
 msgid "Checked in successfully!"
 msgstr ""
 
-#: init-user-engine.php:317
+#: init-user-engine.php:318
 msgid "You received your reward!"
 msgstr ""
 
-#: init-user-engine.php:318
+#: init-user-engine.php:319
 msgid "Still too early to claim!"
 msgstr ""
 
-#: init-user-engine.php:319
+#: init-user-engine.php:320
 msgid "Checking in..."
 msgstr ""
 
-#: init-user-engine.php:321
+#: init-user-engine.php:322
 msgid "Keep Your Streak"
 msgstr ""
 
 #. translators: %s = currency label (e.g. Coin, Xu)
-#: init-user-engine.php:324
+#: init-user-engine.php:325
 msgid "You missed a few days. Spend %s to keep your streak going, or check in now and start over."
 msgstr ""
 
-#: init-user-engine.php:327
+#: init-user-engine.php:328
 msgid "Current streak"
 msgstr ""
 
-#: init-user-engine.php:328
+#: init-user-engine.php:329
 msgid "Missed days"
 msgstr ""
 
-#: init-user-engine.php:329
+#: init-user-engine.php:330
 msgid "Cost"
 msgstr ""
 
-#: init-user-engine.php:330
+#: init-user-engine.php:331
 msgid "Your balance"
 msgstr ""
 
-#: init-user-engine.php:331
+#: init-user-engine.php:332
 msgid "Free"
 msgstr ""
 
-#: init-user-engine.php:332
+#: init-user-engine.php:333
 msgid "Keep Streak"
 msgstr ""
 
-#: init-user-engine.php:333
+#: init-user-engine.php:334
 msgid "Reset Streak & Check In"
 msgstr ""
 
-#: init-user-engine.php:334
+#: init-user-engine.php:335
 msgid "Choosing to reset still checks you in today, but your streak restarts from 1."
 msgstr ""
 
-#: init-user-engine.php:340
+#: init-user-engine.php:341
 msgid "Streak kept and checked in successfully!"
-msgstr ""
-
-#: init-user-engine.php:342
-#: init-user-engine.php:365
-msgid "All messages marked as read."
 msgstr ""
 
 #: init-user-engine.php:343
 #: init-user-engine.php:366
-msgid "All messages deleted."
+msgid "All messages marked as read."
 msgstr ""
 
 #: init-user-engine.php:344
-msgid "Error!"
+#: init-user-engine.php:367
+msgid "All messages deleted."
 msgstr ""
 
 #: init-user-engine.php:345
+msgid "Error!"
+msgstr ""
+
+#: init-user-engine.php:346
 #: templates/dashboard.php:105
 msgid "Transaction History"
 msgstr ""
 
-#: init-user-engine.php:346
+#: init-user-engine.php:347
 #: templates/dashboard.php:99
 msgid "Daily Tasks"
 msgstr ""
 
-#: init-user-engine.php:347
+#: init-user-engine.php:348
 msgid "No daily tasks found."
 msgstr ""
 
-#: init-user-engine.php:348
+#: init-user-engine.php:349
 msgid "Failed to load daily tasks."
 msgstr ""
 
-#: init-user-engine.php:349
+#: init-user-engine.php:350
 #: templates/dashboard.php:89
 msgid "Inbox"
 msgstr ""
 
-#: init-user-engine.php:350
+#: init-user-engine.php:351
 msgid "No messages in your inbox."
 msgstr ""
 
-#: init-user-engine.php:351
+#: init-user-engine.php:352
 msgid "No messages in this category."
 msgstr ""
 
-#: init-user-engine.php:352
+#: init-user-engine.php:353
 msgid "View all messages"
 msgstr ""
 
-#: init-user-engine.php:353
+#: init-user-engine.php:354
 msgid "All"
 msgstr ""
 
-#: init-user-engine.php:355
+#: init-user-engine.php:356
 msgid "System"
 msgstr ""
 
-#: init-user-engine.php:356
+#: init-user-engine.php:357
 msgid "Rewards"
 msgstr ""
 
-#: init-user-engine.php:357
+#: init-user-engine.php:358
 msgid "Activity"
 msgstr ""
 
-#: init-user-engine.php:358
-#: init-user-engine.php:465
+#: init-user-engine.php:359
+#: init-user-engine.php:466
 msgid "Other"
 msgstr ""
 
-#: init-user-engine.php:359
+#: init-user-engine.php:360
 msgid "Mark All as Read"
 msgstr ""
 
-#: init-user-engine.php:360
+#: init-user-engine.php:361
 msgid "Delete All"
 msgstr ""
 
-#: init-user-engine.php:361
+#: init-user-engine.php:362
 msgid "Mark as Read"
 msgstr ""
 
-#: init-user-engine.php:363
+#: init-user-engine.php:364
 msgid "No title"
 msgstr ""
 
-#: init-user-engine.php:364
+#: init-user-engine.php:365
 msgid "Failed to load inbox."
 msgstr ""
 
-#: init-user-engine.php:367
+#: init-user-engine.php:368
 msgid "Click again to confirm"
 msgstr ""
 
-#: init-user-engine.php:369
+#: init-user-engine.php:370
 #: templates/dashboard.php:82
 msgid "VIP Membership"
 msgstr ""
 
-#: init-user-engine.php:370
+#: init-user-engine.php:371
 msgid "Current status:"
 msgstr ""
 
-#: init-user-engine.php:371
+#: init-user-engine.php:372
 msgid "VIP until"
 msgstr ""
 
-#: init-user-engine.php:372
+#: init-user-engine.php:373
 msgid "Not a VIP"
 msgstr ""
 
-#: init-user-engine.php:374
+#: init-user-engine.php:375
 msgid "VIP 7 days"
 msgstr ""
 
-#: init-user-engine.php:375
+#: init-user-engine.php:376
 msgid "VIP 30 days"
 msgstr ""
 
-#: init-user-engine.php:376
+#: init-user-engine.php:377
 msgid "VIP 90 days"
 msgstr ""
 
-#: init-user-engine.php:377
+#: init-user-engine.php:378
 msgid "VIP 180 days"
 msgstr ""
 
-#: init-user-engine.php:378
+#: init-user-engine.php:379
 msgid "VIP 360 days"
 msgstr ""
 
-#: init-user-engine.php:379
+#: init-user-engine.php:380
 msgid "VIP Lifetime"
 msgstr ""
 
-#: init-user-engine.php:381
+#: init-user-engine.php:382
 msgid "Note:"
 msgstr ""
 
-#: init-user-engine.php:382
+#: init-user-engine.php:383
 msgid "VIP will be extended if purchased again before expiration."
 msgstr ""
 
-#: init-user-engine.php:384
+#: init-user-engine.php:385
 msgid "Buy Now"
 msgstr ""
 
-#: init-user-engine.php:385
+#: init-user-engine.php:386
 msgid "VIP purchased successfully!"
 msgstr ""
 
-#: init-user-engine.php:386
+#: init-user-engine.php:387
 msgid "Could not purchase VIP package."
 msgstr ""
 
-#: init-user-engine.php:387
+#: init-user-engine.php:388
 msgid "An error occurred during VIP purchase."
 msgstr ""
 
-#: init-user-engine.php:388
+#: init-user-engine.php:389
 msgid "Unavailable"
 msgstr ""
 
 #. translators: %s = currency label (e.g. Coin, Cash)
-#: init-user-engine.php:390
 #: init-user-engine.php:391
+#: init-user-engine.php:392
 msgid "Pay with %s"
 msgstr ""
 
-#: init-user-engine.php:394
+#: init-user-engine.php:395
 msgid "Already VIP"
 msgstr ""
 
-#: init-user-engine.php:395
+#: init-user-engine.php:396
 msgid "VIP activation is currently disabled by the site admin."
 msgstr ""
 
-#: init-user-engine.php:396
+#: init-user-engine.php:397
 msgid "You already have an active VIP. Please wait until it expires before activating it again."
 msgstr ""
 
-#: init-user-engine.php:398
+#: init-user-engine.php:399
 msgid "Invite Friends"
 msgstr ""
 
-#: init-user-engine.php:399
+#: init-user-engine.php:400
 msgid "Invite your friends and earn rewards"
 msgstr ""
 
-#: init-user-engine.php:400
+#: init-user-engine.php:401
 msgid "Your Referral Code"
 msgstr ""
 
-#: init-user-engine.php:401
+#: init-user-engine.php:402
 msgid "Copy Link"
 msgstr ""
 
-#: init-user-engine.php:402
+#: init-user-engine.php:403
 msgid "Copied!"
 msgstr ""
 
-#: init-user-engine.php:403
+#: init-user-engine.php:404
 msgid "Share via"
 msgstr ""
 
-#: init-user-engine.php:404
+#: init-user-engine.php:405
 msgid "You and your friend will receive bonus when they register."
 msgstr ""
 
-#: init-user-engine.php:405
+#: init-user-engine.php:406
 msgid "Referral Benefits"
 msgstr ""
 
-#: init-user-engine.php:406
+#: init-user-engine.php:407
 msgid "You get:"
 msgstr ""
 
-#: init-user-engine.php:407
+#: init-user-engine.php:408
 msgid "Your friend gets:"
 msgstr ""
 
-#: init-user-engine.php:408
+#: init-user-engine.php:409
 msgid "Your Referral History"
 msgstr ""
 
-#: init-user-engine.php:409
+#: init-user-engine.php:410
 msgid "No referral data yet."
 msgstr ""
 
-#: init-user-engine.php:410
+#: init-user-engine.php:411
 msgid "Could not load referral history."
 msgstr ""
 
-#: init-user-engine.php:412
+#: init-user-engine.php:413
 msgid "No EXP activity yet."
 msgstr ""
 
-#: init-user-engine.php:413
+#: init-user-engine.php:414
 msgid "Experience Log"
 msgstr ""
 
-#: init-user-engine.php:414
+#: init-user-engine.php:415
 msgid "Failed to load experience log."
 msgstr ""
 
-#: init-user-engine.php:418
+#: init-user-engine.php:419
 #: templates/dashboard.php:112
 msgid "Exchange"
 msgstr ""
 
-#: init-user-engine.php:420
+#: init-user-engine.php:421
 msgid "Rate"
 msgstr ""
 
-#: init-user-engine.php:422
+#: init-user-engine.php:423
 msgid "You will receive"
 msgstr ""
 
-#: init-user-engine.php:423
+#: init-user-engine.php:424
 msgid "Max"
 msgstr ""
 
-#: init-user-engine.php:424
+#: init-user-engine.php:425
 msgid "Convert"
 msgstr ""
 
-#: init-user-engine.php:426
+#: init-user-engine.php:427
 msgid "Enter a valid amount."
 msgstr ""
 
-#: init-user-engine.php:427
+#: init-user-engine.php:428
 msgid "Exchanged successfully!"
 msgstr ""
 
-#: init-user-engine.php:428
+#: init-user-engine.php:429
 msgid "Exchange failed."
 msgstr ""
 
-#: init-user-engine.php:429
+#: init-user-engine.php:430
 msgid "Conversion is irreversible. Please review before confirming."
 msgstr ""
 
 #. translators: %1$s = source currency label, %2$s = target currency label
-#: init-user-engine.php:431
 #: init-user-engine.php:432
+#: init-user-engine.php:433
 msgid "%1$s to %2$s"
 msgstr ""
 
-#: init-user-engine.php:436
+#: init-user-engine.php:437
 msgid "Upload Avatar"
 msgstr ""
 
-#: init-user-engine.php:437
+#: init-user-engine.php:438
 msgid "Drop image here or click to upload"
 msgstr ""
 
-#: init-user-engine.php:438
+#: init-user-engine.php:439
 msgid "Save Avatar"
 msgstr ""
 
-#: init-user-engine.php:439
+#: init-user-engine.php:440
 msgid "Uploading..."
 msgstr ""
 
-#: init-user-engine.php:440
+#: init-user-engine.php:441
 msgid "Please select a valid image."
 msgstr ""
 
 #. translators: %s = max upload size in MB
-#: init-user-engine.php:442
+#: init-user-engine.php:443
 msgid "Upload failed. Please try again."
 msgstr ""
 
-#: init-user-engine.php:443
+#: init-user-engine.php:444
 msgid "Remove Avatar"
 msgstr ""
 
-#: init-user-engine.php:444
+#: init-user-engine.php:445
 msgid "Are you sure you want to remove your avatar?"
 msgstr ""
 
-#: init-user-engine.php:445
+#: init-user-engine.php:446
 msgid "Removing..."
 msgstr ""
 
-#: init-user-engine.php:446
+#: init-user-engine.php:447
 msgid "Failed to remove avatar. Please try again."
 msgstr ""
 
-#: init-user-engine.php:448
+#: init-user-engine.php:449
 #: templates/dashboard.php:139
 msgid "Edit Profile"
 msgstr ""
 
-#: init-user-engine.php:450
+#: init-user-engine.php:451
 msgid "Your public display name"
 msgstr ""
 
-#: init-user-engine.php:451
+#: init-user-engine.php:452
 msgid "Bio"
 msgstr ""
 
-#: init-user-engine.php:452
+#: init-user-engine.php:453
 msgid "Short self introduction"
 msgstr ""
 
-#: init-user-engine.php:453
+#: init-user-engine.php:454
 msgid "New Password"
 msgstr ""
 
-#: init-user-engine.php:454
+#: init-user-engine.php:455
 msgid "Leave blank to keep current password"
 msgstr ""
 
-#: init-user-engine.php:456
+#: init-user-engine.php:457
 msgid "https://facebook.com/yourprofile"
 msgstr ""
 
-#: init-user-engine.php:457
+#: init-user-engine.php:458
 msgid "https://twitter.com/yourhandle"
 msgstr ""
 
-#: init-user-engine.php:458
+#: init-user-engine.php:459
 msgid "Your Discord username or invite"
 msgstr ""
 
-#: init-user-engine.php:459
+#: init-user-engine.php:460
 msgid "https://yourwebsite.com"
 msgstr ""
 
-#: init-user-engine.php:461
+#: init-user-engine.php:462
 msgid "Gender"
 msgstr ""
 
-#: init-user-engine.php:462
+#: init-user-engine.php:463
 msgid "Prefer not to say"
 msgstr ""
 
-#: init-user-engine.php:463
+#: init-user-engine.php:464
 msgid "Male"
 msgstr ""
 
-#: init-user-engine.php:464
+#: init-user-engine.php:465
 msgid "Female"
 msgstr ""
 
-#: init-user-engine.php:467
+#: init-user-engine.php:468
 msgid "Date of Birth"
 msgstr ""
 
-#: init-user-engine.php:472
+#: init-user-engine.php:473
 msgid "Save"
 msgstr ""
 
-#: init-user-engine.php:473
+#: init-user-engine.php:474
 msgid "Profile updated successfully!"
 msgstr ""
 
-#: init-user-engine.php:474
+#: init-user-engine.php:475
 msgid "Could not update profile."
 msgstr ""
 
-#: init-user-engine.php:475
+#: init-user-engine.php:476
 msgid "Could not load profile data."
 msgstr ""
 
-#: init-user-engine.php:476
+#: init-user-engine.php:477
 msgid "An error occurred while updating."
 msgstr ""
 
-#: init-user-engine.php:478
+#: init-user-engine.php:479
 msgid "Redeem now"
 msgstr ""
 
-#: init-user-engine.php:479
+#: init-user-engine.php:480
 #: templates/dashboard.php:125
 msgid "Redeem Code"
 msgstr ""
 
-#: init-user-engine.php:480
+#: init-user-engine.php:481
 msgid "Enter redeem code..."
 msgstr ""
 
-#: init-user-engine.php:481
+#: init-user-engine.php:482
 msgid "Redeem"
 msgstr ""
 
-#: init-user-engine.php:485
+#: init-user-engine.php:486
 msgid "You will receive:"
 msgstr ""
 
-#: init-user-engine.php:495
+#: init-user-engine.php:496
 msgid "Failed to redeem code."
 msgstr ""
 
-#: init-user-engine.php:497
+#: init-user-engine.php:498
 #: templates/dashboard.php:132
 msgid "Redeem VIP Code"
 msgstr ""
 
-#: init-user-engine.php:498
+#: init-user-engine.php:499
 msgid "Enter VIP code..."
 msgstr ""
 
-#: init-user-engine.php:499
+#: init-user-engine.php:500
 msgid "You will receive VIP membership days."
 msgstr ""
 

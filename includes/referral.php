@@ -111,15 +111,19 @@ function init_plugin_suite_user_engine_api_get_referral_log( WP_REST_Request $re
     global $wpdb;
 
     // Tìm các user có meta iue_referred_by = $user_id
+    //
+    // So sánh meta_value dạng CHUỖI (%s), đúng như update_user_meta() đã lưu.
+    // Trước 1.7.1 dùng %d: meta_value là LONGTEXT nên MySQL phải ép kiểu
+    // từng dòng sang số trước khi so sánh (và '12abc' cũng khớp với 12).
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $user_ids = $wpdb->get_col( $wpdb->prepare(
         "
         SELECT user_id
         FROM {$wpdb->usermeta}
         WHERE meta_key = 'iue_referred_by'
-        AND meta_value = %d
+        AND meta_value = %s
         ",
-        $user_id
+        (string) absint( $user_id )
     ) );
 
     if ( empty( $user_ids ) ) {
@@ -129,9 +133,18 @@ function init_plugin_suite_user_engine_api_get_referral_log( WP_REST_Request $re
         ] );
     }
 
+    $user_ids = array_map( 'absint', $user_ids );
+
+    // Nạp toàn bộ user được mời (kèm usermeta) bằng 1 lần query thay vì
+    // 1 query/user trong vòng lặp get_userdata() bên dưới.
+    cache_users( $user_ids );
+
     // Lấy thông tin cơ bản của những user được mời
     $data = array_map( function( $ref_user_id ) {
-        $user      = get_userdata( $ref_user_id );
+        $user = get_userdata( $ref_user_id );
+        if ( ! $user ) {
+            return null;
+        }
         $timestamp = strtotime( $user->user_registered );
 
         return [
@@ -142,6 +155,8 @@ function init_plugin_suite_user_engine_api_get_referral_log( WP_REST_Request $re
             'timestamp' => $timestamp,
         ];
     }, $user_ids );
+
+    $data = array_values( array_filter( $data ) );
 
     return rest_ensure_response( [
         'total' => count( $data ),

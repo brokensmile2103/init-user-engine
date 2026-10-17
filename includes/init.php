@@ -95,29 +95,25 @@ function init_plugin_suite_user_engine_check_table() {
 
     // REDEEM CODE
     $redeem_table = $wpdb->prefix . 'init_user_engine_redeem_codes';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$redeem_table'" ) !== $redeem_table ) {
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $redeem_table ) ) {
         init_plugin_suite_user_engine_create_redeem_code_table();
     }
 
     // VIP CODE
     $vip_code_table = $wpdb->prefix . 'init_user_engine_vip_codes';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$vip_code_table'" ) !== $vip_code_table ) {
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $vip_code_table ) ) {
         init_plugin_suite_user_engine_create_vip_code_table();
     }
 
     // TRANSACTION LOG
     $txn_table = $wpdb->prefix . 'init_user_engine_transaction_log';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$txn_table'" ) !== $txn_table ) {
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $txn_table ) ) {
         init_plugin_suite_user_engine_create_transaction_log_table();
     }
 
     // EXP LOG
     $exp_table = $wpdb->prefix . 'init_user_engine_exp_log';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$exp_table'" ) !== $exp_table ) {
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $exp_table ) ) {
         init_plugin_suite_user_engine_create_exp_log_table();
     }
 
@@ -338,10 +334,8 @@ function init_plugin_suite_user_engine_maybe_migrate_logs() {
     $txn_table = $wpdb->prefix . 'init_user_engine_transaction_log';
     $exp_table = $wpdb->prefix . 'init_user_engine_exp_log';
 
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$txn_table'" ) !== $txn_table ) return;
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$exp_table'" ) !== $exp_table ) return;
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $txn_table ) ) return;
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $exp_table ) ) return;
 
     $batch_size = 200;
 

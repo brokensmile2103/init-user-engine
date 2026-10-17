@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -222,6 +222,33 @@ You can search users, customize message type, link, priority, and even set expir
 
 == Changelog ==
 
+= 1.7.1 – October 17, 2026 =
+- Performance (large sites): every Coin/Cash change scanned the whole `usermeta` table. The atomic `UPDATE` added in 1.6.8 picked the wallet row with a subquery on the same table (`WHERE umeta_id = ( SELECT id FROM ( SELECT MIN(umeta_id) … ) )`), which MySQL/MariaDB cannot resolve through the primary key: `EXPLAIN` showed a full index scan (`type: index`, about 800k rows). In our 800k-row benchmark each check-in, reward, purchase, exchange or top-up spent about 0.3 seconds in the database, and the cost grew with the table
+  - The wallet row is now looked up through the `user_id` index (only the rows of that one user are read), then changed by an `UPDATE … WHERE umeta_id = …` on the primary key: 1 row examined instead of the whole table, under 1 ms in the same benchmark
+  - Still atomic: the new value is computed by the database and the funds check stays in the `WHERE` clause of the `UPDATE`. If the row changes between the lookup and the `UPDATE`, nothing is written and the change is retried. Tested with 40 parallel requests on one wallet: no balance spent twice, no credit lost
+  - A plain single-table `UPDATE` by primary key: no multi-table `UPDATE … JOIN`, deterministic for statement-based replication, and no new index on WordPress core tables
+  - The admin **Top-up** tool (all members / VIP members) gets the same speed-up, since it makes one wallet change per member
+  - Balance reads (`init_plugin_suite_user_engine_wallet_read()`, the `X-IUE-Coin` / `X-IUE-Cash` headers, `GET /balance`) no longer use `ORDER BY umeta_id LIMIT 1`, which can make MySQL walk the primary key instead of the `user_id` index. The oldest row is picked in PHP, so the result is the same
+  - Return values, error codes and the `init_plugin_suite_user_engine_coin_changed` / `..._cash_changed` actions are unchanged
+- Performance: the **Referral log** (`GET /referral-log`) now compares `iue_referred_by` as a string, the way it is stored, instead of making the database convert every value to a number (which also matched values such as `12abc`). The invited members are loaded with one query instead of one query per member
+- Performance: the list of active VIP members (used by the Top-up and Send Notification tools) no longer asks the database to count rows it never uses (`SQL_CALC_FOUND_ROWS`)
+- Code quality: table checks in the upgrade routine, the log migration, the Edit User box and Inbox Statistics now use the prepared, `esc_like()`-escaped helper instead of raw `SHOW TABLES LIKE '…'` queries
+- Performance (large sites): **Top-up Coin/Cash** and **Send Notification** to *All members* or *Active VIPs* now run in the background through WP-Cron. Before, `get_users()` loaded every user ID inside the admin request, then made one wallet change, one log row and one Inbox message per member; with tens of thousands of members the request could hit the PHP time limit halfway, with no way to know who had been paid
+  - Members are walked by user ID in batches (100 for top-ups, 500 for notifications) with `ID > cursor`, never all at once and never with `OFFSET`. Each slice runs for up to 20 seconds (or half of `max_execution_time` when lower), then the next slice is scheduled right away
+  - Crash-safe top-ups: for each member, the wallet change, the transaction log row, the Inbox message and the job progress are saved in one database transaction. We killed PHP (`kill -9`) in the middle of a member: that member was rolled back and handled again, and all 12,003 test members were paid exactly once
+  - Notifications: if PHP dies during a batch, the next run skips the members who already got the message, so nobody gets it twice
+  - New **Background Jobs** table on both pages with progress, members changed / messages sent, failures and status, plus a **Cancel** button (members already processed keep what they received). It refreshes by itself while the page is open
+  - Jobs only ever run from WP-Cron: the built-in WP-Cron, or your system cron job if the site sets `DISABLE_WP_CRON`. The admin page never runs a job by itself, so heavy work you moved to a system cron stays there. When PHP has no time limit (WP-CLI, or `php wp-cron.php` run from the command line by a system cron job), each run processes up to 60 seconds of work
+  - If a job makes no progress for 15 minutes (filter `init_plugin_suite_user_engine_bulk_job_stall_minutes`; keep it longer than your system cron interval), its row shows a warning and a **Process from this page** button. Only after the admin clicks it does the open page process the job, a few seconds per request, sharing the same lock as WP-Cron
+  - One job runs at a time, oldest first, and a site-wide lock keeps two processes from running the queue together. Job progress is read straight from the database, never from the object cache. A job interrupted by deactivating the plugin continues once it is activated again
+  - The same members as before are targeted (members of the current site on Multisite; for VIPs, the members whose VIP was active when the job was created)
+  - *Selected users* still runs right away, as before
+  - In our benchmark the background top-up handled 12,003 members at about 2.7 ms per member, and the notification to 12,003 members took less than one second of database work
+  - Developers: for these two targets, `init_plugin_suite_user_engine_admin_send_notice` now fires once per batch, with the members of that batch. New actions `init_plugin_suite_user_engine_bulk_job_created` and `init_plugin_suite_user_engine_bulk_job_finished`, new filters `init_plugin_suite_user_engine_bulk_job_time_budget`, `init_plugin_suite_user_engine_bulk_job_batch_size`, `init_plugin_suite_user_engine_bulk_job_query_args` and `init_plugin_suite_user_engine_bulk_job_stall_minutes`
+- Performance: avatars in comment lists. Each member's avatar reads the `iue_custom_avatar` user meta, which cost one query per commenter not yet in the cache. The users and user meta of the whole list are now loaded at once with `cache_users()`: 40 comments from 40 different members went from 82 queries to 5. This covers the comment template, the Recent Comments block/widget, the wp-admin Comments screen and the REST API
+- Fixed: a Coin Top-up that included VIP members wrote their amount *with* the VIP Coin bonus into the transaction log, while the balance was changed without it (Top-up is a raw adjustment). The log now shows the amount actually applied
+- Translations: POT file regenerated with WP-CLI, Vietnamese translation updated
+
 = 1.7.0 – October 11, 2026 =
 - New: **Display Name Change Limit** (Init User Engine → Settings → Display Name). Members can change their display name only once every N days, like TikTok (for example 7). Set to 0 for unlimited changes; 0 is the default, so nothing changes until you set it
   - Enforced everywhere a member can change their own display name, not only in the Edit Profile modal: `wp-admin/profile.php` (WordPress lets members change it freely there), the core REST API (`/wp/v2/users/me`), WooCommerce Account details, and any other plugin that calls `wp_update_user()` for the signed-in member. The check runs in `wp_pre_insert_user_data`, so a change made too early keeps the current display name
@@ -238,142 +265,9 @@ You can search users, customize message type, link, priority, and even set expir
 - Fixed: a display name containing a double quote (`"`) broke the display name field in the Edit Profile modal. The value is now set safely
 - Translations: POT file regenerated with WP-CLI, Vietnamese translation updated
 
-= 1.6.9 – October 10, 2026 =
-- New: **Live balance sync**. Every Coin/Cash number on the page (`.iue-value-coin`, `.iue-value-cash` and any element with `data-iue-balance="coin|cash"`) now updates as soon as the balance changes, whatever changed it. Before, check-in updated the dashboard but buying VIP did not, and every theme/plugin feature had to update the number itself
-  - Every REST or admin-ajax response that changed the signed-in member's own balance now carries `X-IUE-Coin` / `X-IUE-Cash` headers with the final values (read from the database at the end of the request). Never sent on full page loads, and only for the member's own balance
-  - The member script reads these headers from every `fetch()` / `XMLHttpRequest` response (headers only, the response body is never touched), so any feature built on Init User Engine updates the balance with no extra code
-  - Other open tabs of the same member follow through `BroadcastChannel`, and a page restored from the browser's back/forward cache asks the server for the real balance
-  - New endpoint `GET /wp-json/inituser/v1/balance` (signed-in members only, not cached)
-  - New JavaScript API `window.InitUserEngineBalance` (`set()`, `get()`, `refresh()`) and event `iue:balance:change` on `document` (detail `{ coin, cash, changed }`)
-  - New PHP helper `init_plugin_suite_user_engine_get_balances( $user_id )` and filter `init_plugin_suite_user_engine_balance_sync_enabled`
-- VIP purchase and redeem code responses now include the new `balances`
-- Fixed: after buying VIP the dashboard balance did not change, and the VIP modal kept the balance from when it was opened, so the "can afford" state of the packages was wrong after a purchase or a check-in. With VIP stacking disabled, the packages now switch to "Already VIP" right after a purchase
-- Fixed: redeeming a code added the code amount to the number shown on screen, which was wrong for VIP members (the VIP bonus was not included). The real balance from the server is now shown
-
-= 1.6.8 – October 10, 2026 =
-- Security: Coin and Cash balances are now changed atomically. Before, every change read the balance, computed the new value in PHP and wrote it back (`update_user_meta`), so requests running at the same time could all spend the same balance, or a reward could overwrite a purchase made at the same moment
-  - New `init_plugin_suite_user_engine_wallet_change( $user_id, $currency, $delta, $allow_partial = false )`: one `UPDATE` statement; when spending, the funds check is part of the `WHERE` clause, so the balance can never be spent twice and never goes negative
-  - New `init_plugin_suite_user_engine_spend_coin()` / `init_plugin_suite_user_engine_spend_cash()`: charge a price or return `WP_Error` (`not_enough_coin` / `not_enough_cash`) without changing anything
-  - `init_plugin_suite_user_engine_add_coin()` / `init_plugin_suite_user_engine_add_cash()` keep their signature, VIP bonus and filters, and are now atomic. A negative amount still never goes below 0; the function now returns the real new balance (it could return a negative number before)
-  - The `init_plugin_suite_user_engine_coin_changed` / `..._cash_changed` actions still fire after every change
-- Security: new per-user lock (`init_plugin_suite_user_engine_lock_user()` / `init_plugin_suite_user_engine_unlock_user()`, plus generic `init_plugin_suite_user_engine_acquire_lock()` / `init_plugin_suite_user_engine_release_lock()`). It is a row in the options table created with `INSERT IGNORE`, so only one request can hold it; it is re-entrant, released at shutdown even after a fatal error, and a stale lock expires after 30 seconds (filter `init_plugin_suite_user_engine_user_lock_ttl`)
-- Security: the check-in endpoint used a transient as mutex (`get_transient()` then `set_transient()`), which two requests arriving together could both pass. It now uses the per-user lock
-- Security: **Claim Online Reward** had no lock at all, so parallel requests could each pay the bonus. It now runs under the per-user lock
-- Security: **Exchange** (Cash ↔ Coin) and **VIP purchase** now run under the per-user lock and take the payment atomically; with VIP stacking disabled, parallel purchases could also buy several packages
-- Security: **Keep Streak** (paid streak restore) takes the Coin atomically and refunds it atomically if the log entry cannot be written
-- Security: EXP gains are serialized per user, so two parallel calls can no longer cross the same level and each pay the level-up Coin bonus
-- Fixed: comment rewards could exceed the daily cap, the once-only profile bonus could be paid twice, and the daily login bonus could be paid several times when the first page view of the day fired several requests at once
-- Fixed: a WooCommerce order that goes to "completed" more than once paid the order reward again. It is now paid once per order (order meta `_iue_order_reward_given`)
-- Fixed: Top-up tool (admin) now applies the change atomically, so it can no longer overwrite a purchase the member makes at the same moment
-- Fixed: the database index upgrade lock used `add_option()`, which runs `INSERT … ON DUPLICATE KEY UPDATE` and can succeed for two processes. It now uses the atomic lock
-- Fixed: `uninstall.php` deleted a wrong option name (the plugin constant is not defined during uninstall), so the plugin settings were never removed. It also removes leftover lock rows now
-- Exchange: the idempotency key is now remembered only after a successful exchange, so a failed attempt (for example not enough balance) can be retried with the same key
-
-= 1.6.7 – October 3, 2026 =
-- Performance (large sites): rebuilt the database indexes used by the Inbox, after a production slow query log showed "Mark All as Read" (`UPDATE … WHERE user_id = … AND status = 'unread'`) taking 2.5 seconds on a 1.2M-message Inbox
-  - New composite index `user_status (user_id, status)`: the unread badge count, "Mark All as Read" and the Unread tab now read the index only instead of loading every message row of the user (about 181 → 3 pages read per unread count in our 1.25M-row benchmark)
-  - New composite index `user_pinned_created (user_id, pinned, created_at)`: the Inbox list (`ORDER BY pinned DESC, created_at DESC`) is read straight from the index, no more filesort
-  - Dropped single-column `user_id` indexes on the Inbox, Transaction log and EXP log tables. They were fully covered by composite indexes that start with `user_id`, so they only cost extra writes and disk space (every Coin/EXP change writes to these tables)
-  - Safe on big databases: the index upgrade runs in the background through WP-Cron, never inside a page load (small and new sites are upgraded instantly). It uses online DDL (`ALGORITHM=INPLACE, LOCK=NONE`), so reads and writes keep working while indexes are built; it gives up after 3 seconds if it has to wait for a table lock, instead of making other queries queue behind it, then retries an hour later (up to 24 times); and a lock option makes sure only one process ever runs it. If WP-Cron is not running, the upgrade runs on the next admin page load after the event is more than an hour late
-  - You can also run it yourself during quiet hours (replace `wp_` with your table prefix); the plugin detects the new indexes and marks the upgrade as done: `ALTER TABLE wp_init_user_engine_inbox ADD KEY user_status (user_id, status), ADD KEY user_pinned_created (user_id, pinned, created_at), DROP KEY user_id, ALGORITHM=INPLACE, LOCK=NONE;` then `ALTER TABLE wp_init_user_engine_transaction_log DROP KEY user_id;` and `ALTER TABLE wp_init_user_engine_exp_log DROP KEY user_id;`
-- Performance: the weekly orphaned-Inbox cleanup no longer runs a single `DELETE … LEFT JOIN` over the whole Inbox table. That statement scanned and locked every row (even when nothing needed deleting), blocking every member's Inbox actions while it ran; in our benchmark a member's "Mark All as Read" waited 7.9 seconds. It now walks the distinct user IDs through the index, checks them against the users table in batches of 500 and deletes only orphaned messages, at most 1,000 rows per statement (0.45 s and no table-wide locks when there is nothing to delete)
-- Performance: **Inbox Statistics → Delete All of This Type** now deletes in batches of 1,000 by primary key instead of one `DELETE … WHERE type = …`, which locked the whole table until done (members' Inbox actions waited 7 seconds while 200k messages were deleted in our benchmark; now under 0.1 second)
-- Fixed: the orphaned-Inbox cleanup used `$wpdb->prefix . 'users'` as the users table, which does not exist on Multisite sub-sites (the users table is shared network-wide). It now uses `$wpdb->users`
-- The new background event is cleared on deactivation along with the plugin's other cron events
-
-= 1.6.6 – October 1, 2026 =
-- Added **Lost Password in Modal** (Init User Engine → Settings, right below *Login After Register*). The "Forgot password?" link in the login modal now opens a lost password form inside the same modal instead of sending visitors to `wp-login.php`
-  - Enabled by default. Turn it off if your site cannot send emails yet — the link then goes to the default `wp-login.php?action=lostpassword` page as before
-  - **Custom Lost Password URL** (Custom Links) still takes priority: when it is set, the link always goes there, whatever this option says
-  - Uses the native WordPress password reset flow: the form posts to `wp-login.php?action=lostpassword`, so the reset email, `lostpassword_form` / `lostpassword_post` hooks and the Turnstile "Lost Password Form" protection all keep working
-  - After submitting, visitors land back on the same page with the modal open: a success notice in the login form when the email was sent, or an inline error in the lost password form (unknown user, empty field, email sending failure, captcha failure). Any other error keeps WordPress's default `wp-login.php` behaviour so its exact message is still shown
-  - Template `lostpassword-form.php` can be overridden from `your-theme/init-user-engine/`; any element can also open it with `data-iue="lostpassword"`
-  - Added filter `init_plugin_suite_user_engine_lostpassword_modal_enabled`
-- Performance: the guest script no longer runs a `MutationObserver` on the whole `<body>` (it fired on every DOM change of the page just to attach the password toggle to the registration form, which is already in the page)
-- Performance: the `get_avatar_url` filter no longer re-runs every plugin's `pre_get_avatar_data` callbacks for each avatar; it only applies Init User Engine's own avatar logic (the result is the same)
-- Performance: the check-in countdown now saves its state on `pagehide` instead of `beforeunload`, so browsers can keep the page in the back/forward cache
-- Fixed: the deactivation hook was registered against `includes/core.php` instead of the main plugin file, so it never ran and the plugin's cron events stayed scheduled after deactivation. All three recurring events are now cleared on deactivation (they are scheduled again automatically on reactivation)
-- Fixed: the twice-daily cleanup compared transient expiry times (stored in UTC) with the site's local time, so on sites ahead of UTC it could delete registration captchas and rate-limit counters that had not expired yet
-- Fixed: on sites using "Plain" permalinks (REST URL like `?rest_route=/inituser/v1`), requests that add their own query string were malformed: the registration math captcha never loaded, and Inbox, Transaction History and Experience Log pagination failed. Query strings are now appended with `&` when the REST URL already has one
-- Updated `.pot`/`.po`/`.mo` translation files with the new strings introduced above (Vietnamese translation included), regenerated with WP-CLI
-
-= 1.6.5 – September 24, 2026 =
-- Added **Streak Recovery** (Init User Engine → Settings → Streak Recovery). When a member misses a few days, they can now spend Coin to keep their check-in streak instead of losing it
-  - Two new settings: **Missed Days Allowed** (how many missed days can be covered, `0` = feature off) and **Coin Cost per Missed Day** (`0` = free). Off by default, so nothing changes on existing sites until an admin turns it on
-  - Clicking **Check In** after a gap opens the plugin's standard modal showing the current streak, missed days, total cost and the member's balance, with two choices: keep the streak (pay), or reset it and check in anyway. Closing the modal does nothing. Missing more days than allowed simply resets the streak as before
-  - Keeping a streak covers the missed days but does not count them as check-ins: the streak continues from where it was and today adds +1, so streak milestone rewards (7/30/90…) behave exactly as before
-  - Every charge is written to the Coin transaction log as a deduction with a readable reason (e.g. "Kept check-in streak (2 missed days)"), shown in the member's Transaction History and in the admin user metabox
-  - The frontend only ever shows the configured **Coin Label**, never a hardcoded "Coin"; all new frontend and error strings are label-aware
-  - Safety: the price is re-checked on the server against what the member was shown (rejected if it changed), the balance is verified just before charging, and if the log entry cannot be written the Coin is handed back and the streak is left untouched
-  - `POST /checkin` gained three optional JSON fields: `prompt_restore` (answer with status `restore_available` instead of checking in when the streak can be kept — nothing is changed), `restore_streak` and `restore_cost`. Clients that don't send them behave exactly as before
-  - Added filters `init_plugin_suite_user_engine_streak_restore_max_days` and `init_plugin_suite_user_engine_streak_restore_cost`, and action `init_plugin_suite_user_engine_streak_restored`
-  - New logic lives in `includes/streak-restore.php`
-- Fixed: `POST /checkin` had no protection against overlapping requests, so two requests fired at the same moment could both pass the "already checked in today" test and reward the same day twice. Check-ins are now serialized per user with the same short-lived mutex pattern used by the exchange endpoints; a request that arrives while another is running gets a `409 busy` response
-- Fixed: modals opened from the logged-in dashboard never played their open animation. The `fadeIn`/`slideDown` keyframes referenced by `#iue-modal` only existed in `style-guest.css`, which is not loaded for logged-in users. Added namespaced `iue-fade-in`/`iue-slide-down` keyframes to `style-user.css` (so a theme's own `fadeIn`/`slideDown` can no longer interfere) plus a `prefers-reduced-motion` opt-out
-- Fixed: leaving the **Coin Label** or **Cash Label** field empty made the frontend (dashboard data, Referral benefits, exchange and VIP screens) display a blank currency name, and the VIP purchase inbox message could show an empty label. Both now fall back to "Coin" / "Cash" through the shared `init_plugin_suite_user_engine_get_coin_label()` / `..._get_cash_label()` helpers
-- Fixed: after a failed check-in request (a server error, or a network failure) the check-in button used to switch to "Checked in" or fall back to an untranslated "Check-in" (it read a translation key that was never defined); it now returns to its normal, translated label and shows the error
-- Fixed: the plugin's activation hook was registered against `includes/init.php` instead of the main plugin file, so it never ran and the database tables were only created later, on the first `admin_init`. It now runs on activation as intended (the `admin_init` version check stays as the upgrade path)
-- Updated `.pot`/`.po`/`.mo` translation files with the new strings introduced above (Vietnamese translation included), regenerated with WP-CLI
-
-= 1.6.4 – September 10, 2026 =
-- Fixed: permanently deleting a user (from Users → All Users, bulk delete, or the REST Users endpoint) used to leave that user's **EXP history** and **Inbox messages** behind in the database forever, since nothing ever cleaned them up after the account itself was gone
-  - Now hooked into WordPress core's `deleted_user` action (fires for both single-site `wp_delete_user()` and multisite `wpmu_delete_user()`, so one hook covers both): as soon as a user is permanently deleted, their EXP log rows and all Inbox messages are deleted right along with it
-  - Coin/Cash **transaction log stays untouched on purpose** — wallet history feeds into site-wide statistics and reconciliation (total coin/cash ever issued, revenue reports, etc.), so it's intentionally kept even after the user account is gone
-  - `iue_*` user meta (check-in streak, login bonus flags, profile bonus flag...) needed no extra handling — WordPress core already wipes all usermeta for the user before `deleted_user` fires
-  - Added action hook `init_plugin_suite_user_engine_user_data_purged` (fires with the deleted user's ID right after cleanup) so other plugins/add-ons can hook in and clean up their own related data too
-- No new user-facing strings in this release, so `.pot`/`.po` files are unchanged
-
-= 1.6.3 – September 7, 2026 =
-- Added a new **"Login After Register"** option (Init User Engine → Settings → General, disabled by default). When enabled, a successful registration through the plugin's REST endpoint (`/register`) immediately signs the new user in (`wp_set_auth_cookie()` + `wp_set_current_user()`, followed by the standard `wp_login` action for compatibility with other plugins/themes) instead of leaving them on the Login form
-  - The frontend register form now reloads the page after a successful auto-login (instead of switching to the Login form) so the UI, nonces, and avatar immediately reflect the signed-in state
-  - Left disabled by default so registration and login remain two explicit, separate steps unless a site owner opts in
-- Fixed: a failed login attempt from the plugin's login modal (via `wp_login_form()`) used to fall back to WordPress's default behavior and redirect the visitor to `wp-login.php`, which felt out of place on sites that never expose that page. Failed logins now redirect back to the exact page the visitor was on, with the login modal automatically reopened and an inline error message (wrong username, wrong password, or missing fields)
-  - Implemented via the `wp_login_failed` action combined with `wp_get_referer()`; only intervenes when the login attempt came from a normal frontend page, so logins made directly on `wp-login.php` or inside `wp-admin` keep WordPress's native behavior untouched
-  - The redirect uses two short-lived query arguments (`iue_login_failed`, `iue_login_code`) that `assets/js/guest.js` reads once to open the modal and show the right message, then immediately strips from the URL via `history.replaceState()` so refreshing or sharing the link never re-shows the notice
-- Refreshed `readme.txt` — the **Features** section was rewritten from scratch to match the plugin's actual current feature set (Turnstile/captcha, Require Login gate, Redeem/VIP Codes with CSV export, Inbox Statistics, admin user metabox, and more), several of which had been implemented in past releases but never documented here
-- Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included)
-
-= 1.6.2 – September 4, 2026 =
-- Changed: a pinned Inbox message now only stays pinned to the top while it is **unread**. As soon as it's marked as read (single message or "mark all as read"), it automatically unpins and behaves like any other message, so read messages no longer take up space at the top of the Inbox modal
-  - Implemented by clearing `pinned` back to `0` in the exact same `UPDATE` query that already sets a message to `read` (`init_plugin_suite_user_engine_mark_inbox_read()` and the "mark all as read" REST endpoint) — no extra query, no change to the Inbox `SELECT`/`ORDER BY`, and no new database index needed
-  - Added a one-time backfill (runs once on upgrade, same mechanism already used for schema updates) that clears `pinned` for any pre-existing message that was already pinned **and** read before this update
-  - Added a client-side safety net in the Inbox renderer so the pin icon never shows on a read message, even for the brief moment before the backfill above has run
-- Updated `.pot`/`.po` translation files (no new strings were needed for this change; existing ones were already sufficient)
-
-= 1.6.1 – September 4, 2026 =
-- Added **Export CSV** for both code list screens (User Engine → Redeem Codes / VIP Codes)
-  - New "Export CSV" button next to the "Existing Redeem Codes" / "Existing VIP Codes" heading, exporting the **entire list** (every page, not just the current one) as a downloadable `.csv` file
-  - Redeem Codes CSV columns: ID, Code, Type, Locked User ID, Locked Username, Coin Amount, Cash Amount, Max Uses, Used Count, Status, Valid From, Valid To, Created By, Created At, Updated At
-  - VIP Codes CSV columns: same as above, with VIP Days in place of Coin/Cash Amount
-  - Data is streamed straight to the browser in batches of 500 rows so memory usage stays low even on sites with a large number of codes
-  - File is written with a UTF-8 BOM so it opens correctly in Excel, and every cell is sanitized against CSV/formula injection (values starting with `=`, `+`, `-`, `@`, or a tab are safely prefixed)
-  - Gated behind the `manage_options` capability plus a dedicated nonce per screen (`iue_redeem_code_export_csv` / `iue_vip_code_export_csv`)
-- Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included); `.mo` not rebuilt as part of this change
-
-= 1.6.0 – September 2, 2026 =
-- Added a new **"Require Login to Access Site"** option (Init User Engine → Settings → General). When enabled, visitors who are not logged in no longer see the site's actual content on any page
-  - Instead, they see a blank page in the plugin's theme color with the built-in login modal opened automatically, so they can sign in without leaving the page
-  - Implemented via `template_redirect`, so `wp_head()`/`wp_footer()` still run in full — the plugin's own login modal, and every other theme/plugin hook attached to those actions, keeps working normally
-  - REST API, AJAX, cron, feed, and robots.txt requests are always excluded and are never blocked by this option
-  - Added filter `init_plugin_suite_user_engine_require_login_bypass` so other plugins/themes can exclude specific requests (e.g. a payment callback URL) from the gate
-  - New dedicated `assets/css/require-login.css` and `assets/js/require-login.js` files render the gate's background and auto-open the login modal, kept separate from PHP output for coding-standards compliance
-- Fixed: the frontend guest script (`guest.js`) only exposed `window.openLoginModal` (and wired up Escape-to-close, Alt+L, and hash-triggered opening) when an avatar element was present on the page. Pages without the avatar shortcode/widget — including the new Require Login gate — could not open the login modal at all. The avatar element is now optional; the modal and its triggers work on any page as long as the modal itself is rendered (always the case via `wp_footer`)
-- Updated `.pot`/`.po` translation files with the new strings introduced above (Vietnamese translation included); `.mo` not rebuilt as part of this change
-
 View full changelog (all versions): [Init User Engine – Changelog](https://en.inithtml.com/plugin/init-user-engine/)
 
 == License ==
 
 This plugin is licensed under the GPLv2 or later.  
 You are free to use, modify, and distribute it under the same license.
-
-== Upgrade Notice ==
-
-= 1.7.0 =
-New optional Display Name Change Limit (e.g. once every 7 days, like TikTok), enforced in the profile modal, wp-admin/profile.php, the REST API and WooCommerce, with an admin Unlock button. Edit Profile modal now opens instantly. Off by default.
-
-= 1.6.9 =
-Coin/Cash balances now update live everywhere on the page (VIP purchase, redeem codes, theme features) and stay in sync across open tabs.
-
-= 1.6.8 =
-Security update: Coin/Cash changes are now atomic and spending flows are locked per user, fixing race conditions that let parallel requests spend the same balance several times. Update recommended for all sites.

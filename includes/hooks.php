@@ -414,6 +414,42 @@ function init_plugin_suite_user_engine_filter_avatar_data( $args, $id_or_email )
 }
 
 /**
+ * Nạp trước user + usermeta của mọi thành viên trong 1 danh sách bình luận.
+ *
+ * Mỗi avatar gọi get_user_meta( $user_id, 'iue_custom_avatar' ). Với user chưa
+ * có trong cache, WordPress tốn 1 query (nạp toàn bộ usermeta của user đó)
+ * cho MỖI người bình luận → trang 50 bình luận của 50 thành viên khác nhau
+ * = 50 query. cache_users() nạp user + usermeta của cả danh sách bằng 2 query
+ * và tự bỏ qua user đã có trong cache.
+ *
+ * Hook vào 'the_comments' nên áp dụng cho mọi nơi hiển thị danh sách bình
+ * luận kèm avatar: comments_template(), block/widget Recent Comments, màn
+ * hình Comments trong wp-admin, REST /wp/v2/comments (author_avatar_urls).
+ * Truy vấn chỉ lấy ID hoặc đếm (count) không đi qua filter này.
+ *
+ * @since 1.7.1
+ *
+ * @param WP_Comment[] $comments Danh sách bình luận.
+ * @return WP_Comment[] Giữ nguyên, không thay đổi.
+ */
+function init_plugin_suite_user_engine_prime_commenter_cache( $comments ) {
+	$user_ids = array();
+
+	foreach ( (array) $comments as $comment ) {
+		if ( is_object( $comment ) && ! empty( $comment->user_id ) ) {
+			$user_ids[] = (int) $comment->user_id;
+		}
+	}
+
+	if ( count( $user_ids ) > 1 && function_exists( 'cache_users' ) ) {
+		cache_users( array_values( array_unique( $user_ids ) ) );
+	}
+
+	return $comments;
+}
+add_filter( 'the_comments', 'init_plugin_suite_user_engine_prime_commenter_cache', 10, 1 );
+
+/**
  * (Tùy chọn) Đồng bộ filter get_avatar_url để những nơi gọi trực tiếp URL vẫn được override
  * Ưu tiên cao để chắc chắn thắng
  *

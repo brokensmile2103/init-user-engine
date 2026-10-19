@@ -108,28 +108,36 @@ function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount
 		}
 	}
 
-	global $wpdb;
-	$table = init_plugin_suite_user_engine_txn_table();
+	// Giờ ghi nhận lấy NGAY lúc xảy ra (kể cả khi ghi qua buffer, cron ghi xuống sau).
+	$logged_at = current_time( 'Y-m-d H:i:s' );
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-	$inserted = $wpdb->insert(
-		$table,
-		[
-			'user_id'         => (int) $user_id,
-			'type'            => $type,
-			'amount'          => $final_amount,
-			'original_amount' => $original_amount,
-			'change_type'     => $change,
-			'source'          => sanitize_text_field( $source ),
-			'vip_bonus'       => $is_vip ? 1 : 0,
-			'bonus_percent'   => $bonus_percent,
-			'logged_at'       => current_time( 'Y-m-d H:i:s' ),
-		],
-		[ '%d', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%s' ]
-	);
+	$row = [
+		'user_id'         => (int) $user_id,
+		'type'            => $type,
+		'amount'          => $final_amount,
+		'original_amount' => $original_amount,
+		'change_type'     => $change,
+		'source'          => sanitize_text_field( $source ),
+		'vip_bonus'       => $is_vip ? 1 : 0,
+		'bonus_percent'   => $bonus_percent,
+		'logged_at'       => $logged_at,
+	];
 
-	if ( ! $inserted ) {
-		return false;
+	// 1.7.2: "Buffer writes in object cache" → đưa vào buffer, cron ghi xuống DB
+	// mỗi phút (xem includes/write-behind.php). Không bật / buffer đầy → ghi thẳng.
+	if ( ! init_plugin_suite_user_engine_write_behind_push( 'txn', $row ) ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$inserted = $wpdb->insert(
+			init_plugin_suite_user_engine_txn_table(),
+			$row,
+			[ '%d', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%s' ]
+		);
+
+		if ( ! $inserted ) {
+			return false;
+		}
 	}
 
 	// Tái tạo $entry theo format cũ để các hook cũ vẫn nhận được đúng dữ liệu
@@ -139,7 +147,7 @@ function init_plugin_suite_user_engine_log_transaction( $user_id, $type, $amount
 		'original'      => $original_amount,
 		'change'        => $change,
 		'source'        => $source,
-		'time'          => current_time( 'Y-m-d H:i:s' ),
+		'time'          => $logged_at,
 		'vip_bonus'     => $is_vip,
 		'bonus_percent' => $bonus_percent,
 	];
@@ -331,25 +339,32 @@ function init_plugin_suite_user_engine_log_exp( $user_id, $amount, $source = '',
 
 	$is_vip = init_plugin_suite_user_engine_is_vip( $user_id );
 
-	global $wpdb;
-	$table = init_plugin_suite_user_engine_exp_table();
+	// Giờ ghi nhận lấy NGAY lúc xảy ra (kể cả khi ghi qua buffer, cron ghi xuống sau).
+	$logged_at = current_time( 'Y-m-d H:i:s' );
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-	$inserted = $wpdb->insert(
-		$table,
-		[
-			'user_id'     => (int) $user_id,
-			'amount'      => absint( $amount ),
-			'change_type' => $change,
-			'source'      => sanitize_text_field( $source ),
-			'vip_bonus'   => $is_vip ? 1 : 0,
-			'logged_at'   => current_time( 'Y-m-d H:i:s' ),
-		],
-		[ '%d', '%d', '%s', '%s', '%d', '%s' ]
-	);
+	$row = [
+		'user_id'     => (int) $user_id,
+		'amount'      => absint( $amount ),
+		'change_type' => $change,
+		'source'      => sanitize_text_field( $source ),
+		'vip_bonus'   => $is_vip ? 1 : 0,
+		'logged_at'   => $logged_at,
+	];
 
-	if ( ! $inserted ) {
-		return false;
+	// 1.7.2: ghi qua buffer Object Cache nếu bật (xem includes/write-behind.php).
+	if ( ! init_plugin_suite_user_engine_write_behind_push( 'exp', $row ) ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$inserted = $wpdb->insert(
+			init_plugin_suite_user_engine_exp_table(),
+			$row,
+			[ '%d', '%d', '%s', '%s', '%d', '%s' ]
+		);
+
+		if ( ! $inserted ) {
+			return false;
+		}
 	}
 
 	// Tái tạo $entry theo format cũ để hook cũ vẫn hoạt động
@@ -357,7 +372,7 @@ function init_plugin_suite_user_engine_log_exp( $user_id, $amount, $source = '',
 		'amount'    => absint( $amount ),
 		'change'    => $change,
 		'source'    => $source,
-		'time'      => current_time( 'Y-m-d H:i:s' ),
+		'time'      => $logged_at,
 		'vip_bonus' => $is_vip,
 	];
 

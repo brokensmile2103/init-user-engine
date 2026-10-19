@@ -715,11 +715,40 @@ function init_plugin_suite_user_engine_finish_bulk_job( array $job, $status ) {
  * @return array
  */
 function init_plugin_suite_user_engine_bulk_job_topup_batch( array $job, array $user_ids, $deadline ) {
-	global $wpdb;
-
 	$amount   = (int) $job['payload']['amount'];
 	$currency = 'cash' === $job['payload']['currency'] ? 'cash' : 'coin';
 	$label    = (string) $job['payload']['label'];
+
+	// The log row must be part of each member's transaction: never send it to the write-behind buffer,
+	// where it would survive a rollback.
+	$bypass = init_plugin_suite_user_engine_write_behind_bypass();
+	init_plugin_suite_user_engine_write_behind_bypass( true );
+
+	try {
+		$job = init_plugin_suite_user_engine_bulk_job_topup_members( $job, $user_ids, $deadline, $amount, $currency, $label );
+	} finally {
+		init_plugin_suite_user_engine_write_behind_bypass( $bypass );
+	}
+
+	return $job;
+}
+
+/**
+ * The member loop of init_plugin_suite_user_engine_bulk_job_topup_batch().
+ *
+ * @since 1.7.2
+ * @access private
+ *
+ * @param array  $job      Job.
+ * @param int[]  $user_ids Members, lowest ID first.
+ * @param float  $deadline microtime( true ) at which to stop.
+ * @param int    $amount   Amount (may be negative).
+ * @param string $currency 'coin' or 'cash'.
+ * @param string $label    Currency label.
+ * @return array
+ */
+function init_plugin_suite_user_engine_bulk_job_topup_members( array $job, array $user_ids, $deadline, $amount, $currency, $label ) {
+	global $wpdb;
 
 	foreach ( $user_ids as $user_id ) {
 		if ( microtime( true ) >= $deadline ) {

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -221,6 +221,23 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.2 – October 19, 2026 =
+- New: **Buffer writes in object cache** (Init User Engine → Settings → Performance), off by default. On very busy sites the Transaction log and EXP log get one INSERT (and one commit) per reward, purchase, exchange or check-in: hundreds of thousands of writes a day. With this option the rows are first stored in the persistent object cache, and one WP-Cron event writes them to the database once a minute, both tables in the same run, with multi-row INSERTs of up to 500 rows: a few thousand writes a day instead. In our test 1,000 log rows took 1,000 INSERTs before, and 2 transactions (4 INSERTs) with the buffer
+  - Needs a persistent object cache (Redis, Memcached…). Without one the option is disabled with an explanation and rows are written right away, as before
+  - Only history rows are buffered. Coin, Cash and EXP balances are never buffered and are still changed atomically in the database right away
+  - The time of each row is taken when it happens, not when it is written, so the history keeps the right order and times. `init_plugin_suite_user_engine_log_transaction()` / `init_plugin_suite_user_engine_log_exp()` keep their signature and return value, and the `..._transaction_logged` / `..._exp_logged` actions still fire right away
+  - New rows can take up to a minute to appear in the Transaction/EXP history, the daily tasks list and the Edit User box. The history caches of the members concerned are cleared after each write
+  - Does not bloat the object cache: one small key per row (never one big array rewritten by every request), numbered with the atomic `wp_cache_incr()`. When more than 20,000 rows are waiting (filter `init_plugin_suite_user_engine_write_behind_max_pending`, about 4–5 MB), new rows go straight to the database. Rows expire from the cache after a day
+  - Never writes a row twice or skips one: each batch of rows and the "written up to" cursor are saved in the same database transaction. Tested by killing PHP (`kill -9`) in the middle of a batch, and with 50 processes writing at the same time while the flush ran: every row was written exactly once
+  - If the object cache is flushed or restarted, rows not yet written are lost (history only, never balances) and a new buffer generation starts, so nothing gets stuck. A row whose number was taken but never stored is waited for, then skipped after 2 minutes. Both are counted on the settings page
+  - Runs only from WP-Cron, on its own schedule *Init User Engine: write buffered logs* (every 60 seconds, filter `init_plugin_suite_user_engine_flush_interval`). On sites that set `DISABLE_WP_CRON`, your system cron job runs it; that constant is never taken to mean the site has no cron. Visitors' and admins' requests never write the buffer, except when an admin clicks **Write buffered logs now** or deactivates the plugin
+  - Settings page status: rows waiting, last write, next run, rows written, skipped rows, cache resets and the last error. If nothing was written for 15 minutes while rows are waiting (filter `init_plugin_suite_user_engine_write_behind_stall_minutes`), a warning is shown
+  - Turning the option off: new rows go straight to the database at once; rows already buffered are still written by the event, which then removes itself. Deactivating the plugin writes what is left (a few seconds at most)
+  - The background Top-up job (1.7.1) always writes its log rows directly, because they are part of each member's crash-safe transaction
+  - EXP rows of a member deleted before the write are dropped, like the EXP history of deleted members
+  - Developers: new filters `init_plugin_suite_user_engine_write_behind_enabled`, `init_plugin_suite_user_engine_flush_interval`, `init_plugin_suite_user_engine_write_behind_max_pending`, `init_plugin_suite_user_engine_write_behind_chunk` and `init_plugin_suite_user_engine_write_behind_stall_minutes`, action `init_plugin_suite_user_engine_write_behind_flushed`, and `init_plugin_suite_user_engine_write_behind_bypass()` to write directly from code that runs its own transaction
+- Translations: POT file regenerated with WP-CLI, Vietnamese translation updated
 
 = 1.7.1 – October 17, 2026 =
 - Performance (large sites): every Coin/Cash change scanned the whole `usermeta` table. The atomic `UPDATE` added in 1.6.8 picked the wallet row with a subquery on the same table (`WHERE umeta_id = ( SELECT id FROM ( SELECT MIN(umeta_id) … ) )`), which MySQL/MariaDB cannot resolve through the primary key: `EXPLAIN` showed a full index scan (`type: index`, about 800k rows). In our 800k-row benchmark each check-in, reward, purchase, exchange or top-up spent about 0.3 seconds in the database, and the cost grew with the table

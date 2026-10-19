@@ -193,6 +193,9 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$rate_cash_val = is_numeric( $rate_cash_raw ) ? (float) $rate_cash_raw : 0;
 	$output['rate_cash_per_coin'] = max( 0, $rate_cash_val );
 
+	// 1.7.2: Buffer writes in object cache (xem includes/write-behind.php).
+	$output['buffer_log_writes'] = ! empty( $input['buffer_log_writes'] ) ? 1 : 0;
+
 	return $output;
 }
 
@@ -1024,10 +1027,14 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						<p class="description"><?php esc_html_e( 'Cash given to new user (rarely used).', 'init-user-engine' ); ?></p>
 					</td>
 				</tr>
+
+				<?php init_plugin_suite_user_engine_render_write_behind_settings( (array) $options ); ?>
 			</table>
 
 			<?php submit_button(); ?>
 		</form>
+
+		<?php init_plugin_suite_user_engine_render_write_behind_flush_form(); ?>
 	</div>
 	<?php
 }

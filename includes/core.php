@@ -100,4 +100,6 @@ function init_plugin_suite_user_engine_on_deactivation() {
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_db_index_upgrade' );
 	// Job nền đang chạy dở sẽ tự chạy tiếp khi plugin được kích hoạt lại (xem watchdog trong includes/bulk-jobs.php).
 	wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_run_bulk_jobs' );
+	// 1.7.2: ghi nốt log còn trong buffer Object Cache (tối đa vài giây) rồi gỡ cron ghi buffer.
+	init_plugin_suite_user_engine_write_behind_on_deactivation();
 }

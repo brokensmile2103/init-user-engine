@@ -43,3 +43,9 @@ $wpdb->query(
 	)
 );
 wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_run_bulk_jobs' );
+
+// Write-behind buffer state (1.7.2). Buffered rows in the object cache expire by themselves.
+delete_option( 'iue_wb_state' );
+delete_option( 'iue_wb_active' );
+delete_option( 'iue_wb_enabled_at' );
+wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_write_behind_flush' );

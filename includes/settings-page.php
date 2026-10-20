@@ -9,7 +9,7 @@ add_action( 'admin_menu', function () {
 		'manage_options',
 		INIT_PLUGIN_SUITE_IUE_SLUG,
 		'init_plugin_suite_user_engine_render_settings_page',
-		'dashicons-admin-users',
+		'dashicons-admin-generic',
 		102
 	);
 

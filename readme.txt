@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -221,6 +221,10 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.3 – October 20, 2026 =
+- Fix: pass `home_url( add_query_arg( [] ) )` to `wp_login_url()` instead of `null` to avoid compatibility issues with newer PHP versions
+- Fix: admin menu icon display compatibility with the upcoming WordPress 7.2 release
 
 = 1.7.2 – October 19, 2026 =
 - New: **Buffer writes in object cache** (Init User Engine → Settings → Performance), off by default. On very busy sites the Transaction log and EXP log get one INSERT (and one commit) per reward, purchase, exchange or check-in: hundreds of thousands of writes a day. With this option the rows are first stored in the persistent object cache, and one WP-Cron event writes them to the database once a minute, both tables in the same run, with multi-row INSERTs of up to 500 rows: a few thousand writes a day instead. In our test 1,000 log rows took 1,000 INSERTs before, and 2 transactions (4 INSERTs) with the buffer

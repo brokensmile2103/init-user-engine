@@ -564,7 +564,7 @@ function init_plugin_suite_user_engine_render_require_login_gate() {
 
 	nocache_headers();
 
-	$login_url = wp_login_url( home_url( add_query_arg( null, null ) ) );
+	$login_url = wp_login_url( home_url( add_query_arg( [] ) ) );
 	?><!DOCTYPE html>
 	<html <?php language_attributes(); ?>>
 	<head>

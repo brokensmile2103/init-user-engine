@@ -733,7 +733,7 @@ function init_plugin_suite_user_engine_render_inbox_dashboard_widget() {
             </div>
         </div>
         
-        <p class="description" style="margin:8px 0 0;">
+        <p class="description" style="margin-bottom:8px;">
             <?php
             /* translators: %s: human-readable time difference, e.g. "5 mins" */
             echo esc_html( sprintf( __( 'Updated %s ago', 'init-user-engine' ), human_time_diff( (int) $cached_stats['cached_at'], time() ) ) );

@@ -89,9 +89,15 @@ function init_plugin_suite_user_engine_check_table() {
     // cũ hơn version code (xem update_option() cuối hàm), nên không cần
     // thêm cờ/migration riêng. Dùng luôn index `pinned` sẵn có (WHERE
     // pinned = 1 lọc trước — thường là tập rất nhỏ), không cần thêm index.
+    //
+    // 1.7.5: chỉ chạy khi nâng cấp từ bản cũ hơn 1.6.2. Trước đây câu UPDATE này
+    // chạy lại ở MỖI lần cập nhật plugin; trên bảng Inbox lớn nó phải chờ khóa và
+    // lọt slow query log (~2 giây) dù không còn dòng nào cần sửa.
     $inbox_table = $wpdb->prefix . 'init_user_engine_inbox';
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $wpdb->query( "UPDATE {$inbox_table} SET pinned = 0 WHERE pinned = 1 AND status = 'read'" );
+    if ( version_compare( get_option( 'iue_plugin_db_version', '0.0.0' ), '1.6.2', '<' ) ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $wpdb->query( "UPDATE {$inbox_table} SET pinned = 0 WHERE pinned = 1 AND status = 'read'" );
+    }
 
     // REDEEM CODE
     $redeem_table = $wpdb->prefix . 'init_user_engine_redeem_codes';

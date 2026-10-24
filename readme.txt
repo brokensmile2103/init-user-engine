@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.4
+Stable tag: 1.7.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -227,6 +227,10 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.5 – October 25, 2026 =
+- Performance: after every plugin update, the upgrade routine ran `UPDATE … SET pinned = 0 WHERE pinned = 1 AND status = 'read'` on the whole Inbox table (a one-time backfill for the "unpin when read" behaviour of 1.6.2). On large tables it showed up in the slow query log (about 2 seconds) even though there was nothing left to change. It now only runs when upgrading from a version older than 1.6.2
+- Tweak: spacing of the "Updated X ago" line in the Dashboard Inbox widget
 
 = 1.7.4 – October 25, 2026 =
 - New: **Delete read messages automatically** (Init User Engine → Settings → Inbox → *Delete Read Messages After (days)*), off by default (`0`). Read messages received more than the set number of days ago are deleted once a day in the background, so the Inbox table no longer grows forever on busy sites

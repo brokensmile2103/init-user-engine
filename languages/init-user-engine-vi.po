@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.7.2\n"
+"Project-Id-Version: Init User Engine 1.7.4\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -8,7 +8,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-10-19T03:11:24+00:00\n"
-"PO-Revision-Date: 2026-10-19T03:30:00+00:00\n"
+"PO-Revision-Date: 2026-10-25T01:30:00+07:00
+"
 "Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Domain: init-user-engine\n"
@@ -3568,3 +3569,35 @@ msgstr "Các dòng được ghi bằng WP-Cron. Nếu site chạy WP-Cron bằng
 #: includes/write-behind.php:1006
 msgid "Write buffered logs now"
 msgstr "Ghi bộ đệm xuống ngay"
+
+#: includes/tools/inbox-statistics.php
+msgid "Statistics are being calculated in the background. Please check back in a minute."
+msgstr "Số liệu đang được tính ở chế độ nền. Vui lòng quay lại sau ít phút."
+
+#: includes/tools/inbox-statistics.php
+msgid "Updated %s ago"
+msgstr "Cập nhật %s trước"
+
+#: includes/settings-page.php
+msgid "Delete Read Messages After (days)"
+msgstr "Tự động xóa tin đã đọc sau (ngày)"
+
+#: includes/settings-page.php
+msgid "Automatically delete messages that have been read and were received more than this many days ago. 0 = never delete."
+msgstr "Tự động xóa các tin nhắn đã đọc và được nhận cách đây hơn số ngày này. 0 = không bao giờ xóa."
+
+#: includes/settings-page.php
+msgid "Unread messages, pinned messages and messages carrying a redeem code or VIP code assigned to the member are always kept. Runs once a day in the background, in small batches."
+msgstr "Tin nhắn chưa đọc, tin nhắn được ghim và tin nhắn chứa mã quy đổi hoặc mã VIP được gán riêng cho thành viên luôn được giữ lại. Chạy nền mỗi ngày một lần, theo từng lô nhỏ."
+
+#. translators: %s: number of messages deleted so far
+#: includes/settings-page.php
+#, php-format
+msgid "Cleanup in progress: %s messages deleted so far."
+msgstr "Đang dọn dẹp: đã xóa %s tin nhắn."
+
+#. translators: 1: human-readable time difference, e.g. "2 hours", 2: number of messages deleted
+#: includes/settings-page.php
+#, php-format
+msgid "Last cleanup: %1$s ago, %2$s messages deleted."
+msgstr "Lần dọn gần nhất: %1$s trước, đã xóa %2$s tin nhắn."

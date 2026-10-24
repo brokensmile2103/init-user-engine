@@ -49,3 +49,12 @@ delete_option( 'iue_wb_state' );
 delete_option( 'iue_wb_active' );
 delete_option( 'iue_wb_enabled_at' );
 wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_write_behind_flush' );
+
+// Inbox: auto-delete of read messages and the Dashboard widget snapshot (1.7.4).
+delete_option( 'iue_inbox_autodelete_state' );
+delete_option( 'iue_inbox_autodelete_last' );
+delete_option( 'iue_dashboard_stats_snapshot' );
+delete_transient( 'iue_inbox_autodelete_lock' );
+wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_inbox_auto_delete' );
+wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_inbox_auto_delete_resume' );
+wp_clear_scheduled_hook( 'init_plugin_suite_user_engine_refresh_dashboard_inbox_stats' );

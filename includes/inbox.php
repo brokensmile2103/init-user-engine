@@ -981,3 +981,270 @@ function init_plugin_suite_user_engine_get_inbox_group_map() {
         ],
     ];
 }
+
+/**
+ * Tính số liệu widget Inbox trên Bảng tin và lưu lại (option, không autoload).
+ * Chạy nền qua WP-Cron (sự kiện 1 lần, được widget Bảng tin — xem
+ * includes/tools/inbox-statistics.php — xếp lịch khi số liệu quá hạn). Đặt ở
+ * file này (luôn được nạp) vì file công cụ chỉ được nạp trên trang admin, còn
+ * WP-Cron không chạy trong ngữ cảnh admin.
+ *
+ * @since 1.7.4
+ * @return array|null
+ */
+function init_plugin_suite_user_engine_compute_dashboard_inbox_stats() {
+    global $wpdb;
+    $table = init_plugin_suite_user_engine_get_inbox_table();
+
+    if ( ! init_plugin_suite_user_engine_db_table_exists( $table ) ) {
+        return null;
+    }
+
+    // "Hôm nay" theo cùng đồng hồ với cột created_at (giờ địa phương của site,
+    // xem init_plugin_suite_user_engine_insert_inbox()) — giống trang Thống kê Inbox.
+    $today_start = strtotime( 'today', current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Phải khớp đồng hồ của cột created_at trong bảng Inbox.
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $total_messages   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+    $unread_messages  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'unread'" );
+    $today_messages   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", $today_start ) );
+    $total_recipients = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$table}" );
+    // phpcs:enable
+
+    $stats = [
+        'total_messages'   => $total_messages,
+        'unread_messages'  => $unread_messages,
+        'today_messages'   => $today_messages,
+        'total_recipients' => $total_recipients,
+        'read_percentage'  => $total_messages > 0 ? round( ( ( $total_messages - $unread_messages ) / $total_messages ) * 100, 1 ) : 0,
+        'avg_per_user'     => $total_recipients > 0 ? round( $total_messages / $total_recipients, 1 ) : 0,
+        'cached_at'        => time(),
+    ];
+
+    update_option( 'iue_dashboard_stats_snapshot', $stats, false );
+    delete_transient( 'iue_dashboard_stats' ); // cache 5 phút của bản cũ, không còn dùng
+
+    return $stats;
+}
+add_action( 'init_plugin_suite_user_engine_refresh_dashboard_inbox_stats', 'init_plugin_suite_user_engine_compute_dashboard_inbox_stats' );
+
+// ─────────────────────────────────────────────
+// Tự động xóa tin đã đọc quá X ngày (1.7.4)
+// ─────────────────────────────────────────────
+
+/*
+ * Cài đặt → Inbox → "Tự động xóa tin đã đọc sau (ngày)". 0 = tắt (mặc định).
+ *
+ * Xóa tin ĐÃ ĐỌC có ngày nhận (created_at) cũ hơn X ngày. Bảng Inbox không
+ * lưu thời điểm đọc, và thêm cột mới trên bảng hàng triệu dòng là một thao
+ * tác ALTER TABLE nặng — nên tuổi của tin được tính từ ngày nhận.
+ *
+ * Luôn giữ lại:
+ * - tin chưa đọc;
+ * - tin đang ghim;
+ * - tin chứa mã quà / mã VIP được gán riêng cho thành viên (metadata có
+ *   `created_by`) — xóa đi là thành viên mất luôn mã chưa dùng.
+ *
+ * Chạy nền qua WP-Cron mỗi ngày, xóa theo từng khoảng id (PRIMARY KEY, mặc
+ * định 5.000 id mỗi câu DELETE) nên mỗi câu chỉ khóa một đoạn nhỏ của bảng.
+ * Mỗi lượt chạy tối đa ~20 giây; còn dở thì lưu vị trí và chạy tiếp sau 1 phút.
+ *
+ * Không cần xóa cache số tin chưa đọc: chỉ tin đã đọc bị xóa.
+ */
+
+define( 'INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_EVENT', 'init_plugin_suite_user_engine_inbox_auto_delete' );
+define( 'INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_RESUME', 'init_plugin_suite_user_engine_inbox_auto_delete_resume' );
+
+/**
+ * Số ngày giữ tin đã đọc. 0 = không tự động xóa.
+ *
+ * @since 1.7.4
+ * @return int
+ */
+function init_plugin_suite_user_engine_inbox_auto_delete_days() {
+	$settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
+	$days     = isset( $settings['inbox_auto_delete_days'] ) ? absint( $settings['inbox_auto_delete_days'] ) : 0;
+
+	/**
+	 * Filter: số ngày giữ tin đã đọc trước khi tự động xóa (0 = tắt).
+	 *
+	 * @since 1.7.4
+	 * @param int $days Giá trị trong Cài đặt.
+	 */
+	return max( 0, (int) apply_filters( 'init_plugin_suite_user_engine_inbox_auto_delete_days', $days ) );
+}
+
+/**
+ * Lên lịch / gỡ lịch cron hằng ngày theo cài đặt.
+ *
+ * @since 1.7.4
+ * @return void
+ */
+function init_plugin_suite_user_engine_schedule_inbox_auto_delete() {
+	$next = wp_next_scheduled( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_EVENT );
+
+	if ( init_plugin_suite_user_engine_inbox_auto_delete_days() > 0 ) {
+		if ( ! $next ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_EVENT );
+		}
+		return;
+	}
+
+	if ( $next || wp_next_scheduled( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_RESUME ) ) {
+		wp_clear_scheduled_hook( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_EVENT );
+		wp_clear_scheduled_hook( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_RESUME );
+		delete_option( 'iue_inbox_autodelete_state' );
+	}
+}
+add_action( 'init', 'init_plugin_suite_user_engine_schedule_inbox_auto_delete' );
+
+add_action( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_EVENT, 'init_plugin_suite_user_engine_run_inbox_auto_delete' );
+add_action( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_RESUME, 'init_plugin_suite_user_engine_run_inbox_auto_delete' );
+
+/**
+ * Xóa tin đã đọc quá hạn, theo lô, trong giới hạn thời gian của 1 lượt cron.
+ *
+ * @since 1.7.4
+ * @return int Số tin đã xóa trong lượt chạy này.
+ */
+function init_plugin_suite_user_engine_run_inbox_auto_delete() {
+	global $wpdb;
+
+	$days = init_plugin_suite_user_engine_inbox_auto_delete_days();
+	if ( $days <= 0 ) {
+		delete_option( 'iue_inbox_autodelete_state' );
+		return 0;
+	}
+
+	$table = init_plugin_suite_user_engine_get_inbox_table();
+	if ( ! init_plugin_suite_user_engine_db_table_exists( $table ) ) {
+		return 0;
+	}
+
+	if ( get_transient( 'iue_inbox_autodelete_lock' ) ) {
+		return 0;
+	}
+	set_transient( 'iue_inbox_autodelete_lock', 1, 5 * MINUTE_IN_SECONDS );
+
+	$state = get_option( 'iue_inbox_autodelete_state' );
+
+	if ( ! is_array( $state ) || empty( $state['max_id'] ) ) {
+		// Cùng đồng hồ với cột created_at (giờ địa phương của site).
+		$cutoff = (int) current_time( 'timestamp' ) - $days * DAY_IN_SECONDS; // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Phải khớp đồng hồ của cột created_at trong bảng Inbox.
+
+		// Có tin nào nhận trước mốc không (1 dòng trên index `created_at`)? Không có → xong ngay.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$has_old = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT id FROM {$table} WHERE created_at < %d LIMIT 1",
+				$cutoff
+			)
+		);
+
+		// Quét tới id lớn nhất của bảng (PRIMARY KEY, tức thì) — không suy ra từ created_at,
+		// vì id không chắc tăng theo thời gian (tin nhập từ nơi khác, created_at đặt lùi...).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$max_id = $has_old > 0 ? (int) $wpdb->get_var( "SELECT MAX(id) FROM {$table}" ) : 0;
+
+		if ( $max_id <= 0 ) {
+			update_option( 'iue_inbox_autodelete_last', [ 'time' => time(), 'deleted' => 0 ], false );
+			delete_transient( 'iue_inbox_autodelete_lock' );
+			return 0;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$min_id = (int) $wpdb->get_var( "SELECT MIN(id) FROM {$table}" );
+
+		$state = [
+			'cursor'  => max( 1, $min_id ),
+			'max_id'  => $max_id,
+			'cutoff'  => $cutoff,
+			'deleted' => 0,
+			'started' => time(),
+		];
+	}
+
+	/**
+	 * Filter: số id mỗi câu DELETE.
+	 *
+	 * @since 1.7.4
+	 * @param int $batch Mặc định 5000.
+	 */
+	$batch = max( 500, (int) apply_filters( 'init_plugin_suite_user_engine_inbox_auto_delete_batch', 5000 ) );
+
+	/**
+	 * Filter: thời gian tối đa (giây) của 1 lượt chạy.
+	 *
+	 * @since 1.7.4
+	 * @param int $seconds Mặc định 20.
+	 */
+	$deadline = microtime( true ) + max( 1, (int) apply_filters( 'init_plugin_suite_user_engine_inbox_auto_delete_time_limit', 20 ) );
+
+	/**
+	 * Filter: khóa metadata đánh dấu tin cần giữ lại (không bao giờ tự động xóa).
+	 *
+	 * Mặc định `created_by`: tin gửi mã quà / mã VIP được gán riêng cho thành viên.
+	 *
+	 * @since 1.7.4
+	 * @param string[] $keys
+	 */
+	$keep_keys = array_filter( array_map( 'sanitize_key', (array) apply_filters( 'init_plugin_suite_user_engine_inbox_auto_delete_keep_meta_keys', [ 'created_by' ] ) ) );
+
+	// metadata lưu bằng maybe_serialize(): khóa "abc" xuất hiện dạng s:3:"abc";
+	$keep_sql    = '';
+	$keep_params = [];
+	foreach ( $keep_keys as $key ) {
+		$keep_sql     .= ' AND ( metadata IS NULL OR metadata NOT LIKE %s )';
+		$keep_params[] = '%' . $wpdb->esc_like( 's:' . strlen( $key ) . ':"' . $key . '";' ) . '%';
+	}
+
+	$deleted_now = 0;
+
+	while ( $state['cursor'] <= $state['max_id'] && microtime( true ) < $deadline ) {
+		$from = (int) $state['cursor'];
+		$to   = min( $from + $batch, (int) $state['max_id'] + 1 );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$result = $wpdb->query(
+			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Tham số được truyền dạng mảng: 3 giá trị + 1 giá trị cho mỗi %s trong $keep_sql.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $keep_sql chỉ gồm các %s cố định ở trên.
+				"DELETE FROM {$table} WHERE id >= %d AND id < %d AND created_at < %d AND status IN ('read', 'claimed') AND pinned = 0{$keep_sql}",
+				array_merge( [ $from, $to, (int) $state['cutoff'] ], $keep_params )
+			)
+		);
+
+		if ( false === $result ) {
+			// Lỗi CSDL: giữ nguyên vị trí, lượt sau chạy lại đúng đoạn này.
+			break;
+		}
+
+		$deleted_now      += (int) $result;
+		$state['deleted'] += (int) $result;
+		$state['cursor']   = $to;
+	}
+
+	if ( $state['cursor'] > $state['max_id'] ) {
+		delete_option( 'iue_inbox_autodelete_state' );
+		update_option( 'iue_inbox_autodelete_last', [ 'time' => time(), 'deleted' => (int) $state['deleted'] ], false );
+
+		/**
+		 * Action: sau khi 1 lượt tự động xóa tin đã đọc hoàn tất.
+		 *
+		 * @since 1.7.4
+		 * @param int $deleted Số tin đã xóa.
+		 * @param int $cutoff  Tin nhận trước mốc này (cùng đồng hồ với created_at) đã được xét.
+		 */
+		do_action( 'init_plugin_suite_user_engine_inbox_auto_deleted', (int) $state['deleted'], (int) $state['cutoff'] );
+	} else {
+		update_option( 'iue_inbox_autodelete_state', $state, false );
+
+		if ( ! wp_next_scheduled( INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_RESUME ) ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, INIT_PLUGIN_SUITE_IUE_INBOX_AUTODELETE_RESUME );
+		}
+	}
+
+	delete_transient( 'iue_inbox_autodelete_lock' );
+
+	return $deleted_now;
+}

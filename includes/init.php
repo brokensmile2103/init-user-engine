@@ -65,7 +65,7 @@ function init_plugin_suite_user_engine_on_new_blog( $blog_id, $user_id, $domain,
  * Đồng thời chạy migration dữ liệu nếu chưa chạy.
  */
 function init_plugin_suite_user_engine_check_table() {
-    if ( ! current_user_can( 'administrator' ) ) {
+    if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
 

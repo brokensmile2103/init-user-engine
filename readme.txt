@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - Pinned messages that automatically unpin once read, or once their optional expiration time passes  
 - Admin panel to send custom notifications to selected users or all members, with priority and expiration  
 - Inbox Statistics dashboard (Users → Init User Engine → Inbox Statistics) with date-range filtering
+- Optional automatic cleanup of read messages older than a set number of days (unread, pinned and assigned-code messages are always kept)
 
 **Admin Tools**
 
@@ -156,6 +157,10 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_lostpassword_modal_enabled` – Enable or disable the lost password form inside the login modal (receives the current value and the plugin settings)
 - `init_plugin_suite_user_engine_display_name_change_days` – Modify how many days a member has to wait between two display name changes (receives the days from the settings and the user ID; `0` = unlimited)
 - `init_plugin_suite_user_engine_display_name_limit_applies` – Return `false` to let a user (or role) change their display name freely (receives the current value and the user ID)
+- `init_plugin_suite_user_engine_inbox_auto_delete_days` – Modify how many days read Inbox messages are kept before automatic deletion (`0` = never)
+- `init_plugin_suite_user_engine_inbox_auto_delete_keep_meta_keys` – Metadata keys that mark an Inbox message to keep during automatic deletion (default `created_by`)
+- `init_plugin_suite_user_engine_inbox_auto_delete_batch` / `init_plugin_suite_user_engine_inbox_auto_delete_time_limit` – Ids per `DELETE` (default 5000) and seconds per run (default 20) of the automatic deletion
+- `init_plugin_suite_user_engine_dashboard_stats_max_age` – How old (in seconds) the Dashboard Inbox widget numbers may be before a background refresh (default 900)
 
 === Actions ===
 
@@ -164,6 +169,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_transaction_logged` – After Coin/Cash is logged  
 - `init_plugin_suite_user_engine_exp_logged` – After EXP log is recorded  
 - `init_plugin_suite_user_engine_inbox_inserted` – After new inbox message  
+- `init_plugin_suite_user_engine_inbox_auto_deleted` – After an automatic cleanup of read Inbox messages finishes (number deleted, cutoff)
 - `init_plugin_suite_user_engine_referral_completed` – When referral is completed  
 - `init_plugin_suite_user_engine_after_checkin` – After user check-in  
 - `init_plugin_suite_user_engine_streak_restored` – After a user paid Coin to keep their check-in streak (user ID, missed days, cost, new streak)  
@@ -221,6 +227,25 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.4 – October 25, 2026 =
+- New: **Delete read messages automatically** (Init User Engine → Settings → Inbox → *Delete Read Messages After (days)*), off by default (`0`). Read messages received more than the set number of days ago are deleted once a day in the background, so the Inbox table no longer grows forever on busy sites
+  - Always kept: unread messages, pinned messages, and messages carrying a redeem code or VIP code assigned to a member (deleting them would lose a code the member may not have used yet). Receipts such as "Redeem Code Success" are deleted like any other read message
+  - The age of a message is counted from the day it was received: the Inbox table does not record when a message was read, and adding a column to a table with millions of rows would need a heavy `ALTER TABLE` on every site
+  - Deletes in small slices of the primary key (5,000 ids per `DELETE`), so each statement only locks a small part of the table and members' Inboxes stay responsive. Each run stops after about 20 seconds and continues a minute later where it left off. In our test with 1.6 million messages, the first cleanup removed 1.26 million read messages in about 24 seconds over 2 runs, no `DELETE` took more than 0.31 seconds, and the next daily run (with nothing left to delete) took 0.3 seconds
+  - Messages whose ids are out of date order (imported, or with a back-dated `created_at`) are still found: the whole id range is scanned, not only the ids before the cutoff date
+  - Unread counts are never affected (only read messages are deleted). A database error leaves the position unchanged, so the next run retries the same slice; a lock prevents two runs at the same time
+  - The settings page shows when the last cleanup ran and how many messages it deleted, or the progress of a cleanup still running
+  - Setting the option back to `0` removes the scheduled task at once. Deactivating the plugin removes it too (a cleanup in progress continues after reactivation); uninstalling deletes its options
+  - Developers: new filters `init_plugin_suite_user_engine_inbox_auto_delete_days`, `init_plugin_suite_user_engine_inbox_auto_delete_batch`, `init_plugin_suite_user_engine_inbox_auto_delete_time_limit` and `init_plugin_suite_user_engine_inbox_auto_delete_keep_meta_keys` (metadata keys that mark a message to keep, default `created_by`), action `init_plugin_suite_user_engine_inbox_auto_deleted` (number deleted, cutoff)
+- Performance (large sites): the **Inbox** widget on the WordPress Dashboard ran 4 queries over the whole Inbox table (total, unread, today, recipients) inside the admin's request, again every 5 minutes. With 1.6 million messages each query took up to 2.3 seconds and showed up in the slow query log
+  - The numbers are now calculated in the background by WP-Cron and saved; the widget only reads the saved numbers, with 0 queries on the Inbox table when the Dashboard opens. When they are more than 15 minutes old (filter `init_plugin_suite_user_engine_dashboard_stats_max_age`), a refresh is scheduled and the previous numbers are shown meanwhile, with "Updated X ago"
+  - The very first time, the widget says the numbers are being calculated and shows them a minute later
+  - Fix: "Today" now starts at midnight in the site's time zone, like on the Inbox Statistics page (before, it started at midnight UTC)
+  - Code quality: removed the `extract()` call from the widget
+- Fix: the database upgrade routine checked the `administrator` role instead of a capability; it now checks `manage_options`
+- Deactivation now also removes the Dashboard widget refresh task; uninstall also deletes the saved widget numbers
+- Translations: POT file regenerated with WP-CLI, Vietnamese translation updated
 
 = 1.7.3 – October 20, 2026 =
 - Fix: pass `home_url( add_query_arg( [] ) )` to `wp_login_url()` instead of `null` to avoid compatibility issues with newer PHP versions

@@ -193,6 +193,9 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$rate_cash_val = is_numeric( $rate_cash_raw ) ? (float) $rate_cash_raw : 0;
 	$output['rate_cash_per_coin'] = max( 0, $rate_cash_val );
 
+	// 1.7.4: tự động xóa tin đã đọc quá X ngày (0 = tắt, tối đa 3650 ngày) — xem includes/inbox.php.
+	$output['inbox_auto_delete_days'] = max( 0, min( 3650, (int) ( $input['inbox_auto_delete_days'] ?? 0 ) ) );
+
 	// 1.7.2: Buffer writes in object cache (xem includes/write-behind.php).
 	$output['buffer_log_writes'] = ! empty( $input['buffer_log_writes'] ) ? 1 : 0;
 
@@ -1028,6 +1031,8 @@ function init_plugin_suite_user_engine_render_settings_page() {
 					</td>
 				</tr>
 
+				<?php init_plugin_suite_user_engine_render_inbox_cleanup_settings( (array) $options ); ?>
+
 				<?php init_plugin_suite_user_engine_render_write_behind_settings( (array) $options ); ?>
 			</table>
 
@@ -1036,5 +1041,59 @@ function init_plugin_suite_user_engine_render_settings_page() {
 
 		<?php init_plugin_suite_user_engine_render_write_behind_flush_form(); ?>
 	</div>
+	<?php
+}
+
+/**
+ * Mục "Inbox" trên trang Cài đặt: tự động xóa tin đã đọc (1.7.4).
+ *
+ * @since 1.7.4
+ * @param array $options Cài đặt hiện tại.
+ * @return void
+ */
+function init_plugin_suite_user_engine_render_inbox_cleanup_settings( $options ) {
+	$days  = absint( $options['inbox_auto_delete_days'] ?? 0 );
+	$last  = get_option( 'iue_inbox_autodelete_last' );
+	$state = get_option( 'iue_inbox_autodelete_state' );
+	?>
+	<tr id="iue-inbox-cleanup">
+		<th colspan="2"><h2><?php esc_html_e( 'Inbox', 'init-user-engine' ); ?></h2></th>
+	</tr>
+	<tr>
+		<th scope="row"><label for="iue-inbox-auto-delete-days"><?php esc_html_e( 'Delete Read Messages After (days)', 'init-user-engine' ); ?></label></th>
+		<td>
+			<input type="number" min="0" max="3650" step="1" id="iue-inbox-auto-delete-days"
+				name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[inbox_auto_delete_days]"
+				value="<?php echo esc_attr( $days ); ?>" />
+			<p class="description"><?php esc_html_e( 'Automatically delete messages that have been read and were received more than this many days ago. 0 = never delete.', 'init-user-engine' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Unread messages, pinned messages and messages carrying a redeem code or VIP code assigned to the member are always kept. Runs once a day in the background, in small batches.', 'init-user-engine' ); ?></p>
+			<?php if ( $days > 0 && is_array( $state ) && ! empty( $state['max_id'] ) ) : ?>
+				<p class="description">
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s: number of messages deleted so far */
+							__( 'Cleanup in progress: %s messages deleted so far.', 'init-user-engine' ),
+							number_format_i18n( (int) ( $state['deleted'] ?? 0 ) )
+						)
+					);
+					?>
+				</p>
+			<?php elseif ( is_array( $last ) && ! empty( $last['time'] ) ) : ?>
+				<p class="description">
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: 1: human-readable time difference, e.g. "2 hours", 2: number of messages deleted */
+							__( 'Last cleanup: %1$s ago, %2$s messages deleted.', 'init-user-engine' ),
+							human_time_diff( (int) $last['time'], time() ),
+							number_format_i18n( (int) ( $last['deleted'] ?? 0 ) )
+						)
+					);
+					?>
+				</p>
+			<?php endif; ?>
+		</td>
+	</tr>
 	<?php
 }

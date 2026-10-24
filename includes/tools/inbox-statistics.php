@@ -674,46 +674,32 @@ function init_plugin_suite_user_engine_render_inbox_dashboard_widget() {
         update_option($option_key, 1, false);
     }
     
-    // Cache key for dashboard stats
-    $cache_key = 'iue_dashboard_stats';
-    $cache_expiry = 5 * MINUTE_IN_SECONDS; // Cache for 5 minutes
-    
-    // Try to get cached data
-    $cached_stats = get_transient($cache_key);
-    
-    if (false === $cached_stats) {
-        // Get basic stats from database
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $total_messages = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $unread_messages = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'unread'");
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $today_messages = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE created_at >= %d", strtotime('today')));
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $total_recipients = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table}");
-        
-        // Calculate read percentage
-        $read_percentage = $total_messages > 0 ? round((($total_messages - $unread_messages) / $total_messages) * 100, 1) : 0;
-        
-        // Calculate average messages per user
-        $avg_per_user = $total_recipients > 0 ? round($total_messages / $total_recipients, 1) : 0;
-        
-        // Store in cache
-        $cached_stats = array(
-            'total_messages' => $total_messages,
-            'unread_messages' => $unread_messages,
-            'today_messages' => $today_messages,
-            'total_recipients' => $total_recipients,
-            'read_percentage' => $read_percentage,
-            'avg_per_user' => $avg_per_user,
-            'cached_at' => current_time('timestamp')
-        );
-        
-        set_transient($cache_key, $cached_stats, $cache_expiry);
+    // Tối ưu (slow query): số liệu được tính NỀN qua WP-Cron (xem
+    // init_plugin_suite_user_engine_compute_dashboard_inbox_stats()) — trước đây
+    // 4 query đếm toàn bảng inbox chạy ngay khi admin mở Bảng tin, 5 phút/lần
+    // (bảng 1,6 triệu dòng: ~2,3 giây mỗi query, lọt slow query log). Widget chỉ
+    // đọc bản đã lưu; quá hạn thì xếp lịch tính lại và vẫn hiển thị bản cũ.
+    $cached_stats = get_option( 'iue_dashboard_stats_snapshot' );
+    $max_age      = (int) apply_filters( 'init_plugin_suite_user_engine_dashboard_stats_max_age', 15 * MINUTE_IN_SECONDS );
+    $is_fresh     = is_array( $cached_stats ) && ( time() - (int) ( $cached_stats['cached_at'] ?? 0 ) ) < $max_age;
+
+    if ( ! $is_fresh && ! wp_next_scheduled( 'init_plugin_suite_user_engine_refresh_dashboard_inbox_stats' ) ) {
+        wp_schedule_single_event( time(), 'init_plugin_suite_user_engine_refresh_dashboard_inbox_stats' );
     }
-    
+
+    if ( ! is_array( $cached_stats ) ) {
+        echo '<div class="iue-dashboard-widget"><p>' . esc_html__( 'Statistics are being calculated in the background. Please check back in a minute.', 'init-user-engine' ) . '</p>';
+        echo '<div class="iue-widget-actions"><a href="' . esc_url( admin_url( 'admin.php?page=init-user-engine-inbox-stats' ) ) . '" class="button button-primary">' . esc_html__( 'View Full Statistics', 'init-user-engine' ) . '</a></div></div>';
+        return;
+    }
+
     // Extract cached values
-    extract($cached_stats);
+    $total_messages   = (int) ( $cached_stats['total_messages'] ?? 0 );
+    $unread_messages  = (int) ( $cached_stats['unread_messages'] ?? 0 );
+    $today_messages   = (int) ( $cached_stats['today_messages'] ?? 0 );
+    $total_recipients = (int) ( $cached_stats['total_recipients'] ?? 0 );
+    $read_percentage  = $cached_stats['read_percentage'] ?? 0;
+    $avg_per_user     = $cached_stats['avg_per_user'] ?? 0;
     
     ?>
     <div class="iue-dashboard-widget">
@@ -747,6 +733,13 @@ function init_plugin_suite_user_engine_render_inbox_dashboard_widget() {
             </div>
         </div>
         
+        <p class="description" style="margin:8px 0 0;">
+            <?php
+            /* translators: %s: human-readable time difference, e.g. "5 mins" */
+            echo esc_html( sprintf( __( 'Updated %s ago', 'init-user-engine' ), human_time_diff( (int) $cached_stats['cached_at'], time() ) ) );
+            ?>
+        </p>
+
         <div class="iue-widget-actions">
             <a href="<?php echo esc_url(admin_url('admin.php?page=init-user-engine-inbox-stats')); ?>" class="button button-primary">
                 <?php esc_html_e('View Full Statistics', 'init-user-engine'); ?>

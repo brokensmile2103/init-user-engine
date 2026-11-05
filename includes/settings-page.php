@@ -109,6 +109,12 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	// 0 = không giới hạn; tối đa 3650 ngày (10 năm).
 	$output['display_name_change_days']  = max( 0, min( 3650, (int) ( $input['display_name_change_days'] ?? 0 ) ) );
 
+	// 1.7.6: giới hạn độ dài các trường trong Chỉnh sửa hồ sơ (1..trần cứng; rỗng/không hợp lệ = mặc định).
+	foreach ( init_plugin_suite_user_engine_profile_limit_bounds() as $iue_field => $iue_bound ) {
+		$iue_key            = 'profile_max_' . $iue_field;
+		$output[ $iue_key ] = init_plugin_suite_user_engine_clamp_profile_limit( $input[ $iue_key ] ?? '', $iue_bound['default'], $iue_bound['cap'] );
+	}
+
 	$output['require_login'] 			 = ! empty( $input['require_login'] ) ? 1 : 0;
 
 	$output['hide_admin_bar_subscriber'] = ! empty( $input['hide_admin_bar_subscriber'] ) ? 1 : 0;
@@ -427,6 +433,50 @@ function init_plugin_suite_user_engine_render_settings_page() {
 						</p>
 					</td>
 				</tr>
+
+				<tr>
+					<th colspan="2">
+						<h2><?php esc_html_e( 'Profile Field Limits', 'init-user-engine' ); ?></h2>
+						<p class="description" style="margin-top:4px;">
+							<?php esc_html_e( 'Maximum number of characters members can enter in the Edit Profile modal. When a field is too long, nothing is saved and the member sees which field to shorten.', 'init-user-engine' ); ?>
+						</p>
+					</th>
+				</tr>
+
+				<?php
+				$iue_profile_limits = init_plugin_suite_user_engine_get_profile_field_limits();
+				$iue_profile_bounds = init_plugin_suite_user_engine_profile_limit_bounds();
+				$iue_profile_rows   = array(
+					'display_name' => __( 'Display Name', 'init-user-engine' ),
+					'bio'          => __( 'Bio', 'init-user-engine' ),
+					'discord'      => __( 'Discord', 'init-user-engine' ),
+					'url'          => __( 'Links (Facebook, Twitter, Website)', 'init-user-engine' ),
+				);
+
+				foreach ( $iue_profile_rows as $iue_field => $iue_label ) :
+					$iue_input_id = 'iue-profile-max-' . str_replace( '_', '-', $iue_field );
+					?>
+					<tr>
+						<th scope="row"><label for="<?php echo esc_attr( $iue_input_id ); ?>"><?php echo esc_html( $iue_label ); ?></label></th>
+						<td>
+							<input type="number" min="1" max="<?php echo esc_attr( $iue_profile_bounds[ $iue_field ]['cap'] ); ?>" step="1" class="small-text"
+								id="<?php echo esc_attr( $iue_input_id ); ?>"
+								name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[profile_max_<?php echo esc_attr( $iue_field ); ?>]"
+								value="<?php echo esc_attr( $iue_profile_limits[ $iue_field ] ); ?>" />
+							<?php esc_html_e( 'characters', 'init-user-engine' ); ?>
+							<p class="description">
+								<?php
+								printf(
+									/* translators: 1: Default number of characters. 2: Highest allowed number of characters. */
+									esc_html__( 'Default: %1$s. Allowed: 1 to %2$s.', 'init-user-engine' ),
+									esc_html( number_format_i18n( $iue_profile_bounds[ $iue_field ]['default'] ) ),
+									esc_html( number_format_i18n( $iue_profile_bounds[ $iue_field ]['cap'] ) )
+								);
+								?>
+							</p>
+						</td>
+					</tr>
+				<?php endforeach; ?>
 
 				<tr>
 					<th colspan="2"><h2><?php esc_html_e( 'Avatar', 'init-user-engine' ); ?></h2></th>

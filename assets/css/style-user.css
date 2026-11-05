@@ -1211,6 +1211,27 @@
 	color: #999;
 }
 
+/* 1.7.6: bộ đếm ký tự (Bio) + trường báo lỗi */
+.iue-char-counter {
+	margin-top: 4px;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.iue-char-counter-over {
+	color: #d63638;
+	font-weight: 600;
+}
+
+.iue-form-group [aria-invalid="true"] {
+	border-color: #d63638;
+	box-shadow: 0 0 0 1px #d63638;
+}
+
+.iue-form-group[hidden] {
+	display: none;
+}
+
 .dark .iue-form-group input:disabled {
 	background: #2a2a2a;
 	color: #888;

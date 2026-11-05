@@ -909,9 +909,18 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
     }
 
     $file = $request->get_file_params()['avatar'] ?? null;
-    if ( ! $file || ! $file['tmp_name'] ) {
-        return new WP_Error( 'no_file', 'No file uploaded.', [ 'status' => 400 ] );
+    if ( ! is_array( $file ) || empty( $file['tmp_name'] ) || ! is_string( $file['tmp_name'] ) ) {
+        return new WP_Error( 'no_file', __( 'No file uploaded.', 'init-user-engine' ), [ 'status' => 400 ] );
     }
+
+    // 1.7.6: giới hạn số lần upload / giờ (chống spam đầy ổ đĩa).
+    $rate = init_plugin_suite_user_engine_avatar_rate_limit( $user_id );
+    if ( is_wp_error( $rate ) ) {
+        return $rate;
+    }
+
+    // Avatar hiện tại, để xoá file cũ sau khi lưu avatar mới thành công.
+    $previous_avatar = (string) get_user_meta( $user_id, 'iue_custom_avatar', true );
 
     // === Enforce max size (MB) from settings (0 = no limit)
     $settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, [] );
@@ -943,7 +952,12 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
     }
 
     // Let WP sanitize + unique + move như bình thường
-    $move = wp_handle_upload( $file, [ 'test_form' => false, 'upload_error_handler' => null ] );
+    // 1.7.6: chỉ nhận file ảnh (jpg/png/gif/webp), WP kiểm tra cả đuôi file lẫn nội dung thật.
+    $move = wp_handle_upload( $file, [
+        'test_form' => false,
+        'test_type' => true,
+        'mimes'     => init_plugin_suite_user_engine_avatar_mimes(),
+    ] );
     if ( isset( $move['error'] ) ) {
         return new WP_Error( 'upload_failed', $move['error'], [ 'status' => 500 ] );
     }
@@ -1058,6 +1072,13 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
         update_user_meta( $user_id, 'iue_custom_avatar', esc_url_raw( $url_50 ) );
     }
 
+    // 1.7.6: xoá các file của avatar cũ (50/80/orig) để thư mục không phình mãi.
+    if ( '' !== $previous_avatar
+        && init_plugin_suite_user_engine_avatar_prefix( $user_id, $previous_avatar ) !== $basename
+    ) {
+        init_plugin_suite_user_engine_delete_avatar_files( $user_id, $previous_avatar );
+    }
+
     return [
         'url_50'   => esc_url_raw( $url_50 ),
         'url_80'   => esc_url_raw( $url_80 ),
@@ -1098,27 +1119,8 @@ function init_plugin_suite_user_engine_api_remove_avatar( WP_REST_Request $reque
     $avatar_url = get_user_meta( $user_id, 'iue_custom_avatar', true );
 
     if ( $avatar_url ) {
-        $upload_dir = wp_upload_dir();
-        $base_url   = $upload_dir['baseurl'];
-        $base_dir   = $upload_dir['basedir'];
-
-        if ( strpos( $avatar_url, $base_url ) === 0 ) {
-            $relative_path = ltrim( str_replace( $base_url, '', $avatar_url ), '/' );
-            $avatar_path = $base_dir . '/' . $relative_path;
-
-            $filename = basename( $avatar_path );
-            $basename = preg_replace( '/-\d+\.(jpg|jpeg|png|webp)$/i', '', $filename );
-
-            $avatar_dir = dirname( $avatar_path );
-            $sizes = [ 50, 80 ];
-
-            foreach ( $sizes as $size ) {
-                $path = "{$avatar_dir}/{$basename}-{$size}.jpg";
-                if ( file_exists( $path ) ) {
-                    wp_delete_file( $path );
-                }
-            }
-        }
+        // 1.7.6: xoá đủ các bản 50/80/orig, chỉ trong thư mục avatar của plugin và đúng file của user này.
+        init_plugin_suite_user_engine_delete_avatar_files( $user_id, $avatar_url );
 
         delete_user_meta( $user_id, 'iue_custom_avatar' );
     }
@@ -1131,146 +1133,305 @@ function init_plugin_suite_user_engine_api_remove_avatar( WP_REST_Request $reque
     ]);
 }
 
-// Lấy dữ liệu người dùng
+/**
+ * REST GET /profile/me: data for the Edit Profile modal.
+ *
+ * @since 1.7.6 Also returns the field length limits and whether the current password is required.
+ *
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_get_profile( WP_REST_Request $request ) {
-    $user_id = get_current_user_id();
-    if ( ! $user_id ) {
-        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
-    }
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return new WP_Error( 'unauthorized', __( 'Unauthorized', 'init-user-engine' ), array( 'status' => 401 ) );
+	}
 
-    $user = get_userdata( $user_id );
+	$user = get_userdata( $user_id );
+	if ( ! $user ) {
+		return new WP_Error( 'unauthorized', __( 'Unauthorized', 'init-user-engine' ), array( 'status' => 401 ) );
+	}
 
-    $profile = [
-        'display_name' => $user->display_name,
-        'bio'          => get_user_meta( $user_id, 'description', true ),
-        'facebook'     => get_user_meta( $user_id, 'iue_facebook', true ),
-        'twitter'      => get_user_meta( $user_id, 'iue_twitter', true ),
-        'discord'      => get_user_meta( $user_id, 'iue_discord', true ),
-        'website'      => get_user_meta( $user_id, 'iue_website', true ),
-        'gender'       => get_user_meta( $user_id, 'iue_gender', true ),
-        'dob'          => get_user_meta( $user_id, 'iue_dob', true ),
+	$profile = array(
+		'display_name'             => $user->display_name,
+		// The bio may hold entities added by kses (& → &amp;): show the text the member typed.
+		'bio'                      => wp_specialchars_decode( (string) get_user_meta( $user_id, 'description', true ), ENT_QUOTES ),
+		'facebook'                 => (string) get_user_meta( $user_id, 'iue_facebook', true ),
+		'twitter'                  => (string) get_user_meta( $user_id, 'iue_twitter', true ),
+		'discord'                  => (string) get_user_meta( $user_id, 'iue_discord', true ),
+		'website'                  => (string) get_user_meta( $user_id, 'iue_website', true ),
+		'gender'                   => (string) get_user_meta( $user_id, 'iue_gender', true ),
+		'dob'                      => (string) get_user_meta( $user_id, 'iue_dob', true ),
 
-        // Giới hạn đổi tên hiển thị (days = 0 nghĩa là không giới hạn với user này).
-        'display_name_limit' => init_plugin_suite_user_engine_get_display_name_limit_data( $user_id ),
-    ];
+		// Display name change limit (days = 0 means no limit for this user).
+		'display_name_limit'       => init_plugin_suite_user_engine_get_display_name_limit_data( $user_id ),
 
-    return rest_ensure_response( $profile );
+		// 1.7.6: maximum characters per field and password rules, for the form.
+		'limits'                   => init_plugin_suite_user_engine_get_profile_field_limits(),
+		'require_current_password' => init_plugin_suite_user_engine_requires_current_password( $user_id ),
+	);
+
+	return rest_ensure_response( $profile );
 }
 
-// Cập nhật thông tin
+/**
+ * REST POST /profile/update: save the Edit Profile modal.
+ *
+ * Every field is checked before anything is saved: a field that is too long,
+ * a wrong link or a wrong current password returns an error and nothing is changed.
+ *
+ * @since 1.7.6 Length limits, strict validation, rate limit, current password for password changes.
+ *
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response|WP_Error
+ */
 function init_plugin_suite_user_engine_api_update_profile( WP_REST_Request $request ) {
-    $user_id = get_current_user_id();
-    if ( ! $user_id ) {
-        return new WP_Error( 'unauthorized', 'Unauthorized', [ 'status' => 401 ] );
-    }
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return new WP_Error( 'unauthorized', __( 'Unauthorized', 'init-user-engine' ), array( 'status' => 401 ) );
+	}
 
-    $data = $request->get_json_params();
+	$user_info = get_userdata( $user_id );
+	if ( ! $user_info ) {
+		return new WP_Error( 'unauthorized', __( 'Unauthorized', 'init-user-engine' ), array( 'status' => 401 ) );
+	}
 
-    $honeypot = sanitize_text_field( $data['iue_hp'] ?? '' );
-    if ( ! empty( $honeypot ) ) {
-        return new WP_Error( 'spam_detected', __( 'Spam detected.', 'init-user-engine' ), [ 'status' => 400 ] );
-    }
+	$rate = init_plugin_suite_user_engine_profile_rate_limit( $user_id );
+	if ( is_wp_error( $rate ) ) {
+		return $rate;
+	}
 
-    // Validate ngày sinh trước, để nếu lỗi thì không lưu dở dang các field khác.
-    $dob_raw = sanitize_text_field( $data['dob'] ?? '' );
-    $dob     = '';
+	$data = $request->get_json_params();
 
-    if ( $dob_raw !== '' ) {
-        $dob_date = DateTime::createFromFormat( 'Y-m-d', $dob_raw );
+	// A missing or broken JSON body must not wipe the profile.
+	if ( ! is_array( $data ) ) {
+		return new WP_Error( 'invalid_param', __( 'Invalid profile data.', 'init-user-engine' ), array( 'status' => 400 ) );
+	}
 
-        // createFromFormat có thể tự "sửa" ngày không hợp lệ (VD: 2025-02-30 → 2025-03-02), nên phải so khớp lại chuỗi gốc.
-        if ( ! $dob_date || $dob_date->format( 'Y-m-d' ) !== $dob_raw ) {
-            return new WP_Error( 'invalid_dob', __( 'Please enter a valid date of birth.', 'init-user-engine' ), [ 'status' => 400 ] );
-        }
+	// Read every field as a string (arrays / objects are refused).
+	$fields = array( 'iue_hp', 'display_name', 'bio', 'new_password', 'current_password', 'facebook', 'twitter', 'discord', 'website', 'gender', 'dob' );
+	$raw    = array();
 
-        $today = new DateTime( 'today', wp_timezone() );
-        if ( $dob_date > $today ) {
-            return new WP_Error( 'dob_in_future', __( 'Date of birth cannot be in the future.', 'init-user-engine' ), [ 'status' => 400 ] );
-        }
+	foreach ( $fields as $field ) {
+		$value = init_plugin_suite_user_engine_profile_string_param( $data, $field );
+		if ( is_wp_error( $value ) ) {
+			return $value;
+		}
+		$raw[ $field ] = $value;
+	}
 
-        // Chặn ngày sinh quá xa do nhập nhầm, giới hạn hợp lý trong vòng 120 năm đổ lại.
-        $min_dob_date = ( clone $today )->modify( '-120 years' );
-        if ( $dob_date < $min_dob_date ) {
-            return new WP_Error( 'dob_too_old', __( 'Please enter a valid date of birth.', 'init-user-engine' ), [ 'status' => 400 ] );
-        }
+	if ( '' !== trim( $raw['iue_hp'] ) ) {
+		return new WP_Error( 'spam_detected', __( 'Spam detected.', 'init-user-engine' ), array( 'status' => 400 ) );
+	}
 
-        $dob = $dob_date->format( 'Y-m-d' );
-    }
+	$limits = init_plugin_suite_user_engine_get_profile_field_limits();
 
-    $user_info = get_userdata( $user_id );
+	// ---- Date of birth ----
+	$dob_raw = sanitize_text_field( $raw['dob'] );
+	$dob     = '';
 
-    // Giữ khoảng trắng hợp lệ giữa các từ, không xoá hết như trước
-    $display_name_raw = $data['display_name'] ?? '';
-    $display_name = trim( wp_strip_all_tags( $display_name_raw ) );
+	if ( '' !== $dob_raw ) {
+		$dob_date = DateTime::createFromFormat( '!Y-m-d', $dob_raw, wp_timezone() );
 
-    // Gộp nhiều khoảng trắng liên tiếp thành 1 khoảng trắng
-    $display_name = preg_replace( '/\s+/u', ' ', $display_name );
+		// createFromFormat() "fixes" impossible dates (2025-02-30 → 2025-03-02), so compare with the input.
+		if ( ! $dob_date || $dob_date->format( 'Y-m-d' ) !== $dob_raw ) {
+			return new WP_Error(
+				'invalid_dob',
+				__( 'Please enter a valid date of birth.', 'init-user-engine' ),
+				array(
+					'status' => 400,
+					'field'  => 'dob',
+				)
+			);
+		}
 
-    // Nếu sau khi sanitize mà rỗng => fallback
-    if ( $display_name === '' ) {
-        $nickname = trim( (string) get_user_meta( $user_id, 'nickname', true ) );
-        $display_name = $nickname !== '' ? $nickname : $user_info->user_login;
-    }
+		$today = new DateTime( 'today', wp_timezone() );
+		if ( $dob_date > $today ) {
+			return new WP_Error(
+				'dob_in_future',
+				__( 'Date of birth cannot be in the future.', 'init-user-engine' ),
+				array(
+					'status' => 400,
+					'field'  => 'dob',
+				)
+			);
+		}
 
-    $bio      = sanitize_textarea_field( $data['bio'] ?? '' );
-    $password = $data['new_password'] ?? '';
+		// Refuse dates more than 120 years ago (typing mistakes).
+		$min_dob_date = ( clone $today )->modify( '-120 years' );
+		if ( $dob_date < $min_dob_date ) {
+			return new WP_Error(
+				'dob_too_old',
+				__( 'Please enter a valid date of birth.', 'init-user-engine' ),
+				array(
+					'status' => 400,
+					'field'  => 'dob',
+				)
+			);
+		}
 
-    $facebook = esc_url_raw( $data['facebook'] ?? '' );
-    $twitter  = esc_url_raw( $data['twitter'] ?? '' );
-    $discord  = sanitize_text_field( $data['discord'] ?? '' );
-    $website  = esc_url_raw( $data['website'] ?? '' );
-    $gender   = sanitize_key( $data['gender'] ?? '' );
+		$dob = $dob_date->format( 'Y-m-d' );
+	}
 
-    // Đổi tên hiển thị: kiểm tra giới hạn số ngày trước khi lưu bất kỳ field nào.
-    // Giữ per-user lock từ lúc kiểm tra tới lúc lưu để 2 request song song không cùng lọt qua.
-    $display_name_changed     = ( (string) $user_info->display_name !== (string) $display_name );
-    $check_display_name_limit = $display_name_changed && init_plugin_suite_user_engine_display_name_limit_applies( $user_id );
+	// ---- Display name ----
+	$display_name = init_plugin_suite_user_engine_normalize_display_name( $raw['display_name'] );
 
-    if ( $check_display_name_limit && ! init_plugin_suite_user_engine_lock_user( $user_id, 3 ) ) {
-        return init_plugin_suite_user_engine_busy_error();
-    }
+	// Empty after cleaning: fall back to the nickname, then the login.
+	if ( '' === $display_name ) {
+		$nickname     = init_plugin_suite_user_engine_normalize_display_name( (string) get_user_meta( $user_id, 'nickname', true ) );
+		$display_name = '' !== $nickname ? $nickname : $user_info->user_login;
+	}
 
-    try {
-        if ( $check_display_name_limit ) {
-            $check = init_plugin_suite_user_engine_check_display_name_change( $user_id, $display_name );
-            if ( is_wp_error( $check ) ) {
-                return $check;
-            }
-        }
+	// Only a new name is checked, so an older, longer name never blocks saving the other fields.
+	if ( (string) $user_info->display_name !== $display_name ) {
+		$check = init_plugin_suite_user_engine_check_profile_length( $display_name, 'display_name', __( 'Display Name', 'init-user-engine' ), $limits['display_name'] );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+	}
 
-        wp_update_user( [
-            'ID'           => $user_id,
-            'display_name' => $display_name,
-        ] );
-    } finally {
-        if ( $check_display_name_limit ) {
-            init_plugin_suite_user_engine_unlock_user( $user_id );
-        }
-    }
+	// ---- Bio ----
+	$bio   = init_plugin_suite_user_engine_normalize_bio( $raw['bio'] );
+	$check = init_plugin_suite_user_engine_check_profile_length( $bio, 'bio', __( 'Bio', 'init-user-engine' ), $limits['bio'] );
+	if ( is_wp_error( $check ) ) {
+		return $check;
+	}
 
-    // Đọc lại tên thật đã lưu (có thể đã được filter khác chỉnh sửa).
-    $saved_user   = get_userdata( $user_id );
-    $display_name = $saved_user ? $saved_user->display_name : $display_name;
+	// ---- Discord ----
+	$discord = init_plugin_suite_user_engine_normalize_profile_text( $raw['discord'] );
+	$check   = init_plugin_suite_user_engine_check_profile_length( $discord, 'discord', 'Discord', $limits['discord'] );
+	if ( is_wp_error( $check ) ) {
+		return $check;
+	}
 
-    if ( $password !== '' ) {
-        wp_set_password( $password, $user_id );
-    }
+	// ---- Links ----
+	$urls       = array();
+	$url_fields = array(
+		'facebook' => 'Facebook',
+		'twitter'  => 'Twitter',
+		'website'  => __( 'Website', 'init-user-engine' ),
+	);
 
-    update_user_meta( $user_id, 'description', $bio );
-    update_user_meta( $user_id, 'iue_facebook', $facebook );
-    update_user_meta( $user_id, 'iue_twitter', $twitter );
-    update_user_meta( $user_id, 'iue_discord', $discord );
-    update_user_meta( $user_id, 'iue_website', $website );
-    update_user_meta( $user_id, 'iue_gender', $gender );
-    update_user_meta( $user_id, 'iue_dob', $dob );
+	foreach ( $url_fields as $field => $label ) {
+		$url = init_plugin_suite_user_engine_validate_profile_url( $raw[ $field ], $field, $label, $limits['url'] );
+		if ( is_wp_error( $url ) ) {
+			return $url;
+		}
+		$urls[ $field ] = $url;
+	}
 
-    do_action( 'init_plugin_suite_user_engine_after_update_profile', $user_id, $data );
+	// ---- Gender ----
+	$gender = sanitize_key( $raw['gender'] );
+	if ( ! in_array( $gender, init_plugin_suite_user_engine_profile_allowed_genders(), true ) ) {
+		return new WP_Error(
+			'invalid_gender',
+			__( 'Please choose a valid gender.', 'init-user-engine' ),
+			array(
+				'status' => 400,
+				'field'  => 'gender',
+			)
+		);
+	}
 
-    return rest_ensure_response( [
-        'success' => true,
-        'data'    => [
-            'display_name' => $display_name,
-            'bio'          => $bio,
-        ],
-    ] );
+	// ---- New password (checked now, saved last) ----
+	$password = $raw['new_password'];
+
+	if ( '' !== $password ) {
+		$check = init_plugin_suite_user_engine_validate_new_password( $password, $user_info );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
+		if ( init_plugin_suite_user_engine_requires_current_password( $user_id ) ) {
+			$check = init_plugin_suite_user_engine_verify_current_password( $user_info, $raw['current_password'] );
+			if ( is_wp_error( $check ) ) {
+				return $check;
+			}
+		}
+	}
+
+	// ---- Save display name + bio (wp_update_user runs core filters and the profile_update hook) ----
+	// Keep the per-user lock from the check to the save, so two parallel requests cannot both pass.
+	$display_name_changed     = ( (string) $user_info->display_name !== $display_name );
+	$check_display_name_limit = $display_name_changed && init_plugin_suite_user_engine_display_name_limit_applies( $user_id );
+
+	if ( $check_display_name_limit && ! init_plugin_suite_user_engine_lock_user( $user_id, 3 ) ) {
+		return init_plugin_suite_user_engine_busy_error();
+	}
+
+	try {
+		if ( $check_display_name_limit ) {
+			$check = init_plugin_suite_user_engine_check_display_name_change( $user_id, $display_name );
+			if ( is_wp_error( $check ) ) {
+				return $check;
+			}
+		}
+
+		// wp_update_user() expects slashed data.
+		$updated = wp_update_user(
+			array(
+				'ID'           => $user_id,
+				'display_name' => wp_slash( $display_name ),
+				'description'  => wp_slash( $bio ),
+			)
+		);
+	} finally {
+		if ( $check_display_name_limit ) {
+			init_plugin_suite_user_engine_unlock_user( $user_id );
+		}
+	}
+
+	if ( is_wp_error( $updated ) ) {
+		return new WP_Error( 'update_failed', __( 'Could not update profile.', 'init-user-engine' ), array( 'status' => 500 ) );
+	}
+
+	// Read back what was really saved (another filter may have changed it).
+	clean_user_cache( $user_id );
+	$saved_user   = get_userdata( $user_id );
+	$display_name = $saved_user ? $saved_user->display_name : $display_name;
+
+	// update_user_meta() unslashes its value: slash it so backslashes are kept.
+	update_user_meta( $user_id, 'iue_facebook', wp_slash( $urls['facebook'] ) );
+	update_user_meta( $user_id, 'iue_twitter', wp_slash( $urls['twitter'] ) );
+	update_user_meta( $user_id, 'iue_discord', wp_slash( $discord ) );
+	update_user_meta( $user_id, 'iue_website', wp_slash( $urls['website'] ) );
+	update_user_meta( $user_id, 'iue_gender', $gender );
+	update_user_meta( $user_id, 'iue_dob', $dob );
+
+	$response = array(
+		'display_name'     => $display_name,
+		'bio'              => $bio,
+		'password_changed' => false,
+	);
+
+	if ( '' !== $password ) {
+		$nonce = init_plugin_suite_user_engine_change_own_password( $user_id, $password );
+		if ( is_wp_error( $nonce ) ) {
+			return $nonce;
+		}
+
+		$response['password_changed'] = true;
+		$response['nonce']            = $nonce;
+	}
+
+	// Passwords are never passed to hooks.
+	$hook_data = $data;
+	unset( $hook_data['new_password'], $hook_data['current_password'] );
+
+	/**
+	 * Fires after a member saved the Edit Profile modal.
+	 *
+	 * @since 1.7.6 Passwords are removed from `$data`.
+	 *
+	 * @param int   $user_id User ID.
+	 * @param array $data    Request body (without passwords).
+	 */
+	do_action( 'init_plugin_suite_user_engine_after_update_profile', $user_id, $hook_data );
+
+	return rest_ensure_response(
+		array(
+			'success' => true,
+			'data'    => $response,
+		)
+	);
 }

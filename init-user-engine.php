@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.7.5
+ * Version: 1.7.6
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.5' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.6' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -62,6 +62,7 @@ require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'utils.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'turnstile-forms.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'user-metabox.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'display-name-limit.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'profile-security.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'settings-page.php';
 
 if ( is_admin() ) {
@@ -454,6 +455,12 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
             'bio_placeholder'          => __( 'Short self introduction', 'init-user-engine' ),
             'new_password'             => __( 'New Password', 'init-user-engine' ),
             'leave_blank_to_keep'      => __( 'Leave blank to keep current password', 'init-user-engine' ),
+            'current_password'         => __( 'Current Password', 'init-user-engine' ),
+            'current_password_placeholder' => __( 'Required to set a new password', 'init-user-engine' ),
+            'current_password_required'    => __( 'Please enter your current password to set a new one.', 'init-user-engine' ),
+            'password_changed'             => __( 'Profile updated. Your password was changed and your other devices were signed out.', 'init-user-engine' ),
+            /* translators: 1: Field label (e.g. Bio). 2: Maximum number of characters. */
+            'field_too_long'               => __( '%1$s is too long (maximum %2$d characters).', 'init-user-engine' ),
 
             'facebook_placeholder'     => __( 'https://facebook.com/yourprofile', 'init-user-engine' ),
             'twitter_placeholder'      => __( 'https://twitter.com/yourhandle', 'init-user-engine' ),

@@ -1476,50 +1476,58 @@ function loadEditProfileModal() {
 
 function renderEditProfileModal(user, t) {
     const nameLimit = user.display_name_limit || {};
+    const limits    = user.limits || {};
+    const needCurrentPassword = user.require_current_password !== false;
 
+    // Chỉ dựng khung HTML tĩnh; mọi giá trị của user được gán qua DOM (.value) bên dưới, không bao giờ nối chuỗi vào HTML.
     showUserEngineModal(t.edit_profile_title || 'Edit Profile', `
        <div class="iue-edit-profile-container">
            <div class="iue-form-group">
                <label for="iue-display-name">${t.display_name || 'Display Name'}</label>
-               <input type="text" id="iue-display-name" value="" placeholder="${t.display_name_placeholder || 'Your public display name'}" />
+               <input type="text" id="iue-display-name" placeholder="${t.display_name_placeholder || 'Your public display name'}" />
                <p class="iue-form-hint" id="iue-display-name-hint" hidden></p>
            </div>
            <div class="iue-form-group">
                <label for="iue-bio">${t.bio || 'Bio'}</label>
-               <textarea id="iue-bio" rows="3" placeholder="${t.bio_placeholder || 'Short self introduction'}">${user.bio || ''}</textarea>
+               <textarea id="iue-bio" rows="3" placeholder="${t.bio_placeholder || 'Short self introduction'}" aria-describedby="iue-bio-counter"></textarea>
+               <p class="iue-form-hint iue-char-counter" id="iue-bio-counter" aria-live="polite"></p>
            </div>
            <div class="iue-form-group">
                <label for="iue-new-password">${t.new_password || 'New Password'}</label>
-               <input type="password" id="iue-new-password" placeholder="${t.leave_blank_to_keep || 'Leave blank to keep current password'}" />
+               <input type="password" id="iue-new-password" autocomplete="new-password" placeholder="${t.leave_blank_to_keep || 'Leave blank to keep current password'}" />
+           </div>
+           <div class="iue-form-group" id="iue-current-password-group" hidden>
+               <label for="iue-current-password">${t.current_password || 'Current Password'}</label>
+               <input type="password" id="iue-current-password" autocomplete="current-password" placeholder="${t.current_password_placeholder || 'Required to set a new password'}" />
            </div>
            <div class="iue-form-group">
                <label for="iue-facebook">Facebook</label>
-               <input type="url" id="iue-facebook" value="${user.facebook || ''}" placeholder="${t.facebook_placeholder || 'https://facebook.com/yourprofile'}" />
+               <input type="url" id="iue-facebook" placeholder="${t.facebook_placeholder || 'https://facebook.com/yourprofile'}" />
            </div>
            <div class="iue-form-group">
                <label for="iue-twitter">Twitter</label>
-               <input type="url" id="iue-twitter" value="${user.twitter || ''}" placeholder="${t.twitter_placeholder || 'https://twitter.com/yourhandle'}" />
+               <input type="url" id="iue-twitter" placeholder="${t.twitter_placeholder || 'https://twitter.com/yourhandle'}" />
            </div>
            <div class="iue-form-group">
                <label for="iue-discord">Discord</label>
-               <input type="text" id="iue-discord" value="${user.discord || ''}" placeholder="${t.discord_placeholder || 'Your Discord username or invite'}" />
+               <input type="text" id="iue-discord" placeholder="${t.discord_placeholder || 'Your Discord username or invite'}" />
            </div>
            <div class="iue-form-group">
                <label for="iue-website">Website</label>
-               <input type="url" id="iue-website" value="${user.website || ''}" placeholder="${t.website_placeholder || 'https://yourwebsite.com'}" />
+               <input type="url" id="iue-website" placeholder="${t.website_placeholder || 'https://yourwebsite.com'}" />
            </div>
            <div class="iue-form-group">
                <label for="iue-gender">${t.gender || 'Gender'}</label>
                <select id="iue-gender">
                    <option value="">${t.gender_unspecified || 'Prefer not to say'}</option>
-                   <option value="male" ${user.gender === 'male' ? 'selected' : ''}>${t.gender_male || 'Male'}</option>
-                   <option value="female" ${user.gender === 'female' ? 'selected' : ''}>${t.gender_female || 'Female'}</option>
-                   <option value="other" ${user.gender === 'other' ? 'selected' : ''}>${t.gender_other || 'Other'}</option>
+                   <option value="male">${t.gender_male || 'Male'}</option>
+                   <option value="female">${t.gender_female || 'Female'}</option>
+                   <option value="other">${t.gender_other || 'Other'}</option>
                </select>
            </div>
            <div class="iue-form-group">
                <label for="iue-dob">${t.dob || 'Date of Birth'}</label>
-               <input type="date" id="iue-dob" value="${user.dob || ''}" max="${iueTodayISO()}" />
+               <input type="date" id="iue-dob" max="${iueTodayISO()}" />
            </div>
            <div class="iue-form-actions">
                <button id="iue-save-profile" class="iue-btn">${t.save || 'Save'}</button>
@@ -1527,46 +1535,136 @@ function renderEditProfileModal(user, t) {
        </div>
    `);
 
-    // Gán giá trị qua DOM để tên có dấu nháy hay ký tự đặc biệt không phá vỡ HTML.
-    const nameInput = document.querySelector('#iue-display-name');
-    const nameHint  = document.querySelector('#iue-display-name-hint');
+    const $ = (id) => document.getElementById(id);
 
-    if (nameInput) {
-        nameInput.value = user.display_name || '';
+    const fields = {
+        display_name: $('iue-display-name'),
+        bio: $('iue-bio'),
+        new_password: $('iue-new-password'),
+        current_password: $('iue-current-password'),
+        facebook: $('iue-facebook'),
+        twitter: $('iue-twitter'),
+        discord: $('iue-discord'),
+        website: $('iue-website'),
+        gender: $('iue-gender'),
+        dob: $('iue-dob')
+    };
 
-        // Giới hạn đổi tên hiển thị: khoá ô nhập khi chưa tới ngày được đổi, server vẫn kiểm tra lại.
-        if (nameLimit.locked) {
-            nameInput.disabled = true;
-        }
+    if (!fields.display_name || !fields.bio) return;
 
-        if (nameHint && nameLimit.notice) {
-            nameHint.textContent = nameLimit.notice;
-            nameHint.hidden = false;
-            nameInput.setAttribute('aria-describedby', 'iue-display-name-hint');
-        }
+    // Gán giá trị qua DOM để dấu nháy hay ký tự đặc biệt không phá vỡ HTML (chống XSS).
+    fields.display_name.value = user.display_name || '';
+    fields.bio.value          = user.bio || '';
+    fields.facebook.value     = user.facebook || '';
+    fields.twitter.value      = user.twitter || '';
+    fields.discord.value      = user.discord || '';
+    fields.website.value      = user.website || '';
+    fields.dob.value          = /^\d{4}-\d{2}-\d{2}$/.test(user.dob || '') ? user.dob : '';
+    fields.gender.value       = ['male', 'female', 'other'].includes(user.gender) ? user.gender : '';
+
+    // Giới hạn độ dài (server vẫn kiểm tra lại và báo lỗi nếu vượt).
+    const maxOf = (key) => {
+        const n = parseInt(limits[key], 10);
+        return n > 0 ? n : 0;
+    };
+    const setMax = (el, max) => {
+        if (el && max > 0) el.setAttribute('maxlength', String(max));
+    };
+
+    // Tên cũ dài hơn giới hạn mới: không cắt tên đang có, chỉ chặn khi đổi tên.
+    if ((user.display_name || '').length <= maxOf('display_name')) {
+        setMax(fields.display_name, maxOf('display_name'));
+    }
+    setMax(fields.bio, maxOf('bio'));
+    setMax(fields.discord, maxOf('discord'));
+    setMax(fields.facebook, maxOf('url'));
+    setMax(fields.twitter, maxOf('url'));
+    setMax(fields.website, maxOf('url'));
+
+    // Bộ đếm ký tự cho Bio.
+    const bioCounter = $('iue-bio-counter');
+    const bioMax     = maxOf('bio');
+    const updateBioCounter = () => {
+        if (!bioCounter || !bioMax) return;
+        const len = fields.bio.value.length;
+        bioCounter.textContent = `${iueFmt(len)} / ${iueFmt(bioMax)}`;
+        bioCounter.classList.toggle('iue-char-counter-over', len > bioMax);
+    };
+    fields.bio.addEventListener('input', updateBioCounter);
+    updateBioCounter();
+
+    // Ô mật khẩu hiện tại chỉ hiện khi bắt đầu nhập mật khẩu mới.
+    const currentGroup = $('iue-current-password-group');
+    const toggleCurrentPassword = () => {
+        if (!currentGroup) return;
+        currentGroup.hidden = !(needCurrentPassword && fields.new_password.value !== '');
+    };
+    fields.new_password.addEventListener('input', toggleCurrentPassword);
+    toggleCurrentPassword();
+
+    const nameHint = $('iue-display-name-hint');
+
+    // Giới hạn đổi tên hiển thị: khoá ô nhập khi chưa tới ngày được đổi, server vẫn kiểm tra lại.
+    if (nameLimit.locked) {
+        fields.display_name.disabled = true;
     }
 
-    const saveBtn = document.querySelector('#iue-save-profile');
+    if (nameHint && nameLimit.notice) {
+        nameHint.textContent = nameLimit.notice;
+        nameHint.hidden = false;
+        fields.display_name.setAttribute('aria-describedby', 'iue-display-name-hint');
+    }
+
+    const showFieldError = (message, fieldKey) => {
+        InitUserEngineToast.show(iueEsc(message), 'error');
+
+        const el = fieldKey && fields[fieldKey];
+        if (el && !el.disabled) {
+            if (fieldKey === 'current_password' && currentGroup) currentGroup.hidden = false;
+            el.setAttribute('aria-invalid', 'true');
+            el.focus();
+        }
+    };
+
+    Object.values(fields).forEach((el) => {
+        if (!el) return;
+        el.addEventListener('input', () => el.removeAttribute('aria-invalid'));
+    });
+
+    const saveBtn = $('iue-save-profile');
     if (!saveBtn) return;
 
     saveBtn.addEventListener('click', () => {
-        const dobValue = document.querySelector('#iue-dob').value;
+        const dobValue = fields.dob.value;
 
         // Validate nhẹ phía client để phản hồi ngay, server vẫn là nơi validate chuẩn (authoritative).
         if (dobValue && dobValue > iueTodayISO()) {
-            InitUserEngineToast.show(t.dob_future || 'Date of birth cannot be in the future.', 'error');
+            showFieldError(t.dob_future || 'Date of birth cannot be in the future.', 'dob');
+            return;
+        }
+
+        if (bioMax && fields.bio.value.trim().length > bioMax) {
+            showFieldError((t.field_too_long || '%1$s is too long (maximum %2$d characters).')
+                .replace('%1$s', t.bio || 'Bio')
+                .replace('%2$d', iueFmt(bioMax)), 'bio');
+            return;
+        }
+
+        if (needCurrentPassword && fields.new_password.value !== '' && fields.current_password.value === '') {
+            showFieldError(t.current_password_required || 'Please enter your current password to set a new one.', 'current_password');
             return;
         }
 
         const data = {
-            display_name: document.querySelector('#iue-display-name').value.trim(),
-            bio: document.querySelector('#iue-bio').value.trim(),
-            new_password: document.querySelector('#iue-new-password').value,
-            facebook: document.querySelector('#iue-facebook').value.trim(),
-            twitter: document.querySelector('#iue-twitter').value.trim(),
-            discord: document.querySelector('#iue-discord').value.trim(),
-            website: document.querySelector('#iue-website').value.trim(),
-            gender: document.querySelector('#iue-gender').value,
+            display_name: fields.display_name.value.trim(),
+            bio: fields.bio.value.trim(),
+            new_password: fields.new_password.value,
+            current_password: fields.current_password ? fields.current_password.value : '',
+            facebook: fields.facebook.value.trim(),
+            twitter: fields.twitter.value.trim(),
+            discord: fields.discord.value.trim(),
+            website: fields.website.value.trim(),
+            gender: fields.gender.value,
             dob: dobValue
         };
 
@@ -1584,17 +1682,30 @@ function renderEditProfileModal(user, t) {
         .then(res => res.json())
         .then(res => {
             if (res && res.success) {
-                InitUserEngineToast.show(t.update_success || 'Profile updated successfully!', 'success');
+                const saved = res.data || {};
+
+                // Đổi mật khẩu tạo phiên đăng nhập mới: dùng nonce mới cho các request sau.
+                if (saved.nonce) {
+                    InitUserEngineData.nonce = saved.nonce;
+                }
+
+                InitUserEngineToast.show(
+                    iueEsc(saved.password_changed
+                        ? (t.password_changed || 'Profile updated. Your password was changed and your other devices were signed out.')
+                        : (t.update_success || 'Profile updated successfully!')),
+                    'success'
+                );
                 closeModal();
 
-                if (res.data && res.data.display_name) {
+                if (saved.display_name) {
                     const nameEl = document.querySelector('#iue-dashboard-display-name');
                     if (nameEl) {
-                        nameEl.textContent = res.data.display_name;
+                        nameEl.textContent = saved.display_name;
                     }
                 }
             } else {
-                InitUserEngineToast.show((res && res.message) || (t.update_failed || 'Could not update profile.'), 'error');
+                const field = res && res.data && typeof res.data.field === 'string' ? res.data.field : '';
+                showFieldError((res && res.message) || (t.update_failed || 'Could not update profile.'), field);
                 saveBtn.disabled = false;
             }
         })

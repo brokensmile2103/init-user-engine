@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.5
+Stable tag: 1.7.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - Custom avatar upload with live preview, crop-free flow, and one-click revert to the default/Gravatar image  
 - Configurable upload policy (allow everyone, VIP only, or disable uploads entirely) with a configurable max file size  
 - Optional display name change limit (e.g. once every 7 days, like TikTok), enforced in the profile modal, `wp-admin/profile.php`, the REST API and WooCommerce Account details  
+- Configurable length limits for every Edit Profile field (display name, bio, Discord, links), with a live character counter for the bio  
+- Hardened Edit Profile: changing the password asks for the current password, signs out other devices and sends the WordPress "password changed" email  
 - Theme override support: any template file can be overridden by copying it to `your-theme/init-user-engine/`
 
 **Accounts, Login & Registration**
@@ -161,6 +163,16 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_inbox_auto_delete_keep_meta_keys` – Metadata keys that mark an Inbox message to keep during automatic deletion (default `created_by`)
 - `init_plugin_suite_user_engine_inbox_auto_delete_batch` / `init_plugin_suite_user_engine_inbox_auto_delete_time_limit` – Ids per `DELETE` (default 5000) and seconds per run (default 20) of the automatic deletion
 - `init_plugin_suite_user_engine_dashboard_stats_max_age` – How old (in seconds) the Dashboard Inbox widget numbers may be before a background refresh (default 900)
+- `init_plugin_suite_user_engine_profile_field_limits` – Modify the maximum characters of the Edit Profile fields (keys `display_name`, `bio`, `discord`, `url`; values are clamped to the hard ceilings 250 / 10000 / 255 / 2048)
+- `init_plugin_suite_user_engine_profile_url_hosts` – Domains accepted for the `facebook`, `twitter` and `website` fields (return an empty array to accept any domain)
+- `init_plugin_suite_user_engine_profile_genders` – Allowed values of the Gender field (default `''`, `male`, `female`, `other`)
+- `init_plugin_suite_user_engine_profile_update_rate_limit` – Edit Profile saves allowed per minute (default 10, `0` = no limit)
+- `init_plugin_suite_user_engine_require_current_password` – Whether the current password is required to set a new one (default `true`, not recommended to turn off)
+- `init_plugin_suite_user_engine_current_password_attempts` – Wrong current passwords allowed per 15 minutes (default 5)
+- `init_plugin_suite_user_engine_password_max_length` – Maximum length of a new password (default 128)
+- `init_plugin_suite_user_engine_validate_new_password` – Return a `WP_Error` to refuse a new password (for a stronger policy)
+- `init_plugin_suite_user_engine_avatar_mimes` – File types accepted for avatar uploads (default jpg, png, gif, webp; SVG is never accepted)
+- `init_plugin_suite_user_engine_avatar_upload_rate_limit` – Avatar uploads allowed per hour (default 10, `0` = no limit)
 
 === Actions ===
 
@@ -181,6 +193,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_cash_changed` – After user’s Cash balance is updated  
 - `init_plugin_suite_user_engine_admin_send_notice` – When admin sends notification via wp-admin.
 - `init_plugin_suite_user_engine_display_name_unlocked` – After an administrator lets a member change their display name again (user ID)
+- `init_plugin_suite_user_engine_after_update_profile` – After a member saved the Edit Profile modal (user ID, submitted data without passwords)
+- `init_plugin_suite_user_engine_password_changed` – After a member changed their password from the Edit Profile modal (user ID)
 
 === REST API Endpoints ===
 
@@ -200,8 +214,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `GET  /referral-log` – Get referral history  
 - `POST /avatar` – Upload new avatar  
 - `POST /avatar/remove` – Remove custom avatar and revert to default  
-- `GET  /profile/me` – Get current user profile (includes `display_name_limit`: `days`, `locked`, `next_change`, `notice`)  
-- `POST /profile/update` – Update profile information
+- `GET  /profile/me` – Get current user profile (includes `display_name_limit`: `days`, `locked`, `next_change`, `notice`; `limits`: maximum characters per field; `require_current_password`)  
+- `POST /profile/update` – Update profile information. Every field is checked before anything is saved; errors return HTTP 400/403/429 with `data.field` naming the field. Changing the password needs `current_password` and returns a new `nonce`
 - `GET  /daily-tasks` – Get list of completed daily tasks and rewards
 - `POST /exchange` – Convert Cash → Coin based on exchange rate
 - `POST /redeem-code` – Redeem gift code (returns Coin/Cash rewards)
@@ -227,6 +241,32 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.6 – November 6, 2026 =
+- New: **Profile Field Limits** (Init User Engine → Settings → Profile Field Limits). Maximum characters for the Edit Profile fields, with sensible defaults: Display Name 50, Bio 2000, Discord 100, Links (Facebook, Twitter, Website) 255
+  - Checked on the server in characters, not bytes, so Vietnamese, other accented text and emoji count correctly. A field that is too long is refused with a clear message naming the field, and nothing is saved (no silent cutting)
+  - Each value can be set from 1 up to a hard ceiling (Display Name 250 = the size of the database column, Bio 10000, Discord 255, Links 2048). Empty or invalid values fall back to the default, so existing sites get the defaults without saving the settings
+  - The form sets `maxlength` on every field and shows a live character counter under Bio. A display name that is already longer than a new limit is kept: only a new name is checked
+  - New filter `init_plugin_suite_user_engine_profile_field_limits`
+- Security: changing the password in the Edit Profile modal now asks for the **current password**. Before, anyone with access to a signed-in browser (shared computer, stolen cookie, an XSS on another plugin) could set a new password and take over the account
+  - 5 wrong current passwords per 15 minutes, then password changes are refused until the window ends
+  - New passwords follow the same rules as the registration form (at least 6 characters, letters and numbers), up to 128 characters, and must be different from the current one
+  - The password is now changed with `wp_update_user()` instead of `wp_set_password()`: the member stays signed in on this browser (before, they were silently signed out on the next request), WordPress sends its "password changed" email, and **every other device is signed out**. The response carries a new REST nonce, so the page keeps working without a reload
+  - Members who signed up with a social login and never set a password can use "Lost password". Filter `init_plugin_suite_user_engine_require_current_password` for special cases (not recommended)
+- Security: fixed a stored XSS in the Edit Profile modal. Saved values (Discord, links, bio) were written into the form's HTML; Discord kept double quotes, so a value such as `x" onfocus="…` could run JavaScript. All values are now set as plain text through the DOM, and error messages are escaped before display
+- Security: every request field must be text. Sending an array or object (for example `"display_name": []`) caused a PHP fatal error (HTTP 500) on PHP 8; it now returns HTTP 400. A missing or broken JSON body no longer wipes the profile
+- Security: display name, bio and Discord no longer accept invisible characters and text-direction controls (zero-width spaces, Hangul fillers, right-to-left overrides…), which allowed blank names or look-alike names of other members. Emoji sequences and joiners needed by real text are kept
+- Security: links accept only `http://` and `https://` (no more `mailto:`, `ftp:`…), refuse `user@host` tricks such as `https://facebook.com@example.com`, and must use a real domain name. Facebook must link to `facebook.com` / `fb.com` / `fb.me` and Twitter to `twitter.com` / `x.com` (subdomains allowed); Website accepts any domain. Filter `init_plugin_suite_user_engine_profile_url_hosts`
+- Security: Gender only accepts the values offered in the form (filter `init_plugin_suite_user_engine_profile_genders`)
+- Security: the Edit Profile form can be saved at most 10 times per minute per member (filter `init_plugin_suite_user_engine_profile_update_rate_limit`)
+- Security: passwords are no longer passed to the `init_plugin_suite_user_engine_after_update_profile` action
+- Security (avatar): uploads only accept JPG, PNG, GIF and WebP, checked by extension and real file content (before, any file type allowed by WordPress, such as PDF, was first moved into the uploads folder). Filter `init_plugin_suite_user_engine_avatar_mimes`; SVG is never accepted
+- Security (avatar): at most 10 uploads per hour per member (filter `init_plugin_suite_user_engine_avatar_upload_rate_limit`)
+- Fix (avatar): uploading a new avatar now deletes the files of the previous one, so the avatars folder no longer grows forever. "Remove Avatar" now also deletes the original GIF kept for VIPs. Only files of this plugin's avatars folder that belong to the member are ever deleted
+- Fix: the bio and display name are saved with `wp_update_user()`, so core filters (`pre_user_description`…) and the `profile_update` hook run, and backslashes are no longer lost
+- Fix: a date of birth set to today was refused as "in the future" depending on the time of day
+- Developers: new filters `init_plugin_suite_user_engine_current_password_attempts`, `init_plugin_suite_user_engine_password_max_length`, `init_plugin_suite_user_engine_validate_new_password`, new action `init_plugin_suite_user_engine_password_changed`. Errors of `POST /profile/update` include `data.field`
+- Translations: POT file regenerated with WP-CLI, Vietnamese translation updated
 
 = 1.7.5 – October 25, 2026 =
 - Performance: after every plugin update, the upgrade routine ran `UPDATE … SET pinned = 0 WHERE pinned = 1 AND status = 'read'` on the whole Inbox table (a one-time backfill for the "unpin when read" behaviour of 1.6.2). On large tables it showed up in the slow query log (about 2 seconds) even though there was nothing left to change. It now only runs when upgrading from a version older than 1.6.2

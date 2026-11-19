@@ -2,9 +2,9 @@
 Contributors: brokensmile.2103
 Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.7.6
+Stable tag: 1.7.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -241,6 +241,13 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.7 – November 19, 2026 =
+- Fix: the admin menu icon is compatible with **WordPress 7.2**. WP 7.2 draws menu icons as inline SVG, so the CSS-mask icon of earlier versions no longer showed
+  - Uses the WordPress **Icon Registration API** (`wp_register_icon()`, WP 7.1+): the icon is registered as `init-user-engine/init-user-engine`, only in wp-admin, and the collection is not public so it stays out of the editor's icon picker
+  - WP 7.2+: the menu gets the icon name and core draws the SVG inline, coloured by the admin colour scheme. WP 7.1: a data URI already painted with the colour scheme's icon colour, so it is not black while the page loads
+  - Older WordPress (before 7.1): unchanged, the previous CSS-mask icon is used as a fallback; `menu-icon.css` is now loaded only there
+- Compatibility: tested up to WordPress 7.2
 
 = 1.7.6 – November 6, 2026 =
 - New: **Profile Field Limits** (Init User Engine → Settings → Profile Field Limits). Maximum characters for the Edit Profile fields, with sensible defaults: Display Name 50, Bio 2000, Discord 100, Links (Facebook, Twitter, Website) 255

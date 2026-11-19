@@ -262,8 +262,174 @@ function init_plugin_suite_user_engine_time_ago( $timestamp ) {
 	return __( 'just now', 'init-user-engine' ); // fallback
 }
 
-// Biểu tượng
-add_action( 'admin_enqueue_scripts', function ( $hook ) {
+// =======================
+// Admin menu icon
+// =======================
+
+/**
+ * Register the custom SVG icon with the WordPress Icon Registration API (WP 7.1+).
+ *
+ * Only in wp-admin: the icon is used by the admin menu alone, so there is no reason to register
+ * (and sanitize) it on every front-end or REST request. WP 7.2+: the collection is not public,
+ * so it stays out of the editor's icon picker.
+ *
+ * @since 1.7.7
+ */
+function init_plugin_suite_user_engine_register_icons() {
+	if ( ! function_exists( 'wp_register_icon_collection' ) || ! function_exists( 'wp_register_icon' ) ) {
+		return;
+	}
+
+	$collection = [
+		'label' => __( 'Init User Engine', 'init-user-engine' ),
+	];
+	if ( init_plugin_suite_user_engine_admin_menu_supports_icon_names() ) {
+		$collection['public'] = false; // WP 7.2+
+	}
+
+	wp_register_icon_collection( 'init-user-engine', $collection );
+
+	$content = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M22 12c0-5.51-4.49-10-10-10S2 6.49 2 12c0 2.9 1.25 5.51 3.23 7.34 0 .01 0 .01-.01.02.1.1.22.18.32.27.06.05.11.1.17.14.18.15.38.29.57.43l.2.14q.285.195.6.36c.07.04.15.09.22.13q.3.165.63.3c.08.04.16.08.24.11q.33.135.66.24c.08.03.16.06.24.08.24.07.48.13.72.19.07.02.14.04.22.05.28.06.56.1.85.13.04 0 .08.01.12.02.34.03.68.05 1.02.05s.68-.02 1.01-.05c.04 0 .08-.01.12-.02.29-.03.57-.07.85-.13.07-.01.14-.04.22-.05.24-.06.49-.11.72-.19.08-.03.16-.06.24-.08.22-.08.45-.15.66-.24.08-.03.16-.07.24-.11q.315-.135.63-.3c.08-.04.15-.09.22-.13.2-.12.4-.23.6-.36.07-.04.13-.09.2-.14.2-.14.39-.28.57-.43.06-.05.11-.1.17-.14.11-.09.22-.18.32-.27 0-.01 0-.01-.01-.02C20.75 17.51 22 14.9 22 12m-5.06 4.97c-2.71-1.82-7.15-1.82-9.88 0-.44.29-.8.63-1.1 1A8.48 8.48 0 0 1 3.5 12c0-4.69 3.81-8.5 8.5-8.5s8.5 3.81 8.5 8.5c0 2.32-.94 4.43-2.46 5.97-.29-.37-.66-.71-1.1-1"/><path fill="currentColor" d="M12 6.93c-2.07 0-3.75 1.68-3.75 3.75 0 2.03 1.59 3.68 3.7 3.74h.18a3.743 3.743 0 0 0 3.62-3.74c0-2.07-1.68-3.75-3.75-3.75"/></svg>';
+
+	// WP 7.2+ draws the menu icon at 24px like core icons (strokes ~20px, with margin), so widen
+	// the viewBox by 10% per side to balance it against core. WP 7.1 (20px data URI) keeps the original.
+	if ( init_plugin_suite_user_engine_admin_menu_supports_icon_names() ) {
+		$content = init_plugin_suite_user_engine_pad_svg_viewbox( $content, 0.1 );
+	}
+
+	wp_register_icon(
+		'init-user-engine/init-user-engine',
+		[
+			'label'   => __( 'Init User Engine', 'init-user-engine' ),
+			'content' => $content,
+		]
+	);
+}
+if ( is_admin() ) {
+	add_action( 'init', 'init_plugin_suite_user_engine_register_icons', 1 );
+}
+
+/**
+ * WP 7.2+ renders namespaced admin menu icon names ('init-user-engine/init-user-engine') as
+ * inline SVG (<div class="wp-menu-image dashicons-before svg-icon"><svg …>), coloured by CSS.
+ *
+ * @since 1.7.7
+ */
+function init_plugin_suite_user_engine_admin_menu_supports_icon_names() {
+	return function_exists( 'wp_is_valid_icon_name' ) && function_exists( 'wp_get_icon' );
+}
+
+/**
+ * Widen an SVG viewBox by $ratio (of each side) on every side.
+ *
+ * @since 1.7.7
+ */
+function init_plugin_suite_user_engine_pad_svg_viewbox( $svg, $ratio ) {
+	return preg_replace_callback(
+		'/\bviewBox="([-\d.]+)\s+([-\d.]+)\s+([\d.]+)\s+([\d.]+)"/i',
+		function ( $m ) use ( $ratio ) {
+			$w  = (float) $m[3];
+			$h  = (float) $m[4];
+			$px = $w * $ratio;
+			$py = $h * $ratio;
+			return sprintf(
+				'viewBox="%s %s %s %s"',
+				round( (float) $m[1] - $px, 3 ),
+				round( (float) $m[2] - $py, 3 ),
+				round( $w + 2 * $px, 3 ),
+				round( $h + 2 * $py, 3 )
+			);
+		},
+		(string) $svg,
+		1
+	);
+}
+
+/**
+ * Menu icon colour of the current admin colour scheme (what svg-painter.js will paint), used for
+ * the WP 7.1 data URI so the icon is the right colour at once instead of black until svg-painter runs.
+ *
+ * @since 1.7.7
+ */
+function init_plugin_suite_user_engine_admin_icon_base_color() {
+	static $color = null;
+	if ( null !== $color ) {
+		return $color;
+	}
+
+	$scheme = (string) get_user_option( 'admin_color' );
+	if ( '' === $scheme ) {
+		$scheme = 'fresh';
+	}
+
+	global $_wp_admin_css_colors;
+	if ( ! empty( $_wp_admin_css_colors[ $scheme ]->icon_colors['base'] ) ) {
+		$color = (string) $_wp_admin_css_colors[ $scheme ]->icon_colors['base'];
+	} else {
+		$core  = [
+			'fresh'     => '#a7aaad',
+			'light'     => '#999',
+			'modern'    => '#f3f1f1',
+			'blue'      => '#e5f8ff',
+			'coffee'    => '#f3f2f1',
+			'ectoplasm' => '#ece6f6',
+			'midnight'  => '#f1f2f3',
+			'ocean'     => '#f2fcff',
+			'sunrise'   => '#f3f1f1',
+		];
+		$color = $core[ $scheme ] ?? '#a7aaad';
+	}
+
+	if ( ! preg_match( '/^#[0-9a-f]{3,8}$/i', $color ) ) {
+		$color = '#a7aaad';
+	}
+	return $color;
+}
+
+/**
+ * Icon for add_menu_page().
+ *
+ * - WP 7.2+: the icon name itself → core renders inline SVG, coloured by CSS.
+ * - WP 7.1: base64 data URI, already painted with the admin colour scheme's icon colour.
+ * - Older WP (no Icon API) or icon missing: the Dashicons fallback (menu-icon.css swaps in the SVG).
+ *
+ * @since 1.7.7
+ *
+ * @param string $icon_name Registered icon name.
+ * @param string $fallback  Fallback Dashicons class.
+ * @return string
+ */
+function init_plugin_suite_user_engine_admin_icon_url( $icon_name, $fallback = 'dashicons-admin-generic' ) {
+	if ( ! is_admin() ) {
+		return $fallback;
+	}
+
+	if ( init_plugin_suite_user_engine_admin_menu_supports_icon_names() ) {
+		return $icon_name;
+	}
+
+	if ( function_exists( 'wp_get_icon' ) ) {
+		$svg = wp_get_icon( $icon_name, [ 'size' => 20 ] );
+
+		if ( is_string( $svg ) && '' !== trim( $svg ) ) {
+			// WP 7.1's SVG sanitizer may lowercase viewBox to viewbox.
+			$svg = preg_replace( '/\bviewbox\s*=/i', 'viewBox=', $svg );
+
+			// A background image does not inherit currentColor → paint it with the scheme's icon colour.
+			$svg = str_replace( 'currentColor', init_plugin_suite_user_engine_admin_icon_base_color(), $svg );
+
+			return 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- SVG data URI for add_menu_page().
+		}
+	}
+
+	return $fallback;
+}
+
+// Fallback for WordPress without the Icon API (< 7.1): the CSS mask draws the icon over Dashicons.
+add_action( 'admin_enqueue_scripts', function () {
+	if ( function_exists( 'wp_register_icon' ) ) {
+		return;
+	}
 	wp_enqueue_style( 'iue-admin-icon', INIT_PLUGIN_SUITE_IUE_ASSETS_URL . 'css/menu-icon.css', [], INIT_PLUGIN_SUITE_IUE_VERSION );
 } );
 

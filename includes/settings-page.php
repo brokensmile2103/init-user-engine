@@ -106,6 +106,16 @@ function init_plugin_suite_user_engine_sanitize_settings( $input ) {
 	$max_mb_val	 						 = is_numeric( $max_mb_raw ) ? (float) $max_mb_raw : 0;
 	$output['avatar_max_upload_mb'] 	 = max( 0, $max_mb_val );
 
+	// 1.7.8: kích thước avatar (px). Rỗng/không hợp lệ = mặc định; sắp xếp lại để Nhỏ <= Vừa <= Lớn.
+	$iue_avatar_sizes = array();
+	foreach ( init_plugin_suite_user_engine_avatar_size_defaults() as $iue_slot => $iue_default ) {
+		$iue_avatar_sizes[] = init_plugin_suite_user_engine_clamp_avatar_size( $input[ 'avatar_size_' . $iue_slot ] ?? '', $iue_default );
+	}
+	sort( $iue_avatar_sizes, SORT_NUMERIC );
+	foreach ( array_keys( init_plugin_suite_user_engine_avatar_size_defaults() ) as $iue_index => $iue_slot ) {
+		$output[ 'avatar_size_' . $iue_slot ] = $iue_avatar_sizes[ $iue_index ];
+	}
+
 	// 0 = không giới hạn; tối đa 3650 ngày (10 năm).
 	$output['display_name_change_days']  = max( 0, min( 3650, (int) ( $input['display_name_change_days'] ?? 0 ) ) );
 
@@ -221,6 +231,10 @@ function init_plugin_suite_user_engine_render_settings_page() {
 			<?php settings_fields( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>
 
 			<table class="form-table" role="presentation">
+				<tr>
+					<th colspan="2"><h2><?php esc_html_e( 'General', 'init-user-engine' ); ?></h2></th>
+				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Theme Color', 'init-user-engine' ); ?></th>
 					<td>
@@ -528,6 +542,48 @@ function init_plugin_suite_user_engine_render_settings_page() {
 
 						<p class="description" style="color:#d63638;font-weight:600;">
 							<?php esc_html_e( 'Warning: GIF avatars can be large and may affect performance. Enable only if you understand the risks.', 'init-user-engine' ); ?>
+						</p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Avatar Sizes (px)', 'init-user-engine' ); ?></th>
+					<td>
+						<?php
+						$iue_size_bounds = init_plugin_suite_user_engine_avatar_size_bounds();
+						$iue_size_labels = array(
+							'small'  => __( 'Small', 'init-user-engine' ),
+							'medium' => __( 'Medium', 'init-user-engine' ),
+							'large'  => __( 'Large', 'init-user-engine' ),
+						);
+						?>
+						<fieldset>
+							<legend class="screen-reader-text"><?php esc_html_e( 'Avatar Sizes (px)', 'init-user-engine' ); ?></legend>
+							<?php foreach ( init_plugin_suite_user_engine_avatar_size_defaults() as $iue_slot => $iue_default ) : ?>
+								<?php $iue_size_id = 'iue-avatar-size-' . $iue_slot; ?>
+								<label for="<?php echo esc_attr( $iue_size_id ); ?>" style="display:inline-block;margin-right:14px;">
+									<?php echo esc_html( $iue_size_labels[ $iue_slot ] ); ?>
+									<input type="number" class="small-text" id="<?php echo esc_attr( $iue_size_id ); ?>"
+										min="<?php echo esc_attr( $iue_size_bounds['min'] ); ?>"
+										max="<?php echo esc_attr( $iue_size_bounds['max'] ); ?>"
+										step="1"
+										name="<?php echo esc_attr( INIT_PLUGIN_SUITE_IUE_OPTION ); ?>[avatar_size_<?php echo esc_attr( $iue_slot ); ?>]"
+										value="<?php echo esc_attr( init_plugin_suite_user_engine_clamp_avatar_size( $options[ 'avatar_size_' . $iue_slot ] ?? '', $iue_default ) ); ?>" />
+								</label>
+							<?php endforeach; ?>
+						</fieldset>
+						<p class="description">
+							<?php
+							printf(
+								/* translators: 1: Lowest size in pixels. 2: Highest size in pixels. */
+								esc_html__( 'Each new avatar is cropped to a square and saved in these 3 sizes. Default: 50, 80, 150. Allowed: %1$s to %2$s px.', 'init-user-engine' ),
+								esc_html( number_format_i18n( $iue_size_bounds['min'] ) ),
+								esc_html( number_format_i18n( $iue_size_bounds['max'] ) )
+							);
+							?>
+						</p>
+						<p class="description">
+							<?php esc_html_e( 'Only new uploads use the new sizes: the original image is not kept, so existing avatars cannot be cut again. Each avatar is shown with the closest size that is not smaller than needed.', 'init-user-engine' ); ?>
 						</p>
 					</td>
 				</tr>

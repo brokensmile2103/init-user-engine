@@ -381,15 +381,13 @@ function init_plugin_suite_user_engine_filter_avatar_data( $args, $id_or_email )
 	$disable_gravatar = ! empty( $options['disable_gravatar'] );
 
 	// Lấy avatar IUE.
-	$custom_50 = get_user_meta( $user_id, 'iue_custom_avatar', true );
-	if ( $custom_50 && filter_var( $custom_50, FILTER_VALIDATE_URL ) ) {
+	$custom_urls = init_plugin_suite_user_engine_get_avatar_urls( $user_id );
+	if ( ! empty( $custom_urls ) ) {
 		$size = (int) ( $args['size'] ?? 50 );
 
-		// Map kích thước đơn giản 50/80.
-		$use_url = $custom_50;
-		if ( $size >= 80 ) {
-			$use_url = str_replace( '-50.', '-80.', $custom_50 );
-		}
+		// 1.7.8: bản nhỏ nhất mà vẫn >= kích thước cần hiển thị (không phóng to ảnh nhỏ),
+		// không có thì lấy bản lớn nhất. get_avatar() tự gọi thêm size x2 cho srcset 2x (màn hình Retina).
+		$use_url = init_plugin_suite_user_engine_pick_avatar_url( $custom_urls, $size );
 
 		// Gán lại dữ liệu avatar.
 		$args['url']          = esc_url( $use_url );
@@ -753,6 +751,7 @@ function init_plugin_suite_user_engine_redirect_failed_lostpassword( $errors = n
  * Phạm vi dọn dẹp (đã cân nhắc kỹ):
  * - EXP log (bảng init_user_engine_exp_log)  → xóa toàn bộ theo user_id.
  * - Inbox   (bảng init_user_engine_inbox)    → xóa toàn bộ theo user_id.
+ * - File avatar (uploads/init-user-engine/avatars/avatar-{user_id}-*) → xóa (1.7.8).
  *
  * CỐ Ý KHÔNG đụng vào:
  * - Transaction log / coin/cash (bảng init_user_engine_transaction_log):
@@ -785,6 +784,13 @@ function init_plugin_suite_user_engine_purge_data_on_user_deleted( $user_id ) {
 	// 2) Xóa toàn bộ Inbox của user (đã tự flush cache unread bên trong).
 	if ( function_exists( 'init_plugin_suite_user_engine_delete_all_inbox' ) ) {
 		init_plugin_suite_user_engine_delete_all_inbox( $user_id );
+	}
+
+	// 3) 1.7.8: xóa file avatar của user (trước đây bị bỏ lại trong thư mục uploads).
+	// Multisite: 'deleted_user' cũng chạy khi chỉ gỡ user khỏi 1 site; user vẫn còn
+	// trong mạng nên giữ nguyên avatar của họ.
+	if ( function_exists( 'init_plugin_suite_user_engine_delete_all_avatar_files' ) && ! get_userdata( $user_id ) ) {
+		init_plugin_suite_user_engine_delete_all_avatar_files( $user_id );
 	}
 
 	/**

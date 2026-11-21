@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.7.7
+Stable tag: 1.7.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,21 +107,26 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 
 == Screenshots ==
 
-1. Settings with options for theme color, currency labels, and admin bar/Gravatar control.
-2. Custom Links section for setting Register and Lost Password URLs.
-3. Check-in Reward configuration, including Coin, EXP, and Cash per check-in.
-4. Online Reward configuration based on active time with reward values.
-5. VIP Pricing options for various durations, including lifetime.
-6. VIP Bonus settings to configure extra Coin/EXP for VIP users.
-7. Referral Reward settings for both referrer and new user.
-8. Admin panel to send notifications with content, targeting, priority, and expiration.
-9. Login modal interface for non-logged-in users.
-10. Registration modal with username, email, and password fields.
-11. Avatar button with dropdown panel showing user info, level, stats, and quick links.
-12. VIP Membership modal with Coin-based purchase options and expiration note.
-13. Inbox modal showing system messages, rewards, and user notifications.
-14. Transaction history modal showing all reward activities (check-in, referral, online time...).
-15. Referral modal with shareable code/link, social sharing buttons, and referral history.
+1. General settings: theme color, Coin/Cash labels, exchange rates, require login, admin bar, captcha, registration and lost password options.
+2. Display Name settings: how many days members wait between two display name changes.
+3. Profile Field Limits: maximum characters of the Edit Profile fields.
+4. Avatar settings: upload policy, original GIF for VIPs, avatar sizes, max upload size and Gravatar control.
+5. Cloudflare Turnstile settings with Site Key, Secret Key, API test and theme.
+6. Protect Default WordPress Forms: Cloudflare Turnstile on the native WordPress login, registration and lost password forms.
+7. Custom Links section for setting Register and Lost Password URLs.
+8. Check-in Reward configuration, including Coin, EXP, and Cash per check-in.
+9. Online Reward configuration based on active time with reward values.
+10. VIP Pricing options for various durations, including lifetime.
+11. VIP Bonus settings to configure extra Coin/EXP for VIP users.
+12. Referral Reward settings for both referrer and new user.
+13. Admin panel to send notifications with content, targeting, priority, and expiration.
+14. Login modal interface for non-logged-in users.
+15. Registration modal with username, email, and password fields.
+16. Avatar button with dropdown panel showing user info, level, stats, and quick links.
+17. VIP Membership modal with Coin-based purchase options and expiration note.
+18. Inbox modal showing system messages, rewards, and user notifications.
+19. Transaction history modal showing all reward activities (check-in, referral, online time...).
+20. Referral modal with shareable code/link, social sharing buttons, and referral history.
 
 == Installation ==
 
@@ -173,6 +178,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_validate_new_password` – Return a `WP_Error` to refuse a new password (for a stronger policy)
 - `init_plugin_suite_user_engine_avatar_mimes` – File types accepted for avatar uploads (default jpg, png, gif, webp; SVG is never accepted)
 - `init_plugin_suite_user_engine_avatar_upload_rate_limit` – Avatar uploads allowed per hour (default 10, `0` = no limit)
+- `init_plugin_suite_user_engine_avatar_sizes` – Avatar sizes in pixels cut from each new upload (default from the settings: 50, 80, 150; each from 16 to 512)
 
 === Actions ===
 
@@ -241,6 +247,19 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.8 – November 21, 2026 =
+- New: **Avatar Sizes** (Init User Engine → Settings → Avatar). Three sizes in pixels, default 50, 80 and 150 (before: fixed 50 and 80), each from 16 to 512
+  - Only new uploads use the new sizes: the original image is not kept, so existing avatars are not cut again and keep working as before
+  - `get_avatar()` uses the smallest size that is at least the requested size (never a smaller image blown up), and a bigger one in `srcset` for HiDPI screens. A 50px avatar on a Retina screen now gets the 150px file instead of the 80px one
+  - The image is opened once and scaled down size after size, instead of being read again for every size. An image smaller than a size is not enlarged and only saved once
+  - New filter `init_plugin_suite_user_engine_avatar_sizes`; `POST /avatar` and `POST /avatar/remove` also return `sizes` (size => URL). `url_50` / `url_80` are kept for older code
+- Fix (avatar): photos taken in portrait on a phone were saved lying on their side. The EXIF orientation is now applied before cropping
+- Fix (avatar): after uploading or removing an avatar, HiDPI (Retina) screens showed a broken image until the page was reloaded: only `src` was changed, while `srcset` still pointed to the old file, which is deleted since 1.7.6
+- Fix (avatar): if saving a size failed, a VIP's GIF avatar was already switched to the new file. The avatar is now only changed once every file is saved, and the files of the failed upload are removed
+- Fix (avatar): deleting a user now also deletes their avatar files (on Multisite, only when the user is deleted from the network)
+- Tweak: the first group of the settings page now has a **General** heading
+- Translations: POT file updated, Vietnamese translation updated
 
 = 1.7.7 – November 19, 2026 =
 - Fix: the admin menu icon is compatible with **WordPress 7.2**. WP 7.2 draws menu icons as inline SVG, so the CSS-mask icon of earlier versions no longer showed

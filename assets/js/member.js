@@ -418,6 +418,44 @@ function iueShowTooLargeToast() {
 }
 
 // AVATAR
+// 1.7.8: chọn URL hợp với kích thước hiển thị từ danh sách { size: url } do server trả về:
+// size nhỏ nhất mà vẫn >= px, không có thì lấy size lớn nhất.
+function iuePickAvatarUrl(sizes, px) {
+    const list = Object.keys(sizes || {})
+        .map(key => [parseInt(key, 10) || 0, sizes[key]])
+        .filter(item => item[1])
+        .sort((a, b) => a[0] - b[0]);
+
+    if (!list.length) return '';
+
+    const found = list.find(item => item[0] >= px);
+    return (found || list[list.length - 1])[1];
+}
+
+// Đổi mọi avatar của user trên trang. Cập nhật cả srcset (2x): trước 1.7.8 chỉ đổi src,
+// màn hình Retina vẫn dùng srcset trỏ vào file avatar cũ đã bị xoá → ảnh vỡ.
+function iueApplyAvatarSizes(sizes) {
+    document.querySelectorAll('img.iue-avatar-img').forEach(img => {
+        const px = parseInt(img.getAttribute('width'), 10) || img.clientWidth || 50;
+        const url1x = iuePickAvatarUrl(sizes, px);
+        const url2x = iuePickAvatarUrl(sizes, px * 2);
+
+        if (!url1x) return;
+
+        img.src = url1x;
+        if (url2x && url2x !== url1x) {
+            img.srcset = `${url2x} 2x`;
+        } else {
+            img.removeAttribute('srcset');
+        }
+    });
+
+    const largest = iuePickAvatarUrl(sizes, Infinity);
+    if (largest) {
+        InitUserEngineData.avatar_preview_url = largest;
+    }
+}
+
 function iueShowAvatarModal() {
     const wrapper = document.querySelector('.iue-avatar-wrapper[data-iue-avatar-trigger]');
     // ví dụ flag từ server: InitUserEngineData.can_upload_avatar === false
@@ -426,16 +464,21 @@ function iueShowAvatarModal() {
     }
 
     const img = wrapper?.querySelector('img');
-    let currentSrc = img?.src || '';
+    // 1.7.8: ưu tiên ảnh lớn nhất do server cung cấp cho khung xem trước.
+    let currentSrc = InitUserEngineData.avatar_preview_url || '';
 
-    // Nếu là gravatar → nâng size lên 100 cho rõ preview
-    if (currentSrc.includes('gravatar.com') && currentSrc.includes('s=50')) {
-        currentSrc = currentSrc.replace('s=50', 's=100');
-    }
+    if (!currentSrc) {
+        currentSrc = img?.src || '';
 
-    // Nếu là avatar custom size 50 → đổi sang size 80 cho nét
-    if (currentSrc.match(/-50\.(jpg|jpeg|png|webp)$/)) {
-        currentSrc = currentSrc.replace(/-50\.(jpg|jpeg|png|webp)$/, '-80.$1');
+        // Nếu là gravatar → nâng size lên 100 cho rõ preview
+        if (currentSrc.includes('gravatar.com') && currentSrc.includes('s=50')) {
+            currentSrc = currentSrc.replace('s=50', 's=100');
+        }
+
+        // Nếu là avatar custom size 50 → đổi sang size 80 cho nét
+        if (currentSrc.match(/-50\.(jpg|jpeg|png|webp)$/)) {
+            currentSrc = currentSrc.replace(/-50\.(jpg|jpeg|png|webp)$/, '-80.$1');
+        }
     }
 
     const html = `
@@ -479,9 +522,7 @@ function iueShowAvatarModal() {
                 .then(res => res.json())
                 .then(data => {
                     if (!data.url) throw new Error('Remove failed');
-                    document.querySelectorAll('img.iue-avatar-img').forEach(img => {
-                        img.src = data.url;
-                    });
+                    iueApplyAvatarSizes(data.sizes || { 50: data.url });
                     document.querySelector('#iue-modal .iue-modal-close')?.click();
                 })
                 .catch(err => {
@@ -554,12 +595,10 @@ document.addEventListener('click', (e) => {
     })
     .then(res => res.json())
     .then(data => {
-        const finalUrl = data.url_orig || data.url_80 || data.url_50;
-        if (!finalUrl) throw new Error('Upload failed');
+        const sizes = data.sizes || (data.url_orig ? { 0: data.url_orig } : { 50: data.url_50, 80: data.url_80 });
+        if (!iuePickAvatarUrl(sizes, 50)) throw new Error('Upload failed');
 
-        document.querySelectorAll('img.iue-avatar-img').forEach(img => {
-            img.src = finalUrl;
-        });
+        iueApplyAvatarSizes(sizes);
 
         document.querySelector('#iue-modal .iue-modal-close')?.click();
     })

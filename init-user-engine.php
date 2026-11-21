@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.7.7
+ * Version: 1.7.8
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.7' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.8' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -274,6 +274,8 @@ function init_plugin_suite_user_engine_enqueue_loggedin_assets() {
         'user_cash'            => init_plugin_suite_user_engine_get_cash( $user_id ),
         'can_upload_avatar'    => init_plugin_suite_user_engine_can_upload_avatar( $user_id ),
         'avatar_max_upload_mb' => $avatar_max_upload_mb,
+        // 1.7.8: ảnh lớn nhất cho khung xem trước trong modal Upload Avatar.
+        'avatar_preview_url'   => esc_url_raw( get_avatar_url( $user_id, array( 'size' => max( init_plugin_suite_user_engine_get_avatar_sizes() ) ) ) ),
 
         'is_vip'         => $is_vip, // bool
         'vip_expiry'     => init_plugin_suite_user_engine_get_vip_expiry(),

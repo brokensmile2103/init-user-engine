@@ -826,7 +826,8 @@ function init_plugin_suite_user_engine_avatar_prefix( $user_id, $avatar_url ) {
 	$relative = substr( $strip( $avatar_url ), strlen( $strip( $base_url ) ) );
 
 	// The file must sit directly in the avatars folder (no sub-folder, no "..").
-	if ( ! preg_match( '/^(avatar-(\d+)-\d+)-(?:50|80|orig)(?:-\d+)?\.(?:jpe?g|png|gif|webp)$/i', $relative, $m ) ) {
+	// 1.7.8: any size in pixels (sizes can be set in the settings), not only 50/80.
+	if ( ! preg_match( '/^(avatar-(\d+)-\d+)-(?:\d+|orig)(?:-\d+)?\.(?:jpe?g|png|gif|webp)$/i', $relative, $m ) ) {
 		return '';
 	}
 
@@ -834,7 +835,7 @@ function init_plugin_suite_user_engine_avatar_prefix( $user_id, $avatar_url ) {
 }
 
 /**
- * Delete every file (50px, 80px and original) of one avatar of a user.
+ * Delete every file (each size and the original) of one avatar of a user.
  *
  * Only files of this plugin's avatars folder whose name belongs to the user are deleted.
  *
@@ -860,7 +861,7 @@ function init_plugin_suite_user_engine_delete_avatar_files( $user_id, $avatar_ur
 		return 0;
 	}
 
-	$pattern = '/^' . preg_quote( $prefix, '/' ) . '-(?:50|80|orig)(?:-\d+)?\.(?:jpe?g|png|gif|webp)$/i';
+	$pattern = '/^' . preg_quote( $prefix, '/' ) . '-(?:\d+|orig)(?:-\d+)?\.(?:jpe?g|png|gif|webp)$/i';
 
 	foreach ( $files as $file ) {
 		if ( is_file( $file ) && preg_match( $pattern, basename( $file ) ) ) {
@@ -870,4 +871,221 @@ function init_plugin_suite_user_engine_delete_avatar_files( $user_id, $avatar_ur
 	}
 
 	return $deleted;
+}
+
+/**
+ * Delete every avatar file of a user, whatever avatar it belonged to.
+ *
+ * Used when the user is deleted: the user meta is already gone by then, so the
+ * files are found by their name ("avatar-{user}-{time}-{size}.{ext}").
+ *
+ * @since 1.7.8
+ *
+ * @param int $user_id User ID.
+ * @return int Number of files deleted.
+ */
+function init_plugin_suite_user_engine_delete_all_avatar_files( $user_id ) {
+	$user_id = absint( $user_id );
+
+	if ( ! $user_id ) {
+		return 0;
+	}
+
+	$upload_dir = wp_upload_dir();
+	$dir        = trailingslashit( $upload_dir['basedir'] ) . 'init-user-engine/avatars/';
+	$prefix     = 'avatar-' . $user_id . '-';
+	$files      = glob( $dir . $prefix . '*' );
+	$deleted    = 0;
+
+	if ( ! is_array( $files ) ) {
+		return 0;
+	}
+
+	$pattern = '/^' . preg_quote( $prefix, '/' ) . '\d+-(?:\d+|orig)(?:-\d+)?\.(?:jpe?g|png|gif|webp)$/i';
+
+	foreach ( $files as $file ) {
+		if ( is_file( $file ) && preg_match( $pattern, basename( $file ) ) ) {
+			wp_delete_file( $file );
+			++$deleted;
+		}
+	}
+
+	return $deleted;
+}
+
+/**
+ * Default avatar sizes in pixels.
+ *
+ * @since 1.7.8
+ *
+ * @return int[] Size of each slot (small, medium, large).
+ */
+function init_plugin_suite_user_engine_avatar_size_defaults() {
+	return array(
+		'small'  => 50,
+		'medium' => 80,
+		'large'  => 150,
+	);
+}
+
+/**
+ * Lowest and highest value allowed for one avatar size, in pixels.
+ *
+ * @since 1.7.8
+ *
+ * @return int[] Keys "min" and "max".
+ */
+function init_plugin_suite_user_engine_avatar_size_bounds() {
+	return array(
+		'min' => 16,
+		'max' => 512,
+	);
+}
+
+/**
+ * Keep one avatar size inside the allowed bounds.
+ *
+ * @since 1.7.8
+ *
+ * @param mixed $value    Size entered in the settings.
+ * @param int   $fallback Size used when the value is empty or not a number.
+ * @return int Size in pixels.
+ */
+function init_plugin_suite_user_engine_clamp_avatar_size( $value, $fallback ) {
+	$bounds = init_plugin_suite_user_engine_avatar_size_bounds();
+
+	if ( ! is_scalar( $value ) || ! is_numeric( $value ) ) {
+		$value = $fallback;
+	}
+
+	$value = (int) round( (float) $value );
+
+	return max( $bounds['min'], min( $bounds['max'], $value ) );
+}
+
+/**
+ * Avatar sizes cut from each new upload, smallest first, without duplicates.
+ *
+ * @since 1.7.8
+ *
+ * @return int[] Sizes in pixels.
+ */
+function init_plugin_suite_user_engine_get_avatar_sizes() {
+	$settings = get_option( INIT_PLUGIN_SUITE_IUE_OPTION, array() );
+	$settings = is_array( $settings ) ? $settings : array();
+	$defaults = init_plugin_suite_user_engine_avatar_size_defaults();
+	$sizes    = array();
+
+	foreach ( $defaults as $slot => $default ) {
+		$sizes[] = init_plugin_suite_user_engine_clamp_avatar_size( $settings[ 'avatar_size_' . $slot ] ?? '', $default );
+	}
+
+	/**
+	 * Filters the avatar sizes (in pixels) cut from each new upload.
+	 *
+	 * Only new uploads are affected: avatars already saved keep the sizes they were cut with.
+	 *
+	 * @since 1.7.8
+	 *
+	 * @param int[] $sizes Sizes from the settings (default 50, 80, 150).
+	 */
+	$sizes  = (array) apply_filters( 'init_plugin_suite_user_engine_avatar_sizes', $sizes );
+	$bounds = init_plugin_suite_user_engine_avatar_size_bounds();
+	$clean  = array();
+
+	foreach ( $sizes as $size ) {
+		$size = is_numeric( $size ) ? (int) $size : 0;
+
+		if ( $size >= $bounds['min'] && $size <= $bounds['max'] ) {
+			$clean[ $size ] = $size;
+		}
+	}
+
+	if ( empty( $clean ) ) {
+		$clean = array_combine( array_values( $defaults ), array_values( $defaults ) );
+	}
+
+	ksort( $clean );
+
+	return array_values( $clean );
+}
+
+/**
+ * URLs of the custom avatar of a user, keyed by size in pixels.
+ *
+ * Avatars uploaded before 1.7.8 have no size list: their 50px file is saved in
+ * the "iue_custom_avatar" meta and the 80px file sits next to it. An original
+ * file kept for a VIP (GIF) is used for every size.
+ *
+ * @since 1.7.8
+ *
+ * @param int $user_id User ID.
+ * @return string[] Size => URL, smallest first. Empty when the user has no custom avatar.
+ */
+function init_plugin_suite_user_engine_get_avatar_urls( $user_id ) {
+	$main = get_user_meta( (int) $user_id, 'iue_custom_avatar', true );
+
+	if ( ! is_string( $main ) || '' === $main || ! filter_var( $main, FILTER_VALIDATE_URL ) ) {
+		return array();
+	}
+
+	// Original file kept for a VIP: one file for every size.
+	$path = (string) wp_parse_url( $main, PHP_URL_PATH );
+	if ( preg_match( '/-orig(?:-\d+)?\.[a-z0-9]+$/i', $path ) ) {
+		return array( 0 => $main );
+	}
+
+	$urls  = array();
+	$sizes = get_user_meta( (int) $user_id, 'iue_custom_avatar_sizes', true );
+
+	if ( is_array( $sizes ) ) {
+		foreach ( $sizes as $size => $url ) {
+			$size = absint( $size );
+
+			if ( $size && is_string( $url ) && filter_var( $url, FILTER_VALIDATE_URL ) ) {
+				$urls[ $size ] = $url;
+			}
+		}
+	}
+
+	// Avatar uploaded before 1.7.8.
+	if ( empty( $urls ) ) {
+		$urls[50] = $main;
+
+		if ( preg_match( '/-50(?:-\d+)?\.jpe?g$/i', $path ) ) {
+			$urls[80] = preg_replace( '/-50((?:-\d+)?\.jpe?g)$/i', '-80$1', $main );
+		}
+	}
+
+	ksort( $urls );
+
+	return $urls;
+}
+
+/**
+ * Pick the avatar URL that fits a display size.
+ *
+ * Returns the smallest size that is at least as large as the requested size, so
+ * the image is never blown up; the largest size when none is large enough.
+ *
+ * @since 1.7.8
+ *
+ * @param string[] $urls Size => URL, as returned by init_plugin_suite_user_engine_get_avatar_urls().
+ * @param int      $size Display size in pixels.
+ * @return string URL, or an empty string when $urls is empty.
+ */
+function init_plugin_suite_user_engine_pick_avatar_url( $urls, $size ) {
+	if ( empty( $urls ) || ! is_array( $urls ) ) {
+		return '';
+	}
+
+	ksort( $urls );
+
+	foreach ( $urls as $px => $url ) {
+		if ( (int) $px >= (int) $size ) {
+			return $url;
+		}
+	}
+
+	return end( $urls );
 }

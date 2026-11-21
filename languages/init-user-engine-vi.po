@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.7.8\n"
+"Project-Id-Version: Init User Engine 1.7.9\n"
 "Report-Msgid-Bugs-To: https://inithtml.com/plugin/init-user-engine/\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -3748,3 +3748,52 @@ msgstr "Bắt buộc khi đặt mật khẩu mới"
 #: init-user-engine.php:463
 msgid "Profile updated. Your password was changed and your other devices were signed out."
 msgstr "Đã cập nhật hồ sơ. Mật khẩu đã được đổi và các thiết bị khác đã bị đăng xuất."
+
+msgid "Block"
+msgstr "Chặn"
+
+msgid "Unblock"
+msgstr "Bỏ chặn"
+
+msgid "Blocked"
+msgstr "Đã chặn"
+
+msgid "Block Account"
+msgstr "Chặn tài khoản"
+
+msgid "Unblock Account"
+msgstr "Bỏ chặn tài khoản"
+
+msgid "Block this member? They will be logged out and cannot log in until you unblock them."
+msgstr "Chặn thành viên này? Họ sẽ bị đăng xuất và không thể đăng nhập cho đến khi bạn bỏ chặn."
+
+msgid "Currently: BLOCKED"
+msgstr "Hiện tại: ĐÃ CHẶN"
+
+msgid "Currently: Can log in"
+msgstr "Hiện tại: Được đăng nhập"
+
+msgid "Your account has been blocked. Please contact the site administrator."
+msgstr "Tài khoản của bạn đã bị chặn. Vui lòng liên hệ quản trị viên."
+
+#. translators: %s: display name of the admin who blocked the member
+msgid "by %s"
+msgstr "bởi %s"
+
+#. translators: %s: number of members
+msgid "%s member unblocked."
+msgid_plural "%s members unblocked."
+msgstr[0] "Đã bỏ chặn %s thành viên."
+msgstr[1] "Đã bỏ chặn %s thành viên."
+
+#. translators: %s: number of members
+msgid "%s member blocked and logged out."
+msgid_plural "%s members blocked and logged out."
+msgstr[0] "Đã chặn và đăng xuất %s thành viên."
+msgstr[1] "Đã chặn và đăng xuất %s thành viên."
+
+#. translators: %s: number of accounts
+msgid "%s account was skipped: administrators and your own account cannot be blocked."
+msgid_plural "%s accounts were skipped: administrators and your own account cannot be blocked."
+msgstr[0] "Bỏ qua %s tài khoản: không thể chặn quản trị viên và chính tài khoản của bạn."
+msgstr[1] "Bỏ qua %s tài khoản: không thể chặn quản trị viên và chính tài khoản của bạn."

@@ -4,7 +4,7 @@ Tags: user, level, check-in, referral, vip
 Requires at least: 5.5
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.7.8
+Stable tag: 1.7.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,7 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - "Forgot password?" form right inside the login modal, using the native WordPress reset flow (can be turned off; a custom Lost Password URL always takes priority)  
 - Custom redirect URLs for "Register" and "Lost password" links  
 - Optional "Require Login to Access Site" mode that gates the entire frontend behind the built-in login modal  
+- Block members from **Users** (row link or bulk action) or from their profile: a blocked member is signed out of every device and cannot log in until an administrator unblocks them  
 - Ability to temporarily disable new registrations without affecting other plugins or WordPress core
 
 **Gamification**
@@ -201,6 +202,8 @@ GitHub repository: [https://github.com/brokensmile2103/init-user-engine](https:/
 - `init_plugin_suite_user_engine_display_name_unlocked` – After an administrator lets a member change their display name again (user ID)
 - `init_plugin_suite_user_engine_after_update_profile` – After a member saved the Edit Profile modal (user ID, submitted data without passwords)
 - `init_plugin_suite_user_engine_password_changed` – After a member changed their password from the Edit Profile modal (user ID)
+- `init_plugin_suite_user_engine_user_blocked` / `init_plugin_suite_user_engine_user_unblocked` – After a member is blocked / unblocked (user ID, admin ID)
+- `init_plugin_suite_user_engine_security_event` – When a dangerous request is refused: a logged-in member calling an admin action of the plugin without permission, or an endpoint the interface never offers them (endpoint, action, status code, context IDs). The plugin records nothing itself; a theme or security plugin can log it
 
 === REST API Endpoints ===
 
@@ -247,6 +250,18 @@ Go to **Users → Init User Engine → Send Notification** in wp-admin.
 You can search users, customize message type, link, priority, and even set expiration.
 
 == Changelog ==
+
+= 1.7.9 – November 21, 2026 =
+- New: **Block Members**. In **Users**, each member has a **Block** link and the bulk actions have **Block** and **Unblock**; the User Engine box on the profile has a **Block Account** button too
+  - A blocked member is signed out of every device at once and cannot log in anywhere (the login modal, `wp-login.php`, XML-RPC, Application Passwords) until an administrator unblocks them. The block has no end date
+  - They see "Your account has been blocked" only after typing the right password, so the block does not tell strangers which accounts exist
+  - A **Blocked** column shows when and by whom, and the **Blocked (n)** view lists every blocked member
+  - Administrators and your own account cannot be blocked; they are skipped in bulk actions
+  - New hooks: `init_plugin_suite_user_engine_user_blocked`, `init_plugin_suite_user_engine_user_unblocked`, filters `init_plugin_suite_user_engine_is_user_blocked` and `init_plugin_suite_user_engine_blocked_message`
+- New (developers): action `init_plugin_suite_user_engine_security_event` for themes and security plugins that keep a security log. It fires only for dangerous refusals: a logged-in member calling an admin action of the plugin without permission (admin-ajax, admin-post, Redeem / VIP code tools, blocking), uploading an avatar while not allowed, or being refused by the permission check of a REST route. Ordinary refusals (not logged in, wrong input, rate limits) do not fire it. The plugin itself logs nothing
+- Security: the Redeem Codes tools (create, disable, delete) now check that the user is an administrator, like the VIP Codes tools, and the member search of Send Notification does too
+- Fix: a `delete` or `disable` link of another plugin's admin page (with `_wpnonce`) could be caught by the Redeem Codes tool and sent to the Redeem Codes page. The Redeem / VIP code links now only act on their own page
+- Translations: POT file updated, Vietnamese translation updated
 
 = 1.7.8 – November 21, 2026 =
 - New: **Avatar Sizes** (Init User Engine → Settings → Avatar). Three sizes in pixels, default 50, 80 and 150 (before: fixed 50 and 80), each from 16 to 512

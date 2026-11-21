@@ -647,7 +647,8 @@ function init_plugin_suite_user_engine_redirect_failed_login( $username, $error 
 	// Whitelist mã lỗi: chỉ cho phép các mã đăng nhập tiêu chuẩn của WordPress
 	// (đây cũng là các mã mà form đăng nhập mặc định của WordPress vẫn tự hiển thị,
 	// nên không phát sinh rủi ro dò tài khoản mới so với hành vi gốc).
-	$allowed_codes = [ 'invalid_username', 'invalid_email', 'incorrect_password', 'empty_username', 'empty_password' ];
+	// 1.7.9: + iue_account_blocked (only reached after the right password).
+	$allowed_codes = [ 'invalid_username', 'invalid_email', 'incorrect_password', 'empty_username', 'empty_password', 'iue_account_blocked' ];
 	if ( ! in_array( $error_code, $allowed_codes, true ) ) {
 		$error_code = 'invalid_login';
 	}

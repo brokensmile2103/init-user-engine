@@ -12,6 +12,7 @@ add_action( 'admin_init', function () {
     if ( isset( $_GET['iue_export_redeem_codes'], $_GET['_wpnonce'] ) ) {
 
         if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/redeem-codes/export', 'no_permission' );
             wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
         }
 
@@ -35,6 +36,11 @@ add_action( 'admin_init', function () {
             'iue_redeem_code_create'
         )
     ) {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/redeem-codes/create', 'no_permission' );
+            wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+        }
+
         global $wpdb;
 
         $table = $wpdb->prefix . 'init_user_engine_redeem_codes';
@@ -193,7 +199,12 @@ add_action( 'admin_init', function () {
     ============ DISABLE ================
     =====================================
     */
-    if ( isset( $_GET['disable'], $_GET['_wpnonce'] ) ) {
+    if ( isset( $_GET['disable'], $_GET['_wpnonce'], $_GET['page'] ) && 'init-user-engine-redeem-codes' === $_GET['page'] ) {
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/redeem-codes/disable', 'no_permission' );
+            wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+        }
 
         $id    = absint( $_GET['disable'] );
         $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
@@ -218,7 +229,12 @@ add_action( 'admin_init', function () {
     // =============================
     // DELETE CODE (unused only)
     // =============================
-    if ( isset( $_GET['delete'], $_GET['_wpnonce'] ) ) {
+    if ( isset( $_GET['delete'], $_GET['_wpnonce'], $_GET['page'] ) && 'init-user-engine-redeem-codes' === $_GET['page'] ) {
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/redeem-codes/delete', 'no_permission' );
+            wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
+        }
 
         $id    = absint( $_GET['delete'] );
         $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );

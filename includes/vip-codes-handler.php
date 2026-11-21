@@ -12,6 +12,7 @@ add_action( 'admin_init', function () {
     if ( isset( $_GET['iue_export_vip_codes'], $_GET['_wpnonce'] ) ) {
 
         if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/vip-codes/export', 'no_permission' );
             wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
         }
 
@@ -36,6 +37,7 @@ add_action( 'admin_init', function () {
         )
     ) {
         if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/vip-codes/create', 'no_permission' );
             wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
         }
 
@@ -192,9 +194,10 @@ add_action( 'admin_init', function () {
     ============ DISABLE ================
     =====================================
     */
-    if ( isset( $_GET['vip_disable'], $_GET['_wpnonce'] ) ) {
+    if ( isset( $_GET['vip_disable'], $_GET['_wpnonce'], $_GET['page'] ) && 'init-user-engine-vip-codes' === $_GET['page'] ) {
 
         if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/vip-codes/disable', 'no_permission' );
             wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
         }
 
@@ -221,9 +224,10 @@ add_action( 'admin_init', function () {
     // =============================
     // DELETE CODE (unused only)
     // =============================
-    if ( isset( $_GET['vip_delete'], $_GET['_wpnonce'] ) ) {
+    if ( isset( $_GET['vip_delete'], $_GET['_wpnonce'], $_GET['page'] ) && 'init-user-engine-vip-codes' === $_GET['page'] ) {
 
         if ( ! current_user_can( 'manage_options' ) ) {
+            init_plugin_suite_user_engine_security_event( 'admin/vip-codes/delete', 'no_permission' );
             wp_die( esc_html__( 'You do not have permission to perform this action.', 'init-user-engine' ) );
         }
 

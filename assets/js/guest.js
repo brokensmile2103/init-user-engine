@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			incorrect_password: i18n.login_error_incorrect_password,
 			empty_username:     i18n.login_error_empty_username,
 			empty_password:     i18n.login_error_empty_password,
+			iue_account_blocked: i18n.login_error_account_blocked,
 		};
 
 		const code = params.get('iue_login_code') || '';

@@ -4,6 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action( 'wp_ajax_iue_user_search', function () {
 	check_ajax_referer( 'iue_send_notice', '_ajax_nonce' );
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( [ 'message' => __( 'You are not allowed to do this.', 'init-user-engine' ) ], 403 );
+	}
+
 	$term = isset( $_POST['term'] ) ? sanitize_text_field( wp_unslash( $_POST['term'] ) ) : '';
 	
 	if ( strlen( $term ) < 2 ) {

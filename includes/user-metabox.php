@@ -276,6 +276,13 @@ function init_plugin_suite_user_engine_render_admin_user_metabox( $user ) {
 				<?php endif; ?>
 
 				<?php
+				// -- 1.7.9: Block / Unblock account (below Ban Avatar Upload)
+				if ( function_exists( 'init_plugin_suite_user_engine_render_block_toggle' ) ) {
+					init_plugin_suite_user_engine_render_block_toggle( $user_id );
+				}
+				?>
+
+				<?php
 				// -- Display name change limit: status + "Unlock Display Name" (below Ban Avatar Upload)
 				if ( function_exists( 'init_plugin_suite_user_engine_render_display_name_unlock' ) ) {
 					init_plugin_suite_user_engine_render_display_name_unlock( $user_id );

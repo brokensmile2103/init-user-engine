@@ -913,6 +913,9 @@ function init_plugin_suite_user_engine_api_upload_avatar( WP_REST_Request $reque
 	// Guard: policy + VIP + per-user ban.
 	$user_id = get_current_user_id();
 	if ( ! init_plugin_suite_user_engine_can_upload_avatar( $user_id ) ) {
+		// The upload button is hidden from members who cannot upload, so this is a bypass attempt.
+		init_plugin_suite_user_engine_security_event( 'rest/' . INIT_PLUGIN_SUITE_IUE_NAMESPACE . '/avatar', 'forbidden_avatar_upload' );
+
 		return new WP_Error(
 			'forbidden_avatar_upload',
 			__( 'You are not allowed to upload an avatar.', 'init-user-engine' ),

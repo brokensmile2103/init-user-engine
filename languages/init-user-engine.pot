@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Init User Engine 1.7.8\n"
+"Project-Id-Version: Init User Engine 1.7.9\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/init-user-engine\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3701,3 +3701,52 @@ msgstr ""
 #: templates/register-form.php:48
 msgid "Type your answer here"
 msgstr ""
+
+msgid "Block"
+msgstr ""
+
+msgid "Unblock"
+msgstr ""
+
+msgid "Blocked"
+msgstr ""
+
+msgid "Block Account"
+msgstr ""
+
+msgid "Unblock Account"
+msgstr ""
+
+msgid "Block this member? They will be logged out and cannot log in until you unblock them."
+msgstr ""
+
+msgid "Currently: BLOCKED"
+msgstr ""
+
+msgid "Currently: Can log in"
+msgstr ""
+
+msgid "Your account has been blocked. Please contact the site administrator."
+msgstr ""
+
+#. translators: %s: display name of the admin who blocked the member
+msgid "by %s"
+msgstr ""
+
+#. translators: %s: number of members
+msgid "%s member unblocked."
+msgid_plural "%s members unblocked."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of members
+msgid "%s member blocked and logged out."
+msgid_plural "%s members blocked and logged out."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of accounts
+msgid "%s account was skipped: administrators and your own account cannot be blocked."
+msgid_plural "%s accounts were skipped: administrators and your own account cannot be blocked."
+msgstr[0] ""
+msgstr[1] ""

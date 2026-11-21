@@ -3,7 +3,7 @@
  * Plugin Name: Init User Engine
  * Plugin URI: https://inithtml.com/plugin/init-user-engine/
  * Description: Lightweight, gamified user engine with EXP, wallet, check-in, VIP, inbox, and referral – powered by REST API and Vanilla JS.
- * Version: 1.7.8
+ * Version: 1.7.9
  * Author: Init HTML
  * Author URI: https://inithtml.com/
  * Text Domain: init-user-engine
@@ -20,7 +20,7 @@ defined('ABSPATH') || exit;
 // Constant Definitions
 // =======================
 
-define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.8' );
+define( 'INIT_PLUGIN_SUITE_IUE_VERSION',        '1.7.9' );
 define( 'INIT_PLUGIN_SUITE_IUE_SLUG',           'init-user-engine' );
 define( 'INIT_PLUGIN_SUITE_IUE_OPTION',         'init_plugin_suite_user_engine_settings' );
 define( 'INIT_PLUGIN_SUITE_IUE_NAMESPACE',      'inituser/v1' );
@@ -58,6 +58,8 @@ require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'referral.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'redeem-codes-handler.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'vip-codes-handler.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'utils.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'security-events.php';
+require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'user-block.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'turnstile-forms.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'user-metabox.php';
 require_once INIT_PLUGIN_SUITE_IUE_INCLUDES_PATH . 'display-name-limit.php';
@@ -152,6 +154,7 @@ function init_plugin_suite_user_engine_enqueue_guest_assets() {
             'login_error_incorrect_password' => __( 'Incorrect password. Please try again.', 'init-user-engine' ),
             'login_error_empty_username'     => __( 'Please enter your username or email address.', 'init-user-engine' ),
             'login_error_empty_password'     => __( 'Please enter your password.', 'init-user-engine' ),
+            'login_error_account_blocked'    => init_plugin_suite_user_engine_blocked_message(),
             'login_error_generic'            => __( 'Incorrect username or password. Please try again.', 'init-user-engine' ),
             'title_lostpassword'             => __( 'Lost Password', 'init-user-engine' ),
             'processing'                     => __( 'Processing...', 'init-user-engine' ),

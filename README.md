@@ -4,7 +4,7 @@
 
 **Pure JavaScript. Real-time REST API. Built for frontend-first WordPress.**
 
-[![Version](https://img.shields.io/badge/stable-v1.7.8-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
+[![Version](https://img.shields.io/badge/stable-v1.7.9-blue.svg)](https://wordpress.org/plugins/init-user-engine/)
 [![License](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 ![Made with ❤️ in HCMC](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F%20in%20HCMC-blue)
 
@@ -24,6 +24,7 @@ You get full control over user interactions: check-in, VIP purchase, Coin/EXP re
 - Optional protection of the native WordPress login/register/lost-password forms using the same Turnstile setup
 - Optional "Require Login to Access Site" mode that gates the entire frontend behind the login modal
 - Option to temporarily disable new registrations, plus custom Register / Lost Password URLs
+- Block members from **Users** (row link or bulk action): they are signed out everywhere and cannot log in until unblocked
 - EXP & level system with streaks, milestones, and bonuses
 - Coin & Cash dual-wallet system with transaction history, custom currency labels, and a configurable exchange rate between the two currencies
 - Race-safe wallet: every Coin/Cash change is a single atomic update, and spending flows (check-in, VIP, exchange, rewards) run under a per-user lock
@@ -35,10 +36,11 @@ You get full control over user interactions: check-in, VIP purchase, Coin/EXP re
 - VIP membership system with Coin-based, Cash-based, or combined purchases, multiple duration tiers, a lifetime option, and VIP bonuses
 - Referral system with cookie-based tracking and separate rewards for referrer and new user
 - Redeem Code / Gift Code system with auto rewards (Coin/Cash), plus a dedicated VIP Codes module — both exportable to CSV from wp-admin
-- Built-in inbox system (custom DB table) with pinned/expiring messages and an Inbox Statistics dashboard
-- Profile editing: display name, bio, social links, gender, and date of birth
+- Built-in inbox system (custom DB table) with pinned/expiring messages, optional auto-delete of read messages, and an Inbox Statistics dashboard
+- Profile editing: display name, bio, social links, gender, and date of birth, with configurable field length limits
+- Password change asks for the current password and signs out other devices
 - Optional display name change limit (e.g. once every 7 days, like TikTok), enforced everywhere including `wp-admin/profile.php`, with an admin "Unlock Display Name" button
-- Custom avatar upload & preview, with configurable upload policy (everyone / VIP only / disabled) and max file size; optional Gravatar disable
+- Custom avatar upload & preview, with configurable upload policy (everyone / VIP only / disabled), max file size and three avatar sizes (HiDPI `srcset`); optional Gravatar disable
 - Admin panel to send targeted notifications, plus a per-user overview metabox on the profile screen
 - Automatic cleanup of a user's EXP log and Inbox when the account is permanently deleted (Coin/Cash transaction history is intentionally kept for reconciliation)
 - Theme override support: copy any template to `your-theme/init-user-engine/`
@@ -135,6 +137,10 @@ Other responses you may see: `409 restore_unavailable` (nothing to restore), `40
 - `init_plugin_suite_user_engine_balance_sync_enabled` – Turn live balance sync off for a request  
 - `init_plugin_suite_user_engine_display_name_change_days` – Modify the days a member must wait between display name changes (`0` = unlimited)  
 - `init_plugin_suite_user_engine_display_name_limit_applies` – Return `false` to let a user change their display name freely
+- `init_plugin_suite_user_engine_avatar_sizes` – Modify the avatar sizes
+- `init_plugin_suite_user_engine_profile_field_limits` – Modify the max characters of profile fields
+- `init_plugin_suite_user_engine_is_user_blocked` – Decide whether a member is blocked
+- `init_plugin_suite_user_engine_blocked_message` – Modify the message shown to a blocked member at login
 
 ### Actions
 
@@ -161,6 +167,9 @@ Other responses you may see: `409 restore_unavailable` (nothing to restore), `40
 - `init_plugin_suite_user_engine_coin_changed` – After user's Coin balance changes  
 - `init_plugin_suite_user_engine_cash_changed` – After user's Cash balance changes  
 - `init_plugin_suite_user_engine_display_name_unlocked` – After an admin lets a member change their display name again
+- `init_plugin_suite_user_engine_password_changed` – After a member changed their password in the profile modal
+- `init_plugin_suite_user_engine_user_blocked` / `_user_unblocked` – After a member is blocked / unblocked (user ID, admin ID)
+- `init_plugin_suite_user_engine_security_event` – A dangerous request was refused (endpoint, action, status, context IDs). The plugin logs nothing; a theme or security plugin can
 
 ### JavaScript events
 
@@ -178,6 +187,7 @@ JS API: `window.InitUserEngineBalance` – `set()`, `get()`, `refresh()`
 - `init_plugin_suite_user_engine_lock_user()` / `_unlock_user()` – Per-user lock for your own balance flows  
 - `init_plugin_suite_user_engine_get_balances( $user_id )` – Current Coin and Cash  
 - `init_plugin_suite_user_engine_is_display_name_locked( $user_id )` / `_unlock_display_name( $user_id )` – Display name limit status and reset
+- `init_plugin_suite_user_engine_block_user( $user_id )` / `_unblock_user( $user_id )` / `_is_user_blocked( $user_id )` – Block a member, unblock, check
 
 ## Installation
 
